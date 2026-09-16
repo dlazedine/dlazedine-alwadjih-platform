@@ -21,13 +21,35 @@
     </script>
     <!-- Supabase JS (المصادقة + قاعدة البيانات + المراقبة الحيّة) -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script>
-        /* =====================================================================
-           إعدادات الاتصال بـ Supabase — عدّل هذين السطرين فقط بعد إنشاء مشروعك
-           ===================================================================== */
-        const projectUrl = "https://yzxyttieobyblznaehcl.supabase.co";
-         const anonPublicKey = "sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u";
-    </script>
+<script>
+    // 1. إعدادات الاتصال بـ Supabase
+    const projectUrl = "https://supabase.co";
+    const anonPublicKey = "sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u";
+    
+    // 2. إنشاء عميل الاتصال (Client)
+    const supabase = supabase.createClient(projectUrl, anonPublicKey);
+
+    // 3. دالة بسيطة جداً للتأكد من أن الاتصال يعمل (كمثال لجلب الأساتذة)
+    async function checkConnection() {
+        try {
+            // استعلام تجريبي لجلب البيانات من جدول الأساتذة (teachers) أو الأنشطة
+            const { data, error } = await supabase
+                .from('teachers') // استبدل 'teachers' باسم الجدول الحقيقي لديك إذا كان مختلفاً
+                .select('*')
+                .limit(1);
+
+            if (error) throw error;
+            console.log("✅ تم الاتصال بـ Supabase بنجاح! البيانات المسترجعة:", data);
+        } catch (err) {
+            console.error("❌ فشل الاتصال بقاعدة البيانات:", err.message);
+        }
+    }
+
+    // تشغيل الفحص التجريبي عند تحميل الصفحة
+    document.addEventListener("DOMContentLoaded", checkConnection);
+</script>
+
+    <style>
     <style>
         /* ===== الأنماط الأساسية (محسّنة) ===== */
         :root {
