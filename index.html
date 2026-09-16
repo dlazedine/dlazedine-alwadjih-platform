@@ -3583,7 +3583,9 @@
                         if (error) throw error;
                         await this.hydrateAfterAuth(data.user, false);
                     } catch (err) {
-                        showAuthMsg('البريد الإلكتروني أو كلمة المرور غير صحيحة.', 'error');
+                        console.error('Supabase login error:', err);
+                        const raw = (err && (err.message || err.error_description)) || 'خطأ غير معروف';
+                        showAuthMsg('تعذّر الدخول — رسالة الخادم: ' + raw, 'error');
                         btn.disabled = false;
                         btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> دخول';
                     }
@@ -3610,8 +3612,12 @@
                         }
                         this.revealApp(profile);
                     } catch (e) {
+                        console.error('Supabase hydrateAfterAuth error:', e);
                         if (!silent) {
-                            showAuthMsg('تعذّر العثور على ملف تعريف لهذا الحساب. يرجى التواصل مع مدير المنصة.', 'error');
+                            const raw = (e && (e.message || e.error_description)) || 'no-profile';
+                            showAuthMsg('تعذّر العثور على ملف تعريف لهذا الحساب في جدول profiles (' + raw + '). تأكد أن الـ UID في الجدول مطابق تماماً لهذا الحساب.', 'error');
+                            const btn = document.getElementById('authSubmitBtn');
+                            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> دخول'; }
                             sbMain.auth.signOut();
                         }
                     }
