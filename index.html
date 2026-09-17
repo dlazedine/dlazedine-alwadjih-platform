@@ -3097,7 +3097,18 @@
 
             <!-- تبويب بنك الأنشطة -->
             <div class="tab-content" id="tab-bank">
-                <h3 style="margin-bottom:15px;"><i class="fas fa-university"></i> بنك الأنشطة (الأعمال الموجهة)</h3>
+              <h3 style="margin-bottom:15px;"><i class="fas fa-university"></i> بنك الأنشطة (الأعمال الموجهة)</h3>
+                              <div class="alert alert-info" style="background:#e6f4ea; padding:12px 20px; border-radius:var(--radius); margin-bottom:15px; border:1px solid #c3e6cb;">
+                    <i class="fas fa-users" style="color:var(--success);"></i>
+                    <strong>الأنشطة المشتركة:</strong> جميع الأنشطة التي يضيفها الأساتذة تظهر هنا تلقائياً لجميع المستخدمين، مع إمكانية تحميلها بصيغة Word.
+                    <span id="sharedActivitiesCount" style="background:var(--success); color:#fff; padding:2px 10px; border-radius:12px; font-size:12px; margin-right:8px;">0 نشاط مشترك</span>
+                </div>
+
+                <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:15px;" class="no-print">
+                    <button class="btn btn-success" onclick="app.exportAllSharedActivities()"><i class="fas fa-file-word"></i> تحميل جميع الأنشطة المشتركة (Word)</button>
+                    <button class="btn btn-info" onclick="app.exportBankToExcel()"><i class="fas fa-file-excel"></i> تصدير الجدول (CSV)</button>
+                    <button class="btn btn-warning" onclick="app.refreshSharedActivities()"><i class="fas fa-sync"></i> تحديث من الخادم</button>
+                </div>
                 <p style="color:#6c7a8d; margin-bottom:15px;">جميع الأنشطة المصنفة حسب الذكاءات، VARK، المستوى البيداغوجي، ونمط النشاط.</p>
                 <div class="bank-stats" id="bankStats">
                     <div class="stat-item">
@@ -5173,6 +5184,11 @@
                     document.getElementById('bankTotal').textContent = total;
                     document.getElementById('bankModels').textContent = MODELS_SEED.length;
                     document.getElementById('bankCustom').textContent = Store.state.customActivities.length;
+                                      const sharedCount = Store.state.customActivities.length;
+                    const sharedBadge = document.getElementById('sharedActivitiesCount');
+                    if (sharedBadge) {
+                        sharedBadge.textContent = sharedCount + ' نشاط مشترك';
+                    }
                 },
 
                 renderModels() {
@@ -5530,6 +5546,148 @@
                     }
                 },
 
+                              // ============================================================
+                //  دوال تصدير الأنشطة المشتركة بصيغة Word
+                // ============================================================
+                exportAllSharedActivities() {
+                    const sharedActs = Store.state.customActivities;
+                    if (!sharedActs.length) {
+                        showToast('لا توجد أنشطة مشتركة لتصديرها.', 'warning');
+                        return;
+                    }
+
+                    let content = `
+                        <div style="text-align:center; border-bottom:3px solid #1a3d6e; padding-bottom:15px; margin-bottom:20px;">
+                            <h1 style="color:#1a3d6e;">📚 بنك الأنشطة المشتركة</h1>
+                            <p style="color:#4a5a72; font-size:15px;">منصة الأعمال الموجهة - البيداغوجيا الفارقية</p>
+                            <p style="color:#6c7a8d; font-size:13px;">تاريخ التصدير: ${new Date().toLocaleDateString('ar-EG')} | عدد الأنشطة: ${sharedActs.length}</p>
+                        </div>
+                    `;
+
+                    sharedActs.forEach((act, idx) => {
+                        const goal = getGoalFull(act.goalId);
+                        const goalHtml = goal ? `
+                            <div style="background:#f0f7ff; border-right:4px solid #c49b3f; padding:10px 14px; border-radius:6px; margin:8px 0;">
+                                <strong style="color:#c49b3f;">🎯 ${sanitize(goal.text)}</strong><br>
+                                <span style="color:#1a3d6e; font-size:13px;">${sanitize(goal.desc)}</span>
+                            </div>
+                        ` : '';
+
+                        content += `
+                            <div style="border:2px solid #1a3d6e; padding:20px; margin-bottom:25px; border-radius:10px; page-break-inside:avoid; background:#fcfdff;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #c49b3f; padding-bottom:10px; margin-bottom:12px;">
+                                    <h2 style="color:#1a3d6e; margin:0; font-size:20px;">${idx+1}. ${sanitize(act.title)}</h2>
+                                    <span style="background:#1a3d6e; color:#fff; padding:4px 14px; border-radius:20px; font-size:12px;">${sanitize(act.level)}</span>
+                                </div>
+
+                                <table style="width:100%; border-collapse:collapse; margin:10px 0;">
+                                    <tr>
+                                        <td style="padding:6px 10px; border:1px solid #ddd; background:#f1f6fa; width:25%;"><strong>المادة:</strong></td>
+                                        <td style="padding:6px 10px; border:1px solid #ddd;">${sanitize(act.subject || '—')}</td>
+                                        <td style="padding:6px 10px; border:1px solid #ddd; background:#f1f6fa; width:25%;"><strong>المستوى البيداغوجي:</strong></td>
+                                        <td style="padding:6px 10px; border:1px solid #ddd;">${sanitize(act.pedagogy || '—')}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:6px 10px; border:1px solid #ddd; background:#f1f6fa;"><strong>الأقسام:</strong></td>
+                                        <td style="padding:6px 10px; border:1px solid #ddd;">${sanitize(act.classes || '—')}</td>
+                                        <td style="padding:6px 10px; border:1px solid #ddd; background:#f1f6fa;"><strong>الأفواج:</strong></td>
+                                        <td style="padding:6px 10px; border:1px solid #ddd;">${sanitize(act.groups || '—')}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:6px 10px; border:1px solid #ddd; background:#f1f6fa;"><strong>الذكاءات:</strong></td>
+                                        <td style="padding:6px 10px; border:1px solid #ddd;">${sanitize(act.intelligences?.join('، ') || '—')}</td>
+                                        <td style="padding:6px 10px; border:1px solid #ddd; background:#f1f6fa;"><strong>VARK:</strong></td>
+                                        <td style="padding:6px 10px; border:1px solid #ddd;">${sanitize(act.vark?.join('، ') || '—')}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:6px 10px; border:1px solid #ddd; background:#f1f6fa;"><strong>نمط النشاط:</strong></td>
+                                        <td style="padding:6px 10px; border:1px solid #ddd;">${sanitize(act.style || '—')}</td>
+                                        <td style="padding:6px 10px; border:1px solid #ddd; background:#f1f6fa;"><strong>المتعلمون:</strong></td>
+                                        <td style="padding:6px 10px; border:1px solid #ddd;">${act.students?.length ? sanitize(act.students.join('، ')) : '—'}</td>
+                                    </tr>
+                                    ${act.owner_name ? `
+                                    <tr>
+                                        <td style="padding:6px 10px; border:1px solid #ddd; background:#f1f6fa;"><strong>بواسطة:</strong></td>
+                                        <td colspan="3" style="padding:6px 10px; border:1px solid #ddd;">${sanitize(act.owner_name)}</td>
+                                    </tr>` : ''}
+                                </table>
+
+                                ${goalHtml}
+
+                                ${act.startSituation ? `<p><strong>🚀 وضعية الانطلاق:</strong> ${sanitize(act.startSituation)}</p>` : ''}
+                                ${act.text ? `<p><strong>📖 النص:</strong> ${sanitize(act.text)}</p>` : ''}
+                                ${act.questions ? `<p><strong>❓ الأسئلة:</strong> ${sanitize(act.questions)}</p>` : ''}
+                                ${act.answer ? `<p><strong>✅ الإجابة النموذجية:</strong> ${sanitize(act.answer)}</p>` : ''}
+                                ${act.teacherRole ? `<p><strong>👨‍🏫 دور الأستاذ:</strong> ${sanitize(act.teacherRole)}</p>` : ''}
+                                ${act.groupWork ? `<p><strong>👥 عمل الأفواج:</strong> ${sanitize(act.groupWork)}</p>` : ''}
+                                ${act.endSituation ? `<p><strong>🏁 وضعية الختام:</strong> ${sanitize(act.endSituation)}</p>` : ''}
+                                ${act.description ? `<p><strong>📝 وصف النشاط:</strong> ${sanitize(act.description)}</p>` : ''}
+                            </div>
+                        `;
+                    });
+
+                    content += `
+                        <p style="text-align:center; margin-top:30px; color:#8a9aa8; font-size:12px; border-top:2px solid #e9edf2; padding-top:15px;">
+                            منصة الأعمال الموجهة - البيداغوجيا الفارقية | مفتش التربية والتكوين - درويش الهلالي
+                        </p>
+                    `;
+
+                    exportWithSaveAs(content, `الأنشطة_المشتركة_${new Date().toISOString().slice(0,10)}`, 'application/msword;charset=utf-8', '.doc');
+                },
+
+                // ============================================================
+                //  تصدير بنك الأنشطة إلى CSV
+                // ============================================================
+                exportBankToExcel() {
+                    const all = getAllActivities();
+                    if (!all.length) { showToast('لا توجد أنشطة للتصدير', 'warning'); return; }
+
+                    const headers = ['#', 'العنوان', 'المستوى', 'المادة', 'المستوى البيداغوجي', 'نمط النشاط',
+                                     'الذكاءات', 'VARK', 'المتعلمون', 'النوع', 'صاحب النشاط', 'التاريخ'];
+
+                    const rows = all.map((item, idx) => {
+                        const isModel = MODELS_SEED.some(m => m.id === item.id);
+                        const isShared = Store.state.customActivities.some(a => a.id === item.id);
+                        const type = isModel ? 'نموذج جاهز' : (isShared ? 'مشترك' : 'مستخلص');
+                        return [
+                            idx + 1,
+                            item.title || '',
+                            item.level || '',
+                            item.subject || '',
+                            item.pedagogy || '',
+                            item.style || '',
+                            (item.intelligences || []).join(' / '),
+                            (item.vark || []).join(' / '),
+                            (item.students || []).join(' / '),
+                            type,
+                            item.owner_name || 'النظام',
+                            item.created_at ? new Date(item.created_at).toLocaleDateString('ar-EG') : ''
+                        ];
+                    });
+
+                    let csv = headers.map(h => `"${h}"`).join(',') + '\n';
+                    rows.forEach(row => {
+                        csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n';
+                    });
+
+                    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `بنك_الأنشطة_${new Date().toISOString().slice(0,10)}.csv`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showToast('تم تصدير بنك الأنشطة بصيغة CSV', 'success');
+                },
+
+                // ============================================================
+                //  تحديث الأنشطة المشتركة يدوياً من الخادم
+                // ============================================================
+                async refreshSharedActivities() {
+                    showToast('جاري تحديث الأنشطة من الخادم...', 'info', 2000);
+                    await SharedActivities.load();
+                    showToast('تم تحديث بنك الأنشطة من الخادم بنجاح ✅', 'success');
+                },
                 renderStudentList() {
                     const container = document.getElementById('studentListContainer');
                     const students = window._tempStudents || [];
