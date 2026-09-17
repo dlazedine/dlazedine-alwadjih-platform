@@ -3632,6 +3632,10 @@
                     const rolePill = document.getElementById('userBadgeRole');
                     rolePill.textContent = profile.role === 'admin' ? 'مدير المنصة' : 'أستاذ(ة)';
                     rolePill.className = 'role-pill ' + (profile.role === 'admin' ? 'admin' : 'teacher');
+                    // بنك الأنشطة المشترك: تحميل مركزي + تحديث لحظي لجميع المستخدمين
+                    SharedActivities.load();
+                    SharedActivities.subscribeRealtime();
+
                     if (profile.role === 'admin') {
                         document.querySelectorAll('.admin-only').forEach(el => el.style.removeProperty('display'));
                         TeacherAdmin.subscribeRealtime();
@@ -3815,6 +3819,171 @@
 
             window.AuthSystem = AuthSystem;
             window.TeacherAdmin = TeacherAdmin;
+
+            // ================================================================
+            //  بنك الأنشطة المشترك — Supabase Postgres + Realtime
+            //  الأنشطة المضافة من الأساتذة تحفظ مركزياً في جدول public.activities
+            // ================================================================
+            const SharedActivities = {
+                _channel: null,
+                _loading: false,
+
+                normalize(row) {
+                    if (!row) return null;
+                    return {
+                        ...row,
+                        id: row.id,
+                        owner_id: row.owner_id,
+                        owner_name: row.owner_name || '',
+                        students: Array.isArray(row.students) ? row.students : [],
+                        intelligences: Array.isArray(row.intelligences) ? row.intelligences : [],
+                        vark: Array.isArray(row.vark) ? row.vark : [],
+                        goalId: row.goal_id || row.goalId || 'k1',
+                        startSituation: row.start_situation ?? row.startSituation ?? '',
+                        teacherRole: row.teacher_role ?? row.teacherRole ?? '',
+                        groupWork: row.group_work ?? row.groupWork ?? '',
+                        endSituation: row.end_situation ?? row.endSituation ?? ''
+                    };
+                },
+
+                toRow(data, id) {
+                    const profile = AuthSystem.currentProfile || {};
+                    return {
+                        ...(id ? {} : { id }),
+                        owner_id: profile.id,
+                        owner_name: profile.full_name || profile.email || '',
+                        title: data.title,
+                        subject: data.subject,
+                        level: data.level,
+                        topic: data.topic || '',
+                        pedagogy: data.pedagogy || 'أساسي',
+                        style: data.style || 'تعاوني',
+                        classes: data.classes || '',
+                        groups: data.groups || '',
+                        start_situation: data.startSituation || '',
+                        teacher_role: data.teacherRole || '',
+                        group_work: data.groupWork || '',
+                        end_situation: data.endSituation || '',
+                        text: data.text || '',
+                        questions: data.questions || '',
+                        answer: data.answer || '',
+                        description: data.description || '',
+                        students: Array.isArray(data.students) ? data.students : [],
+                        intelligences: Array.isArray(data.intelligences) ? data.intelligences : [],
+                        vark: Array.isArray(data.vark) ? data.vark : [],
+                        goal_id: data.goalId || 'k1'
+                    };
+                },
+
+                async load() {
+                    if (!SUPABASE_CONFIGURED || !sbMain || !AuthSystem.currentProfile || this._loading) return;
+                    this._loading = true;
+                    try {
+                        const { data, error } = await sbMain.from('activities')
+                            .select('*')
+                            .order('created_at', { ascending: false });
+                        if (error) throw error;
+                        Store.state.customActivities = (data || []).map(r => this.normalize(r));
+                        App.renderAll();
+                    } catch (error) {
+                        console.error('SharedActivities.load error:', error);
+                        showToast('تعذّر تحميل بنك الأنشطة المشترك: ' + (error.message || 'خطأ غير معروف'), 'error', 6000);
+                    } finally {
+                        this._loading = false;
+                    }
+                },
+
+                async insert(data) {
+                    if (!SUPABASE_CONFIGURED || !sbMain || !AuthSystem.currentProfile) {
+                        throw new Error('لا توجد جلسة Supabase فعّالة.');
+                    }
+                    const row = this.toRow(data);
+                    const { data: created, error } = await sbMain.from('activities').insert(row).select('*').single();
+                    if (error) throw error;
+                    return this.normalize(created);
+                },
+
+                async update(id, data) {
+                    if (!SUPABASE_CONFIGURED || !sbMain || !AuthSystem.currentProfile) {
+                        throw new Error('لا توجد جلسة Supabase فعّالة.');
+                    }
+                    const row = this.toRow(data);
+                    delete row.owner_id;
+                    delete row.owner_name;
+                    const { data: updated, error } = await sbMain.from('activities')
+                        .update(row)
+                        .eq('id', id)
+                        .select('*')
+                        .single();
+                    if (error) throw error;
+                    return this.normalize(updated);
+                },
+
+                async remove(id) {
+                    if (!SUPABASE_CONFIGURED || !sbMain || !AuthSystem.currentProfile) {
+                        throw new Error('لا توجد جلسة Supabase فعّالة.');
+                    }
+                    const { error } = await sbMain.from('activities').delete().eq('id', id);
+                    if (error) throw error;
+                },
+
+                upsertLocalCache(row) {
+                    const item = this.normalize(row);
+                    if (!item) return;
+                    const list = Store.state.customActivities || [];
+                    const idx = list.findIndex(a => a.id === item.id);
+                    if (idx >= 0) list[idx] = item;
+                    else list.unshift(item);
+                    Store.state.customActivities = list;
+                },
+
+                removeLocalCache(id) {
+                    Store.state.customActivities = (Store.state.customActivities || []).filter(a => a.id !== id);
+                },
+
+                subscribeRealtime() {
+                    if (!SUPABASE_CONFIGURED || !sbMain || this._channel) return;
+                    this._channel = sbMain.channel('shared_activities_live')
+                        .on('postgres_changes', {
+                            event: '*',
+                            schema: 'public',
+                            table: 'activities'
+                        }, (payload) => {
+                            if (payload.eventType === 'INSERT') {
+                                this.upsertLocalCache(payload.new);
+                                App.renderAll();
+                                const name = payload.new.owner_name || 'أحد الأساتذة';
+                                if (payload.new.owner_id !== (AuthSystem.currentProfile && AuthSystem.currentProfile.id)) {
+                                    showToast('نشاط جديد أضافه ' + name + ' إلى بنك الأنشطة', 'info', 4000);
+                                }
+                            } else if (payload.eventType === 'UPDATE') {
+                                this.upsertLocalCache(payload.new);
+                                App.renderAll();
+                                if (payload.new.owner_id !== (AuthSystem.currentProfile && AuthSystem.currentProfile.id)) {
+                                    showToast('تم تحديث نشاط في بنك الأنشطة المشترك', 'info', 3000);
+                                }
+                            } else if (payload.eventType === 'DELETE') {
+                                this.removeLocalCache(payload.old && payload.old.id);
+                                App.renderAll();
+                                showToast('تم حذف نشاط من بنك الأنشطة المشترك', 'info', 3000);
+                            }
+                        })
+                        .subscribe((status) => {
+                            if (status === 'SUBSCRIBED') {
+                                console.log('Shared activities realtime: connected');
+                            }
+                        });
+                },
+
+                canEdit(item) {
+                    const profile = AuthSystem.currentProfile;
+                    return !!profile && (profile.role === 'admin' || item.owner_id === profile.id);
+                },
+
+                canDelete(item) {
+                    return this.canEdit(item);
+                }
+            };
 
             // -------------------- المخزن المركزي (Store) --------------------
             const Store = {
@@ -5229,10 +5398,9 @@
                     document.getElementById('activityModal').classList.remove('active');
                 },
 
-                saveActivity() {
+                async saveActivity() {
                     const id = document.getElementById('editActivityId').value;
-                    const intelligences = Array.from(document.querySelectorAll('#intelligencesCheck input:checked')).map(el =>
-                        el.value);
+                    const intelligences = Array.from(document.querySelectorAll('#intelligencesCheck input:checked')).map(el => el.value);
                     const vark = Array.from(document.querySelectorAll('#varkCheck input:checked')).map(el => el.value);
                     const data = {
                         title: document.getElementById('actTitle').value.trim(),
@@ -5256,59 +5424,110 @@
                         vark,
                         goalId: document.getElementById('activityGoalId').value || Store.state.selectedGoal.id || 'k1'
                     };
+
                     if (!data.title || !data.teacherRole || !data.groupWork || !data.description) {
                         showToast('العنوان، دور الأستاذ، عمل الأفواج، والوصف إلزامية.', 'error');
                         return;
                     }
-                    const state = Store.state;
-                    if (id) {
-                        const idx = state.customActivities.findIndex(a => a.id === id);
-                        if (idx !== -1) state.customActivities[idx] = { ...state.customActivities[idx], ...data };
-                    } else {
-                        state.customActivities.push({ id: generateId(), ...data });
+
+                    const existing = id ? Store.state.customActivities.find(a => a.id === id) : null;
+                    if (id && existing && !SharedActivities.canEdit(existing)) {
+                        showToast('لا يمكنك تعديل هذا النشاط. التعديل متاح لصاحبه أو للمدير.', 'error');
+                        return;
                     }
-                    Store.setState(state);
-                    this.closeActivityModal();
-                    this.renderAll();
-                    showToast(id ? 'تم التعديل بنجاح!' : 'تم الإضافة بنجاح!', 'success');
-                    if (window.TeacherAdmin) {
-                        TeacherAdmin.logAction(id ? 'update' : 'create', data.title, { subject: data.subject, level: data.level });
+
+                    const saveBtn = document.querySelector('#activityModal .modal-actions .btn-success');
+                    if (saveBtn) {
+                        saveBtn.disabled = true;
+                        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+                    }
+
+                    try {
+                        let saved;
+                        if (id) {
+                            saved = await SharedActivities.update(id, data);
+                            SharedActivities.upsertLocalCache(saved);
+                            await TeacherAdmin.logAction('update', data.title, { subject: data.subject, level: data.level });
+                            showToast('تم تعديل النشاط المشترك بنجاح!', 'success');
+                        } else {
+                            saved = await SharedActivities.insert(data);
+                            SharedActivities.upsertLocalCache(saved);
+                            await TeacherAdmin.logAction('create', data.title, { subject: data.subject, level: data.level });
+                            showToast('تمت إضافة النشاط إلى البنك المشترك لجميع الأساتذة!', 'success');
+                        }
+
+                        this.closeActivityModal();
+                        this.renderAll();
+                    } catch (error) {
+                        console.error('saveActivity error:', error);
+                        showToast('تعذّر حفظ النشاط في البنك المشترك: ' + (error.message || 'تحقق من سياسات RLS وجدول activities'), 'error', 7000);
+                    } finally {
+                        if (saveBtn) {
+                            saveBtn.disabled = false;
+                            saveBtn.innerHTML = '<i class="fas fa-save"></i> حفظ';
+                        }
                     }
                 },
 
                 editCustomActivity(id) {
                     const act = Store.state.customActivities.find(a => a.id === id);
-                    if (act) this.openActivityModal(act);
+                    if (!act) { showToast('النشاط غير موجود', 'error'); return; }
+                    if (!SharedActivities.canEdit(act)) {
+                        showToast('التعديل متاح لصاحب النشاط أو للمدير فقط.', 'error');
+                        return;
+                    }
+                    this.openActivityModal(act);
                 },
 
-                deleteCustomActivity(id) {
-                    if (!confirm('حذف هذا النشاط نهائياً؟')) return;
+                async deleteCustomActivity(id) {
+                    if (!confirm('حذف هذا النشاط نهائياً من البنك المشترك؟')) return;
                     const removed = Store.state.customActivities.find(a => a.id === id);
-                    Store.state.customActivities = Store.state.customActivities.filter(a => a.id !== id);
-                    Store.setState(Store.state);
-                    this.renderAll();
-                    showToast('تم الحذف', 'info');
-                    if (window.TeacherAdmin && removed) {
-                        TeacherAdmin.logAction('delete', removed.title, { subject: removed.subject, level: removed.level });
+                    if (!removed) return;
+                    if (!SharedActivities.canDelete(removed)) {
+                        showToast('الحذف متاح لصاحب النشاط أو للمدير فقط.', 'error');
+                        return;
+                    }
+
+                    try {
+                        await SharedActivities.remove(id);
+                        SharedActivities.removeLocalCache(id);
+                        await TeacherAdmin.logAction('delete', removed.title, { subject: removed.subject, level: removed.level });
+                        this.renderAll();
+                        showToast('تم حذف النشاط من البنك المشترك', 'info');
+                    } catch (error) {
+                        console.error('deleteCustomActivity error:', error);
+                        showToast('تعذّر حذف النشاط: ' + (error.message || 'تحقق من صلاحيات RLS'), 'error', 6000);
                     }
                 },
 
-                duplicateActivity(id) {
-                    let item = MODELS_SEED.find(m => m.id === id) || Store.state.activities.find(a => a.id === id) || Store
-                        .state.customActivities.find(a => a.id === id);
+                async duplicateActivity(id) {
+                    let item = MODELS_SEED.find(m => m.id === id) || Store.state.activities.find(a => a.id === id) ||
+                        Store.state.customActivities.find(a => a.id === id);
                     if (!item) return;
+
                     const copy = JSON.parse(JSON.stringify(item));
-                    copy.id = generateId();
-                    copy.title = copy.title + ' (نسخة)';
+                    delete copy.id;
+                    delete copy.owner_id;
+                    delete copy.owner_name;
+                    delete copy.created_at;
+                    delete copy.updated_at;
+                    copy.title = (copy.title || 'نشاط') + ' (نسخة)';
                     copy.students = copy.students || [];
                     copy.intelligences = copy.intelligences || [];
                     copy.vark = copy.vark || [];
                     copy.pedagogy = copy.pedagogy || 'أساسي';
                     copy.style = copy.style || 'تعاوني';
-                    Store.state.customActivities.push(copy);
-                    Store.setState(Store.state);
-                    this.renderAll();
-                    showToast('تم نسخ النشاط', 'success');
+
+                    try {
+                        const saved = await SharedActivities.insert(copy);
+                        SharedActivities.upsertLocalCache(saved);
+                        await TeacherAdmin.logAction('create', saved.title, { subject: saved.subject, level: saved.level });
+                        this.renderAll();
+                        showToast('تم نسخ النشاط وإضافته إلى البنك المشترك', 'success');
+                    } catch (error) {
+                        console.error('duplicateActivity error:', error);
+                        showToast('تعذّر نسخ النشاط إلى البنك المشترك: ' + (error.message || 'خطأ غير معروف'), 'error', 6000);
+                    }
                 },
 
                 renderStudentList() {
@@ -5352,13 +5571,19 @@
                     }
                 },
 
-                manageStudents(id) {
-                    let item = MODELS_SEED.find(m => m.id === id) || Store.state.activities.find(a => a.id === id) || Store
-                        .state.customActivities.find(a => a.id === id);
+                async manageStudents(id) {
+                    let item = MODELS_SEED.find(m => m.id === id) || Store.state.activities.find(a => a.id === id) ||
+                        Store.state.customActivities.find(a => a.id === id);
                     if (!item) return;
+
                     if (!Store.state.customActivities.some(a => a.id === id)) {
                         const copy = JSON.parse(JSON.stringify(item));
-                        copy.id = generateId();
+                        delete copy.id;
+                        delete copy.owner_id;
+                        delete copy.owner_name;
+                        delete copy.created_at;
+                        delete copy.updated_at;
+                        copy.title = (copy.title || 'نشاط') + ' (نسخة للتحرير)';
                         copy.students = item.students ? [...item.students] : [];
                         copy.intelligences = item.intelligences || [];
                         copy.vark = item.vark || [];
@@ -5369,13 +5594,22 @@
                         if (!copy.groupWork) copy.groupWork = '';
                         if (!copy.endSituation) copy.endSituation = '';
                         if (!copy.description) copy.description = 'نسخة للتحرير';
-                        Store.state.customActivities.push(copy);
-                        Store.setState(Store.state);
-                        this.renderAll();
-                        this.openActivityModal(copy);
+
+                        try {
+                            const saved = await SharedActivities.insert(copy);
+                            SharedActivities.upsertLocalCache(saved);
+                            this.renderAll();
+                            this.openActivityModal(saved);
+                        } catch (error) {
+                            console.error('manageStudents create copy error:', error);
+                            showToast('تعذّر إنشاء النسخة المشتركة: ' + (error.message || 'خطأ غير معروف'), 'error', 6000);
+                        }
                     } else {
-                        const act = Store.state.customActivities.find(a => a.id === id);
-                        if (act) this.openActivityModal(act);
+                        if (!SharedActivities.canEdit(item)) {
+                            showToast('لا يمكنك تعديل المتعلمين في نشاط أستاذ آخر.', 'error');
+                            return;
+                        }
+                        this.openActivityModal(item);
                     }
                 },
 
@@ -5465,45 +5699,67 @@
                 renderBank() {
                     const all = getAllActivities();
                     const tbody = document.getElementById('bankTableBody');
+                    if (!all.length) {
+                        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; color:#99a; padding:30px;">لا توجد أنشطة في البنك حالياً.</td></tr>';
+                        return;
+                    }
+
                     tbody.innerHTML = all.map((item, idx) => {
                         const isModel = MODELS_SEED.some(m => m.id === item.id);
-                        const isCustom = Store.state.customActivities.some(a => a.id === item.id);
-                        const type = isModel ? 'جاهز' : (isCustom ? 'مضاف' : 'مستخلص');
+                        const isShared = Store.state.customActivities.some(a => a.id === item.id);
+                        const type = isModel ? 'جاهز' : (isShared ? 'مشترك' : 'مستخلص');
                         const studentsCount = item.students?.length || 0;
-                        const studentNames = item.students?.slice(0, 3).join('، ') + (studentsCount > 3 ? ' ...' : '') ||
-                            'لا يوجد';
+                        const studentNames = item.students?.slice(0, 3).join('، ') + (studentsCount > 3 ? ' ...' : '') || 'لا يوجد';
                         const intelStr = item.intelligences?.length ? item.intelligences.map(i =>
                             `<span class="intelligence-badge">${sanitize(i)}</span>`).join(' ') : '—';
                         const varkStr = item.vark?.length ? item.vark.map(v =>
                             `<span class="vark-badge">${sanitize(v)}</span>`).join(' ') : '—';
-                        const pedStr = item.pedagogy ? `<span class="pedagogy-badge">${sanitize(item.pedagogy)}</span>` :
-                            '—';
+                        const pedStr = item.pedagogy ? `<span class="pedagogy-badge">${sanitize(item.pedagogy)}</span>` : '—';
                         const styleStr = item.style ? `<span class="style-badge">${sanitize(item.style)}</span>` : '—';
                         const goal = getGoalFull(item.goalId);
                         const goalStr = goal ? `<span class="goal-badge">🎯 ${sanitize(goal.text)}</span>` : '—';
+
+                        let actionButtons = `
+                            <button class="btn btn-sm btn-word" title="تحميل Word قابل للتعديل" onclick="app.exportActivity('${item.id}')"><i class="fas fa-file-word"></i></button>
+                            <button class="btn btn-sm btn-success" title="مشاركة" onclick="app.shareActivity('${item.id}')"><i class="fas fa-share-alt"></i></button>
+                            <button class="btn btn-sm btn-warning" title="نسخ إلى بنكك المشترك" onclick="app.duplicateActivity('${item.id}')"><i class="fas fa-copy"></i></button>
+                            <button class="btn btn-sm btn-info" title="إدارة المتعلمين" onclick="app.manageStudents('${item.id}')"><i class="fas fa-user-edit"></i></button>`;
+
+                        if (isShared) {
+                            const canEdit = SharedActivities.canEdit(item);
+                            const canDelete = SharedActivities.canDelete(item);
+                            if (canEdit) {
+                                actionButtons += `<button class="btn btn-sm btn-info" title="تعديل" onclick="app.editCustomActivity('${item.id}')"><i class="fas fa-edit"></i></button>`;
+                            }
+                            if (canDelete) {
+                                actionButtons += `<button class="btn btn-sm btn-danger" title="حذف" onclick="app.deleteCustomActivity('${item.id}')"><i class="fas fa-trash"></i></button>`;
+                            }
+                        } else if (!isModel) {
+                            // السجلات القديمة المستخلصة تبقى محلية للعرض فقط.
+                            actionButtons += `
+                                <button class="btn btn-sm btn-info" title="تعديل السجل المحلي" onclick="app.openEditBankModal('${item.id}')"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger" title="حذف السجل المحلي" onclick="app.deleteBankActivity('${item.id}')"><i class="fas fa-trash"></i></button>`;
+                        }
+
                         return `<tr>
-                                <td>${idx+1}</td>
-                                <td>${sanitize(item.title)}</td>
-                                <td>${sanitize(item.level)}</td>
-                                <td>${sanitize(item.subject || 'اللغة العربية')}</td>
-                                <td>${intelStr}</td>
-                                <td>${varkStr}</td>
-                                <td>${pedStr}</td>
-                                <td>${styleStr}</td>
-                                <td>${goalStr}</td>
-                                <td>${studentsCount > 0 ? `${studentsCount} (${sanitize(studentNames)})` : '—'}</td>
-                                <td><span style="background:${type==='جاهز'?'#e2eaf2':type==='مضاف'?'#d4edda':'#fff3cd'}; padding:2px 10px; border-radius:20px;">${type}</span></td>
-                                <td class="no-print" style="display:flex; gap:4px; flex-wrap:wrap;">
-                                    <button class="btn btn-sm btn-word" onclick="app.exportActivity('${item.id}')"><i class="fas fa-file-word"></i></button>
-                                    <button class="btn btn-sm btn-success" onclick="app.shareActivity('${item.id}')"><i class="fas fa-share-alt"></i></button>
-                                    <button class="btn btn-sm btn-warning" onclick="app.duplicateActivity('${item.id}')"><i class="fas fa-copy"></i></button>
-                                    <button class="btn btn-sm btn-info" onclick="app.manageStudents('${item.id}')"><i class="fas fa-user-edit"></i></button>
-                                    ${isCustom ? `<button class="btn btn-sm btn-info" onclick="app.editCustomActivity('${item.id}')"><i class="fas fa-edit"></i></button>` : ''}
-                                    ${isCustom ? `<button class="btn btn-sm btn-danger" onclick="app.deleteCustomActivity('${item.id}')"><i class="fas fa-trash"></i></button>` : ''}
-                                    ${!isCustom && !isModel ? `<button class="btn btn-sm btn-info" onclick="app.openEditBankModal('${item.id}')"><i class="fas fa-edit"></i></button>` : ''}
-                                    ${!isCustom && !isModel ? `<button class="btn btn-sm btn-danger" onclick="app.deleteBankActivity('${item.id}')"><i class="fas fa-trash"></i></button>` : ''}
-                                </td>
-                            </tr>`;
+                            <td>${idx+1}</td>
+                            <td>${sanitize(item.title)}</td>
+                            <td>${sanitize(item.level)}</td>
+                            <td>${sanitize(item.subject || 'اللغة العربية')}</td>
+                            <td>${intelStr}</td>
+                            <td>${varkStr}</td>
+                            <td>${pedStr}</td>
+                            <td>${styleStr}</td>
+                            <td>${goalStr}</td>
+                            <td>${studentsCount > 0 ? `${studentsCount} (${sanitize(studentNames)})` : '—'}</td>
+                            <td>
+                                <span style="background:${type==='جاهز'?'#e2eaf2':type==='مشترك'?'#d4edda':'#fff3cd'}; padding:2px 10px; border-radius:20px;">
+                                    ${type}
+                                </span>
+                                ${isShared && item.owner_name ? `<div style="font-size:11px;color:#6c7a8d;margin-top:3px;">بواسطة: ${sanitize(item.owner_name)}</div>` : ''}
+                            </td>
+                            <td class="no-print" style="display:flex; gap:4px; flex-wrap:wrap;">${actionButtons}</td>
+                        </tr>`;
                     }).join('');
                 },
 
