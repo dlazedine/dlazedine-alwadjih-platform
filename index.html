@@ -3841,18 +3841,29 @@
                     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#99a; padding:20px;"><i class="fas fa-spinner fa-spin"></i> جاري تحميل الإحصائيات...</td></tr>';
 
                     try {
-                        const { data: teachers, error: tErr } = await sbMain
+                        // جلب جميع الملفات الشخصية (مديرون + أساتذة)
+                        const { data: profiles, error: tErr } = await sbMain
                             .from('profiles')
-                            .select('id, full_name, email, active, role')
-                            .eq('role', 'teacher');
+                            .select('id, full_name, email, active, role');
 
                         if (tErr) throw tErr;
 
+                        // جلب جميع الأنشطة
                         const { data: activities, error: aErr } = await sbMain
                             .from('activities')
                             .select('owner_id, owner_name, title, created_at');
 
                         if (aErr) throw aErr;
+
+                        // فلترة: نعرض فقط من لديه نشاط واحد على الأقل
+                        const teachers = (profiles || []).filter(p =>
+                            (activities || []).some(a => a.owner_id === p.id)
+                        );
+
+                        if (teachers.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#99a; padding:20px;"><i class="fas fa-info-circle"></i> لا توجد أنشطة مسجّلة حتى الآن.</td></tr>';
+                            return;
+                        }
 
                         const stats = teachers.map(teacher => {
                             const teacherActs = (activities || []).filter(a => a.owner_id === teacher.id);
@@ -3888,12 +3899,13 @@
                             else if (s.count >= 2) { countColor = '#856404'; countBg = '#fff3cd'; }
                             else if (s.count === 0) { countColor = '#721c24'; countBg = '#f8d7da'; }
 
-                            const lastDateStr = s.lastDate
-                                ? new Date(s.lastDate).toLocaleString('ar-EG', {
-                                    year: 'numeric', month: '2-digit', day: '2-digit',
-                                    hour: '2-digit', minute: '2-digit'
-                                })
-                                : '—';
+3902                         const lastDateStr = s.lastDate
+                        ? new Date(s.lastDate).toLocaleString('en-GB', {
+                            year: 'numeric', month: '2-digit', day: '2-digit',
+                            hour: '2-digit', minute: '2-digit',
+                            hour12: false
+                        }).replace(',', '')
+                        : '—';
 
                             return `
                                 <tr>
