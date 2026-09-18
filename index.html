@@ -3304,6 +3304,42 @@
                     </div>
                 </div>
 
+                              <!-- ============================================================ -->
+                <!--  بطاقة إحصائيات مفصّلة لكل أستاذ (جديدة)                    -->
+                <!-- ============================================================ -->
+                <div class="admin-panel-card" style="margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+                        <h3 style="margin-bottom:0;"><i class="fas fa-chart-bar"></i> إحصائيات مفصّلة لكل أستاذ</h3>
+                        <button class="btn btn-sm btn-info" onclick="TeacherAdmin.renderTeacherStats()">
+                            <i class="fas fa-sync"></i> تحديث الإحصائيات
+                        </button>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="teacher-table" id="teacherStatsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:40px;">#</th>
+                                    <th>الأستاذ(ة)</th>
+                                    <th>البريد الإلكتروني</th>
+                                    <th>عدد الأنشطة</th>
+                                    <th>آخر نشاط</th>
+                                    <th>تاريخ آخر نشاط</th>
+                                    <th>الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teacherStatsBody">
+                                <tr>
+                                    <td colspan="7" style="text-align:center; color:#99a; padding:20px;">
+                                        <i class="fas fa-info-circle"></i> اضغط "تحديث الإحصائيات" لتحميل البيانات
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style="font-size:12px; color:#8a9aa8; margin-top:10px;">
+                        <i class="fas fa-info-circle"></i> تُحدَّث الإحصائيات تلقائياً عند فتح هذا التبويب أو عند إضافة/تعديل نشاط.
+                    </p>
+                </div>
                 <div class="admin-panel-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                         <h3 style="margin-bottom:0;"><i class="fas fa-stream"></i> سجلّ العمليات الحيّ</h3>
@@ -3794,6 +3830,98 @@
                     this._logCache = data;
                     this.renderLog();
                     this.updateMonitorStats();
+                },
+                // ============================================================
+                //  إحصائيات مفصّلة لكل أستاذ (جديدة)
+                // ============================================================
+                async renderTeacherStats() {
+                    const tbody = document.getElementById('teacherStatsBody');
+                    if (!tbody) return;
+
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#99a; padding:20px;"><i class="fas fa-spinner fa-spin"></i> جاري تحميل الإحصائيات...</td></tr>';
+
+                    try {
+                        const { data: teachers, error: tErr } = await sbMain
+                            .from('profiles')
+                            .select('id, full_name, email, active, role')
+                            .eq('role', 'teacher');
+
+                        if (tErr) throw tErr;
+
+                        const { data: activities, error: aErr } = await sbMain
+                            .from('activities')
+                            .select('owner_id, owner_name, title, created_at');
+
+                        if (aErr) throw aErr;
+
+                        const stats = teachers.map(teacher => {
+                            const teacherActs = (activities || []).filter(a => a.owner_id === teacher.id);
+                            const actCount = teacherActs.length;
+
+                            let lastAct = null;
+                            if (teacherActs.length > 0) {
+                                const sorted = [...teacherActs].sort((a, b) =>
+                                    new Date(b.created_at) - new Date(a.created_at)
+                                );
+                                lastAct = sorted[0];
+                            }
+
+                            return {
+                                ...teacher,
+                                count: actCount,
+                                lastTitle: lastAct ? lastAct.title : null,
+                                lastDate: lastAct ? lastAct.created_at : null
+                            };
+                        });
+
+                        stats.sort((a, b) => b.count - a.count);
+
+                        if (stats.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#99a; padding:20px;">لا يوجد أساتذة مسجّلون بعد.</td></tr>';
+                            return;
+                        }
+
+                        tbody.innerHTML = stats.map((s, idx) => {
+                            let countColor = '#6c7a8d';
+                            let countBg = '#f1f4f9';
+                            if (s.count >= 5) { countColor = '#155724'; countBg = '#d4edda'; }
+                            else if (s.count >= 2) { countColor = '#856404'; countBg = '#fff3cd'; }
+                            else if (s.count === 0) { countColor = '#721c24'; countBg = '#f8d7da'; }
+
+                            const lastDateStr = s.lastDate
+                                ? new Date(s.lastDate).toLocaleString('ar-EG', {
+                                    year: 'numeric', month: '2-digit', day: '2-digit',
+                                    hour: '2-digit', minute: '2-digit'
+                                })
+                                : '—';
+
+                            return `
+                                <tr>
+                                    <td>${idx + 1}</td>
+                                    <td><strong>${sanitize(s.full_name || '—')}</strong></td>
+                                    <td style="font-size:12px; color:#6c7a8d;">${sanitize(s.email || '—')}</td>
+                                    <td>
+                                        <span style="background:${countBg}; color:${countColor}; padding:4px 14px; border-radius:20px; font-weight:700; font-size:14px;">
+                                            ${s.count}
+                                        </span>
+                                    </td>
+                                    <td style="font-size:13px;">${s.lastTitle ? sanitize(s.lastTitle) : '—'}</td>
+                                    <td style="font-size:12px; color:#6c7a8d;">${lastDateStr}</td>
+                                    <td>
+                                        <span class="status-dot ${s.active ? 'active' : 'inactive'}"></span>
+                                        ${s.active ? 'نشط' : 'معطّل'}
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+
+                        console.log('✅ تم تحديث إحصائيات الأساتذة:', stats.length, 'أستاذ');
+                    } catch (error) {
+                        console.error('renderTeacherStats error:', error);
+                        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--danger); padding:20px;">
+                            <i class="fas fa-exclamation-triangle"></i> تعذّر تحميل الإحصائيات: ${sanitize(error.message || 'خطأ غير معروف')}
+                        </td></tr>`;
+                    }
                 },
 
                 renderLog() {
