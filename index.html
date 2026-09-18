@@ -3969,35 +3969,67 @@
 
                 subscribeRealtime() {
                     if (!SUPABASE_CONFIGURED || !sbMain || this._channel) return;
+                    const myId = AuthSystem.currentProfile && AuthSystem.currentProfile.id;
+
                     this._channel = sbMain.channel('shared_activities_live')
                         .on('postgres_changes', {
                             event: '*',
                             schema: 'public',
                             table: 'activities'
                         }, (payload) => {
+
+                            // ============ حالة 1: إضافة نشاط جديد ============
                             if (payload.eventType === 'INSERT') {
                                 this.upsertLocalCache(payload.new);
                                 App.renderAll();
                                 const name = payload.new.owner_name || 'أحد الأساتذة';
-                                if (payload.new.owner_id !== (AuthSystem.currentProfile && AuthSystem.currentProfile.id)) {
-                                    showToast('نشاط جديد أضافه ' + name + ' إلى بنك الأنشطة', 'info', 4000);
+                                const title = payload.new.title || 'بدون عنوان';
+                                if (payload.new.owner_id !== myId) {
+                                    showToast(
+                                        `🔔 أضاف ${name} نشاطاً جديداً: "${title}"`,
+                                        'success',
+                                        6000
+                                    );
                                 }
-                            } else if (payload.eventType === 'UPDATE') {
+                            }
+
+                            // ============ حالة 2: تعديل نشاط موجود ============
+                            else if (payload.eventType === 'UPDATE') {
                                 this.upsertLocalCache(payload.new);
                                 App.renderAll();
-                                if (payload.new.owner_id !== (AuthSystem.currentProfile && AuthSystem.currentProfile.id)) {
-                                    showToast('تم تحديث نشاط في بنك الأنشطة المشترك', 'info', 3000);
+                                const name = payload.new.owner_name || 'أحد الأساتذة';
+                                const title = payload.new.title || 'بدون عنوان';
+                                if (payload.new.owner_id !== myId) {
+                                    showToast(
+                                        `✏️ عدّل ${name} النشاط: "${title}"`,
+                                        'info',
+                                        6000
+                                    );
                                 }
-                            } else if (payload.eventType === 'DELETE') {
-                                this.removeLocalCache(payload.old && payload.old.id);
+                            }
+
+                            // ============ حالة 3: حذف نشاط ============
+                            else if (payload.eventType === 'DELETE') {
+                                const oldRow = payload.old || {};
+                                this.removeLocalCache(oldRow.id);
                                 App.renderAll();
-                                showToast('تم حذف نشاط من بنك الأنشطة المشترك', 'info', 3000);
+                                const name = oldRow.owner_name || 'أحد الأساتذة';
+                                const title = oldRow.title || 'بدون عنوان';
+                                if (oldRow.owner_id !== myId) {
+                                    showToast(
+                                        `🗑️ حذف ${name} النشاط: "${title}"`,
+                                        'warning',
+                                        6000
+                                    );
+                                }
                             }
                         })
                         .subscribe((status) => {
                             if (status === 'SUBSCRIBED') {
-                                console.log('Shared activities realtime: connected');
+                                console.log('✅ Shared activities realtime: connected');
                             }
+                        });
+                },
                         });
                 },
 
