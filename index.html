@@ -5769,6 +5769,57 @@
                     this.renderBank();
                     showToast('تم مسح البحث', 'info', 1500);
                 },
+                              // ============================================================
+                //  نسخ رابط النشاط مباشرة (بدون QR)
+                // ============================================================
+                copyActivityLink(id) {
+                    let item = MODELS_SEED.find(m => m.id === id) 
+                        || Store.state.activities.find(a => a.id === id) 
+                        || Store.state.customActivities.find(a => a.id === id);
+                    if (!item) {
+                        showToast('النشاط غير موجود', 'error');
+                        return;
+                    }
+
+                    try {
+                        // ترميز النشاط إلى Base64
+                        const jsonStr = JSON.stringify(item);
+                        const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+                        const link = window.location.href.split('?')[0] + '?data=' + encoded;
+
+                        // نسخ إلى الحافظة
+                        if (navigator.clipboard && window.isSecureContext) {
+                            navigator.clipboard.writeText(link).then(() => {
+                                showToast('✅ تم نسخ رابط النشاط: ' + item.title, 'success', 3000);
+                            }).catch(err => {
+                                this._fallbackCopy(link, item.title);
+                            });
+                        } else {
+                            this._fallbackCopy(link, item.title);
+                        }
+                    } catch (err) {
+                        console.error('copyActivityLink error:', err);
+                        showToast('تعذّر إنشاء الرابط: ' + err.message, 'error', 5000);
+                    }
+                },
+
+                // دالة مساعدة للنسخ (احتياطية للمتصفحات القديمة)
+                _fallbackCopy(text, itemTitle) {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    textarea.setSelectionRange(0, 99999);
+                    try {
+                        document.execCommand('copy');
+                        showToast('✅ تم نسخ رابط النشاط: ' + itemTitle, 'success', 3000);
+                    } catch (err) {
+                        prompt('انسخ الرابط يدوياً:', text);
+                    }
+                    document.body.removeChild(textarea);
+                },
                 renderStudentList() {
                     const container = document.getElementById('studentListContainer');
                     const students = window._tempStudents || [];
