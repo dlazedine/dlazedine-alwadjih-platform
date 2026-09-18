@@ -3837,7 +3837,15 @@
                             if (document.getElementById('tab-teachers').classList.contains('active')) {
                                 this.renderTeachers();
                             }
-                            showToast('نشاط جديد من الأستاذ(ة) ' + payload.new.teacher_name, 'info', 3500);
+                            const actionLabelMap = { create: 'أضاف نشاطاً جديداً', update: 'عدّل نشاطاً', delete: 'حذف نشاطاً' };
+                            const iconMap = { create: '🔔', update: '✏️', delete: '🗑️' };
+                            const toastTypeMap = { create: 'success', update: 'info', delete: 'warning' };
+                            const action = payload.new.action;
+                            const label = actionLabelMap[action] || 'قام بعملية';
+                            const icon = iconMap[action] || '🔔';
+                            const toastType = toastTypeMap[action] || 'info';
+                            const titlePart = payload.new.activity_title ? (': "' + payload.new.activity_title + '"') : '';
+                            showToast(icon + ' ' + payload.new.teacher_name + ' ' + label + titlePart, toastType, 3500);
                         })
                         .subscribe();
                 }
