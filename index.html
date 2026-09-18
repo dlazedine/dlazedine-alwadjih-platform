@@ -5703,6 +5703,72 @@
                     await SharedActivities.load();
                     showToast('تم تحديث بنك الأنشطة من الخادم بنجاح ✅', 'success');
                 },
+
+                              // ============================================================
+                //  البحث الفوري في بنك الأنشطة
+                // ============================================================
+                filterBank() {
+                    const query = (document.getElementById('bankSearchInput')?.value || '').trim().toLowerCase();
+                    const resultSpan = document.getElementById('bankSearchResult');
+
+                    // إعادة عرض الجدول بالكامل أولاً (لضمان ظهور كل الصفوف)
+                    this.renderBank();
+
+                    if (!query) {
+                        if (resultSpan) {
+                            resultSpan.innerHTML = '<i class="fas fa-list"></i> جميع الأنشطة';
+                            resultSpan.style.background = '#fff';
+                            resultSpan.style.color = '#6c7a8d';
+                        }
+                        return;
+                    }
+
+                    // البحث في صفوف الجدول
+                    const rows = document.querySelectorAll('#bankTableBody tr');
+                    let visibleCount = 0;
+                    const totalRows = rows.length;
+
+                    rows.forEach(row => {
+                        // نستثني عمود "الإجراءات" (آخر عمود) من البحث
+                        const searchableCells = row.querySelectorAll('td:not(:last-child)');
+                        const rowText = Array.from(searchableCells)
+                            .map(td => td.textContent)
+                            .join(' ')
+                            .toLowerCase();
+
+                        if (rowText.includes(query)) {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    if (resultSpan) {
+                        if (visibleCount === 0) {
+                            resultSpan.innerHTML = `<i class="fas fa-exclamation-circle"></i> لا توجد نتائج لـ "${sanitize(query)}"`;
+                            resultSpan.style.background = '#fdecea';
+                            resultSpan.style.color = 'var(--danger)';
+                        } else {
+                            resultSpan.innerHTML = `<i class="fas fa-filter"></i> ${visibleCount} نتيجة من ${totalRows}`;
+                            resultSpan.style.background = '#e6f4ea';
+                            resultSpan.style.color = 'var(--success)';
+                        }
+                    }
+                },
+
+                clearBankSearch() {
+                    const input = document.getElementById('bankSearchInput');
+                    if (input) input.value = '';
+                    const resultSpan = document.getElementById('bankSearchResult');
+                    if (resultSpan) {
+                        resultSpan.innerHTML = '<i class="fas fa-list"></i> جميع الأنشطة';
+                        resultSpan.style.background = '#fff';
+                        resultSpan.style.color = '#6c7a8d';
+                    }
+                    this.renderBank();
+                    showToast('تم مسح البحث', 'info', 1500);
+                },
                 renderStudentList() {
                     const container = document.getElementById('studentListContainer');
                     const students = window._tempStudents || [];
