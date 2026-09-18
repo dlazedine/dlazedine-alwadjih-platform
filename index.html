@@ -3109,6 +3109,21 @@
                     <button class="btn btn-info" onclick="app.exportBankToExcel()"><i class="fas fa-file-excel"></i> تصدير الجدول (CSV)</button>
                     <button class="btn btn-warning" onclick="app.refreshSharedActivities()"><i class="fas fa-sync"></i> تحديث من الخادم</button>
                 </div>
+                              <div style="background:#f8faff; padding:14px 18px; border-radius:12px; margin-bottom:15px; border:1px solid #e2e8f0; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+                    <div style="flex:1; min-width:220px; position:relative;">
+                        <i class="fas fa-search" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); color:#6c7a8d;"></i>
+                        <input type="text" id="bankSearchInput" 
+                               placeholder="🔍 ابحث في العناوين، أسماء الأساتذة، المواد، المستويات..." 
+                               oninput="app.filterBank()"
+                               style="width:100%; padding:11px 40px 11px 14px; border:1.5px solid #ced4da; border-radius:10px; font-size:14px; font-family:var(--font-ar); background:#fff;">
+                    </div>
+                    <button class="btn btn-sm btn-outline" onclick="app.clearBankSearch()" title="مسح البحث">
+                        <i class="fas fa-times"></i> مسح
+                    </button>
+                    <span id="bankSearchResult" style="font-size:13px; color:#6c7a8d; background:#fff; padding:6px 14px; border-radius:20px; border:1px solid #e2e8f0;">
+                        <i class="fas fa-list"></i> جميع الأنشطة
+                    </span>
+                </div>
                 <p style="color:#6c7a8d; margin-bottom:15px;">جميع الأنشطة المصنفة حسب الذكاءات، VARK، المستوى البيداغوجي، ونمط النشاط.</p>
                 <div class="bank-stats" id="bankStats">
                     <div class="stat-item">
