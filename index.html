@@ -3124,6 +3124,43 @@
                         <i class="fas fa-list"></i> جميع الأنشطة
                     </span>
                 </div>
+                              <!-- شريط الفلاتر المتقدمة (جديد) -->
+                <div style="background:#f8faff; padding:14px 18px; border-radius:12px; margin-bottom:15px; border:1px solid #e2e8f0;">
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
+                        <span style="font-weight:600; color:var(--primary); font-size:14px;"><i class="fas fa-filter"></i> فلترة متقدمة:</span>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                                              <select id="filterTeacher" onchange="app.applyBankFilters()" style="padding:8px 12px; border:1.5px solid #ced4da; border-radius:8px; font-size:13px; font-family:var(--font-ar); background:#fff; min-width:150px;">
+                            <option value="">👤 كل الأساتذة</option>
+                        </select>
+                        <select id="filterSubject" onchange="app.applyBankFilters()" style="padding:8px 12px; border:1.5px solid #ced4da; border-radius:8px; font-size:13px; font-family:var(--font-ar); background:#fff; min-width:150px;">
+                            <option value="">📚 كل المواد</option>
+                            <option value="اللغة العربية">اللغة العربية</option>
+                            <option value="الرياضيات">الرياضيات</option>
+                            <option value="اللغة الفرنسية">اللغة الفرنسية</option>
+                            <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                        </select>
+                        <select id="filterLevel" onchange="app.applyBankFilters()" style="padding:8px 12px; border:1.5px solid #ced4da; border-radius:8px; font-size:13px; font-family:var(--font-ar); background:#fff; min-width:150px;">
+                            <option value="">🎓 كل المستويات</option>
+                            <option value="السنة الأولى متوسط">السنة الأولى متوسط</option>
+                            <option value="السنة الثانية متوسط">السنة الثانية متوسط</option>
+                            <option value="السنة الثالثة متوسط">السنة الثالثة متوسط</option>
+                            <option value="السنة الرابعة متوسط">السنة الرابعة متوسط</option>
+                        </select>
+                        <select id="filterType" onchange="app.applyBankFilters()" style="padding:8px 12px; border:1.5px solid #ced4da; border-radius:8px; font-size:13px; font-family:var(--font-ar); background:#fff; min-width:150px;">
+                            <option value="">🏷️ كل الأنواع</option>
+                            <option value="shared">🟢 مشترك فقط</option>
+                            <option value="model">🔵 نماذج جاهزة</option>
+                            <option value="local">🟡 مستخلص محلي</option>
+                        </select>
+                                              <button class="btn btn-sm btn-outline" onclick="app.clearBankFilters()" title="مسح الفلاتر">
+                            <i class="fas fa-times"></i> مسح الفلاتر
+                        </button>
+                        <span id="bankFilterResult" style="font-size:13px; color:#6c7a8d; background:#fff; padding:6px 14px; border-radius:20px; border:1px solid #e2e8f0; margin-right:auto;">
+                            <i class="fas fa-info-circle"></i> لا فلتر مطبّق
+                        </span>
+                    </div>
+                </div>
                 <p style="color:#6c7a8d; margin-bottom:15px;">جميع الأنشطة المصنفة حسب الذكاءات، VARK، المستوى البيداغوجي، ونمط النشاط.</p>
                 <div class="bank-stats" id="bankStats">
                     <div class="stat-item">
@@ -5949,6 +5986,104 @@
                     showToast('تم مسح البحث', 'info', 1500);
                 },
                               // ============================================================
+                //  فلترة متقدمة في بنك الأنشطة
+                // ============================================================
+                applyBankFilters() {
+                    const teacher = (document.getElementById('filterTeacher')?.value || '').trim();
+                    const subject = (document.getElementById('filterSubject')?.value || '').trim();
+                    const level = (document.getElementById('filterLevel')?.value || '').trim();
+                    const type = (document.getElementById('filterType')?.value || '').trim();
+
+                    const resultSpan = document.getElementById('bankFilterResult');
+
+                    this.renderBank();
+
+                    if (!teacher && !subject && !level && !type) {
+                        if (resultSpan) {
+                            resultSpan.innerHTML = '<i class="fas fa-info-circle"></i> لا فلتر مطبّق';
+                            resultSpan.style.background = '#fff';
+                            resultSpan.style.color = '#6c7a8d';
+                        }
+                        return;
+                    }
+
+                    const rows = document.querySelectorAll('#bankTableBody tr');
+                    let visibleCount = 0;
+                    const totalRows = rows.length;
+
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        if (cells.length < 11) return;
+
+                        const rowTeacher = (cells[10]?.textContent || '').toLowerCase();
+                        const rowSubject = (cells[3]?.textContent || '').trim();
+                        const rowLevel = (cells[2]?.textContent || '').trim();
+                        const rowType = (cells[10]?.textContent || '').toLowerCase();
+
+                        let matches = true;
+
+                        if (teacher && !rowTeacher.includes(teacher.toLowerCase())) matches = false;
+                        if (subject && rowSubject !== subject) matches = false;
+                        if (level && rowLevel !== level) matches = false;
+
+                        if (type) {
+                            if (type === 'shared' && !rowType.includes('مشترك')) matches = false;
+                            if (type === 'model' && !rowType.includes('نموذج')) matches = false;
+                            if (type === 'local' && !rowType.includes('مستخلص')) matches = false;
+                        }
+
+                        row.style.display = matches ? '' : 'none';
+                        if (matches) visibleCount++;
+                    });
+
+                    if (resultSpan) {
+                        if (visibleCount === 0) {
+                            resultSpan.innerHTML = '<i class="fas fa-exclamation-circle"></i> لا توجد نتائج';
+                            resultSpan.style.background = '#fdecea';
+                            resultSpan.style.color = 'var(--danger)';
+                        } else {
+                            resultSpan.innerHTML = `<i class="fas fa-filter"></i> ${visibleCount} نتيجة من ${totalRows}`;
+                            resultSpan.style.background = '#e6f4ea';
+                            resultSpan.style.color = 'var(--success)';
+                        }
+                    }
+                },
+
+                clearBankFilters() {
+                    ['filterTeacher', 'filterSubject', 'filterLevel', 'filterType'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.value = '';
+                    });
+                    const resultSpan = document.getElementById('bankFilterResult');
+                    if (resultSpan) {
+                        resultSpan.innerHTML = '<i class="fas fa-info-circle"></i> لا فلتر مطبّق';
+                        resultSpan.style.background = '#fff';
+                        resultSpan.style.color = '#6c7a8d';
+                    }
+                    this.renderBank();
+                    showToast('تم مسح الفلاتر', 'info', 1500);
+                },
+
+                populateTeacherFilter() {
+                    const select = document.getElementById('filterTeacher');
+                    if (!select) return;
+
+                    const teachers = new Set();
+                    Store.state.customActivities.forEach(a => {
+                        if (a.owner_name) teachers.add(a.owner_name);
+                    });
+
+                    const currentValue = select.value;
+                    select.innerHTML = '<option value="">👤 كل الأساتذة</option>' +
+                        Array.from(teachers).sort().map(name =>
+                            `<option value="${sanitize(name)}">${sanitize(name)}</option>`
+                        ).join('');
+
+                    if (currentValue && Array.from(teachers).includes(currentValue)) {
+                        select.value = currentValue;
+                    }
+                },
+                              // ============================================================
                 //  نسخ رابط النشاط مباشرة (بدون QR)
                 // ============================================================
                 copyActivityLink(id) {
@@ -7208,7 +7343,10 @@
                             'active'));
                             document.getElementById('tab-' + this.dataset.tab).classList.add('active');
                             if (this.dataset.tab === 'models') app.renderModels();
-                            if (this.dataset.tab === 'bank') app.renderBank();
+                            if (this.dataset.tab === 'bank') {
+                                app.renderBank();
+                                app.populateTeacherFilter();
+                            }
                             if (this.dataset.tab === 'statistics') app.renderStatsCharts();
                             if (this.dataset.tab === 'activities') {
                                 app.renderCustomActivities();
