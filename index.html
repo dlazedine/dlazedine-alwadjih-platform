@@ -6011,8 +6011,8 @@
 
                         let actionButtons = `
                             <button class="btn btn-sm btn-word" title="تحميل Word قابل للتعديل" onclick="app.exportActivity('${item.id}')"><i class="fas fa-file-word"></i></button>
-                            <button class="btn btn-sm btn-success" title="مشاركة" onclick="app.shareActivity('${item.id}')"><i class="fas fa-share-alt"></i></button>
-                            <button class="btn btn-sm btn-warning" title="نسخ إلى بنكك المشترك" onclick="app.duplicateActivity('${item.id}')"><i class="fas fa-copy"></i></button>
+                        <button class="btn btn-sm btn-success" title="مشاركة (QR)" onclick="app.shareActivity('${item.id}')"><i class="fas fa-share-alt"></i></button>
+                    <button class="btn btn-sm btn-info" title="نسخ الرابط مباشرة" onclick="app.copyActivityLink('${item.id}')" style="background:#17a2b8;"><i class="fas fa-link"></i></button>                        <button class="btn btn-sm btn-warning" title="نسخ إلى بنكك المشترك" onclick="app.duplicateActivity('${item.id}')"><i class="fas fa-copy"></i></button>
                             <button class="btn btn-sm btn-info" title="إدارة المتعلمين" onclick="app.manageStudents('${item.id}')"><i class="fas fa-user-edit"></i></button>`;
 
                         if (isShared) {
