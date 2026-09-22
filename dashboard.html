@@ -9,22 +9,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+<!-- استدعاء Firebase المتوافق -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<!-- استدعاء مكتبة Supabase وتصحيح روابط الـ CDN المكسورة -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  <!-- استدعاء مكتبة Supabase -->
-<script src="https://jsdelivr.net"></script>
-
-<script>
-  // مفاتيح الاتصال بـ Supabase (تأكد من مطابقتها لما هو موجود لديك)
+  // مفاتيح الاتصال بـ Supabase 
   const SUPABASE_URL = 'https://yzxyttieobyblznaehcl.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u';
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 </script>
-
-</script>
+>
 
 <style>
     :root {
