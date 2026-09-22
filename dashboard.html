@@ -14,32 +14,16 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBdv2RJ7EzlnVQcXyyozlLhVKdgwaKQdaY",
-        authDomain: "mou3ladja.firebaseapp.com",
-        projectId: "mou3ladja",
-        storageBucket: "mou3ladja.firebasestorage.app",
-        messagingSenderId: "986880549463",
-        appId: "1:986880549463:web:b4de098099622040bfb912",
-        measurementId: "G-E0BZPDCZB9"
-    };
-    let fbAuth = null, fbDb = null;
-    try {
-        if (typeof firebase !== 'undefined') {
-            firebase.initializeApp(firebaseConfig);
-            fbAuth = firebase.auth();
-            fbDb = firebase.firestore();
-        }
-    } catch (e) { console.error('⚠️ فشل الاتصال بـ Firebase:', e); }
+  <!-- استدعاء مكتبة Supabase -->
+<script src="https://jsdelivr.net"></script>
 
-    const SUPABASE_URL = "https://yzxyttieobyblznaehcl.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u";
-    let sbMain = null;
-    try {
-        if (typeof window.supabase !== 'undefined') {
-            sbMain = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
-    } catch (e) { console.error('⚠️ فشل الاتصال بـ Supabase:', e); }
+<script>
+  // مفاتيح الاتصال بـ Supabase (تأكد من مطابقتها لما هو موجود لديك)
+  const SUPABASE_URL = 'https://yzxyttieobyblznaehcl.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u';
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+
 </script>
 
 <style>
@@ -797,6 +781,38 @@ function subscribeRealtime() {
         })
         .subscribe();
 }
+// الدالة الجديدة لحفظ النشاط وسجل العمليات في Supabase مباشرة
+async function logActivityToSupabase(teacherName, email, activityTitle, level, subject) {
+    try {
+        // نقوم بإدراج البيانات في جدول الأنشطة الرئيسي بـ Supabase
+        const { data, error } = await supabase
+            .from('activities') // تأكد من اسم الجدول في قاعدة بياناتك
+            .insert([
+                { 
+                    teacher_name: teacherName,
+                    email: email,
+                    title: activityTitle,
+                    level: level,
+                    subject: subject,
+                    created_at: new Date().toISOString()
+                }
+            ]);
+
+        if (error) throw error;
+
+        console.log("تم تسجيل النشاط بنجاح في Supabase!");
+        
+        // إذا كانت لوحة التحكم تحتاج تحديثاً فورياً
+        if (typeof refreshDashboardData === 'function') {
+            refreshDashboardData();
+        }
+
+    } catch (err) {
+        console.error("خطأ أثناء الكتابة في Supabase:", err.message);
+    }
+}
+
+
 </script>
 
 </body>
