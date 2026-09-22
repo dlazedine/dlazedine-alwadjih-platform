@@ -3659,26 +3659,55 @@
                     rolePill.className = 'role-pill ' + (profile.role === 'admin' ? 'admin' : 'teacher');
                     // بنك الأنشطة المشترك: تحميل مركزي + تحديث لحظي لجميع المستخدمين
                     SharedActivities.load();
-                    SharedActivities.subscribeRealtime();
+       subscribeRealtime() {
+    if (!fbDb || this._channel) return;
+    const myId = AuthSystem.currentProfile && AuthSystem.currentProfile.id;
 
-                    if (profile.role === 'admin') {
-                        document.querySelectorAll('.admin-only').forEach(el => el.style.removeProperty('display'));
-                        // ⚡ مراقبة النشاطات انتقلت إلى لوحة التحكم الموحّدة (dashboard.html) —
-                        // لم يعد الاشتراك اللحظي هنا ضرورياً أو آمناً (عناصر الواجهة القديمة أُزيلت).
+    this._channel = fbDb.collection('activities')
+        .orderBy('created_at', 'desc')
+        .limit(20)
+        .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                const data = { id: change.doc.id, ...change.doc.data() };
+
+                // تجاهل القديم عند التحميل الأول
+                const itemTime = new Date(data.created_at).getTime();
+                if (Date.now() - itemTime > 10000) return;
+
+                if (change.type === 'added') {
+                    this.upsertLocalCache(data);
+                    App.renderAll();
+                    if (data.owner_id !== myId) {
+                        showToast(
+                            `🔔 ${data.owner_name} أضاف نشاطاً: "${data.title}"`,
+                            'success',
+                            5000
+                        );
                     }
-                },
-
-                async logout() {
-                    if (!confirm('هل تريد تسجيل الخروج؟')) return;
-                    // مسح جلسة البوابة الموحّدة (تُخرج المستخدم من كل الأدوات وليس هذه فقط)
-                    try {
-                        sessionStorage.removeItem('pgb_session');
-                        localStorage.removeItem('pgb_session_persistent');
-                    } catch(e) {}
-                    if (sbMain) await sbMain.auth.signOut();
-                    window.location.href = 'index.html';
+                } else if (change.type === 'modified') {
+                    this.upsertLocalCache(data);
+                    App.renderAll();
+                    if (data.owner_id !== myId) {
+                        showToast(
+                            `✏️ ${data.owner_name} عدّل النشاط: "${data.title}"`,
+                            'info',
+                            5000
+                        );
+                    }
+                } else if (change.type === 'removed') {
+                    this.removeLocalCache(data.id);
+                    App.renderAll();
+                    if (data.owner_id !== myId) {
+                        showToast(
+                            `🗑️ ${data.owner_name} حذف نشاطاً`,
+                            'warning',
+                            5000
+                        );
+                    }
                 }
-            };
+            });
+        }, (error) => console.error('Realtime error:', error));
+}
 
             // ================================================================
             //  إدارة الأساتذة + سجلّ مراقبة النشاطات (TeacherAdmin)
@@ -3771,20 +3800,22 @@
                 },
 
                 // تسجيل عملية في سجلّ المراقبة (تُستدعى تلقائياً عند إضافة/تعديل/حذف نشاط)
-                async logAction(action, activityTitle, extra) {
-                    if (!SUPABASE_CONFIGURED || !AuthSystem.currentProfile) return;
-                    extra = extra || {};
-                    try {
-                        await sbMain.from('activity_log').insert({
-                            teacher_id: AuthSystem.currentProfile.id,
-                            teacher_name: AuthSystem.currentProfile.full_name || AuthSystem.currentProfile.email,
-                            action: action,
-                            activity_title: activityTitle || '',
-                            subject: extra.subject || '',
-                            level: extra.level || ''
-                        });
-                    } catch (e) {}
-                },
+ async logAction(action, activityTitle, extra) {
+    extra = extra || {};
+    try {
+        await fbDb.collection('activity_log').add({
+            teacher_id: AuthSystem.currentProfile.id,
+            teacher_name: AuthSystem.currentProfile.full_name || AuthSystem.currentProfile.email,
+            action: action,
+            activity_title: activityTitle || '',
+            subject: extra.subject || '',
+            level: extra.level || '',
+            created_at: new Date().toISOString()
+        });
+    } catch (e) {
+        console.error('⚠️ logAction error:', e);
+    }
+}
 
                 async refreshLog() {
                     const feed = document.getElementById('logFeed');
@@ -3990,34 +4021,37 @@
                     };
                 },
 
-                toRow(data, id) {
-                    const profile = AuthSystem.currentProfile || {};
-                    return {
-                        ...(id ? {} : { id }),
-                        owner_id: profile.id,
-                        owner_name: profile.full_name || profile.email || '',
-                        title: data.title,
-                        subject: data.subject,
-                        level: data.level,
-                        topic: data.topic || '',
-                        pedagogy: data.pedagogy || 'أساسي',
-                        style: data.style || 'تعاوني',
-                        classes: data.classes || '',
-                        groups: data.groups || '',
-                        start_situation: data.startSituation || '',
-                        teacher_role: data.teacherRole || '',
-                        group_work: data.groupWork || '',
-                        end_situation: data.endSituation || '',
-                        text: data.text || '',
-                        questions: data.questions || '',
-                        answer: data.answer || '',
-                        description: data.description || '',
-                        students: Array.isArray(data.students) ? data.students : [],
-                        intelligences: Array.isArray(data.intelligences) ? data.intelligences : [],
-                        vark: Array.isArray(data.vark) ? data.vark : [],
-                        goal_id: data.goalId || 'k1'
-                    };
-                },
+                
+toRow(data, id) {
+    const profile = AuthSystem.currentProfile || {};
+    return {
+        ...(id ? {} : { id }),
+        owner_id: profile.id,                                    // ← معرّف الأستاذ
+        owner_name: profile.full_name || profile.email || '',    // ← الاسم
+        owner_email: profile.email || '',                        // ← ✅ جديد: البريد
+        title: data.title,
+        subject: data.subject,
+        level: data.level,
+        topic: data.topic || '',
+        pedagogy: data.pedagogy || 'أساسي',
+        style: data.style || 'تعاوني',
+        classes: data.classes || '',
+        groups: data.groups || '',
+        start_situation: data.startSituation || '',
+        teacher_role: data.teacherRole || '',
+        group_work: data.groupWork || '',
+        end_situation: data.endSituation || '',
+        text: data.text || '',
+        questions: data.questions || '',
+        answer: data.answer || '',
+        description: data.description || '',
+        students: Array.isArray(data.students) ? data.students : [],
+        intelligences: Array.isArray(data.intelligences) ? data.intelligences : [],
+        vark: Array.isArray(data.vark) ? data.vark : [],
+        goal_id: data.goalId || 'k1',
+        created_at: new Date().toISOString()                      // ← ✅ جديد: التاريخ
+    };
+}
 
                 async load() {
                     if (!SUPABASE_CONFIGURED || !sbMain || !AuthSystem.currentProfile || this._loading) return;

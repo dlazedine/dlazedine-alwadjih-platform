@@ -734,69 +734,140 @@ function updateMonitorStats() {
 async function renderTeacherStats() {
     const tbody = document.getElementById('teacherStatsBody');
     if (!tbody) return;
-    if (!sbMain) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--danger); padding:20px;">خدمة المراقبة غير متاحة</td></tr>'; return; }
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> جارٍ تحميل الإحصائيات...</td></tr>';
+
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#99a; padding:20px;">' +
+                      '<i class="fas fa-spinner fa-spin"></i> جاري تحميل الإحصائيات...</td></tr>';
+
     try {
+        // 1. جلب قائمة المستخدمين من Firestore
         await listenToCloudUsers();
-        const teachers = getUsers().filter(u => u.role !== 'inspector');
+        const users = getUsers().filter(u => u.role !== 'inspector');
 
-        const { data: activities, error: aErr } = await sbMain.from('activities').select('id, owner_id, title, created_at');
-        if (aErr) throw aErr;
-
-        if (teachers.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">لا يوجد أساتذة مسجّلون بعد.</td></tr>';
+        if (!users.length) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#99a; padding:20px;">' +
+                              'لا يوجد أساتذة مسجّلون بعد.</td></tr>';
             return;
         }
 
-        const stats = teachers.map(teacher => {
-            const teacherActs = (activities || []).filter(a => a.owner_id === teacher.id);
+        // 2. جلب جميع الأنشطة من Firestore
+        const activitiesSnap = await fbDb.collection('activities').get();
+        const activities = [];
+        activitiesSnap.forEach(doc => {
+            activities.push({ id: doc.id, ...doc.data() });
+        });
+
+        // 3. مطابقة كل أستاذ بأنشطته
+        const stats = users.map(teacher => {
+            // نطابق بـ id أو email (احتياطي)
+            const teacherActs = activities.filter(a =>
+                a.owner_id === teacher.id ||
+                (teacher.email && a.owner_email === teacher.email)
+            );
+
             let lastAct = null;
             if (teacherActs.length > 0) {
-                lastAct = [...teacherActs].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+                lastAct = [...teacherActs].sort((a, b) =>
+                    new Date(b.created_at || 0) - new Date(a.created_at || 0)
+                )[0];
             }
-            return { ...teacher, count: teacherActs.length, lastTitle: lastAct ? lastAct.title : null, lastDate: lastAct ? lastAct.created_at : null };
+
+            return {
+                ...teacher,
+                count: teacherActs.length,
+                lastTitle: lastAct ? lastAct.title : null,
+                lastDate: lastAct ? lastAct.created_at : null
+            };
         });
+
         stats.sort((a, b) => b.count - a.count);
 
+        // 4. عرض النتائج
         tbody.innerHTML = stats.map((s, idx) => {
-            let countColor = '#6c7a8d', countBg = '#f1f4f9';
-            if (s.count >= 5) { countColor = '#155724'; countBg = '#d4edda'; }
+            let countColor = '#6c7a8d';
+            let countBg = '#f1f4f9';
+            if (s.count >= 5)      { countColor = '#155724'; countBg = '#d4edda'; }
             else if (s.count >= 2) { countColor = '#856404'; countBg = '#fff3cd'; }
-            else if (s.count === 0) { countColor = '#721c24'; countBg = '#f8d7da'; }
-            const lastDateStr = s.lastDate ? new Date(s.lastDate).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).replace(',', '') : '—';
+            else if (s.count === 0){ countColor = '#721c24'; countBg = '#f8d7da'; }
+
+            const lastDateStr = s.lastDate
+                ? new Date(s.lastDate).toLocaleString('en-GB', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', hour12: false
+                }).replace(',', '')
+                : '—';
+
             return `
                 <tr>
                     <td>${idx + 1}</td>
                     <td><strong>${escapeHtml(s.fullName || '—')}</strong></td>
-                    <td style="font-size:12px; color:var(--text-muted);">${escapeHtml(s.email || '—')}</td>
+                    <td style="font-size:12px; color:#6c7a8d;">${escapeHtml(s.email || '—')}</td>
                     <td><span style="background:${countBg}; color:${countColor}; padding:4px 14px; border-radius:20px; font-weight:700; font-size:14px;">${s.count}</span></td>
                     <td style="font-size:13px;">${s.lastTitle ? escapeHtml(s.lastTitle) : '—'}</td>
-                    <td style="font-size:12px; color:var(--text-muted);">${lastDateStr}</td>
+                    <td style="font-size:12px; color:#6c7a8d;">${lastDateStr}</td>
                     <td><span class="status-dot ${s.active ? 'active' : 'inactive'}"></span>${s.active ? 'نشط' : 'معطّل'}</td>
                 </tr>`;
         }).join('');
+
+        console.log('✅ إحصائيات الأساتذة:', stats.length, 'أستاذ،', activities.length, 'نشاط');
+
     } catch (error) {
         console.error('renderTeacherStats error:', error);
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--danger); padding:20px;"><i class="fas fa-exclamation-triangle"></i> تعذّر تحميل الإحصائيات: ${escapeHtml(error.message || 'خطأ غير معروف')}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#b22234; padding:20px;">
+            <i class="fas fa-exclamation-triangle"></i>
+            تعذّر تحميل الإحصائيات: ${escapeHtml(error.message || 'خطأ غير معروف')}
+        </td></tr>`;
     }
 }
 
 function subscribeRealtime() {
-    if (!sbMain || _realtimeChannel) return;
-    _realtimeChannel = sbMain.channel('activity_log_live')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_log' }, (payload) => {
-            _logCache.unshift(payload.new);
-            renderLog();
-            updateMonitorStats();
-            const actionLabelMap = { create: 'أضاف نشاطاً جديداً', update: 'عدّل نشاطاً', delete: 'حذف نشاطاً' };
-            const iconMap = { create: '🔔', update: '✏️', delete: '🗑️' };
-            const toastTypeMap = { create: 'success', update: 'info', delete: 'warning' };
-            const action = payload.new.action;
-            const titlePart = payload.new.activity_title ? (': "' + payload.new.activity_title + '"') : '';
-            showToast((iconMap[action] || '🔔') + ' ' + payload.new.teacher_name + ' ' + (actionLabelMap[action] || 'قام بعملية') + titlePart, toastTypeMap[action] || 'info', 4000);
-        })
-        .subscribe();
+    if (!fbDb || _realtimeChannel) return;
+
+    // الاستماع لجدول activity_log
+    _realtimeChannel = fbDb.collection('activity_log')
+        .orderBy('created_at', 'desc')
+        .limit(1)
+        .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === 'added') {
+                    const log = { id: change.doc.id, ...change.doc.data() };
+
+                    // تجاهل العناصر القديمة (عند التحميل الأول)
+                    const logTime = new Date(log.created_at).getTime();
+                    if (Date.now() - logTime > 10000) return;
+
+                    _logCache.unshift(log);
+                    renderLog();
+                    updateMonitorStats();
+
+                    // إشعار Toast
+                    const actionLabelMap = {
+                        create: 'أضاف نشاطاً جديداً',
+                        update: 'عدّل نشاطاً',
+                        delete: 'حذف نشاطاً'
+                    };
+                    const iconMap = { create: '🔔', update: '✏️', delete: '🗑️' };
+                    const toastTypeMap = { create: 'success', update: 'info', delete: 'warning' };
+                    const action = log.action;
+                    const titlePart = log.activity_title ? (': "' + log.activity_title + '"') : '';
+
+                    showToast(
+                        (iconMap[action] || '🔔') + ' ' +
+                        log.teacher_name + ' ' +
+                        (actionLabelMap[action] || 'قام بعملية') +
+                        titlePart,
+                        toastTypeMap[action] || 'info',
+                        4000
+                    );
+
+                    // إعادة تحميل الإحصائيات تلقائياً
+                    setTimeout(() => renderTeacherStats(), 500);
+                }
+            });
+        }, (error) => {
+            console.error('⚠️ Realtime error:', error);
+        });
 }
+
 </script>
 
 </body>
