@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ركن النقاش والمحادثة التربوية — درويش الهلالي</title>
+
+<meta name="theme-color" content="#1a3d6e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ركن النقاش">
+<meta name="application-name" content="ركن النقاش">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="msapplication-TileColor" content="#1a3d6e">
+<meta name="description" content="ركن المحادثة الجماعية والمناقشات التربوية ودفتر الملاحظات للأساتذة - المقاطعة الثانية قسنطينة">
+<meta name="author" content="درويش الهلالي">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBdv2RJ7EzlnVQcXyyozlLhVKdgwaKQdaY",
+        authDomain: "mou3ladja.firebaseapp.com",
+        projectId: "mou3ladja",
+        storageBucket: "mou3ladja.firebasestorage.app",
+        messagingSenderId: "986880549463",
+        appId: "1:986880549463:web:b4de098099622040bfb912",
+        measurementId: "G-E0BZPDCZB9"
+    };
+    let fbAuth = null, fbDb = null;
+    try {
+        if (typeof firebase !== 'undefined') {
+            firebase.initializeApp(firebaseConfig);
+            fbAuth = firebase.auth();
+            fbDb = firebase.firestore();
+        }
+    } catch (e) { console.error('⚠️ Firebase:', e); }
+</script>
+
+<style>
+/* ============================================================
+   الجذور والثوابت — مطابقة لمنصة المعالجة البيداغوجية
+   ============================================================ */
+:root {
+    --primary: #1a3d6e;
+    --primary-light: #eef3f9;
+    --navy-deep: #0f2340;
+    --gold: #c49b3f;
+    --gold-deep: #a6802f;
+    --gold-light: #f5e6c8;
+    --danger: #b22234;
+    --success: #1e7e34;
+    --warning: #b38b2b;
+    --info: #17a2b8;
+    --teal: #167c80;
+    --teal-dark: #0f6469;
+    --text-dark: #17324d;
+    --text-muted: #5d7182;
+    --bg-body: #f0f4f8;
+    --bg-card: #ffffff;
+    --border-color: #d8e4df;
+    --radius: 14px;
+    --shadow: 0 8px 30px rgba(0,0,0,0.08);
+    --transition: all 0.25s ease;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
+    background: var(--bg-body);
+    color: var(--text-dark);
+    line-height: 1.8;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* شريط المستخدم */
+.user-bar {
+    background: var(--navy-deep); color: #eaf1f8;
+    padding: 10px 24px; display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; flex-wrap: wrap; gap: 8px;
+}
+.user-bar a, .user-bar button {
+    color: #dbe6f0; text-decoration: none; background: none;
+    border: 1px solid rgba(255,255,255,0.25); font-family: inherit;
+    font-size: 12.5px; padding: 6px 14px; border-radius: 20px;
+    cursor: pointer; transition: var(--transition);
+}
+.user-bar a:hover, .user-bar button:hover { background: rgba(255,255,255,0.1); }
+.user-bar .who { font-weight: 700; color: var(--gold-light); }
+
+/* الترويسة */
+.hero {
+    background: linear-gradient(150deg, var(--navy-deep) 0%, var(--primary) 100%);
+    color: #fff; padding: 34px 24px; text-align: center; position: relative; overflow: hidden;
+}
+.hero::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 90% -10%, rgba(196,155,63,0.35), transparent 55%);
+    pointer-events: none;
+}
+.hero h1 {
+    font-family: 'Amiri', serif; font-size: clamp(22px, 4vw, 30px); margin-bottom: 8px; position: relative;
+}
+.hero h1 i { color: var(--gold-light); }
+.hero p { color: #cfdcea; font-size: 13.5px; max-width: 800px; margin: 0 auto; position: relative; }
+
+/* التبويبات */
+.nav-tabs {
+    display: flex; gap: 6px; background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color); padding: 8px 20px;
+    position: sticky; top: 0; z-index: 20;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    overflow-x: auto; flex-wrap: wrap; margin: 0; justify-content: center;
+}
+.nav-tabs::-webkit-scrollbar { height: 4px; }
+.nav-tabs::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+.nav-tab {
+    padding: 10px 16px; cursor: pointer; font-size: 13.5px; font-weight: 700;
+    color: var(--text-muted); border-bottom: 3px solid transparent; transition: var(--transition);
+    display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+    border-radius: 10px; background: transparent; user-select: none;
+}
+.nav-tab:hover { color: var(--primary); background: var(--primary-light); }
+.nav-tab.active { color: var(--primary); border-bottom-color: var(--gold); background: var(--primary-light); }
+.nav-tab .tab-badge {
+    background: var(--danger); color: #fff; font-size: 10.5px; font-weight: 700;
+    border-radius: 999px; padding: 1px 7px; margin-inline-start: 2px;
+}
+
+.tab-content { display: none; max-width: 1100px; margin: 0 auto; padding: 26px 20px 60px; }
+.tab-content.active { display: block; animation: fadeIn 0.25s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* الأزرار */
+.btn {
+    display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px;
+    border-radius: 10px; border: none; font-family: inherit; font-size: 13.5px;
+    font-weight: 700; cursor: pointer; transition: var(--transition);
+    text-decoration: none; color: #fff; background: var(--primary);
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(26,61,110,0.2); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--navy-deep); }
+.btn-gold { background: var(--gold); color: #fff; }
+.btn-gold:hover { background: var(--gold-deep); }
+.btn-outline { background: #fff; border: 1.5px solid var(--border-color); color: var(--text-dark); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); background: #fff; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: #8f1a29; }
+.btn-success { background: var(--success); color: #fff; }
+.btn-teal { background: var(--teal); color: #fff; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+/* النوافذ المنبثقة */
+.modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(15,35,64,0.55);
+    z-index: 100; align-items: flex-start; justify-content: center;
+    padding: 30px 16px; overflow-y: auto;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+    background: #fff; border-radius: var(--radius); padding: 30px;
+    max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin-bottom: 30px;
+    position: relative; animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+.modal-box h3 {
+    color: var(--primary); margin-bottom: 18px; padding-bottom: 10px;
+    border-bottom: 2px solid var(--gold); display: flex; align-items: center; gap: 8px;
+}
+.modal-close {
+    position: absolute; top: 15px; left: 20px; font-size: 24px; cursor: pointer;
+    color: var(--text-muted); background: none; border: none; transition: var(--transition);
+    width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: var(--danger); background: var(--primary-light); transform: rotate(90deg); }
+
+/* حقول النماذج */
+.field-group { margin-bottom: 14px; }
+.field-group label { display: block; width: 100%; font-weight: 700; color: var(--primary); font-size: 13.5px; margin-bottom: 6px; }
+.field-group input, .field-group textarea, .field-group select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px;
+    font-size: 13.5px; font-family: inherit; color: var(--text-dark); background: #fff;
+}
+.field-group textarea { min-height: 90px; resize: vertical; line-height: 1.7; }
+.field-group input:focus, .field-group textarea:focus, .field-group select:focus {
+    outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(196,155,63,0.15);
+}
+
+/* حالة فارغة */
+.empty-state { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+.empty-state i { font-size: 40px; color: var(--border-color); margin-bottom: 14px; display: block; }
+
+/* ============================================================
+   المحادثة الجماعية
+   ============================================================ */
+.chat-wrap {
+    background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow);
+    border: 1px solid var(--border-color); overflow: hidden;
+    display: flex; flex-direction: column; height: 65vh; min-height: 420px;
+}
+.chat-feed { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.chat-feed::-webkit-scrollbar { width: 6px; }
+.chat-feed::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+.chat-bubble { max-width: 78%; padding: 10px 14px; border-radius: 14px; position: relative; }
+.chat-bubble.mine {
+    align-self: flex-start; background: var(--primary-light); border: 1px solid #cfe0f0;
+    border-bottom-right-radius: 4px;
+}
+.chat-bubble.theirs {
+    align-self: flex-end; background: var(--gold-light); border: 1px solid #ecdcae;
+    border-bottom-left-radius: 4px;
+}
+.chat-bubble .cb-head { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+.chat-bubble.theirs .cb-head { color: var(--gold-deep); }
+.chat-bubble .cb-role {
+    font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px; color: #fff; background: var(--teal);
+}
+.chat-bubble .cb-text { font-size: 14px; color: var(--text-dark); white-space: pre-wrap; word-break: break-word; }
+.chat-bubble .cb-time { font-size: 10.5px; color: var(--text-muted); margin-top: 4px; text-align: left; }
+.chat-input-row {
+    display: flex; gap: 10px; padding: 14px; border-top: 1px solid var(--border-color); background: #fafcff;
+}
+.chat-input-row textarea {
+    flex: 1; resize: none; min-height: 44px; max-height: 120px; padding: 10px 14px;
+    border: 1px solid var(--border-color); border-radius: 22px; font-family: inherit;
+    font-size: 14px; line-height: 1.6;
+}
+.chat-input-row textarea:focus { outline: none; border-color: var(--gold); }
+.chat-input-row button {
+    width: 46px; height: 46px; border-radius: 50%; border: none; background: var(--primary);
+    color: #fff; font-size: 16px; cursor: pointer; flex-shrink: 0; transition: var(--transition);
+}
+.chat-input-row button:hover { background: var(--navy-deep); transform: scale(1.05); }
+.chat-hint { padding: 6px 18px; font-size: 11.5px; color: var(--text-muted); background: #fafcff; text-align: center; }
+
+/* ============================================================
+   المناقشات التربوية
+   ============================================================ */
+.section-toolbar {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    flex-wrap: wrap; margin-bottom: 18px;
+}
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-chip {
+    padding: 6px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 700;
+    background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted);
+    cursor: pointer; transition: var(--transition);
+}
+.filter-chip:hover { border-color: var(--gold); }
+.filter-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.thread-list { display: flex; flex-direction: column; gap: 12px; }
+.thread-card {
+    background: var(--bg-card); border: 1px solid var(--border-color); border-right: 4px solid var(--teal);
+    border-radius: var(--radius); padding: 16px 18px; cursor: pointer; transition: var(--transition);
+    box-shadow: var(--shadow);
+}
+.thread-card:hover { transform: translateY(-2px); border-right-color: var(--gold); }
+.thread-card .tc-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+.thread-card h4 { font-size: 15.5px; color: var(--text-dark); }
+.thread-cat {
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+    background: var(--primary-light); color: var(--primary); white-space: nowrap; flex-shrink: 0;
+}
+.thread-card p { font-size: 13px; color: var(--text-muted); margin: 6px 0; overflow: hidden; text-overflow: ellipsis;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.thread-meta { display: flex; gap: 14px; font-size: 11.5px; color: var(--text-muted); flex-wrap: wrap; margin-top: 8px; }
+.thread-meta span { display: flex; align-items: center; gap: 5px; }
+.thread-meta i { color: var(--gold); }
+
+.thread-detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.reply-list { display: flex; flex-direction: column; gap: 12px; margin: 18px 0; max-height: 45vh; overflow-y: auto; padding-inline-end: 4px; }
+.reply-item { background: var(--bg-body); border-radius: 10px; padding: 12px 14px; border: 1px solid var(--border-color); }
+.reply-item .ri-head { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+.reply-item .ri-time { font-size: 11px; color: var(--text-muted); font-weight: 400; margin-inline-start: auto; }
+.reply-item p { font-size: 13.5px; color: var(--text-dark); white-space: pre-wrap; }
+
+/* ============================================================
+   دفتر الملاحظات
+   ============================================================ */
+.notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.note-card {
+    background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius);
+    padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px;
+    border-top: 4px solid var(--tag-color, var(--gold));
+}
+.note-card .nc-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.note-card h4 { font-size: 14.5px; color: var(--text-dark); }
+.note-tag {
+    font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; color: #fff;
+    background: var(--tag-color, var(--gold)); white-space: nowrap;
+}
+.note-card p { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; flex: 1;
+    overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
+.note-card .nc-foot { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); border-top: 1px dashed var(--border-color); padding-top: 8px; }
+.note-card .nc-actions { display: flex; gap: 6px; }
+.note-card .nc-actions button { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 13px; transition: var(--transition); }
+.note-card .nc-actions button:hover { color: var(--primary); }
+.note-card .nc-actions button.del:hover { color: var(--danger); }
+.search-box { position: relative; flex: 1; min-width: 200px; }
+.search-box input { width: 100%; padding: 10px 14px 10px 38px; border: 1px solid var(--border-color); border-radius: 20px; font-family: inherit; font-size: 13px; }
+.search-box i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+/* Footer */
+.app-footer {
+    margin-top: 40px; padding: 20px 30px;
+    background: linear-gradient(145deg, #f8faff, #eef3f9);
+    border-top: 4px solid var(--gold); border-radius: var(--radius); text-align: center;
+}
+.app-footer .footer-content { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 15px 40px; }
+.app-footer .footer-content span { font-size: 13.5px; color: var(--text-muted); }
+.app-footer .footer-content .brand { font-size: 15px; font-weight: 700; color: var(--primary); }
+.app-footer .footer-content .brand i { color: var(--gold); margin-left: 8px; }
+.app-footer .footer-content i { color: var(--gold); margin-left: 6px; }
+.app-footer .footer-bottom { margin-top: 8px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 10px; }
+
+/* Toast + spinner */
+.spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(26,61,110,0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#ssoLoadingScreen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+#ssoLoadingScreen .who { font-size: 13.5px; color: var(--text-muted); }
+
+.hidden { display: none !important; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    body { padding: 0; }
+    .user-bar { padding: 8px 12px; font-size: 12px; }
+    .hero { padding: 24px 16px; }
+    .hero h1 { font-size: 19px; }
+    .nav-tabs { padding: 0 8px; justify-content: flex-start; }
+    .nav-tab { padding: 10px 12px; font-size: 12.5px; }
+    .tab-content { padding: 16px 12px 40px; }
+    .modal-box { padding: 20px 15px; border-radius: 15px; }
+    .chat-wrap { height: 72vh; }
+    .chat-bubble { max-width: 90%; }
+    .field-group label { width: 100%; }
+    .notes-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="ssoLoadingScreen">
+    <div class="spinner"></div>
+    <div class="who">جارٍ التحقق من الدخول...</div>
+</div>
+
+<div id="appScreen" class="hidden">
+
+    <div class="user-bar">
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <a href="index.html"><i class="fas fa-arrow-right"></i> البوابة</a>
+            <span>مرحباً، <span class="who" id="userNameLabel"></span></span>
+        </div>
+        <button onclick="handleLogout()"><i class="fas fa-arrow-right-from-bracket"></i> تسجيل الخروج</button>
+    </div>
+
+    <div class="hero">
+        <h1><i class="fas fa-comments"></i> ركن النقاش والمحادثة التربوية</h1>
+        <p>فضاء تفاعلي جماعي للأساتذة: محادثة حيّة، مناقشات تربوية حول الممارسات الصفية، ودفتر شخصي لتدوين الملاحظات والأفكار.</p>
+    </div>
+
+    <div class="nav-tabs">
+        <div class="nav-tab active" data-tab="chat"><i class="fas fa-comment-dots"></i> المحادثة الجماعية</div>
+        <div class="nav-tab" data-tab="discuss"><i class="fas fa-people-group"></i> المناقشات التربوية</div>
+        <div class="nav-tab" data-tab="notes"><i class="fas fa-note-sticky"></i> دفتر ملاحظاتي</div>
+    </div>
+
+    <!-- ============ المحادثة الجماعية ============ -->
+    <div class="tab-content active" id="panel-chat">
+        <div class="chat-wrap">
+            <div class="chat-feed" id="chatFeed"></div>
+            <div class="chat-hint"><i class="fas fa-circle-info"></i> هذه المحادثة مشتركة بين جميع الأساتذة والمفتش — يرجى الالتزام بأدب النقاش المهني.</div>
+            <div class="chat-input-row">
+                <textarea id="chatInput" placeholder="اكتب رسالتك هنا... (Enter للإرسال، Shift+Enter لسطر جديد)" rows="1"></textarea>
+                <button onclick="sendChatMessage()" title="إرسال"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ المناقشات التربوية ============ -->
+    <div class="tab-content" id="panel-discuss">
+        <div class="section-toolbar">
+            <div class="filter-chips" id="discussFilters">
+                <div class="filter-chip active" data-cat="الكل">الكل</div>
+                <div class="filter-chip" data-cat="اللغة العربية">اللغة العربية</div>
+                <div class="filter-chip" data-cat="الرياضيات">الرياضيات</div>
+                <div class="filter-chip" data-cat="التربية الإسلامية">التربية الإسلامية</div>
+                <div class="filter-chip" data-cat="تسيير الصف">تسيير الصف</div>
+                <div class="filter-chip" data-cat="عام">عام</div>
+            </div>
+            <button class="btn btn-gold" onclick="openNewThreadModal()"><i class="fas fa-plus"></i> موضوع نقاش جديد</button>
+        </div>
+        <div class="thread-list" id="threadList"></div>
+    </div>
+
+    <!-- ============ دفتر الملاحظات ============ -->
+    <div class="tab-content" id="panel-notes">
+        <div class="section-toolbar">
+            <div class="search-box">
+                <i class="fas fa-magnifying-glass"></i>
+                <input type="text" id="notesSearch" placeholder="ابحث في ملاحظاتك..." oninput="renderNotes()">
+            </div>
+            <button class="btn btn-primary" onclick="openNewNoteModal()"><i class="fas fa-plus"></i> ملاحظة جديدة</button>
+        </div>
+        <div class="notes-grid" id="notesGrid"></div>
+    </div>
+
+    <!-- ============ تذييل الصفحة ============ -->
+    <div style="max-width:1100px; margin:0 auto; padding:0 20px;">
+        <div class="app-footer">
+            <div class="footer-content">
+                <span class="brand"><i class="fas fa-comments"></i> ركن النقاش والمحادثة التربوية</span>
+                <span><i class="fas fa-user-tie"></i> درويش الهلالي - مفتش مادة اللغة العربية والتربية الإسلامية</span>
+                <span><i class="fas fa-envelope"></i> dlazedine68@gmail.com</span>
+                <span><i class="fas fa-phone-alt"></i> 0779353736</span>
+            </div>
+            <div class="footer-bottom">
+                <i class="fas fa-shield-alt"></i> جزء من بوابة الأدوات الرقمية للممارسة المهنية — © 2026
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ============ نافذة موضوع نقاش جديد ============ -->
+<div class="modal-overlay" id="threadModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeModal('threadModal')"><i class="fas fa-times"></i></button>
+        <h3><i class="fas fa-plus-circle"></i> موضوع نقاش جديد</h3>
+        <div class="field-group">
+            <label>عنوان الموضوع</label>
+            <input type="text" id="newThreadTitle" placeholder="مثال: كيف تتعاملون مع صعوبات القراءة في السنة الثانية؟">
+        </div>
+        <div class="field-group">
+            <label>التصنيف</label>
+            <select id="newThreadCat">
+                <option>اللغة العربية</option>
+                <option>الرياضيات</option>
+                <option>التربية الإسلامية</option>
+                <option>تسيير الصف</option>
+                <option>عام</option>
+            </select>
+        </div>
+        <div class="field-group">
+            <label>تفاصيل الموضوع</label>
+            <textarea id="newThreadBody" placeholder="اشرح فكرتك أو استفسارك بالتفصيل..."></textarea>
+        </div>
+        <button class="btn btn-gold" onclick="createThread()"><i class="fas fa-paper-plane"></i> نشر الموضوع</button>
+    </div>
+</div>
+
+<!-- ============ نافذة تفاصيل الموضوع ============ -->
+<div class="modal-overlay" id="threadDetailModal">
+    <div class="modal-box" style="max-width:800px;">
+        <button class="modal-close" onclick="closeModal('threadDetailModal')"><i class="fas fa-times"></i></button>
+        <div id="threadDetailContent"></div>
+    </div>
+</div>
+
+<!-- ============ نافذة ملاحظة جديدة / تعديل ============ -->
+<div class="modal-overlay" id="noteModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeModal('noteModal')"><i class="fas fa-times"></i></button>
+        <h3><i class="fas fa-note-sticky"></i> <span id="noteModalTitle">ملاحظة جديدة</span></h3>
+        <input type="hidden" id="editNoteId">
+        <div class="field-group">
+            <label>العنوان</label>
+            <input type="text" id="noteTitle" placeholder="عنوان مختصر للملاحظة">
+        </div>
+        <div class="field-group">
+            <label>التصنيف</label>
+            <select id="noteTag">
+                <option value="تحضير">تحضير</option>
+                <option value="تقييم">تقييم</option>
+                <option value="ملاحظة صف">ملاحظة صف</option>
+                <option value="فكرة">فكرة</option>
+                <option value="تذكير">تذكير</option>
+            </select>
+        </div>
+        <div class="field-group">
+            <label>المحتوى</label>
+            <textarea id="noteContent" style="min-height:140px;" placeholder="دوّن ملاحظتك هنا..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="saveNote()"><i class="fas fa-save"></i> حفظ الملاحظة</button>
+    </div>
+</div>
+
+<script>
+/* ============================================================
+   1. الثوابت والجلسة (SSO موحّد مع بقية المنصة)
+   ============================================================ */
+const SESSION_KEY = 'pgb_session';
+let currentUser = null;
+let cloudReady = false;
+let chatData = { messages: [] };
+let discussData = { threads: [] };
+let notesData = { notes: [] };
+let activeThreadId = null;
+let activeDiscussFilter = 'الكل';
+let unsubChat = null, unsubDiscuss = null, unsubNotes = null;
+
+function getPortalSession() {
+    try {
+        const raw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY + '_persistent');
+        if (!raw) return null;
+        const session = JSON.parse(raw);
+        if (!session || Date.now() > session.expiresAt) return null;
+        return session.user || null;
+    } catch (e) { return null; }
+}
+function handleLogout() {
+    if (!confirm('هل تريد تسجيل الخروج؟')) return;
+    try { sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem(SESSION_KEY + '_persistent'); } catch (e) {}
+    window.location.href = 'index.html';
+}
+
+/* ============================================================
+   2. أدوات عامة
+   ============================================================ */
+function generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function escapeHtml(t) { const d = document.createElement('div'); d.innerText = (t || ''); return d.innerHTML; }
+function timeAgo(ts) {
+    const diff = Math.floor((Date.now() - ts) / 1000);
+    if (diff < 60) return 'الآن';
+    if (diff < 3600) return `منذ ${Math.floor(diff/60)} د`;
+    if (diff < 86400) return `منذ ${Math.floor(diff/3600)} س`;
+    if (diff < 604800) return `منذ ${Math.floor(diff/86400)} يوم`;
+    return new Date(ts).toLocaleDateString('ar-DZ', { year:'numeric', month:'2-digit', day:'2-digit' });
+}
+function fullDateTime(ts) {
+    const d = new Date(ts);
+    return d.toLocaleDateString('ar-DZ', { year:'numeric', month:'2-digit', day:'2-digit' }) + ' ' +
+           d.toLocaleTimeString('ar-DZ', { hour:'2-digit', minute:'2-digit' });
+}
+function roleLabel(role) { return role === 'inspector' ? 'مفتش' : 'أستاذ(ة)'; }
+const TAG_COLORS = { 'تحضير':'#1a3d6e', 'تقييم':'#b38b2b', 'ملاحظة صف':'#167c80', 'فكرة':'#c49b3f', 'تذكير':'#b22234' };
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+/* ============================================================
+   3. Firebase: مصادقة ومزامنة سحابية
+   ============================================================ */
+function ensureAnonAuth() {
+    if (!fbAuth) return Promise.resolve(null);
+    const p = new Promise((resolve) => {
+        if (fbAuth.currentUser) { resolve(fbAuth.currentUser); return; }
+        fbAuth.signInAnonymously().catch(() => {});
+        const unsub = fbAuth.onAuthStateChanged((user) => { if (user) { unsub(); resolve(user); } });
+    });
+    return Promise.race([p, new Promise(r => setTimeout(() => r(null), 8000))]);
+}
+function docRef(name) {
+    if (!fbDb) return null;
+    try { return fbDb.collection('platform_shared').doc(name); } catch (e) { return null; }
+}
+function listenChat() {
+    const ref = docRef('discussion_chat');
+    if (!ref) { cloudReady = true; return; }
+    unsubChat = ref.onSnapshot((doc) => {
+        chatData = (doc.exists && doc.data()) ? doc.data() : { messages: [] };
+        if (!Array.isArray(chatData.messages)) chatData.messages = [];
+        renderChat();
+    }, (err) => console.error('chat sync:', err));
+}
+function listenDiscuss() {
+    const ref = docRef('discussion_threads');
+    if (!ref) return;
+    unsubDiscuss = ref.onSnapshot((doc) => {
+        discussData = (doc.exists && doc.data()) ? doc.data() : { threads: [] };
+        if (!Array.isArray(discussData.threads)) discussData.threads = [];
+        renderThreads();
+        if (activeThreadId) renderThreadDetail(activeThreadId);
+    }, (err) => console.error('discuss sync:', err));
+}
+function listenNotes() {
+    const ref = docRef('teacher_notes');
+    if (!ref) return;
+    unsubNotes = ref.onSnapshot((doc) => {
+        notesData = (doc.exists && doc.data()) ? doc.data() : { notes: [] };
+        if (!Array.isArray(notesData.notes)) notesData.notes = [];
+        renderNotes();
+    }, (err) => console.error('notes sync:', err));
+}
+async function saveChat() {
+    const ref = docRef('discussion_chat');
+    if (!ref) { alert('⚠️ الخدمة السحابية غير متاحة حالياً'); return false; }
+    try {
+        if (chatData.messages.length > 200) chatData.messages = chatData.messages.slice(-200);
+        await ref.set({ messages: chatData.messages, updatedAt: new Date().toISOString() });
+        return true;
+    } catch (e) { console.error(e); alert('⚠️ تعذّر الإرسال — تحقق من الاتصال'); return false; }
+}
+async function saveDiscuss() {
+    const ref = docRef('discussion_threads');
+    if (!ref) { alert('⚠️ الخدمة السحابية غير متاحة حالياً'); return false; }
+    try {
+        await ref.set({ threads: discussData.threads, updatedAt: new Date().toISOString() });
+        return true;
+    } catch (e) { console.error(e); alert('⚠️ تعذّر الحفظ — تحقق من الاتصال'); return false; }
+}
+async function saveNotes() {
+    const ref = docRef('teacher_notes');
+    if (!ref) { alert('⚠️ الخدمة السحابية غير متاحة حالياً'); return false; }
+    try {
+        await ref.set({ notes: notesData.notes, updatedAt: new Date().toISOString() });
+        return true;
+    } catch (e) { console.error(e); alert('⚠️ تعذّر الحفظ — تحقق من الاتصال'); return false; }
+}
+
+/* ============================================================
+   4. المحادثة الجماعية
+   ============================================================ */
+function renderChat() {
+    const feed = document.getElementById('chatFeed');
+    if (!chatData.messages.length) {
+        feed.innerHTML = `<div class="empty-state"><i class="fas fa-comment-slash"></i>لا توجد رسائل بعد — كن أول من يبدأ النقاش!</div>`;
+        return;
+    }
+    const wasNearBottom = (feed.scrollTop + feed.clientHeight) >= (feed.scrollHeight - 60);
+    feed.innerHTML = chatData.messages.map(m => {
+        const mine = currentUser && m.authorId === currentUser.id;
+        return `
+        <div class="chat-bubble ${mine ? 'mine' : 'theirs'}">
+            <div class="cb-head">${escapeHtml(m.authorName)} <span class="cb-role">${roleLabel(m.authorRole)}</span></div>
+            <div class="cb-text">${escapeHtml(m.text)}</div>
+            <div class="cb-time">${fullDateTime(m.createdAt)}</div>
+        </div>`;
+    }).join('');
+    if (wasNearBottom || feed.dataset.firstRender !== '1') {
+        feed.scrollTop = feed.scrollHeight;
+        feed.dataset.firstRender = '1';
+    }
+}
+async function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text || !currentUser) return;
+    chatData.messages.push({
+        id: generateId(), text,
+        authorId: currentUser.id, authorName: currentUser.fullName || currentUser.username,
+        authorRole: currentUser.role, createdAt: Date.now()
+    });
+    input.value = '';
+    input.style.height = 'auto';
+    renderChat();
+    await saveChat();
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('chatInput');
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+    });
+    input.addEventListener('input', () => {
+        input.style.height = 'auto';
+        input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+    });
+});
+
+/* ============================================================
+   5. المناقشات التربوية
+   ============================================================ */
+function openNewThreadModal() {
+    document.getElementById('newThreadTitle').value = '';
+    document.getElementById('newThreadBody').value = '';
+    document.getElementById('newThreadCat').value = 'اللغة العربية';
+    openModal('threadModal');
+}
+async function createThread() {
+    const title = document.getElementById('newThreadTitle').value.trim();
+    const body = document.getElementById('newThreadBody').value.trim();
+    const cat = document.getElementById('newThreadCat').value;
+    if (!title) { alert('يرجى كتابة عنوان للموضوع'); return; }
+    const thread = {
+        id: generateId(), title, body, category: cat,
+        authorId: currentUser.id, authorName: currentUser.fullName || currentUser.username,
+        authorRole: currentUser.role, createdAt: Date.now(), replies: []
+    };
+    discussData.threads.unshift(thread);
+    closeModal('threadModal');
+    renderThreads();
+    const ok = await saveDiscuss();
+    if (ok) { /* toast-free success */ }
+}
+function setDiscussFilter(cat) {
+    activeDiscussFilter = cat;
+    document.querySelectorAll('#discussFilters .filter-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.cat === cat);
+    });
+    renderThreads();
+}
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('discussFilters').addEventListener('click', (e) => {
+        const chip = e.target.closest('.filter-chip');
+        if (chip) setDiscussFilter(chip.dataset.cat);
+    });
+});
+function renderThreads() {
+    const list = document.getElementById('threadList');
+    let threads = discussData.threads.slice().sort((a,b) => b.createdAt - a.createdAt);
+    if (activeDiscussFilter !== 'الكل') threads = threads.filter(t => t.category === activeDiscussFilter);
+    if (!threads.length) {
+        list.innerHTML = `<div class="empty-state"><i class="fas fa-comments"></i>لا توجد مواضيع في هذا التصنيف بعد — ابدأ أول نقاش!</div>`;
+        return;
+    }
+    list.innerHTML = threads.map(t => `
+        <div class="thread-card" onclick="openThread('${t.id}')">
+            <div class="tc-top">
+                <h4>${escapeHtml(t.title)}</h4>
+                <span class="thread-cat">${escapeHtml(t.category)}</span>
+            </div>
+            <p>${escapeHtml(t.body || '')}</p>
+            <div class="thread-meta">
+                <span><i class="fas fa-user"></i> ${escapeHtml(t.authorName)}</span>
+                <span><i class="fas fa-clock"></i> ${timeAgo(t.createdAt)}</span>
+                <span><i class="fas fa-reply"></i> ${(t.replies||[]).length} رد</span>
+            </div>
+        </div>
+    `).join('');
+}
+function openThread(id) {
+    activeThreadId = id;
+    renderThreadDetail(id);
+    openModal('threadDetailModal');
+}
+function renderThreadDetail(id) {
+    const t = discussData.threads.find(x => x.id === id);
+    const box = document.getElementById('threadDetailContent');
+    if (!t) { box.innerHTML = `<div class="empty-state"><i class="fas fa-circle-exclamation"></i>تعذّر العثور على الموضوع.</div>`; return; }
+    const replies = (t.replies || []).slice().sort((a,b) => a.createdAt - b.createdAt);
+    box.innerHTML = `
+        <div class="thread-detail-head">
+            <h3 style="border:none; padding:0; margin:0;"><i class="fas fa-comments"></i> ${escapeHtml(t.title)}</h3>
+            <span class="thread-cat">${escapeHtml(t.category)}</span>
+        </div>
+        <div class="thread-meta" style="margin-bottom:14px;">
+            <span><i class="fas fa-user"></i> ${escapeHtml(t.authorName)} (${roleLabel(t.authorRole)})</span>
+            <span><i class="fas fa-clock"></i> ${fullDateTime(t.createdAt)}</span>
+        </div>
+        <p style="font-size:14px; line-height:1.8; color:var(--text-dark); background:var(--bg-body); padding:12px 14px; border-radius:10px;">${escapeHtml(t.body || '')}</p>
+        <h4 style="margin-top:20px; font-size:14px; color:var(--primary);"><i class="fas fa-reply-all"></i> الردود (${replies.length})</h4>
+        <div class="reply-list">
+            ${replies.length ? replies.map(r => `
+                <div class="reply-item">
+                    <div class="ri-head"><i class="fas fa-user-circle"></i> ${escapeHtml(r.authorName)} <span style="font-weight:400; color:var(--text-muted);">· ${roleLabel(r.authorRole)}</span><span class="ri-time">${timeAgo(r.createdAt)}</span></div>
+                    <p>${escapeHtml(r.text)}</p>
+                </div>
+            `).join('') : `<div class="empty-state" style="padding:20px;"><i class="fas fa-reply"></i>لا توجد ردود بعد — كن أول من يرد.</div>`}
+        </div>
+        <div class="field-group" style="margin-top:10px;">
+            <textarea id="replyText" placeholder="اكتب ردك هنا..." style="min-height:70px;"></textarea>
+        </div>
+        <button class="btn btn-teal" onclick="addReply('${t.id}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button>
+    `;
+}
+async function addReply(threadId) {
+    const ta = document.getElementById('replyText');
+    const text = ta.value.trim();
+    if (!text) return;
+    const t = discussData.threads.find(x => x.id === threadId);
+    if (!t) return;
+    if (!Array.isArray(t.replies)) t.replies = [];
+    t.replies.push({
+        id: generateId(), text, authorId: currentUser.id,
+        authorName: currentUser.fullName || currentUser.username,
+        authorRole: currentUser.role, createdAt: Date.now()
+    });
+    renderThreadDetail(threadId);
+    renderThreads();
+    await saveDiscuss();
+}
+
+/* ============================================================
+   6. دفتر ملاحظاتي (خاص بكل أستاذ)
+   ============================================================ */
+function myNotes() {
+    if (!currentUser) return [];
+    return notesData.notes.filter(n => n.authorId === currentUser.id);
+}
+function openNewNoteModal() {
+    document.getElementById('noteModalTitle').textContent = 'ملاحظة جديدة';
+    document.getElementById('editNoteId').value = '';
+    document.getElementById('noteTitle').value = '';
+    document.getElementById('noteTag').value = 'تحضير';
+    document.getElementById('noteContent').value = '';
+    openModal('noteModal');
+}
+function editNote(id) {
+    const n = notesData.notes.find(x => x.id === id);
+    if (!n) return;
+    document.getElementById('noteModalTitle').textContent = 'تعديل الملاحظة';
+    document.getElementById('editNoteId').value = n.id;
+    document.getElementById('noteTitle').value = n.title;
+    document.getElementById('noteTag').value = n.tag;
+    document.getElementById('noteContent').value = n.content;
+    openModal('noteModal');
+}
+async function saveNote() {
+    const id = document.getElementById('editNoteId').value;
+    const title = document.getElementById('noteTitle').value.trim();
+    const tag = document.getElementById('noteTag').value;
+    const content = document.getElementById('noteContent').value.trim();
+    if (!title) { alert('يرجى كتابة عنوان للملاحظة'); return; }
+    if (id) {
+        const n = notesData.notes.find(x => x.id === id);
+        if (n) { n.title = title; n.tag = tag; n.content = content; n.updatedAt = Date.now(); }
+    } else {
+        notesData.notes.unshift({
+            id: generateId(), title, tag, content,
+            authorId: currentUser.id, authorName: currentUser.fullName || currentUser.username,
+            createdAt: Date.now(), updatedAt: Date.now()
+        });
+    }
+    closeModal('noteModal');
+    renderNotes();
+    await saveNotes();
+}
+async function deleteNote(id) {
+    if (!confirm('هل تريد حذف هذه الملاحظة نهائياً؟')) return;
+    notesData.notes = notesData.notes.filter(n => n.id !== id);
+    renderNotes();
+    await saveNotes();
+}
+function renderNotes() {
+    const grid = document.getElementById('notesGrid');
+    const q = (document.getElementById('notesSearch').value || '').trim().toLowerCase();
+    let list = myNotes().sort((a,b) => (b.updatedAt||b.createdAt) - (a.updatedAt||a.createdAt));
+    if (q) list = list.filter(n => (n.title + ' ' + n.content).toLowerCase().includes(q));
+    if (!list.length) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-note-sticky"></i>دفترك فارغ بعد — أضف ملاحظتك الأولى.</div>`;
+        return;
+    }
+    grid.innerHTML = list.map(n => `
+        <div class="note-card" style="--tag-color:${TAG_COLORS[n.tag] || 'var(--gold)'}">
+            <div class="nc-top">
+                <h4>${escapeHtml(n.title)}</h4>
+                <span class="note-tag">${escapeHtml(n.tag)}</span>
+            </div>
+            <p>${escapeHtml(n.content)}</p>
+            <div class="nc-foot">
+                <span><i class="fas fa-clock"></i> ${timeAgo(n.updatedAt || n.createdAt)}</span>
+                <div class="nc-actions">
+                    <button onclick="editNote('${n.id}')" title="تعديل"><i class="fas fa-pen"></i></button>
+                    <button class="del" onclick="deleteNote('${n.id}')" title="حذف"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+/* ============================================================
+   7. التبويبات + الإقلاع
+   ============================================================ */
+function setupMainTabs() {
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const portalUser = getPortalSession();
+    if (!portalUser) { window.location.href = 'index.html'; return; }
+    currentUser = portalUser;
+    document.getElementById('userNameLabel').textContent = currentUser.fullName || currentUser.username || '';
+
+    document.getElementById('ssoLoadingScreen').style.display = 'none';
+    document.getElementById('appScreen').classList.remove('hidden');
+
+    setupMainTabs();
+    renderChat();
+    renderThreads();
+    renderNotes();
+
+    await ensureAnonAuth();
+    listenChat();
+    listenDiscuss();
+    listenNotes();
+});
+</script>
+
+</body>
+</html>
