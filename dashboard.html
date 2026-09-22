@@ -14,32 +14,16 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBdv2RJ7EzlnVQcXyyozlLhVKdgwaKQdaY",
-        authDomain: "mou3ladja.firebaseapp.com",
-        projectId: "mou3ladja",
-        storageBucket: "mou3ladja.firebasestorage.app",
-        messagingSenderId: "986880549463",
-        appId: "1:986880549463:web:b4de098099622040bfb912",
-        measurementId: "G-E0BZPDCZB9"
-    };
-    let fbAuth = null, fbDb = null;
-    try {
-        if (typeof firebase !== 'undefined') {
-            firebase.initializeApp(firebaseConfig);
-            fbAuth = firebase.auth();
-            fbDb = firebase.firestore();
-        }
-    } catch (e) { console.error('⚠️ فشل الاتصال بـ Firebase:', e); }
+<!-- استدعاء مكتبة Supabase -->
+<script src="https://jsdelivr.net"></script>
 
-    const SUPABASE_URL = "https://yzxyttieobyblznaehcl.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u";
-    let sbMain = null;
-    try {
-        if (typeof window.supabase !== 'undefined') {
-            sbMain = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
-    } catch (e) { console.error('⚠️ فشل الاتصال بـ Supabase:', e); }
+<script>
+  // مفاتيح الاتصال بـ Supabase (تأكد من مطابقتها لما هو موجود لديك)
+  const SUPABASE_URL = 'https://yzxyttieobyblznaehcl.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u';
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+
 </script>
 
 <style>
@@ -734,138 +718,99 @@ function updateMonitorStats() {
 async function renderTeacherStats() {
     const tbody = document.getElementById('teacherStatsBody');
     if (!tbody) return;
-
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#99a; padding:20px;">' +
-                      '<i class="fas fa-spinner fa-spin"></i> جاري تحميل الإحصائيات...</td></tr>';
-
+    if (!sbMain) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--danger); padding:20px;">خدمة المراقبة غير متاحة</td></tr>'; return; }
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> جارٍ تحميل الإحصائيات...</td></tr>';
     try {
-        // 1. جلب قائمة المستخدمين من Firestore
         await listenToCloudUsers();
-        const users = getUsers().filter(u => u.role !== 'inspector');
+        const teachers = getUsers().filter(u => u.role !== 'inspector');
 
-        if (!users.length) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#99a; padding:20px;">' +
-                              'لا يوجد أساتذة مسجّلون بعد.</td></tr>';
+        const { data: activities, error: aErr } = await sbMain.from('activities').select('id, owner_id, title, created_at');
+        if (aErr) throw aErr;
+
+        if (teachers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">لا يوجد أساتذة مسجّلون بعد.</td></tr>';
             return;
         }
 
-        // 2. جلب جميع الأنشطة من Firestore
-        const activitiesSnap = await fbDb.collection('activities').get();
-        const activities = [];
-        activitiesSnap.forEach(doc => {
-            activities.push({ id: doc.id, ...doc.data() });
-        });
-
-        // 3. مطابقة كل أستاذ بأنشطته
-        const stats = users.map(teacher => {
-            // نطابق بـ id أو email (احتياطي)
-            const teacherActs = activities.filter(a =>
-                a.owner_id === teacher.id ||
-                (teacher.email && a.owner_email === teacher.email)
-            );
-
+        const stats = teachers.map(teacher => {
+            const teacherActs = (activities || []).filter(a => a.owner_id === teacher.id);
             let lastAct = null;
             if (teacherActs.length > 0) {
-                lastAct = [...teacherActs].sort((a, b) =>
-                    new Date(b.created_at || 0) - new Date(a.created_at || 0)
-                )[0];
+                lastAct = [...teacherActs].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
             }
-
-            return {
-                ...teacher,
-                count: teacherActs.length,
-                lastTitle: lastAct ? lastAct.title : null,
-                lastDate: lastAct ? lastAct.created_at : null
-            };
+            return { ...teacher, count: teacherActs.length, lastTitle: lastAct ? lastAct.title : null, lastDate: lastAct ? lastAct.created_at : null };
         });
-
         stats.sort((a, b) => b.count - a.count);
 
-        // 4. عرض النتائج
         tbody.innerHTML = stats.map((s, idx) => {
-            let countColor = '#6c7a8d';
-            let countBg = '#f1f4f9';
-            if (s.count >= 5)      { countColor = '#155724'; countBg = '#d4edda'; }
+            let countColor = '#6c7a8d', countBg = '#f1f4f9';
+            if (s.count >= 5) { countColor = '#155724'; countBg = '#d4edda'; }
             else if (s.count >= 2) { countColor = '#856404'; countBg = '#fff3cd'; }
-            else if (s.count === 0){ countColor = '#721c24'; countBg = '#f8d7da'; }
-
-            const lastDateStr = s.lastDate
-                ? new Date(s.lastDate).toLocaleString('en-GB', {
-                    year: 'numeric', month: '2-digit', day: '2-digit',
-                    hour: '2-digit', minute: '2-digit', hour12: false
-                }).replace(',', '')
-                : '—';
-
+            else if (s.count === 0) { countColor = '#721c24'; countBg = '#f8d7da'; }
+            const lastDateStr = s.lastDate ? new Date(s.lastDate).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).replace(',', '') : '—';
             return `
                 <tr>
                     <td>${idx + 1}</td>
                     <td><strong>${escapeHtml(s.fullName || '—')}</strong></td>
-                    <td style="font-size:12px; color:#6c7a8d;">${escapeHtml(s.email || '—')}</td>
+                    <td style="font-size:12px; color:var(--text-muted);">${escapeHtml(s.email || '—')}</td>
                     <td><span style="background:${countBg}; color:${countColor}; padding:4px 14px; border-radius:20px; font-weight:700; font-size:14px;">${s.count}</span></td>
                     <td style="font-size:13px;">${s.lastTitle ? escapeHtml(s.lastTitle) : '—'}</td>
-                    <td style="font-size:12px; color:#6c7a8d;">${lastDateStr}</td>
+                    <td style="font-size:12px; color:var(--text-muted);">${lastDateStr}</td>
                     <td><span class="status-dot ${s.active ? 'active' : 'inactive'}"></span>${s.active ? 'نشط' : 'معطّل'}</td>
                 </tr>`;
         }).join('');
-
-        console.log('✅ إحصائيات الأساتذة:', stats.length, 'أستاذ،', activities.length, 'نشاط');
-
     } catch (error) {
         console.error('renderTeacherStats error:', error);
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#b22234; padding:20px;">
-            <i class="fas fa-exclamation-triangle"></i>
-            تعذّر تحميل الإحصائيات: ${escapeHtml(error.message || 'خطأ غير معروف')}
-        </td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--danger); padding:20px;"><i class="fas fa-exclamation-triangle"></i> تعذّر تحميل الإحصائيات: ${escapeHtml(error.message || 'خطأ غير معروف')}</td></tr>`;
     }
 }
 
 function subscribeRealtime() {
-    if (!fbDb || _realtimeChannel) return;
+    if (!sbMain || _realtimeChannel) return;
+    _realtimeChannel = sbMain.channel('activity_log_live')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_log' }, (payload) => {
+            _logCache.unshift(payload.new);
+            renderLog();
+            updateMonitorStats();
+            const actionLabelMap = { create: 'أضاف نشاطاً جديداً', update: 'عدّل نشاطاً', delete: 'حذف نشاطاً' };
+            const iconMap = { create: '🔔', update: '✏️', delete: '🗑️' };
+            const toastTypeMap = { create: 'success', update: 'info', delete: 'warning' };
+            const action = payload.new.action;
+            const titlePart = payload.new.activity_title ? (': "' + payload.new.activity_title + '"') : '';
+            showToast((iconMap[action] || '🔔') + ' ' + payload.new.teacher_name + ' ' + (actionLabelMap[action] || 'قام بعملية') + titlePart, toastTypeMap[action] || 'info', 4000);
+        })
+        .subscribe();
+}
 
-    // الاستماع لجدول activity_log
-    _realtimeChannel = fbDb.collection('activity_log')
-        .orderBy('created_at', 'desc')
-        .limit(1)
-        .onSnapshot((snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === 'added') {
-                    const log = { id: change.doc.id, ...change.doc.data() };
-
-                    // تجاهل العناصر القديمة (عند التحميل الأول)
-                    const logTime = new Date(log.created_at).getTime();
-                    if (Date.now() - logTime > 10000) return;
-
-                    _logCache.unshift(log);
-                    renderLog();
-                    updateMonitorStats();
-
-                    // إشعار Toast
-                    const actionLabelMap = {
-                        create: 'أضاف نشاطاً جديداً',
-                        update: 'عدّل نشاطاً',
-                        delete: 'حذف نشاطاً'
-                    };
-                    const iconMap = { create: '🔔', update: '✏️', delete: '🗑️' };
-                    const toastTypeMap = { create: 'success', update: 'info', delete: 'warning' };
-                    const action = log.action;
-                    const titlePart = log.activity_title ? (': "' + log.activity_title + '"') : '';
-
-                    showToast(
-                        (iconMap[action] || '🔔') + ' ' +
-                        log.teacher_name + ' ' +
-                        (actionLabelMap[action] || 'قام بعملية') +
-                        titlePart,
-                        toastTypeMap[action] || 'info',
-                        4000
-                    );
-
-                    // إعادة تحميل الإحصائيات تلقائياً
-                    setTimeout(() => renderTeacherStats(), 500);
+// الدالة الجديدة لحفظ النشاط وسجل العمليات في Supabase مباشرة
+async function logActivityToSupabase(teacherName, email, activityTitle, level, subject) {
+    try {
+        // نقوم بإدراج البيانات في جدول الأنشطة الرئيسي بـ Supabase
+        const { data, error } = await supabase
+            .from('activities') // تأكد من اسم الجدول في قاعدة بياناتك
+            .insert([
+                { 
+                    teacher_name: teacherName,
+                    email: email,
+                    title: activityTitle,
+                    level: level,
+                    subject: subject,
+                    created_at: new Date().toISOString()
                 }
-            });
-        }, (error) => {
-            console.error('⚠️ Realtime error:', error);
-        });
+            ]);
+
+        if (error) throw error;
+
+        console.log("تم تسجيل النشاط بنجاح في Supabase!");
+        
+        // إذا كانت لوحة التحكم تحتاج تحديثاً فورياً
+        if (typeof refreshDashboardData === 'function') {
+            refreshDashboardData();
+        }
+
+    } catch (err) {
+        console.error("خطأ أثناء الكتابة في Supabase:", err.message);
+    }
 }
 
 </script>
