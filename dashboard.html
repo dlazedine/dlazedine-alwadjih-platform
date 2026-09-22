@@ -298,6 +298,23 @@ function ensureAnonAuth() {
     return Promise.race([p, t]);
 }
 
+// ⚡ إصلاح تقني: بعد توحيد الدخول عبر Firebase، لم تعد هناك جلسة Supabase Auth
+// حقيقية عند فتح لوحة التحكم — فتفشل قراءة activity_log / activities بصمت إن
+// كانت محمية بسياسات RLS تشترط "مستخدم موثّق". نُنشئ هنا جلسة Supabase مجهولة
+// موثّقة فعلياً قبل أي استعلام مراقبة، دون تغيير أي هوية أو بيانات.
+function ensureSupabaseSession() {
+    if (!sbMain) return Promise.resolve(null);
+    const attempt = sbMain.auth.getSession().then(({ data }) => {
+        if (data && data.session) return data.session;
+        return sbMain.auth.signInAnonymously().then(({ data: signInData, error }) => {
+            if (error) { console.error('⚠️ تعذّر إنشاء جلسة Supabase موثّقة (قد تفشل المراقبة):', error); return null; }
+            return signInData ? signInData.session : null;
+        });
+    }).catch((e) => { console.error('⚠️ Supabase ensureSupabaseSession:', e); return null; });
+    const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 8000));
+    return Promise.race([attempt, timeout]);
+}
+
 function getUsersCloudDocRef() {
     if (!fbDb) return null;
     try { return fbDb.collection('platform_shared').doc('users'); }
@@ -677,6 +694,7 @@ let _realtimeChannel = null;
 
 async function initMonitor() {
     await ensureAnonAuth();
+    await ensureSupabaseSession();
     await listenToCloudUsers();
     await refreshLog();
     await renderTeacherStats();

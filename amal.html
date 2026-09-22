@@ -3566,6 +3566,12 @@
                         window.location.href = 'index.html';
                         return;
                     }
+                    // ⚡ إصلاح تقني: بعد توحيد الدخول عبر Firebase، لم تعد هناك جلسة
+                    // Supabase Auth حقيقية — ما يجعل سياسات RLS ترفض القراءة/الكتابة
+                    // في بنك الأنشطة المشترك وسجلّ المراقبة بصمت (دون أي رسالة خطأ
+                    // ظاهرة). نُنشئ هنا جلسة Supabase مجهولة موثّقة فعلياً حتى تنجح كل
+                    // عمليات Supabase لهذا المستخدم، دون أي تغيير في هويته أو بياناته.
+                    await this.ensureSupabaseSession();
                     // بناء ملف تعريف متوافق من بيانات جلسة البوابة (بدون الحاجة لتسجيل دخول منفصل)
                     const profile = {
                         id: portalUser.id,
@@ -3579,6 +3585,28 @@
                     if (loader) loader.style.display = 'none';
                     this.revealApp(profile);
                     return;
+                },
+
+                // ينشئ جلسة Supabase موثّقة (مجهولة الهوية) إن لم تكن موجودة، حتى تمرّ
+                // عمليات القراءة/الكتابة المحمية بسياسات RLS التي تشترط "مستخدم موثّق"
+                // (auth.uid() ليست NULL). لا يغيّر هذا أي بيانات ولا هوية المستخدم —
+                // فقط يزيل حالة "زائر مجهول تماماً" التي كانت تُسقط الطلبات بصمت.
+                async ensureSupabaseSession() {
+                    if (!SUPABASE_CONFIGURED || !sbMain) return null;
+                    const attempt = (async () => {
+                        try {
+                            const { data } = await sbMain.auth.getSession();
+                            if (data && data.session) return data.session;
+                            const { data: signInData, error } = await sbMain.auth.signInAnonymously();
+                            if (error) { console.error('⚠️ تعذّر إنشاء جلسة Supabase موثّقة (قد تفشل الكتابة/المراقبة):', error); return null; }
+                            return signInData ? signInData.session : null;
+                        } catch (e) {
+                            console.error('⚠️ Supabase ensureSupabaseSession:', e);
+                            return null;
+                        }
+                    })();
+                    const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 8000));
+                    return Promise.race([attempt, timeout]);
                 },
 
                 async _legacyInit() {
@@ -3775,7 +3803,7 @@
                     if (!SUPABASE_CONFIGURED || !AuthSystem.currentProfile) return;
                     extra = extra || {};
                     try {
-                        await sbMain.from('activity_log').insert({
+                        const { error } = await sbMain.from('activity_log').insert({
                             teacher_id: AuthSystem.currentProfile.id,
                             teacher_name: AuthSystem.currentProfile.full_name || AuthSystem.currentProfile.email,
                             action: action,
@@ -3783,7 +3811,11 @@
                             subject: extra.subject || '',
                             level: extra.level || ''
                         });
-                    } catch (e) {}
+                        // ⚡ إصلاح تقني: كانت هذه الأخطاء تُبتلع بصمت — ما جعل نشاطات
+                        // الأساتذة تختفي من لوحة المراقبة دون أي أثر يُفسّر السبب.
+                        // الآن تُطبع في الطرفية (Console) لتسهيل التشخيص مستقبلاً.
+                        if (error) console.error('⚠️ تعذّر تسجيل العملية في سجلّ المراقبة (activity_log):', error);
+                    } catch (e) { console.error('⚠️ logAction:', e); }
                 },
 
                 async refreshLog() {
@@ -4088,6 +4120,12 @@
                 subscribeRealtime() {
                     if (!SUPABASE_CONFIGURED || !sbMain || this._channel) return;
                     const myId = AuthSystem.currentProfile && AuthSystem.currentProfile.id;
+                    // ⚡ إصلاح تقني: إشعارات "فلان أضاف/عدّل/حذف نشاطاً" كانت تظهر لكل
+                    // الأساتذة على قناة بث واحدة — دون تمييز للمفتش. الآن تبقى مزامنة
+                    // بنك الأنشطة المشترك حيّة للجميع (upsertLocalCache + renderAll)،
+                    // لكن الإشعار المنبثق (toast) يظهر فقط لحساب المفتش، لأنه هو من
+                    // يحتاج متابعة نشاط الأساتذة لحظياً.
+                    const isInspector = AuthSystem.currentProfile && AuthSystem.currentProfile.role === 'admin';
 
                     this._channel = sbMain.channel('shared_activities_live')
                         .on('postgres_changes', {
@@ -4102,7 +4140,7 @@
                                 App.renderAll();
                                 const name = payload.new.owner_name || 'أحد الأساتذة';
                                 const title = payload.new.title || 'بدون عنوان';
-                                if (payload.new.owner_id !== myId) {
+                                if (isInspector && payload.new.owner_id !== myId) {
                                     showToast(
                                         `🔔 أضاف ${name} نشاطاً جديداً: "${title}"`,
                                         'success',
@@ -4117,7 +4155,7 @@
                                 App.renderAll();
                                 const name = payload.new.owner_name || 'أحد الأساتذة';
                                 const title = payload.new.title || 'بدون عنوان';
-                                if (payload.new.owner_id !== myId) {
+                                if (isInspector && payload.new.owner_id !== myId) {
                                     showToast(
                                         `✏️ عدّل ${name} النشاط: "${title}"`,
                                         'info',
@@ -4133,7 +4171,7 @@
                                 App.renderAll();
                                 const name = oldRow.owner_name || 'أحد الأساتذة';
                                 const title = oldRow.title || 'بدون عنوان';
-                                if (oldRow.owner_id !== myId) {
+                                if (isInspector && oldRow.owner_id !== myId) {
                                     showToast(
                                         `🗑️ حذف ${name} النشاط: "${title}"`,
                                         'warning',
