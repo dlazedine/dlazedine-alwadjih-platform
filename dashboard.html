@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>لوحة التحكم - حسابات الأساتذة ومراقبة النشاطات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBdv2RJ7EzlnVQcXyyozlLhVKdgwaKQdaY",
+        authDomain: "mou3ladja.firebaseapp.com",
+        projectId: "mou3ladja",
+        storageBucket: "mou3ladja.firebasestorage.app",
+        messagingSenderId: "986880549463",
+        appId: "1:986880549463:web:b4de098099622040bfb912",
+        measurementId: "G-E0BZPDCZB9"
+    };
+    let fbAuth = null, fbDb = null;
+    try {
+        if (typeof firebase !== 'undefined') {
+            firebase.initializeApp(firebaseConfig);
+            fbAuth = firebase.auth();
+            fbDb = firebase.firestore();
+        }
+    } catch (e) { console.error('⚠️ فشل الاتصال بـ Firebase:', e); }
+
+    const SUPABASE_URL = "https://yzxyttieobyblznaehcl.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u";
+    let sbMain = null;
+    try {
+        if (typeof window.supabase !== 'undefined') {
+            sbMain = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+    } catch (e) { console.error('⚠️ فشل الاتصال بـ Supabase:', e); }
+</script>
+
+<style>
+    :root {
+        --primary: #1a3d6e; --primary-light: #eef3f9; --navy-deep: #0f2340;
+        --gold: #c49b3f; --gold-deep: #a6802f; --gold-light: #f5e6c8;
+        --danger: #b22234; --success: #1e7e34; --warning: #b38b2b; --info: #17a2b8; --teal: #167c80;
+        --text-dark: #17324d; --text-muted: #5d7182; --bg-body: #f0f4f8; --bg-card: #ffffff;
+        --border-color: #d8e4df; --radius: 14px; --shadow: 0 8px 30px rgba(0,0,0,0.08); --transition: all 0.25s ease;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif; background: var(--bg-body); color: var(--text-dark); line-height: 1.8; }
+
+    #reauthScreen { min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(150deg,#0f2340,#1a3d6e); padding:20px; }
+    .reauth-box { background:#fff; width:100%; max-width:380px; border-radius:16px; padding:34px 30px; box-shadow:0 20px 60px rgba(0,0,0,0.35); text-align:center; }
+    .reauth-box .icon { width:56px; height:56px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 16px; }
+    .reauth-box h1 { font-size:18px; color:var(--text-dark); margin-bottom:6px; }
+    .reauth-box p { font-size:12.5px; color:var(--text-muted); margin-bottom:20px; }
+    .reauth-box input { width:100%; padding:12px 14px; border:1px solid var(--border-color); border-radius:8px; font-family:inherit; font-size:14px; margin-bottom:14px; }
+    .reauth-box button { width:100%; padding:13px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-family:inherit; font-size:14.5px; font-weight:700; cursor:pointer; }
+    .reauth-msg { display:none; text-align:right; font-size:12.5px; padding:10px 14px; border-radius:8px; margin-bottom:14px; background:#fbeceb; color:var(--danger); }
+    .reauth-box a { display:inline-block; margin-top:16px; font-size:12px; color:var(--text-muted); }
+
+    #ssoLoadingScreen { min-height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; }
+    .spin { width:38px; height:38px; border:3px solid var(--border-color); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #appScreen { display:none; }
+
+    .user-bar { background: var(--navy-deep); color:#eaf1f8; padding:10px 24px; display:flex; align-items:center; justify-content:space-between; font-size:13px; flex-wrap:wrap; gap:8px; }
+    .user-bar a, .user-bar button { color:#dbe6f0; text-decoration:none; background:none; border:1px solid rgba(255,255,255,0.25); font-family:inherit; font-size:12.5px; padding:6px 14px; border-radius:20px; cursor:pointer; }
+    .user-bar .right { display:flex; gap:8px; align-items:center; }
+
+    .hero { background: linear-gradient(150deg, var(--navy-deep) 0%, var(--primary) 100%); color:#fff; padding:30px 24px; text-align:center; }
+    .hero h1 { font-size: clamp(20px, 3.5vw, 27px); margin-bottom:6px; }
+    .hero p { color:#cfdcea; font-size:13px; }
+
+    .main-tabs { display:flex; justify-content:center; gap:6px; background: var(--bg-card); border-bottom:1px solid var(--border-color); padding:0 20px; position:sticky; top:0; z-index:20; }
+    .main-tab { padding:16px 22px; cursor:pointer; font-size:14px; font-weight:700; color: var(--text-muted); border-bottom:3px solid transparent; display:flex; align-items:center; gap:8px; }
+    .main-tab.active { color: var(--primary); border-bottom-color: var(--gold); }
+
+    .tab-panel { display:none; max-width:1100px; margin:0 auto; padding:24px 20px 60px; }
+    .tab-panel.active { display:block; }
+
+    .btn { display:inline-flex; align-items:center; gap:7px; padding:10px 18px; border-radius:10px; border:none; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer; }
+    .btn-success { background: var(--success); color:#fff; }
+    .btn-info { background: var(--info); color:#fff; }
+    .btn-gold { background: var(--gold); color:#fff; }
+    .btn-warning { background: var(--warning); color:#fff; }
+    .btn-danger { background: var(--danger); color:#fff; }
+    .btn-outline { background:#fff; border:1.5px solid var(--border-color); color:var(--text-dark); }
+    .btn-sm { padding:6px 12px; font-size:12px; }
+
+    .card-box { background: var(--bg-card); border:1px solid var(--border-color); border-radius: var(--radius); padding:20px; box-shadow: var(--shadow); margin-bottom:20px; }
+    .card-box h3 { font-size:15.5px; color: var(--primary); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+
+    .user-card { display:flex; align-items:center; gap:14px; padding:14px; border:1px solid var(--border-color); border-radius:12px; margin-bottom:10px; flex-wrap:wrap; }
+    .user-card-avatar { width:42px; height:42px; border-radius:50%; background: var(--primary-light); color: var(--primary); display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; }
+    .user-card-info { flex:1; min-width:180px; }
+    .user-card-info h4 { font-size:14px; }
+    .user-card-info p { font-size:12px; color: var(--text-muted); }
+    .user-card-role { font-size:11.5px; font-weight:700; padding:4px 12px; border-radius:16px; }
+    .user-card-role.inspector { background:#f5e6c8; color:#8c6423; }
+    .user-card-role.teacher { background:#eef3f9; color:var(--primary); }
+    .user-card-role.supervisor { background:#e3f4f5; color:var(--teal); }
+
+    .field-group { margin-bottom:14px; }
+    .field-group label { display:block; font-size:12.5px; font-weight:700; color: var(--primary); margin-bottom:6px; }
+    .field-group input, .field-group select { width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:8px; font-family:inherit; font-size:13px; }
+
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(15,35,64,0.55); z-index:100; align-items:center; justify-content:center; padding:16px; }
+    .modal-overlay.active { display:flex; }
+    .modal-box { background:#fff; border-radius: var(--radius); width:100%; max-width:520px; padding:24px; max-height:85vh; overflow-y:auto; position:relative; }
+    .modal-close { position:absolute; top:16px; left:16px; background:none; border:none; font-size:20px; color:var(--text-muted); cursor:pointer; }
+
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; margin-bottom:20px; }
+    .stat-card { background: var(--bg-card); border:1px solid var(--border-color); border-radius: var(--radius); padding:18px; text-align:center; }
+    .stat-card .number { font-size:26px; font-weight:900; color: var(--primary); }
+    .stat-card .label { font-size:12px; color: var(--text-muted); margin-top:4px; }
+
+    table.teacher-table { width:100%; border-collapse:collapse; font-size:13px; }
+    table.teacher-table th { background: var(--bg-body); padding:10px; text-align:right; color: var(--text-muted); font-size:12px; }
+    table.teacher-table td { padding:10px; border-top:1px solid var(--border-color); }
+
+    .log-feed { max-height:420px; overflow-y:auto; }
+    .log-row { display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid var(--border-color); font-size:12.5px; }
+    .log-action-icon { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; color:#fff; flex-shrink:0; }
+    .log-action-icon.create { background: var(--success); }
+    .log-action-icon.update { background: var(--info); }
+    .log-action-icon.delete { background: var(--danger); }
+    .log-teacher { font-weight:700; color: var(--primary); }
+    .log-time { margin-inline-start:auto; color: var(--text-muted); font-size:11px; white-space:nowrap; }
+    .status-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-inline-end:5px; }
+    .status-dot.active { background: var(--success); }
+    .status-dot.inactive { background: var(--danger); }
+</style>
+</head>
+<body>
+
+<div id="reauthScreen">
+    <div class="reauth-box">
+        <div class="icon">🔒</div>
+        <h1>تأكيد الهوية</h1>
+        <p id="reauthWho"></p>
+        <div class="reauth-msg" id="reauthMsg"></div>
+        <form id="reauthForm" onsubmit="return handleReauth(event)">
+            <input type="password" id="reauthPassword" placeholder="أدخل كلمة مرورك الخاصة..." autocomplete="current-password">
+            <button type="submit" id="reauthBtn">تأكيد والدخول</button>
+        </form>
+        <a href="index.html">العودة إلى البوابة</a>
+    </div>
+</div>
+
+<div id="ssoLoadingScreen" style="display:none;">
+    <div class="spin"></div>
+    <div style="font-size:13.5px; color:var(--text-muted);">جارٍ التحميل...</div>
+</div>
+
+<div id="appScreen">
+    <div class="user-bar">
+        <div class="right">
+            <a href="index.html"><i class="fas fa-arrow-right"></i> البوابة</a>
+            <span>مرحباً، <b id="userNameLabel" style="color:var(--gold-light)"></b></span>
+        </div>
+        <button onclick="handleLogout()"><i class="fas fa-arrow-right-from-bracket"></i> تسجيل الخروج</button>
+    </div>
+
+    <div class="hero">
+        <h1><i class="fas fa-user-shield"></i> لوحة التحكم</h1>
+        <p>إدارة حسابات الأساتذة ومراقبة النشاطات — مكان واحد موحّد لكل أدوات المنظومة</p>
+    </div>
+
+    <div class="main-tabs">
+        <div class="main-tab active" data-maintab="users"><i class="fas fa-users-cog"></i> إدارة المستخدمين</div>
+        <div class="main-tab" data-maintab="monitor"><i class="fas fa-satellite-dish"></i> مراقبة النشاطات</div>
+    </div>
+
+    <!-- ============ إدارة المستخدمين ============ -->
+    <div class="tab-panel active" id="panel-users">
+        <div class="card-box">
+            <h3><i class="fas fa-users-cog"></i> إدارة المستخدمين</h3>
+            <p style="color:var(--text-muted); margin-bottom:16px; font-size:13px;">
+                يشمل هذا القسم كل حسابات الأساتذة والمفتشين المستخدمة في جميع أدوات المنظومة. عدد المستخدمين الحالي: <strong id="totalUsersCount">0</strong>
+            </p>
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">
+                <button class="btn btn-success" onclick="openAddUserModal()"><i class="fas fa-user-plus"></i> إضافة أستاذ</button>
+                <button class="btn btn-info" onclick="document.getElementById('csvInput').click()"><i class="fas fa-file-csv"></i> استيراد من CSV</button>
+                <input type="file" id="csvInput" accept=".csv" style="display:none;" onchange="importUsersFromCSV(event)">
+                <button class="btn btn-gold" onclick="exportUsersCSV()"><i class="fas fa-download"></i> تصدير CSV</button>
+                <button class="btn btn-warning" onclick="downloadCSVTemplate()"><i class="fas fa-file-download"></i> تحميل نموذج CSV</button>
+            </div>
+            <div id="usersListContainer"></div>
+        </div>
+    </div>
+
+    <!-- ============ مراقبة النشاطات ============ -->
+    <div class="tab-panel" id="panel-monitor">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="number" id="monitorTotalActions">0</div><div class="label">إجمالي العمليات</div></div>
+            <div class="stat-card"><div class="number" id="monitorActiveTeachers">0</div><div class="label">أساتذة نشطون</div></div>
+            <div class="stat-card"><div class="number" id="monitorToday">0</div><div class="label">عمليات اليوم</div></div>
+        </div>
+
+        <div class="card-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+                <h3 style="margin-bottom:0;"><i class="fas fa-chart-bar"></i> إحصائيات مفصّلة لكل أستاذ</h3>
+                <button class="btn btn-sm btn-info" onclick="renderTeacherStats()"><i class="fas fa-sync"></i> تحديث</button>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="teacher-table">
+                    <thead><tr><th>#</th><th>الأستاذ(ة)</th><th>البريد الإلكتروني</th><th>عدد الأنشطة</th><th>آخر نشاط</th><th>تاريخ آخر نشاط</th><th>الحالة</th></tr></thead>
+                    <tbody id="teacherStatsBody"><tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">اضغط "تحديث" لتحميل البيانات</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                <h3 style="margin-bottom:0;"><i class="fas fa-stream"></i> سجلّ العمليات الحيّ</h3>
+                <div style="display:flex; gap:8px;">
+                    <select id="monitorFilterTeacher" onchange="renderLog()" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border-color); font-family:inherit;">
+                        <option value="">كل الأساتذة</option>
+                    </select>
+                    <button class="btn btn-sm btn-info" onclick="refreshLog()"><i class="fas fa-sync"></i> تحديث</button>
+                </div>
+            </div>
+            <div class="log-feed" id="logFeed"><div style="text-align:center; color:var(--text-muted); padding:20px;">جارٍ تحميل السجل...</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ نافذة المستخدم ============ -->
+<div class="modal-overlay" id="userModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeUserModal()">&times;</button>
+        <h3 id="userModalTitle" style="color:var(--primary); margin-bottom:16px;">إضافة مستخدم جديد</h3>
+        <input type="hidden" id="editUserId" value="">
+        <div class="field-group"><label>الاسم الكامل</label><input type="text" id="userFullName" maxlength="100"></div>
+        <div class="field-group"><label>اسم المستخدم</label><input type="text" id="userUsername" maxlength="50"></div>
+        <div class="field-group"><label>البريد الإلكتروني</label><input type="email" id="userEmail"></div>
+        <div class="field-group"><label>المؤسسة</label><input type="text" id="userSchool"></div>
+        <div class="field-group"><label>الدور</label>
+            <select id="userRole">
+                <option value="teacher">👨‍🏫 أستاذ</option>
+                <option value="supervisor">🔵 مشرف</option>
+                <option value="inspector">👑 مفتش</option>
+            </select>
+        </div>
+        <div class="field-group"><label>كلمة المرور</label><input type="text" id="userPassword" placeholder="اتركها فارغة لتوليدها تلقائياً"></div>
+        <div style="display:flex; gap:12px; margin-top:10px;">
+            <button class="btn btn-success" onclick="saveUser()"><i class="fas fa-save"></i> حفظ</button>
+            <button class="btn btn-outline" onclick="closeUserModal()">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<div id="toastContainer" style="position:fixed; top:20px; left:20px; z-index:9999; display:flex; flex-direction:column; gap:8px;"></div>
+
+<script>
+// ============================================================
+//  1. الجلسة الموحّدة وتأكيد الهوية
+// ============================================================
+function getPortalSession() {
+    try {
+        const raw = sessionStorage.getItem('pgb_session') || localStorage.getItem('pgb_session_persistent');
+        if (!raw) return null;
+        const session = JSON.parse(raw);
+        if (!session || Date.now() > session.expiresAt) return null;
+        return session.user || null;
+    } catch (e) { return null; }
+}
+const __portalUser = getPortalSession();
+if (!__portalUser || __portalUser.role !== 'inspector') {
+    window.location.replace('index.html');
+}
+
+let currentUser = null;
+let cachedUsers = [];
+
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password + 'pgb_salt_2026');
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+async function verifyPassword(password, hash) { return (await hashPassword(password)) === hash; }
+
+function ensureAnonAuth() {
+    if (!fbAuth) return Promise.resolve(null);
+    const p = new Promise((resolve) => {
+        if (fbAuth.currentUser) { resolve(fbAuth.currentUser); return; }
+        fbAuth.signInAnonymously().catch(() => {});
+        const unsub = fbAuth.onAuthStateChanged((u) => { if (u) { unsub(); resolve(u); } });
+    });
+    const t = new Promise((resolve) => setTimeout(() => resolve(null), 8000));
+    return Promise.race([p, t]);
+}
+
+function getUsersCloudDocRef() {
+    if (!fbDb) return null;
+    try { return fbDb.collection('platform_shared').doc('users'); }
+    catch (e) { return null; }
+}
+
+let cloudUsersReadyPromise = null;
+function listenToCloudUsers() {
+    if (cloudUsersReadyPromise) return cloudUsersReadyPromise;
+    const docRef = getUsersCloudDocRef();
+    if (!docRef) { cloudUsersReadyPromise = Promise.resolve(cachedUsers); return cloudUsersReadyPromise; }
+    const snapshotPromise = new Promise((resolve) => {
+        docRef.onSnapshot(
+            (doc) => {
+                cachedUsers = (doc.exists && Array.isArray(doc.data().list)) ? doc.data().list : [];
+                resolve(cachedUsers);
+                if (document.getElementById('appScreen').style.display !== 'none') renderUsersList();
+            },
+            () => { resolve(cachedUsers); }
+        );
+    });
+    const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(cachedUsers), 8000));
+    cloudUsersReadyPromise = Promise.race([snapshotPromise, timeoutPromise]);
+    return cloudUsersReadyPromise;
+}
+function getUsers() { return cachedUsers; }
+async function saveUsers(users) {
+    cachedUsers = users;
+    try {
+        const docRef = getUsersCloudDocRef();
+        if (!docRef) throw new Error('لا يوجد اتصال');
+        await docRef.set({ list: users, updatedAt: new Date().toISOString() });
+        return true;
+    } catch (e) {
+        console.error(e);
+        showToast('⚠️ تعذّر حفظ التغييرات على الخادم', 'error');
+        return false;
+    }
+}
+
+async function handleReauth(event) {
+    event.preventDefault();
+    const btn = document.getElementById('reauthBtn');
+    const msg = document.getElementById('reauthMsg');
+    const password = document.getElementById('reauthPassword').value;
+    if (!password) return false;
+    btn.disabled = true; btn.textContent = 'جارٍ التحقق...';
+    msg.style.display = 'none';
+    try {
+        await ensureAnonAuth();
+        await listenToCloudUsers();
+        const user = cachedUsers.find(u => u.id === __portalUser.id);
+        if (!user) { msg.textContent = 'تعذّر العثور على حسابك.'; msg.style.display = 'block'; return false; }
+        const valid = await verifyPassword(password, user.passwordHash);
+        if (!valid) { msg.textContent = 'كلمة المرور غير صحيحة.'; msg.style.display = 'block'; return false; }
+        document.getElementById('reauthScreen').style.display = 'none';
+        enterApp(user);
+    } catch (e) {
+        console.error(e);
+        msg.textContent = 'تعذّر التحقق — تحقق من اتصالك بالإنترنت.';
+        msg.style.display = 'block';
+    } finally {
+        btn.disabled = false; btn.textContent = 'تأكيد والدخول';
+    }
+    return false;
+}
+
+function handleLogout() {
+    if (!confirm('هل تريد تسجيل الخروج؟')) return;
+    try { sessionStorage.removeItem('pgb_session'); localStorage.removeItem('pgb_session_persistent'); } catch (e) {}
+    window.location.href = 'index.html';
+}
+
+function enterApp(user) {
+    currentUser = user;
+    document.getElementById('appScreen').style.display = 'block';
+    document.getElementById('userNameLabel').textContent = user.fullName || user.username;
+    setupMainTabs();
+    renderUsersList();
+    initMonitor();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (!__portalUser || __portalUser.role !== 'inspector') return;
+    document.getElementById('reauthWho').textContent = 'الدخول باسم: ' + (__portalUser.fullName || __portalUser.username);
+});
+
+// ============================================================
+//  2. أدوات مساعدة
+// ============================================================
+function generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+function formatDateGeorgian() { return new Date().toISOString().split('T')[0]; }
+function formatDateTimeAr(date) {
+    const d = new Date(date);
+    return d.toLocaleDateString('ar-DZ', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' + d.toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' });
+}
+function generateRandomPassword(length = 10) {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    let password = '';
+    for (let i = 0; i < length; i++) password += chars.charAt(Math.floor(Math.random() * chars.length));
+    return password;
+}
+function showToast(message, type = 'info', duration = 3500) {
+    const colors = { info: 'var(--info)', success: 'var(--success)', error: 'var(--danger)', warning: 'var(--warning)' };
+    const toast = document.createElement('div');
+    toast.style.cssText = `background:${colors[type] || colors.info}; color:#fff; padding:12px 20px; border-radius:10px; font-weight:600; font-size:13px; box-shadow:0 8px 25px rgba(0,0,0,0.15);`;
+    toast.textContent = message;
+    document.getElementById('toastContainer').appendChild(toast);
+    setTimeout(() => toast.remove(), duration);
+}
+
+function setupMainTabs() {
+    document.querySelectorAll('.main-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById('panel-' + tab.dataset.maintab).classList.add('active');
+        });
+    });
+}
+
+// ============================================================
+//  3. إدارة المستخدمين (منقولة من منصة المعالجة البيداغوجية)
+// ============================================================
+function renderUsersList() {
+    const container = document.getElementById('usersListContainer');
+    if (!container) return;
+    const users = getUsers();
+    document.getElementById('totalUsersCount').textContent = users.length;
+    if (users.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:30px;">جارٍ التحميل أو لا يوجد مستخدمون بعد.</p>';
+        return;
+    }
+    const roleLabels = {
+        inspector: { label: '👑 مفتش', class: 'inspector' },
+        teacher: { label: '👨‍🏫 أستاذ', class: 'teacher' },
+        supervisor: { label: '🔵 مشرف', class: 'supervisor' }
+    };
+    const sorted = [...users].sort((a, b) => {
+        const order = { inspector: 0, supervisor: 1, teacher: 2 };
+        return (order[a.role] || 3) - (order[b.role] || 3);
+    });
+    container.innerHTML = sorted.map(user => {
+        const role = roleLabels[user.role] || { label: 'مستخدم', class: 'teacher' };
+        const initials = (user.fullName || '').split(' ').map(w => w[0]).slice(0, 2).join('');
+        const isCurrentUser = currentUser && currentUser.id === user.id;
+        return `
+            <div class="user-card">
+                <div class="user-card-avatar">${escapeHtml(initials)}</div>
+                <div class="user-card-info">
+                    <h4>${escapeHtml(user.fullName)} ${isCurrentUser ? '(أنت)' : ''}</h4>
+                    <p>
+                        <i class="fas fa-user"></i> ${escapeHtml(user.username)}
+                        ${user.email ? ' · <i class="fas fa-envelope"></i> ' + escapeHtml(user.email) : ''}
+                        ${user.school ? ' · <i class="fas fa-school"></i> ' + escapeHtml(user.school) : ''}
+                    </p>
+                    <p style="font-size:11.5px; margin-top:4px;">آخر دخول: ${user.lastLogin ? formatDateTimeAr(user.lastLogin) : 'لم يسجل بعد'}</p>
+                </div>
+                <span class="user-card-role ${role.class}">${role.label}</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button class="btn btn-sm btn-info" onclick="editUser('${user.id}')" title="تعديل"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-warning" onclick="resetUserPassword('${user.id}')" title="إعادة تعيين كلمة المرور"><i class="fas fa-key"></i></button>
+                    ${!isCurrentUser ? `
+                        <button class="btn btn-sm ${user.active ? 'btn-danger' : 'btn-success'}" onclick="toggleUserActive('${user.id}')" title="${user.active ? 'تعطيل' : 'تفعيل'}"><i class="fas fa-${user.active ? 'user-slash' : 'user-check'}"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteUser('${user.id}')" title="حذف"><i class="fas fa-trash"></i></button>
+                    ` : ''}
+                </div>
+            </div>`;
+    }).join('');
+}
+
+function openAddUserModal() {
+    document.getElementById('userModalTitle').textContent = 'إضافة مستخدم جديد';
+    document.getElementById('editUserId').value = '';
+    document.getElementById('userFullName').value = '';
+    document.getElementById('userUsername').value = '';
+    document.getElementById('userEmail').value = '';
+    document.getElementById('userSchool').value = '';
+    document.getElementById('userRole').value = 'teacher';
+    document.getElementById('userPassword').value = '';
+    document.getElementById('userModal').classList.add('active');
+}
+function closeUserModal() { document.getElementById('userModal').classList.remove('active'); }
+
+async function saveUser() {
+    const fullName = document.getElementById('userFullName').value.trim();
+    const username = document.getElementById('userUsername').value.trim();
+    const email = document.getElementById('userEmail').value.trim();
+    const school = document.getElementById('userSchool').value.trim();
+    const role = document.getElementById('userRole').value;
+    const password = document.getElementById('userPassword').value;
+    const editId = document.getElementById('editUserId').value;
+
+    if (!fullName || !username) { showToast('يرجى إدخال الاسم الكامل واسم المستخدم', 'error'); return; }
+    if (!/^[a-zA-Z0-9._-]{3,50}$/.test(username)) { showToast('اسم المستخدم يجب أن يكون 3-50 حرفاً (بدون مسافات أو رموز خاصة)', 'error'); return; }
+
+    const users = getUsers();
+    const existingUser = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.id !== editId);
+    if (existingUser) { showToast('اسم المستخدم موجود مسبقاً', 'error'); return; }
+
+    if (editId) {
+        const idx = users.findIndex(u => u.id === editId);
+        if (idx !== -1) {
+            users[idx].fullName = fullName; users[idx].username = username; users[idx].email = email;
+            users[idx].school = school; users[idx].role = role;
+            if (password) users[idx].passwordHash = await hashPassword(password);
+            const saved = await saveUsers(users);
+            if (saved) { showToast('✅ تم تحديث بيانات المستخدم وحفظه على الخادم', 'success'); closeUserModal(); }
+            else showToast('❌ لم يتم حفظ التغييرات على الخادم', 'error');
+            renderUsersList();
+        }
+    } else {
+        const newPassword = password || generateRandomPassword();
+        const passwordHash = await hashPassword(newPassword);
+        const newUser = {
+            id: 'user_' + generateId(), username, fullName, email, school, role, passwordHash,
+            createdAt: new Date().toISOString(), lastLogin: null, mustChangePassword: !password, active: true
+        };
+        users.push(newUser);
+        const saved = await saveUsers(users);
+        if (!saved) { showToast('❌ لم يتم حفظ الحساب الجديد على الخادم', 'error'); return; }
+        if (!password) {
+            alert(`🔑 تم إنشاء المستخدم بنجاح وحُفظ على الخادم!\n\nاسم المستخدم: ${username}\nكلمة المرور: ${newPassword}\n\n⚠️ احفظ كلمة المرور وأرسلها للأستاذ`);
+        }
+        showToast('✅ تم إضافة المستخدم وحفظه على الخادم بنجاح', 'success');
+        closeUserModal();
+        renderUsersList();
+    }
+}
+
+function editUser(userId) {
+    const user = getUsers().find(u => u.id === userId);
+    if (!user) return;
+    document.getElementById('userModalTitle').textContent = 'تعديل بيانات المستخدم';
+    document.getElementById('editUserId').value = user.id;
+    document.getElementById('userFullName').value = user.fullName;
+    document.getElementById('userUsername').value = user.username;
+    document.getElementById('userEmail').value = user.email || '';
+    document.getElementById('userSchool').value = user.school || '';
+    document.getElementById('userRole').value = user.role;
+    document.getElementById('userPassword').value = '';
+    document.getElementById('userModal').classList.add('active');
+}
+
+async function resetUserPassword(userId) {
+    const user = getUsers().find(u => u.id === userId);
+    if (!user) return;
+    if (!confirm(`هل تريد إعادة تعيين كلمة المرور للـ ${user.fullName}؟`)) return;
+    const newPassword = generateRandomPassword();
+    const users = getUsers();
+    const idx = users.findIndex(u => u.id === userId);
+    if (idx !== -1) {
+        users[idx].passwordHash = await hashPassword(newPassword);
+        users[idx].mustChangePassword = true;
+        await saveUsers(users);
+        alert(`🔑 تم إعادة تعيين كلمة المرور!\n\nاسم المستخدم: ${user.username}\nكلمة المرور الجديدة: ${newPassword}\n\n⚠️ احفظ كلمة المرور وأرسلها للأستاذ`);
+        showToast('✅ تم إعادة تعيين كلمة المرور', 'success');
+    }
+}
+
+async function toggleUserActive(userId) {
+    const user = getUsers().find(u => u.id === userId);
+    if (!user) return;
+    const action = user.active ? 'تعطيل' : 'تفعيل';
+    if (!confirm(`هل تريد ${action} حساب ${user.fullName}؟`)) return;
+    const users = getUsers();
+    const idx = users.findIndex(u => u.id === userId);
+    if (idx !== -1) {
+        users[idx].active = !users[idx].active;
+        await saveUsers(users);
+        showToast(`✅ تم ${action} الحساب`, 'success');
+        renderUsersList();
+    }
+}
+
+async function deleteUser(userId) {
+    const user = getUsers().find(u => u.id === userId);
+    if (!user) return;
+    if (!confirm(`⚠️ هل تريد حذف المستخدم "${user.fullName}" نهائياً؟\n\nلا يمكن التراجع عن هذه العملية!`)) return;
+    if (!confirm(`تأكيد أخير: سيتم حذف جميع بيانات هذا المستخدم. متابعة؟`)) return;
+    const users = getUsers().filter(u => u.id !== userId);
+    await saveUsers(users);
+    showToast('✅ تم حذف المستخدم', 'success');
+    renderUsersList();
+}
+
+async function importUsersFromCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async function (e) {
+        try {
+            const text = e.target.result;
+            const lines = text.split('\n').filter(l => l.trim());
+            if (lines.length < 2) { showToast('الملف فارغ أو لا يحتوي على بيانات', 'error'); return; }
+            const dataLines = lines.slice(1);
+            const users = getUsers();
+            let imported = 0, skipped = 0;
+            const credentials = [];
+            for (const line of dataLines) {
+                const parts = line.split(',').map(p => p.trim().replace(/^"|"$/g, ''));
+                if (parts.length < 3) { skipped++; continue; }
+                const [fullName, username, email, school, role] = parts;
+                if (!fullName || !username) { skipped++; continue; }
+                const exists = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+                if (exists) { skipped++; continue; }
+                const password = generateRandomPassword();
+                const passwordHash = await hashPassword(password);
+                users.push({
+                    id: 'user_' + generateId(), username, fullName, email: email || '', school: school || '',
+                    role: role || 'teacher', passwordHash, createdAt: new Date().toISOString(),
+                    lastLogin: null, mustChangePassword: true, active: true
+                });
+                credentials.push({ fullName, username, password });
+                imported++;
+            }
+            await saveUsers(users);
+            renderUsersList();
+            showToast(`✅ تم استيراد ${imported} مستخدم (تم تخطي ${skipped})`, 'success');
+            if (credentials.length > 0) {
+                let msg = `📋 بيانات الدخول للمستخدمين الجدد:\n\n`;
+                credentials.forEach(c => { msg += `${c.fullName}\n  المستخدم: ${c.username}\n  كلمة المرور: ${c.password}\n\n`; });
+                msg += `⚠️ احفظ هذه البيانات وأرسلها للأساتذة`;
+                navigator.clipboard.writeText(msg).then(() => alert(msg + '\n\n✅ تم نسخ البيانات إلى الحافظة')).catch(() => alert(msg));
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('حدث خطأ في قراءة الملف', 'error');
+        }
+        event.target.value = '';
+    };
+    reader.readAsText(file, 'UTF-8');
+}
+
+function exportUsersCSV() {
+    const users = getUsers();
+    if (users.length === 0) { showToast('لا يوجد مستخدمون للتصدير', 'warning'); return; }
+    let csv = '\uFEFF';
+    csv += 'الاسم الكامل,اسم المستخدم,البريد الإلكتروني,المؤسسة,الدور,آخر دخول,الحالة\n';
+    users.forEach(u => {
+        const roleAr = { inspector: 'مفتش', teacher: 'أستاذ', supervisor: 'مشرف' }[u.role] || u.role;
+        const status = u.active ? 'نشط' : 'معطّل';
+        const lastLogin = u.lastLogin ? formatDateTimeAr(u.lastLogin) : 'لم يسجل';
+        csv += `"${u.fullName}","${u.username}","${u.email || ''}","${u.school || ''}","${roleAr}","${lastLogin}","${status}"\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `المستخدمون_${formatDateGeorgian()}.csv`;
+    link.click();
+    showToast('✅ تم تصدير قائمة المستخدمين', 'success');
+}
+
+function downloadCSVTemplate() {
+    let csv = '\uFEFF';
+    csv += 'الاسم الكامل,اسم المستخدم,البريد الإلكتروني,المؤسسة,الدور\n';
+    csv += 'محمد بن علي,mohamed.benali,mohamed@example.com,متوسطة النصر,teacher\n';
+    csv += 'فاطمة الزهراء,fatima.zahra,fatima@example.com,متوسطة الأمل,teacher\n';
+    csv += 'عبد القادر أمين,abdelkader.amine,,متوسطة الوئام,supervisor\n';
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'نموذج_استيراد_المستخدمين.csv';
+    link.click();
+    showToast('📄 تم تحميل النموذج', 'success');
+}
+
+// ============================================================
+//  4. مراقبة النشاطات (منقولة من منصة الأعمال الموجهة)
+//  ⚡ مُعدَّلة لتُطابق حسابات الأساتذة الموحّدة (Firestore) بدل جدول
+//     profiles في Supabase الذي لم يعد مستعملاً لتسجيل الدخول.
+// ============================================================
+let _logCache = [];
+let _realtimeChannel = null;
+
+async function initMonitor() {
+    await ensureAnonAuth();
+    await listenToCloudUsers();
+    await refreshLog();
+    await renderTeacherStats();
+    subscribeRealtime();
+}
+
+async function refreshLog() {
+    const feed = document.getElementById('logFeed');
+    if (!sbMain) { feed.innerHTML = '<div style="text-align:center; color:var(--danger); padding:20px;">خدمة المراقبة غير متاحة</div>'; return; }
+    feed.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">جارٍ تحميل السجل...</div>';
+    try {
+        const { data, error } = await sbMain.from('activity_log').select('*').order('created_at', { ascending: false }).limit(300);
+        if (error) throw error;
+        _logCache = data || [];
+        populateTeacherFilter();
+        renderLog();
+        updateMonitorStats();
+    } catch (e) {
+        console.error(e);
+        feed.innerHTML = '<div style="text-align:center; color:var(--danger); padding:20px;">تعذّر تحميل السجل</div>';
+    }
+}
+
+function populateTeacherFilter() {
+    const select = document.getElementById('monitorFilterTeacher');
+    const prevVal = select.value;
+    const known = getUsers().filter(u => u.role !== 'inspector');
+    select.innerHTML = '<option value="">كل الأساتذة</option>' +
+        known.map(u => `<option value="${u.id}">${escapeHtml(u.fullName)}</option>`).join('');
+    select.value = prevVal;
+}
+
+function renderLog() {
+    const feed = document.getElementById('logFeed');
+    const filterId = document.getElementById('monitorFilterTeacher').value;
+    const rows = filterId ? _logCache.filter(r => r.teacher_id === filterId) : _logCache;
+    if (!rows.length) { feed.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد عمليات مسجّلة بعد</div>'; return; }
+    const iconMap = { create: 'fa-plus', update: 'fa-pen', delete: 'fa-trash' };
+    const labelMap = { create: 'أضاف نشاط', update: 'عدّل نشاط', delete: 'حذف نشاط' };
+    feed.innerHTML = rows.map(r => `
+        <div class="log-row">
+            <div class="log-action-icon ${escapeHtml(r.action)}"><i class="fas ${iconMap[r.action] || 'fa-circle'}"></i></div>
+            <div><span class="log-teacher">${escapeHtml(r.teacher_name)}</span> — ${labelMap[r.action] || r.action}: <strong>${escapeHtml(r.activity_title || '—')}</strong></div>
+            <span class="log-time">${new Date(r.created_at).toLocaleString('ar-EG')}</span>
+        </div>`).join('');
+}
+
+function updateMonitorStats() {
+    document.getElementById('monitorTotalActions').textContent = _logCache.length;
+    document.getElementById('monitorActiveTeachers').textContent = new Set(_logCache.map(r => r.teacher_id)).size;
+    const todayStr = new Date().toDateString();
+    document.getElementById('monitorToday').textContent = _logCache.filter(r => new Date(r.created_at).toDateString() === todayStr).length;
+}
+
+async function renderTeacherStats() {
+    const tbody = document.getElementById('teacherStatsBody');
+    if (!tbody) return;
+    if (!sbMain) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--danger); padding:20px;">خدمة المراقبة غير متاحة</td></tr>'; return; }
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> جارٍ تحميل الإحصائيات...</td></tr>';
+    try {
+        await listenToCloudUsers();
+        const teachers = getUsers().filter(u => u.role !== 'inspector');
+
+        const { data: activities, error: aErr } = await sbMain.from('activities').select('id, owner_id, title, created_at');
+        if (aErr) throw aErr;
+
+        if (teachers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">لا يوجد أساتذة مسجّلون بعد.</td></tr>';
+            return;
+        }
+
+        const stats = teachers.map(teacher => {
+            const teacherActs = (activities || []).filter(a => a.owner_id === teacher.id);
+            let lastAct = null;
+            if (teacherActs.length > 0) {
+                lastAct = [...teacherActs].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+            }
+            return { ...teacher, count: teacherActs.length, lastTitle: lastAct ? lastAct.title : null, lastDate: lastAct ? lastAct.created_at : null };
+        });
+        stats.sort((a, b) => b.count - a.count);
+
+        tbody.innerHTML = stats.map((s, idx) => {
+            let countColor = '#6c7a8d', countBg = '#f1f4f9';
+            if (s.count >= 5) { countColor = '#155724'; countBg = '#d4edda'; }
+            else if (s.count >= 2) { countColor = '#856404'; countBg = '#fff3cd'; }
+            else if (s.count === 0) { countColor = '#721c24'; countBg = '#f8d7da'; }
+            const lastDateStr = s.lastDate ? new Date(s.lastDate).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).replace(',', '') : '—';
+            return `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td><strong>${escapeHtml(s.fullName || '—')}</strong></td>
+                    <td style="font-size:12px; color:var(--text-muted);">${escapeHtml(s.email || '—')}</td>
+                    <td><span style="background:${countBg}; color:${countColor}; padding:4px 14px; border-radius:20px; font-weight:700; font-size:14px;">${s.count}</span></td>
+                    <td style="font-size:13px;">${s.lastTitle ? escapeHtml(s.lastTitle) : '—'}</td>
+                    <td style="font-size:12px; color:var(--text-muted);">${lastDateStr}</td>
+                    <td><span class="status-dot ${s.active ? 'active' : 'inactive'}"></span>${s.active ? 'نشط' : 'معطّل'}</td>
+                </tr>`;
+        }).join('');
+    } catch (error) {
+        console.error('renderTeacherStats error:', error);
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--danger); padding:20px;"><i class="fas fa-exclamation-triangle"></i> تعذّر تحميل الإحصائيات: ${escapeHtml(error.message || 'خطأ غير معروف')}</td></tr>`;
+    }
+}
+
+function subscribeRealtime() {
+    if (!sbMain || _realtimeChannel) return;
+    _realtimeChannel = sbMain.channel('activity_log_live')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_log' }, (payload) => {
+            _logCache.unshift(payload.new);
+            renderLog();
+            updateMonitorStats();
+            const actionLabelMap = { create: 'أضاف نشاطاً جديداً', update: 'عدّل نشاطاً', delete: 'حذف نشاطاً' };
+            const iconMap = { create: '🔔', update: '✏️', delete: '🗑️' };
+            const toastTypeMap = { create: 'success', update: 'info', delete: 'warning' };
+            const action = payload.new.action;
+            const titlePart = payload.new.activity_title ? (': "' + payload.new.activity_title + '"') : '';
+            showToast((iconMap[action] || '🔔') + ' ' + payload.new.teacher_name + ' ' + (actionLabelMap[action] || 'قام بعملية') + titlePart, toastTypeMap[action] || 'info', 4000);
+        })
+        .subscribe();
+}
+</script>
+
+</body>
+</html>

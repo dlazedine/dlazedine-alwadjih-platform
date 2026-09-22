@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تعليمية اللغة العربية — الأداة الموحّدة</title>
+<meta name="description" content="أداة تعليمية شاملة: مرجعية نظرية + مقاطع جاهزة + بناء مذكرات + بنك أسئلة">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBdv2RJ7EzlnVQcXyyozlLhVKdgwaKQdaY",
+        authDomain: "mou3ladja.firebaseapp.com",
+        projectId: "mou3ladja",
+        storageBucket: "mou3ladja.firebasestorage.app",
+        messagingSenderId: "986880549463",
+        appId: "1:986880549463:web:b4de098099622040bfb912",
+        measurementId: "G-E0BZPDCZB9"
+    };
+    let fbAuth = null, fbDb = null;
+    try {
+        if (typeof firebase !== 'undefined') {
+            firebase.initializeApp(firebaseConfig);
+            fbAuth = firebase.auth();
+            fbDb = firebase.firestore();
+        }
+    } catch (e) { console.error('⚠️ Firebase:', e); }
+</script>
+
+<style>
+:root {
+    --primary: #1a3d6e; --primary-light: #eef3f9; --navy-deep: #0f2340;
+    --gold: #c49b3f; --gold-deep: #a6802f; --gold-light: #f5e6c8;
+    --danger: #b22234; --success: #1e7e34; --warning: #b38b2b;
+    --info: #17a2b8; --teal: #167c80;
+    --text-dark: #17324d; --text-muted: #5d7182;
+    --bg-body: #f0f4f8; --bg-card: #ffffff; --border-color: #d8e4df;
+    --radius: 14px; --shadow: 0 8px 30px rgba(0,0,0,0.08);
+    --transition: all 0.25s ease;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
+    background: var(--bg-body); color: var(--text-dark);
+    line-height: 1.8; padding-top: env(safe-area-inset-top, 0px);
+}
+#ssoLoadingScreen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--bg-body); flex-direction: column; gap: 14px;
+}
+#ssoLoadingScreen .spin {
+    width: 38px; height: 38px; border: 3px solid var(--border-color);
+    border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#appScreen { display: none; }
+
+.user-bar {
+    background: var(--navy-deep); color: #eaf1f8; padding: 10px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; flex-wrap: wrap; gap: 8px;
+}
+.user-bar a, .user-bar button {
+    color: #dbe6f0; text-decoration: none; background: none;
+    border: 1px solid rgba(255,255,255,0.25); font-family: inherit;
+    font-size: 12.5px; padding: 6px 14px; border-radius: 20px;
+    cursor: pointer; transition: var(--transition);
+}
+.user-bar a:hover, .user-bar button:hover { background: rgba(255,255,255,0.1); }
+.user-bar .who { font-weight: 700; color: var(--gold-light); }
+
+.hero {
+    background: linear-gradient(150deg, var(--navy-deep) 0%, var(--primary) 100%);
+    color: #fff; padding: 34px 24px; text-align: center; position: relative; overflow: hidden;
+}
+.hero::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 90% -10%, rgba(196,155,63,0.35), transparent 55%);
+    pointer-events: none;
+}
+.hero h1 { font-family: 'Amiri', serif; font-size: clamp(24px, 4vw, 32px); margin-bottom: 8px; position: relative; }
+.hero p { color: #cfdcea; font-size: 13.5px; max-width: 800px; margin: 0 auto; position: relative; }
+
+.main-tabs {
+    display: flex; justify-content: center; gap: 4px; background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color); padding: 0 20px;
+    position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    overflow-x: auto;
+}
+.main-tab {
+    padding: 16px 20px; cursor: pointer; font-size: 14px; font-weight: 700;
+    color: var(--text-muted); border-bottom: 3px solid transparent;
+    transition: var(--transition); display: flex; align-items: center;
+    gap: 8px; white-space: nowrap;
+}
+.main-tab:hover { color: var(--primary); }
+.main-tab.active { color: var(--primary); border-bottom-color: var(--gold); }
+
+.tab-panel { display: none; max-width: 1200px; margin: 0 auto; padding: 26px 20px 60px; }
+.tab-panel.active { display: block; }
+
+/* Theory */
+.theory-section { margin-bottom: 30px; }
+.theory-section > h2 {
+    font-size: 18px; color: var(--primary); font-weight: 700;
+    margin-bottom: 16px; display: flex; align-items: center; gap: 9px;
+}
+.theory-section > h2 i { color: var(--gold-deep); }
+.def-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.def-card {
+    background: var(--bg-card); border: 1px solid var(--border-color);
+    border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow);
+}
+.def-card h3 { font-size: 14.5px; color: var(--primary); margin-bottom: 8px; }
+.def-card p { font-size: 13px; color: var(--text-muted); }
+
+.rubric-card {
+    background: var(--bg-card); border: 1px solid var(--border-color);
+    border-radius: var(--radius); margin-bottom: 16px; overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.rubric-head {
+    padding: 16px 20px; cursor: pointer; display: flex;
+    align-items: center; justify-content: space-between;
+    border-right: 5px solid var(--accent, var(--gold));
+}
+.rubric-head .titles h3 { font-size: 15.5px; color: var(--text-dark); }
+.rubric-head .titles span { font-size: 12px; color: var(--text-muted); }
+.rubric-head .desc { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; max-width: 70ch; }
+.rubric-head i.chev { transition: transform 0.25s ease; color: var(--text-muted); }
+.rubric-card.open .rubric-head i.chev { transform: rotate(180deg); }
+.rubric-body { display: none; padding: 0 20px 18px; }
+.rubric-card.open .rubric-body { display: block; }
+.skill-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    padding: 10px 0; border-top: 1px dashed var(--border-color); font-size: 13px;
+}
+.skill-row:first-child { border-top: none; }
+.skill-row .sk { color: var(--text-dark); font-weight: 500; }
+.skill-row .q { color: var(--text-muted); white-space: pre-line; }
+.skill-row .q::before { content: '« '; color: var(--gold-deep); }
+
+.type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.type-card {
+    background: var(--bg-card); border: 1px solid var(--border-color);
+    border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow);
+}
+.type-card h3 { font-size: 14.5px; color: var(--primary); margin-bottom: 6px; }
+.type-card p.tdesc { font-size: 12.5px; color: var(--text-muted); margin-bottom: 10px; }
+.type-card .tlabel { font-size: 11px; color: var(--gold-deep); font-weight: 700; margin-top: 8px; margin-bottom: 4px; }
+.type-card ul { margin: 0 18px; font-size: 12px; color: var(--text-dark); }
+.type-card .topics { font-size: 11.5px; color: var(--text-muted); }
+
+/* Practice */
+.level-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.level-tab {
+    padding: 10px 18px; border-radius: 24px; border: 1.5px solid var(--border-color);
+    background: var(--bg-card); cursor: pointer; font-size: 13.5px;
+    font-weight: 700; color: var(--text-muted); transition: var(--transition);
+}
+.level-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+.practice-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.practice-toolbar h2 { font-size: 15.5px; color: var(--primary); }
+
+.btn {
+    display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px;
+    border-radius: 10px; border: none; font-family: inherit; font-size: 13.5px;
+    font-weight: 700; cursor: pointer; transition: var(--transition);
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--navy-deep); }
+.btn-gold { background: var(--gold); color: #fff; }
+.btn-gold:hover { background: var(--gold-deep); }
+.btn-outline { background: #fff; border: 1.5px solid var(--border-color); color: var(--text-dark); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: #8f1a29; }
+.btn-success { background: var(--success); color: #fff; }
+.btn-word { background: #2b579a; color: #fff; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+.empty-hint { text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 13.5px; }
+.empty-hint i { font-size: 32px; color: var(--border-color); display: block; margin-bottom: 12px; }
+
+.segment-card {
+    background: var(--bg-card); border: 1px solid var(--border-color);
+    border-radius: var(--radius); margin-bottom: 16px; box-shadow: var(--shadow); overflow: hidden;
+}
+.segment-head {
+    padding: 16px 20px; display: flex; align-items: center;
+    justify-content: space-between; cursor: pointer; gap: 10px; flex-wrap: wrap;
+}
+.segment-head .titlewrap { display: flex; align-items: center; gap: 12px; }
+.segment-head .num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--primary-light);
+    color: var(--primary); display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; flex-shrink: 0;
+}
+.segment-head h3 { font-size: 15px; color: var(--text-dark); }
+.segment-head .meta { font-size: 11.5px; color: var(--text-muted); }
+.segment-actions { display: flex; gap: 6px; align-items: center; }
+.icon-btn {
+    width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-color);
+    background: #fff; color: var(--text-muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: var(--transition); font-size: 13px;
+}
+.icon-btn:hover { border-color: var(--primary); color: var(--primary); }
+.icon-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+.segment-body { display: none; padding: 0 20px 20px; border-top: 1px solid var(--border-color); }
+.segment-card.open .segment-body { display: block; padding-top: 16px; }
+
+.info-block { background: var(--bg-body); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; font-size: 13px; }
+.info-block .lbl { font-size: 11.5px; color: var(--gold-deep); font-weight: 700; margin-bottom: 4px; }
+.info-block .val { color: var(--text-dark); white-space: pre-line; }
+.comp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 10px; margin-bottom: 14px; }
+.comp-item { background: var(--bg-body); border-radius: 10px; padding: 12px 14px; font-size: 12.5px; }
+.comp-item .lbl { font-size: 11px; color: var(--primary); font-weight: 700; margin-bottom: 4px; }
+.comp-item .val { color: var(--text-dark); white-space: pre-line; }
+
+/* Modal */
+.modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(15,35,64,0.55);
+    z-index: 100; align-items: flex-start; justify-content: center;
+    padding: 30px 16px; overflow-y: auto;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+    background: #fff; border-radius: var(--radius); width: 100%; max-width: 820px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin-bottom: 30px;
+}
+.modal-header {
+    padding: 18px 22px; border-bottom: 1px solid var(--border-color);
+    display: flex; justify-content: space-between; align-items: center;
+}
+.modal-header h3 { font-size: 16px; color: var(--primary); }
+.modal-close { background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; }
+.modal-body { padding: 20px 22px; max-height: 72vh; overflow-y: auto; }
+.modal-footer { padding: 16px 22px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+
+.field-group { margin-bottom: 14px; }
+.field-group label { display: block; font-size: 12.5px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+.field-group input, .field-group textarea, .field-group select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border-color);
+    border-radius: 8px; font-family: inherit; font-size: 13px;
+    color: var(--text-dark); background: #fff;
+}
+.field-group textarea { resize: vertical; min-height: 70px; line-height: 1.7; }
+.field-group input:focus, .field-group textarea:focus, .field-group select:focus { outline: none; border-color: var(--gold); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.skill-checks {
+    display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px;
+    max-height: 140px; overflow-y: auto; background: #fff;
+    border-radius: 6px; padding: 8px 10px; border: 1px solid var(--border-color);
+}
+.skill-checks label { display: flex; align-items: flex-start; gap: 6px; font-size: 12px; color: var(--text-dark); cursor: pointer; }
+.skill-checks input { margin-top: 3px; }
+.gen-btn { font-size: 11.5px; padding: 5px 12px; }
+
+.memo-field { display: grid; grid-template-columns: 190px 1fr; gap: 12px; align-items: start; padding: 10px 14px; border-bottom: 1px dashed var(--border-color); }
+.memo-field label { font-weight: 700; color: var(--primary); font-size: 13px; }
+.memo-field input, .memo-field textarea {
+    padding: 8px 12px; border: 1.5px solid var(--border-color); border-radius: 8px;
+    font-size: 13px; background: #fafcff; font-family: inherit; width: 100%;
+}
+.memo-field textarea { min-height: 60px; resize: vertical; line-height: 1.7; }
+
+.memo-title-bar {
+    background: linear-gradient(90deg, var(--primary) 0%, #eef3f9 100%);
+    color: #fff; padding: 10px 18px; border-radius: 10px;
+    font-size: 15px; font-weight: 700; margin: 20px 0 12px;
+}
+.memo-title-bar.gold { background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 100%); color: var(--navy-deep); }
+
+@media (max-width: 640px) {
+    .field-row, .skill-row, .comp-grid, .memo-field { grid-template-columns: 1fr; }
+    .main-tabs { overflow-x: auto; }
+}
+</style>
+</head>
+<body>
+
+<div id="ssoLoadingScreen">
+    <div class="spin"></div>
+    <div style="font-size:13.5px; color:var(--text-muted);">جارٍ التحقق من الدخول...</div>
+</div>
+
+<div id="appScreen">
+    <div class="user-bar">
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <a href="index.html"><i class="fas fa-arrow-right"></i> البوابة</a>
+            <span>مرحباً، <span class="who" id="userNameLabel"></span></span>
+        </div>
+        <button onclick="handleLogout()"><i class="fas fa-arrow-right-from-bracket"></i> تسجيل الخروج</button>
+    </div>
+
+    <div class="hero">
+        <h1><i class="fas fa-book-open-reader"></i> تعليمية اللغة العربية — الأداة الموحّدة</h1>
+        <p>مرجعية نظرية شاملة + 32 مقطعاً جاهزاً (8 × 4 مستويات) + محرّك بناء المذكرات وفق سيرورة الوثيقة المرافقة + بنك أسئلة الفهم القرائي الخمسة.</p>
+    </div>
+
+    <div class="main-tabs">
+        <div class="main-tab active" data-maintab="theory"><i class="fas fa-scroll"></i> المرجعية النظرية</div>
+        <div class="main-tab" data-maintab="segments"><i class="fas fa-folder-open"></i> المقاطع الجاهزة</div>
+        <div class="main-tab" data-maintab="memo"><i class="fas fa-pen-ruler"></i> بناء المذكرة</div>
+        <div class="main-tab" data-maintab="bank"><i class="fas fa-wand-magic-sparkles"></i> بنك الأسئلة</div>
+    </div>
+
+    <!-- ============ المرجعية النظرية ============ -->
+    <div class="tab-panel active" id="panel-theory">
+        <div class="theory-section">
+            <h2><i class="fas fa-lightbulb"></i> مفاهيم أساسية</h2>
+            <div class="def-grid" id="defGrid"></div>
+        </div>
+        <div class="theory-section">
+            <h2><i class="fas fa-diagram-project"></i> أنماط النصوص</h2>
+            <div class="type-grid" id="typeGrid"></div>
+        </div>
+        <div class="theory-section">
+            <h2><i class="fas fa-layer-group"></i> البطاقة الفنية لمعايير بناء الأسئلة وفق مستويات الفهم القرائي</h2>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">اضغط على أي مستوى لعرض مهاراته وصيغ الأسئلة المقترحة له.</p>
+            <div id="rubricList"></div>
+        </div>
+    </div>
+
+    <!-- ============ المقاطع الجاهزة ============ -->
+    <div class="tab-panel" id="panel-segments">
+        <div class="level-tabs" id="levelTabsSeg"></div>
+        <div class="practice-toolbar">
+            <h2 id="segLevelTitle"></h2>
+            <button class="btn btn-gold" onclick="openCustomSegmentModal()"><i class="fas fa-plus"></i> إضافة مقطع مخصّص</button>
+        </div>
+        <div id="segmentsList"></div>
+    </div>
+
+    <!-- ============ بناء المذكرة ============ -->
+    <div class="tab-panel" id="panel-memo">
+        <div class="level-tabs" id="levelTabsMemo"></div>
+        <div class="field-row" style="margin-bottom:16px;">
+            <div class="field-group">
+                <label>اختر المقطع</label>
+                <select id="memoSegmentSelect"></select>
+            </div>
+            <div class="field-group">
+                <label>اختر الميدان</label>
+                <select id="memoDomainSelect">
+                    <option value="oral">فهم المنطوق وإنتاجه</option>
+                    <option value="written">فهم المكتوب</option>
+                    <option value="production">الإنتاج الكتابي</option>
+                    <option value="integration">الإدماج والتقويم</option>
+                </select>
+            </div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
+            <button class="btn btn-primary" onclick="generateMemo()"><i class="fas fa-cogs"></i> توليد المذكرة</button>
+            <button class="btn btn-word" onclick="exportMemoWord()"><i class="fas fa-file-word"></i> تصدير Word</button>
+            <button class="btn btn-outline" onclick="window.print()"><i class="fas fa-print"></i> طباعة / PDF</button>
+            <button class="btn btn-success" onclick="saveMemoToCloud()"><i class="fas fa-cloud-upload-alt"></i> حفظ في السحابة</button>
+        </div>
+        <div id="memoOutput"></div>
+    </div>
+
+    <!-- ============ بنك الأسئلة ============ -->
+    <div class="tab-panel" id="panel-bank">
+        <p style="font-size:13.5px; color:var(--text-muted); margin-bottom:16px;">
+            اختر مستوى الفهم، ثم حدّد المهارات المستهدفة، ثم اضغط "توليد الأسئلة". يمكنك تعديل الناتج يدوياً.
+        </p>
+        <div id="bankContainer"></div>
+        <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="generateAllBankQuestions()"><i class="fas fa-wand-magic-sparkles"></i> توليد أسئلة كل المستويات</button>
+            <button class="btn btn-outline" onclick="clearBank()"><i class="fas fa-eraser"></i> تفريغ</button>
+            <button class="btn btn-word" onclick="exportBankWord()"><i class="fas fa-file-word"></i> تصدير Word</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: مقطع مخصّص -->
+<div class="modal-overlay" id="customSegmentModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>إضافة مقطع مخصّص</h3>
+            <button class="modal-close" onclick="closeCustomSegmentModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="field-group"><label>المستوى</label>
+                <select id="csLevel"><option value="1">السنة الأولى</option><option value="2">السنة الثانية</option><option value="3">السنة الثالثة</option><option value="4">السنة الرابعة</option></select>
+            </div>
+            <div class="field-group"><label>عنوان المقطع</label><input type="text" id="csTitle"></div>
+            <div class="field-group"><label>الوصف</label><textarea id="csDesc"></textarea></div>
+            <div class="field-group"><label>الكفاءة الختامية</label><textarea id="csCompetency"></textarea></div>
+            <div class="field-group"><label>مركبات الكفاءة</label><textarea id="csComponents"></textarea></div>
+            <div class="field-group"><label>الموارد المعرفية</label><textarea id="csResources"></textarea></div>
+            <div class="field-group"><label>القيم والكفاءات العرضية</label><textarea id="csValues"></textarea></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeCustomSegmentModal()">إلغاء</button>
+            <button class="btn btn-primary" onclick="saveCustomSegment()"><i class="fas fa-save"></i> حفظ</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// 1. البيانات المرجعية
+// ============================================================
+
+const DEFINITIONS = [
+    { title: 'الميدان', text: 'هو الجزء المهيكل والمنظم للمادة قصد التعلّم، يحدد عدد الكفاءات وعدد الميادين في المادة. ميادين اللغة العربية ثلاثة: فهم المنطوق وإنتاجه، فهم المكتوب، والإنتاج الكتابي.' },
+    { title: 'المقطع التعلمي', text: 'مجموعة مرتبة ومترابطة من الأنشطة والمهمات، ينوب عن التحضير اليومي، يتميز بوجود علاقات تربط بين مختلف أجزائه المتتابعة في تدرّج لولبي، ويُختتم بوضعية إدماجية تقويمية.' },
+    { title: 'المقاربة النصية', text: 'اختيار بيداغوجي يقتضي الربط بين التلقي والإنتاج، ويجعل النص محورا أساسيا تدور حوله جميع فروع اللغة، فيمثل البنية الكبرى التي تظهر فيها كل المستويات اللغوية والصوتية والدلالية والنحوية والصرفية والأسلوبية.' },
+    { title: 'الوضعية المشكلة الانطلاقية (الأم)', text: 'تُطرح في بداية كل مقطع، تحفّز المتعلم على البحث والاستكشاف، وتتضمن سياقا وأسنادا ومهمات وتعليمة، ويسعى الأستاذ مع متعلميه إلى حلّها في آخر المقطع بتوظيف ما اكتسبوه من موارد.' },
+    { title: 'الوضعية الإدماجية التقويمية', text: 'تشتمل على المكونات ذاتها للوضعية الانطلاقية (السياق، الأسناد، التعليمة) وتختلف عنها في جدّتها، وتهدف إلى قياس مدى تحقق الكفاءة المرتبطة بالمقطع.' },
+    { title: 'أنواع القراءة', text: 'القراءة الصامتة: دون نطق أو همس. القراءة الجهرية: تُنطق بصوت مسموع مع مراعاة ضوابطها. القراءة التحصيلية: لتثبيت المعلومات. القراءة النقدية التحليلية: لتوليد نظرة نقدية واعية.' },
+    { title: 'سيرورة ميدان فهم المنطوق', text: '1) ما قبل الإسماع (تحضيري) 2) الإسماع الأول (فهم عام) 3) الإسماع الثاني (فهم تفصيلي) 4) الإسماع الثالث (تحليل وتركيب) 5) الإنتاج والتقويم.' },
+    { title: 'سيرورة ميدان فهم المكتوب', text: '1) القراءة الصامتة (وضعية الانطلاق + الفرضيات) 2) القراءة الجهرية النموذجية 3) القراءة التحليلية 4) الظواهر اللغوية 5) دراسة النص الأدبي 6) التقويم والإدماج.' },
+    { title: 'سيرورة الإنتاج الكتابي', text: '1) تقديم التقنية/النمط 2) تدريب (محاكاة من السند) 3) الإنتاج الكتابي + التقويم وفق شبكة المعايير.' },
+    { title: 'الإدماج', text: 'نشاط تعلمي هدفه حمل المتعلم على استثمار موارد المقطع في حل وضعية مشكلة دالة، ويأتي غالبا عند نهاية الأسبوع الثالث والرابع. من خصائصه: يكون المتعلم فاعلا ومسيطرا، تعبئة الموارد، نشاط موجه نحو إنماء الكفاءة.' },
+];
+
+const TEXT_TYPES = [
+    { name: 'النمط الحواري', desc: 'الحديث الذي يدور بين طرفين أو مجموعة من الأطراف في جو موحٍ بالهدوء والود بعيدا عن التعصب، يتصف بالحركة والتقطع والعبارات القصيرة، ويتلوّن بالتعجب والصراع أو الإجبار والإكراه.', indicators: ['استخدام الجمل القصيرة', 'بروز ضمير المخاطب', 'تواتر أسماء الأعلام', 'غلبة أساليب الاستفهام والتعجب أو الأمر'], topics: ['المسرح، القصة، الحكاية، الرواية، التحقيقات، المقابلة، الاستجوابات'] },
+    { name: 'النمط التوجيهي', desc: 'يُتحاذ بالترتيب والتسلسل المنطقي، يقدّم فكرة للعامة، يخلو من المشاعر أو العاطفة، يأتي للنصح والإرشاد والتوجيه.', indicators: ['سيطرة الجمل الإنشائية وخاصة الأمر والنهي', 'استخدام ضمائر المخاطب وأساليب النفي والإغراء والتحذير', 'استعمال أفعال الإلزام: يتوجب، يلزم، يقتضي، يجب عليك', 'استعمال الجمل القصيرة الواضحة الدلالة'], topics: ['توجيهات وإرشادات، القوانين، النشرات، الإعلانات'] },
+    { name: 'النمط السردي', desc: 'نقل أحداث أو أخبار من الواقع أو من نسج الخيال أو منهما معا، في إطار زمان ومكان بطريقة فنية، تتسلسل الأحداث فيه تسلسلا زمنيا.', indicators: ['استعمال عنصري الزمان والمكان', 'بروز الشخصيات', 'غلبة الزمن الماضي', 'الإكثار من أدوات الربط', 'هيمنة الجمل الخبرية'], topics: ['القصة، الرحلة، السيرة، الحكاية، المثل، المسرح'] },
+    { name: 'النمط الوصفي', desc: 'تصوير لغوي فني لإنسان أو حيوان أو جماد، من خلال الألفاظ والعبارات.', indicators: ['تعيين الشيء الموصوف وتركيز الوصف عليه', 'استعمال الصور البلاغية: الاستعارة، الكناية، التشبيه', 'استعمال الجمل الإنشائية', 'ثراء النص بالنعوت والأحوال', 'غلبة الجمل الفعلية'], topics: ['القصائد، المقالات، القصص، الجرد، نشرات الأحوال الجوية'] },
+    { name: 'النمط الحجاجي', desc: 'إقامة الحجة والبيّنة والدليل والبرهان، أسلوب تواصلي يرمي إلى إثبات قضية أو الإقناع بفكرة.', indicators: ['استخدام أساليب التوكيد والنفي والتعليل والاستنتاج', 'طرح القضية ودعمها بالبراهين', 'استخدام ضمير المتكلم', 'استخدام الجمل القصيرة', 'أدوات الربط المنطقية'], topics: ['المقالات، الإعلانات، الشعارات، النصوص النقدية'] },
+    { name: 'النمط التفسيري', desc: 'طريقة في التعبير تتناول حقيقة عامة لا رأيا شخصيا، مع ذكر أسبابها ونتائجها من غير إشراك الذات.', indicators: ['أدوات التحليل المنطقي: لأنّ، لام التعليل، لكي، بما أنّ، إذن', 'استخدام الأفعال المضارعة الدالة على الحقائق', 'استخدام الجمل الخبرية', 'كثرة الجمل الاسمية', 'غياب الرأي الشخصي'], topics: ['المقال، الموسوعات، الوثائق، الأخبار'] },
+];
+
+const READING_LEVELS = [
+    {
+        key: 'literal', name: 'الفهم الحرفي', subtitle: '(فهم السطور)', color: '#1a3d6e',
+        desc: 'أبسط أنواع الفهم القرائي، يركز على استيعاب المعاني الظاهرة في النص بشكل مباشر.',
+        skills: [
+            { skill: 'تحديد المعنى المناسب للكلمة من السياق', question: 'حدّد المعنى المناسب للكلمة من السياق.' },
+            { skill: 'ترتيب الأحداث حسب تسلسلها في النص', question: 'رتّب الأحداث حسب تسلسلها في النص.' },
+            { skill: 'تذكّر التفاصيل المذكورة في النص', question: 'اذكر تفاصيل الأحداث الواردة في النص.' },
+            { skill: 'الربط بين الكلمات والصور والأصوات', question: 'اربط بين الكلمة والصورة المناسبة.' },
+            { skill: 'التعبير الصوتي عن المعاني', question: 'عبّر بالصوت عن المعاني.' },
+            { skill: 'تحديد مرادف الكلمة وضدّها', question: 'استخرج المرادف المناسب للكلمة "..." من النص.\nاستخرج الضد المناسب للكلمة "..." من النص.\nوظّف الكلمة المشروحة في جملة من إنشائك.' },
+        ]
+    },
+    {
+        key: 'inferential', name: 'الفهم الاستنتاجي', subtitle: '(بين السطور)', color: '#c49b3f',
+        desc: 'استخلاص المعلومات غير الصريحة من النص بتكوين استنتاجات منطقية بناء على الأدلة.',
+        skills: [
+            { skill: 'اختيار عنوان مناسب للنص', question: 'اختر عنوانا مناسبا للنص. (اختيار من متعدد)' },
+            { skill: 'تحديد الفكرة العامة للموضوع', question: 'استنبط الفكرة العامة للموضوع.' },
+            { skill: 'استنتاج معاني الكلمات غير المألوفة', question: 'استنتج معاني الكلمات غير المألوفة من خلال السياق.' },
+            { skill: 'استنتاج سمات الشخصيات', question: 'استنتج سمات الشخصيات من خلال تلميحات النص.' },
+            { skill: 'تحديد الفكرة الأساسية للفقرات', question: 'استنتج الفكرة الأساسية للفقرة الأولى.\nاستنتج الفكرة الأساسية للفقرة الثانية.' },
+            { skill: 'استنتاج غرض المؤلف', question: 'فسّر غرض المؤلف من الموضوع.\nحدد وجهة نظر الكاتب بناء على فهمك.' },
+        ]
+    },
+    {
+        key: 'interpretive', name: 'الفهم التفسيري', subtitle: '(بين السطور)', color: '#167c80',
+        desc: 'يتطلب فهم المعاني المبطنة وتقديم تفسيرات لها من خلال تحليل الرموز والاستعارات.',
+        skills: [
+            { skill: 'التنبؤ بالنتائج بناء على المقدمات', question: 'تنبأ بالنتائج بناء على المقدمات المعروضة في النص.' },
+            { skill: 'التفسير الرمزي أو المجازي للغة', question: 'فسّر المعنى الرمزي أو المجازي في قول الكاتب: "..."' },
+            { skill: 'تحديد التضاد أو المقارنات', question: 'حدد التضاد أو المقارنات الواردة في المقروء.' },
+            { skill: 'تحديد السبب والنتيجة', question: 'حدد السبب والنتيجة في النص القرائي.' },
+            { skill: 'وصف مشاعر الشخصيات', question: 'صف مشاعر الشخصية في هذا الموقف.' },
+        ]
+    },
+    {
+        key: 'critical', name: 'الفهم الناقد', subtitle: '(ما وراء السطور - التقييمي)', color: '#8c6423',
+        desc: 'يتطلب تقييم النص بأسلوب منظم وتحليل معانيه ومقارنتها بالمعرفة السابقة.',
+        skills: [
+            { skill: 'تمييز الحقيقة والرأي', question: 'ميّز بين الحقيقة والرأي.' },
+            { skill: 'التمييز بين ما يتصل بأفكار النص وما لا يتصل', question: 'ميّز بين ما يتصل بأفكار النص المقروء وما لا يتصل به.' },
+            { skill: 'التمييز بين الأفكار الأساسية والثانوية', question: 'ميّز بين الأفكار الأساسية والثانوية.' },
+            { skill: 'التمييز بين المقبول وغير المقبول', question: 'ميّز بين المقبول وغير المقبول من الأفكار.' },
+            { skill: 'تكوين رأي حول الأفكار والقضايا', question: 'عبّر عن رأيك حول الأفكار في النص.\nعبّر عن رأيك حول القضايا المطروحة في النص.' },
+        ]
+    },
+    {
+        key: 'creative', name: 'الفهم الإبداعي', subtitle: '(ما وراء السطور - التذوقي)', color: '#b22234',
+        desc: 'أعلى مستويات الفهم القرائي، يمارس فيه القارئ التفاعل مع النص بطرق مبتكرة.',
+        skills: [
+            { skill: 'ابتكار نهاية جديدة للقصة', question: 'ابتكر نهاية جديدة للقصة.' },
+            { skill: 'اقتراح حلول جديدة لمشكلة', question: 'اقترح حلولا جديدة لمشكلة وردت في النص.' },
+            { skill: 'التنبؤ بالأحداث', question: 'تنبأ بالأحداث بناء على مقدّمة النص.' },
+            { skill: 'تطوير أفكار جديدة', question: 'طوّر أفكارا جديدة من خلال أفكار سابقة.' },
+            { skill: 'اقتراح عنوان جديد للنص', question: 'اقترح عنوانا جديدا للنص.' },
+            { skill: 'إعادة صياغة النص', question: 'صغ النص بأسلوبك الخاص.' },
+            { skill: 'تصنيف المفردات والصور', question: 'صنّف المفردات الآتية وفق الحقول الدلالية المناسبة: ...' },
+            { skill: 'تلخيص النص', question: 'لخّص النص.' },
+            { skill: 'تحديد التعبير الأجمل أو الأقوى', question: 'حدد التعبير الأجمل من بين التعبيرات المقدَّمة.\nحدد التعبير الأقوى من بين التعبيرات المقدَّمة.' },
+            { skill: 'تحديد الحالة المزاجية والانفعالية', question: 'حدد الحالة المزاجية التي اشتمل عليها النص.\nحدد الحالة الانفعالية التي اشتمل عليها النص.' },
+        ]
+    },
+];
+
+// ============================================================
+// 2. المقاطع الثمانية × 4 مستويات = 32 مقطعاً
+// ============================================================
+
+const ALL_SEGMENTS = {
+    1: [
+        { id: 'S1-1', title: 'الحياة العائلية', desc: 'احترام الوالدين، صلة الأرحام، العلاقات الأسرية',
+          competency: 'يتواصل مشافهة بلسان عربي ولفظ منسجم، ويفهم مضمون الخطاب المنطوق من أنماط متنوعة، ويتفاعل معه، وينتج خطابات شفهية محترماً أساليب تناول الكلمة، في وضعيات تواصلية دالة.',
+          components: '• يستمع إلى خطابات شفهية ويتفاعل معها.\n• ينتج خطابات شفهية موظفاً رصيده اللغوي الجديد.\n• يحدد عناصر الوضعية التواصلية.',
+          resources: 'النعت وأحكامه؛ الفعل ودلالته الزمنية؛ الاسم والضمير وأسماء الإشارة والأسماء الموصولة؛ الجمع وأنواعه؛ المرفوعات؛ المنصوبات؛ الرسم الإملائي.',
+          values: 'احترام الوالدين؛ صلة الأرحام؛ الترابط الأسري؛ التعاون؛ البر بالوالدين.' },
+        { id: 'S1-2', title: 'حب الوطن', desc: 'المواطنة، التضامن، الشجاعة، التضحية، الحرية، الشهداء',
+          competency: 'يقرأ قراءة مسترسلة منغمة نصوصاً نثرية وشعرية متنوعة الأنماط، محترماً علامات الوقف، ويعبر عن فهمه لمضمونها، لا تقل عن مائة وثمانين كلمة مشكولة جزئياً.',
+          components: '• يقرأ النص بأداء حسن.\n• يستخرج فكرته العامة وأفكاره الأساسية.\n• يستخرج القيم الواردة في النص.',
+          resources: 'الهمزة وأنواعها؛ الفعل الصحيح والمعتل؛ المرفوعات والمنصوبات؛ التوابع؛ علامات الوقف.',
+          values: 'حب الوطن؛ التضحية؛ المواطنة؛ الشجاعة؛ الاعتزاز بالهوية.' },
+        { id: 'S1-3', title: 'عظماء الإنسانية', desc: 'عظماء بلادي، عظماء الإسلام، عظماء العالم، عظماء التاريخ',
+          competency: 'ينتج كتابة نصوصاً منسجمة متنوعة الأنماط بلغة سليمة، مع التحكم في خطاطة نمطي السرد والوصف، لا تقل عن 10 أسطر.',
+          components: '• يكتب مقدمة موضوع منسجم.\n• يوظف مكتسباته اللغوية والبلاغية.\n• يستخدم خصائص النمط المستهدف.',
+          resources: 'خطاطة النص السردي؛ الفعل الماضي والمضارع والأمر؛ الضمائر؛ أدوات الربط؛ التشبيه والاستعارة.',
+          values: 'تقدير العظماء؛ الاقتداء بالقدوة؛ احترام العلم والعلماء.' },
+        { id: 'S1-4', title: 'الأخلاق والمجتمع', desc: 'العفو والتسامح، التواضع، الأمانة، الصدق، الصبر',
+          competency: 'يتواصل مشافهة بلغة سليمة ويفهم معاني الخطاب المنطوق ويتفاعل معه، وينتج خطابات شفهية مسترسلة.',
+          components: '• يستخلص القيم والمواقف.\n• يبدي رأيه في المقروء.\n• يستدل بالأمثلة والشواهد.',
+          resources: 'الاسم الجامد والمشتق؛ الفعل اللازم والمتعدي؛ الأساليب اللغوية؛ الجملة الاسمية والفعلية.',
+          values: 'الصدق؛ الأمانة؛ العفو؛ التسامح؛ التواضع؛ الصبر.' },
+        { id: 'S1-5', title: 'العلم والاكتشافات العلمية', desc: 'طلب العلم، الأقمار الصناعية، وسائل الاتصال، الإنسان والآلة',
+          competency: 'يقرأ قراءة مسترسلة منغمة نصوصاً نثرية وشعرية متنوعة الأنماط.',
+          components: '• يقرأ قراءة معبرة.\n• يستخلص الأفكار الأساسية.\n• يتعرف على النص العلمي.',
+          resources: 'الميزان الصرفي؛ الفعل المجرد والمزيد؛ الأسماء الخمسة؛ الممنوع من الصرف؛ الحقول الدلالية.',
+          values: 'طلب العلم؛ حب الاكتشاف؛ الإبداع؛ الابتكار.' },
+        { id: 'S1-6', title: 'الأعياد', desc: 'الأعياد الدينية، الأعياد الوطنية، الأعياد العالمية',
+          competency: 'ينتج كتابة نصوصاً منسجمة متنوعة الأنماط بلغة سليمة.',
+          components: '• يحترم التعليمة.\n• يراعي خصائص النمط.\n• يوظف الروابط المناسبة.',
+          resources: 'أسماء الزمان والمكان؛ الأفعال الناسخة؛ أدوات الاستفهام؛ الأساليب الإنشائية.',
+          values: 'الاعتزاز بالهوية؛ احترام الأديان؛ التسامح؛ التآخي.' },
+        { id: 'S1-7', title: 'الطبيعة', desc: 'الحيوانات، الغابة، الحياة في الريف، البحر',
+          competency: 'يقرأ قراءة مسترسلة منغمة نصوصاً نثرية وشعرية متنوعة الأنماط.',
+          components: '• يستخرج الأفكار.\n• يتعرف على النص الوصفي.\n• يتذوق الجانب الجمالي.',
+          resources: 'صيغ المبالغة؛ اسم التفضيل؛ الصفة المشبهة؛ التشبيه والكناية؛ المجاز.',
+          values: 'حماية البيئة؛ احترام الطبيعة؛ الرفق بالحيوان.' },
+        { id: 'S1-8', title: 'الصحة والرياضة', desc: 'نظافة المحيط، التغذية، المرض والعلاج، أضرار التدخين',
+          competency: 'ينتج كتابة نصوصاً منسجمة متنوعة الأنماط بلغة سليمة، في وضعيات تواصلية دالة.',
+          components: '• يكتب نصاً إقناعياً.\n• يوظف الحجج والأدلة.\n• يحرر فقرة منسجمة.',
+          resources: 'أسلوب الشرط؛ أدوات الربط؛ الجملة المركبة؛ الروابط الحجاجية.',
+          values: 'الحفاظ على الصحة؛ النظافة؛ ممارسة الرياضة.' },
+    ],
+    2: [
+        { id: 'S2-1', title: 'الحياة العائلية', desc: 'العلاقات الأسرية، صلة الأرحام، آداب الحوار الأسري',
+          competency: 'يتواصل مشافهة بلسان عربي ولغة منسجمة، ويفهم مدلول معاني الخطاب المنطوق من أنماط متنوعة ويتفاعل معه.',
+          components: '• يفهم معاني الخطاب.\n• يتواصل بالإجابة عن أسئلة ويطرح أخرى.\n• يميز نمط الخطاب المنطوق.',
+          resources: 'الاسم المقصور والمنقوص؛ حروف العطف؛ الفعل المعتل وأنواعه؛ التاء المفتوحة والمربوطة.',
+          values: 'صلة الأرحام؛ الترابط الأسري؛ آداب الحوار.' },
+        { id: 'S2-2', title: 'حب الوطن', desc: 'المواطنة، التضحية، الرموز الوطنية',
+          competency: 'يقرأ قراءة مسترسلة منغمة تحليلية نصوصاً نثرية وشعرية متنوعة الأنماط، محترماً علامات الوقف.',
+          components: '• يقرأ النص بأداء حسن.\n• يستخرج الأفكار.\n• يستخرج القيم الوطنية.',
+          resources: 'أسماء الزمان والمكان؛ حروف القسم؛ إسناد الفعل المثال إلى الضمائر.',
+          values: 'حب الوطن؛ الاعتزاز بالرموز الوطنية؛ التضحية.' },
+        { id: 'S2-3', title: 'عظماء الإنسانية', desc: 'من عظماء بلادي، من عظماء الإسلام، من عظماء العالم',
+          competency: 'ينتج كتابة نصوصاً منسجمة متنوعة الأنماط بلغة سليمة، مع التحكم في خطاطة نمطي الحوار والتوجيه، لا تقل عن 12 سطراً.',
+          components: '• يكتب نصاً حواريّاً.\n• يوظف روابط النص الحواري.\n• يراعي قيم الموضوع.',
+          resources: 'الاسم الممدود؛ نصب الفعل المضارع؛ حروف الاستفهام؛ اسماء الزمان والمكان.',
+          values: 'تقدير العظماء؛ الاقتداء بالقدوة.' },
+        { id: 'S2-4', title: 'الأخلاق والمجتمع', desc: 'العفو، التسامح، الأمانة، الصدق، الصبر',
+          competency: 'يتواصل مشافهة بوعي ولغة منسجمة، ويفهم مضمون الخطاب المنطوق ويتفاعل معه.',
+          components: '• يفهم معاني الخطاب.\n• يحلل الأفكار.\n• يستخلص القيم.',
+          resources: 'الاسم الجامد والمشتق؛ أفعال المقاربة والرجاء والشروع؛ حروف النفي.',
+          values: 'الصدق، الأمانة، العفو، التسامح.' },
+        { id: 'S2-5', title: 'العلم والاكتشافات العلمية', desc: 'طلب العلم، وسائل الاتصال، الإنسان والآلة',
+          competency: 'يقرأ قراءة مسترسلة منغمة تحليلية نصوصاً متنوعة الأنماط.',
+          components: '• يقرأ قراءة معبرة.\n• يستخلص الأفكار.\n• يتعرف على النص العلمي.',
+          resources: 'جزم الفعل المضارع؛ الأفعال الخمسة؛ الفعل المجرد والمزيد.',
+          values: 'طلب العلم؛ حب الاكتشاف.' },
+        { id: 'S2-6', title: 'الأعياد', desc: 'الأعياد الدينية، الوطنية، العالمية',
+          competency: 'ينتج كتابة نصوصاً منسجمة متنوعة الأنماط بلغة سليمة، مع التحكم في خطاطة نمطي الحوار والتوجيه.',
+          components: '• يكتب نصاً حواريّاً.\n• يوظف روابط النص الحواري.\n• يراعي قيم الموضوع.',
+          resources: 'أحرف الجواب: نعم، لا، بلى؛ الفعل المجرد؛ أحرف التنبيه والزيادة.',
+          values: 'الاعتزاز بالهوية؛ التسامح.' },
+        { id: 'S2-7', title: 'الطبيعة', desc: 'الغابة، البحر، الحياة في الريف',
+          competency: 'يقرأ قراءة مسترسلة منغمة تحليلية نصوصاً متنوعة الأنماط.',
+          components: '• يستخرج الأفكار.\n• يتعرف على النص الوصفي.\n• يتذوق الجانب الجمالي.',
+          resources: 'أفعال متعدية لمفعولين؛ الفعل المزيد وأوزانه؛ أحرف المفاجأة والتفسير.',
+          values: 'حماية البيئة؛ احترام الطبيعة.' },
+        { id: 'S2-8', title: 'الصحة والرياضة', desc: 'التغذية، المرض والعلاج، أضرار التدخين',
+          competency: 'ينتج كتابة نصوصاً منسجمة متنوعة الأنماط بلغة سليمة.',
+          components: '• يكتب نصاً إقناعياً.\n• يوظف الحجج والأدلة.\n• يحرر فقرة منسجمة.',
+          resources: 'أفعل التفضيل؛ أحرف الصمدية: لو، إن، كي، ما؛ أحرف الاستفتاح والتمني.',
+          values: 'الحفاظ على الصحة؛ ممارسة الرياضة.' },
+    ],
+    3: [
+        { id: 'S3-1', title: 'الآفات الاجتماعية', desc: 'الغش، الاحتكار، الكذب، النفاق، الحسد، الرشوة',
+          competency: 'يصغي إلى خطابات تفسيرية، يدرك مضمونها ويعيد إنتاجها بلغة سليمة.',
+          components: '• يفهم معاني الخطاب.\n• يحلل الأفكار.\n• يستخلص القيم.',
+          resources: 'بناء الفعل الماضي على الفتح والضم والسكون؛ علامات الوقف؛ بعض حروف المعاني.',
+          values: 'محاربة الآفات الاجتماعية؛ النزاهة؛ الصدق.' },
+        { id: 'S3-2', title: 'الإعلام والمجتمع', desc: 'الجرائد، المجلات، الإذاعة، التلفزة',
+          competency: 'يقرأ قراءة مسترسلة معبرة نصوصاً حجاجية تفسيرية مشكولة جزئياً.',
+          components: '• يقرأ قراءة معبرة.\n• يستخلص الأفكار.\n• يتعرف على النص التفسيري.',
+          resources: 'بناء الفعل المضارع على الفتح والسكون؛ اسم الفاعل وعمله؛ لا النافية للجنس.',
+          values: 'الوعي الإعلامي؛ التمييز بين الإيجابي والسلبي.' },
+        { id: 'S3-3', title: 'التضامن الإنساني', desc: 'الهلال الأحمر، الصليب الأحمر، أطباء بلا حدود',
+          competency: 'يحرر بمنهجية فقرة تفسيرية مترابطة بلغة سليمة موظفاً قيماً اجتماعية.',
+          components: '• يكتب نصاً تفسيرياً.\n• يوظف الروابط التفسيرية.\n• يراعي قيم الموضوع.',
+          resources: 'اسم الفاعل وعمله؛ صيغ المبالغة؛ بناء فعل الأمر.',
+          values: 'التضامن؛ التكافل؛ حب الخير.' },
+        { id: 'S3-4', title: 'شعوب العالم', desc: 'الأجناس، العادات والتقاليد، المعتقدات',
+          competency: 'يقرأ قراءة واعية نصوصاً حجاجية مشكولة جزئياً، ويستنبط أثر الحجة.',
+          components: '• يحلل الأفكار.\n• يستخلص القيم.\n• يبدي رأيه.',
+          resources: 'الشرط وأركانه؛ اسم فعل الأمر؛ نصب الفعل المضارع بأن المضمرة.',
+          values: 'التسامح؛ احترام الاختلاف؛ التعايش السلمي.' },
+        { id: 'S3-5', title: 'العلم والتقدم التكنولوجي', desc: 'الأقراص المضغوطة، الاتصال الرقمي، العلاج بالأشعة',
+          competency: 'يصغي بوعي إلى خطابات حجاجية، يناقش معناها ويعرض آراءه مدعوماً بالحجج.',
+          components: '• يفهم معنى الخطاب.\n• يحلل الحجج.\n• يبدي رأيه.',
+          resources: 'أدوات الشرط الجازمة؛ أدوات الشرط غير الجازمة؛ اقتران جواب الشرط.',
+          values: 'حب العلم؛ الوعي التكنولوجي.' },
+        { id: 'S3-6', title: 'التلوث البيئي', desc: 'النفايات الصناعية، تلوث الهواء والماء',
+          competency: 'يقرأ قراءة واعية نصوصاً حجاجية مشكولة جزئياً، ويستنبط أثر الحجة.',
+          components: '• يحلل الأفكار.\n• يستخلص القيم.\n• يبدي رأيه.',
+          resources: 'أدوات الشرط الجازمة؛ أدوات الشرط غير الجازمة؛ اقتران جواب الشرط.',
+          values: 'حماية البيئة؛ الوعي البيئي.' },
+        { id: 'S3-7', title: 'الصناعات التقليدية', desc: 'النسيج، الفخار، النحاس، الحلي الفضية',
+          competency: 'يصغي بتركيز إلى خطابات حجاجية تفسيرية، يفهم معناها العام وخطاطة النمط.',
+          components: '• يفهم الخطاب.\n• يحلل الحجاج.\n• يبدي رأيه.',
+          resources: 'أدوات الشرط الجازمة؛ أدوات الشرط غير الجازمة؛ اقتران جواب الشرط.',
+          values: 'الاعتزاز بالتراث؛ دعم الصناعات التقليدية.' },
+        { id: 'S3-8', title: 'الهجرة الداخلية والخارجية', desc: 'النزوح الريفي، هجرة الأدمغة',
+          competency: 'يكتب نصاً حجاجياً مترابطاً ومنسجماً، مدعوماً بالحجج بلغة سليمة لا يقل عن 14 سطراً.',
+          components: '• يكتب نصاً حجاجياً.\n• يوظف الروابط الحجاجية.\n• يراعي قيم الموضوع.',
+          resources: 'اقتران جواب الشرط بالفعل؛ أدوات الشرط غير الجازمة؛ إعراب المنادى.',
+          values: 'الوعي بمخاطر الهجرة السرية؛ حب الوطن.' },
+    ],
+    4: [
+        { id: 'S4-1', title: 'قضايا اجتماعية', desc: 'التكاتف الاجتماعي، الاحتكام إلى القوانين والأعراف',
+          competency: 'يستمع إلى خطابات متنوعة الأنماط يغلب عليها السرد مع الحوار والوصف، يفهم ويحلل مضمونها.',
+          components: '• يفهم معنى الخطاب.\n• يحلل الأفكار.\n• يبدي رأيه.',
+          resources: 'الحقيقة والمجاز؛ السجع؛ عطف النسق؛ عطف البيان؛ البدل.',
+          values: 'التكاتف الاجتماعي؛ الاحتكام إلى القوانين.' },
+        { id: 'S4-2', title: 'ثقافة الصورة', desc: 'الدور الإيجابي والسلبي للصورة في المجتمع',
+          competency: 'يقرأ قراءة مسترسلة منغمة تحليلية واعية ونقدية نصوصاً مختلفة الأنماط.',
+          components: '• يقرأ قراءة ناقدة.\n• يحلل الأفكار.\n• يبدي رأيه.',
+          resources: 'الجملة البسيطة والمركبة؛ الجملة الواقعة مفعولاً به؛ الجملة الواقعة نعتاً وحالاً.',
+          values: 'الوعي بثقافة الصورة؛ التمييز بين الإيجابي والسلبي.' },
+        { id: 'S4-3', title: 'شعوب العالم', desc: 'الأجناس، العادات والتقاليد، المعتقدات',
+          competency: 'ينتج كتابة نصوصاً منسجمة متنوعة الأنماط، لا تقل عن 16 سطراً بلغة سليمة.',
+          components: '• يكتب نصاً تفسيرياً وصفياً.\n• يوظف الروابط.\n• يراعي قيم الموضوع.',
+          resources: 'الاقتباس؛ الأسلوب الخبري؛ الجملة الخبرية؛ الجملة الفعلية الواقعة خبراً.',
+          values: 'التسامح؛ احترام الاختلاف؛ التعايش السلمي.' },
+        { id: 'S4-4', title: 'التضامن الإنساني', desc: 'الهلال الأحمر، المنظمات الدولية لحقوق الإنسان',
+          competency: 'يصغي بتركيز إلى خطابات متنوعة الأنماط يغلب عليها التفسير والوصف.',
+          components: '• يفهم الخطاب.\n• يحلل الأفكار.\n• يبدي رأيه.',
+          resources: 'الاقتباس؛ الأسلوب الخبري؛ الجملة الخبرية؛ الجملة الاسمية الواقعة خبراً.',
+          values: 'التضامن؛ التكافل؛ حقوق الإنسان.' },
+        { id: 'S4-5', title: 'التلوث البيئي', desc: 'النفايات الصناعية، تلوث الهواء والماء',
+          competency: 'يقرأ قراءة واعية نصوصاً حجاجية مشكولة جزئياً، ويستنبط أثر الحجة.',
+          components: '• يحلل الأفكار.\n• يستخلص القيم.\n• يبدي رأيه.',
+          resources: 'الأسلوب الإنشائي؛ الاستعارة التصريحية؛ الجملة الفعلية الواقعة مضافاً إليه.',
+          values: 'حماية البيئة؛ الوعي البيئي.' },
+        { id: 'S4-6', title: 'الصناعات التقليدية', desc: 'النسيج، الفخار، النحاس، الحلي الفضية',
+          competency: 'يصغي بتدبر إلى خطابات متنوعة الأنماط يفهم مضمونها ويحللها.',
+          components: '• يفهم الخطاب.\n• يحلل الأفكار.\n• يبدي رأيه.',
+          resources: 'الجملة الواقعة جواباً للشرط؛ أركانها؛ الجملة الواقعة جواباً لشرط جازم.',
+          values: 'الاعتزاز بالتراث؛ دعم الصناعات التقليدية.' },
+        { id: 'S4-7', title: 'الهجرة الداخلية والخارجية', desc: 'النزوح الريفي، هجرة الأدمغة',
+          competency: 'ينتج كتابة نصوصاً منسجمة متنوعة الأنماط، لا تقل عن 16 سطراً بلغة سليمة.',
+          components: '• يكتب نصاً منسجماً.\n• يوظف الروابط.\n• يراعي قيم الموضوع.',
+          resources: 'الجملة الواقعة جواباً للشرط؛ أركانها؛ الجملة الواقعة جواباً لشرط جازم.',
+          values: 'الوعي بمخاطر الهجرة السرية؛ حب الوطن.' },
+        { id: 'S4-8', title: 'هجرة الأدمغة', desc: 'هجرة الكفاءات، الحلول المقترحة',
+          competency: 'يصغي بتدبر إلى خطابات متنوعة الأنماط يفهم مضمونها ويحللها.',
+          components: '• يفهم الخطاب.\n• يحلل الأفكار.\n• يبدي رأيه.',
+          resources: 'الجملة الواقعة جواباً للشرط؛ أركانها؛ الجملة الواقعة جواباً لشرط جازم.',
+          values: 'الوعي بمخاطر هجرة الأدمغة؛ حب الوطن.' },
+    ],
+};
+
+// ============================================================
+// 3. SSO + Firestore
+// ============================================================
+let currentUser = null;
+let cachedData = { customSegments: [], memos: [] };
+let cloudReady = false;
+
+function getPortalSession() {
+    try {
+        const raw = sessionStorage.getItem('pgb_session') || localStorage.getItem('pgb_session_persistent');
+        if (!raw) return null;
+        const session = JSON.parse(raw);
+        if (!session || Date.now() > session.expiresAt) return null;
+        return session.user || null;
+    } catch (e) { return null; }
+}
+function handleLogout() {
+    if (!confirm('هل تريد تسجيل الخروج؟')) return;
+    try { sessionStorage.removeItem('pgb_session'); localStorage.removeItem('pgb_session_persistent'); } catch (e) {}
+    window.location.href = 'index.html';
+}
+function getArabicDocRef() {
+    if (!fbDb) return null;
+    try { return fbDb.collection('platform_shared').doc('arabic_unified'); } catch (e) { return null; }
+}
+function ensureAnonAuth() {
+    if (!fbAuth) return Promise.resolve(null);
+    const p = new Promise((resolve) => {
+        if (fbAuth.currentUser) { resolve(fbAuth.currentUser); return; }
+        fbAuth.signInAnonymously().catch(() => {});
+        const unsub = fbAuth.onAuthStateChanged((user) => { if (user) { unsub(); resolve(user); } });
+    });
+    return Promise.race([p, new Promise(r => setTimeout(() => r(null), 8000))]);
+}
+function listenToCloudData() {
+    const docRef = getArabicDocRef();
+    if (!docRef) { cloudReady = true; return Promise.resolve(cachedData); }
+    return new Promise((resolve) => {
+        docRef.onSnapshot(
+            (doc) => {
+                cachedData = (doc.exists && doc.data()) ? doc.data() : { customSegments: [], memos: [] };
+                cloudReady = true; resolve(cachedData);
+                if (document.getElementById('panel-segments').classList.contains('active')) renderSegments();
+            },
+            (error) => { console.error('Firestore:', error); cloudReady = true; resolve(cachedData); }
+        );
+    });
+}
+async function saveToCloud() {
+    try {
+        const docRef = getArabicDocRef();
+        if (!docRef) throw new Error('السحابة غير متاحة');
+        await docRef.set({ ...cachedData, updatedAt: new Date().toISOString() });
+        return true;
+    } catch (e) { console.error(e); alert('⚠️ تعذّر الحفظ — تحقق من الاتصال'); return false; }
+}
+function generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function escapeHtml(t) { const d = document.createElement('div'); d.innerText = (t || ''); return d.innerHTML; }
+
+// ============================================================
+// 4. العرض النظري
+// ============================================================
+function renderTheory() {
+    document.getElementById('defGrid').innerHTML = DEFINITIONS.map(d =>
+        `<div class="def-card"><h3>${escapeHtml(d.title)}</h3><p>${escapeHtml(d.text)}</p></div>`
+    ).join('');
+
+    document.getElementById('typeGrid').innerHTML = TEXT_TYPES.map(t =>
+        `<div class="type-card">
+            <h3>${escapeHtml(t.name)}</h3>
+            <p class="tdesc">${escapeHtml(t.desc)}</p>
+            <div class="tlabel">مؤشراته</div>
+            <ul>${t.indicators.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>
+            <div class="tlabel">مواضيعه</div>
+            <div class="topics">${escapeHtml(t.topics.join(' — '))}</div>
+        </div>`
+    ).join('');
+
+    document.getElementById('rubricList').innerHTML = READING_LEVELS.map(lvl =>
+        `<div class="rubric-card" id="rubric-${lvl.key}" style="--accent:${lvl.color}">
+            <div class="rubric-head" onclick="toggleRubric('${lvl.key}')">
+                <div class="titles">
+                    <h3>${escapeHtml(lvl.name)} <span>${escapeHtml(lvl.subtitle)}</span></h3>
+                    <div class="desc">${escapeHtml(lvl.desc)}</div>
+                </div>
+                <i class="fas fa-chevron-down chev"></i>
+            </div>
+            <div class="rubric-body">
+                ${lvl.skills.map(s => `
+                    <div class="skill-row">
+                        <div class="sk">${escapeHtml(s.skill)}</div>
+                        <div class="q">${escapeHtml(s.question)}</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>`
+    ).join('');
+}
+function toggleRubric(key) { document.getElementById('rubric-' + key).classList.toggle('open'); }
+
+// ============================================================
+// 5. المقاطع الجاهزة
+// ============================================================
+let currentLevelSeg = 1;
+
+function renderLevelTabsSeg() {
+    document.getElementById('levelTabsSeg').innerHTML = [1,2,3,4].map(l =>
+        `<div class="level-tab ${l === currentLevelSeg ? 'active' : ''}" onclick="switchLevelSeg(${l})">السنة ${['الأولى','الثانية','الثالثة','الرابعة'][l-1]} متوسط</div>`
+    ).join('');
+    document.getElementById('segLevelTitle').textContent = `مقاطع السنة ${['الأولى','الثانية','الثالثة','الرابعة'][currentLevelSeg-1]} متوسط (${ALL_SEGMENTS[currentLevelSeg].length} مقاطع)`;
+}
+function switchLevelSeg(l) { currentLevelSeg = l; renderLevelTabsSeg(); renderSegments(); }
+
+function renderSegments() {
+    renderLevelTabsSeg();
+    const list = document.getElementById('segmentsList');
+    if (!cloudReady) {
+        list.innerHTML = `<div class="empty-hint"><i class="fas fa-spinner fa-spin"></i>جارٍ التحميل...</div>`;
+        return;
+    }
+    const custom = (cachedData.customSegments || []).filter(s => s.level === currentLevelSeg);
+    const builtin = ALL_SEGMENTS[currentLevelSeg];
+    const all = [...builtin, ...custom];
+
+    list.innerHTML = all.map((seg, i) => `
+        <div class="segment-card" id="segcard-${seg.id}">
+            <div class="segment-head" onclick="toggleSegment('${seg.id}')">
+                <div class="titlewrap">
+                    <div class="num">${i + 1}</div>
+                    <div>
+                        <h3>${escapeHtml(seg.title)} ${seg.custom ? '<span style="font-size:10px; color:var(--gold-deep);">(مخصّص)</span>' : ''}</h3>
+                        <div class="meta">${escapeHtml(seg.desc || '')}</div>
+                    </div>
+                </div>
+                <div class="segment-actions" onclick="event.stopPropagation()">
+                    ${seg.custom ? `<button class="icon-btn danger" onclick="deleteCustomSegment('${seg.id}')"><i class="fas fa-trash"></i></button>` : ''}
+                    <i class="fas fa-chevron-down chev" style="color:var(--text-muted)"></i>
+                </div>
+            </div>
+            <div class="segment-body">
+                <div class="comp-grid">
+                    <div class="comp-item"><div class="lbl">الكفاءة الختامية</div><div class="val">${escapeHtml(seg.competency || '—')}</div></div>
+                    <div class="comp-item"><div class="lbl">مركبات الكفاءة</div><div class="val">${escapeHtml(seg.components || '—')}</div></div>
+                    <div class="comp-item"><div class="lbl">الموارد المعرفية</div><div class="val">${escapeHtml(seg.resources || '—')}</div></div>
+                    <div class="comp-item"><div class="lbl">القيم والكفاءات العرضية</div><div class="val">${escapeHtml(seg.values || '—')}</div></div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+function toggleSegment(id) { document.getElementById('segcard-' + id).classList.toggle('open'); }
+
+function openCustomSegmentModal() {
+    document.getElementById('csLevel').value = currentLevelSeg;
+    document.getElementById('csTitle').value = '';
+    document.getElementById('csDesc').value = '';
+    document.getElementById('csCompetency').value = '';
+    document.getElementById('csComponents').value = '';
+    document.getElementById('csResources').value = '';
+    document.getElementById('csValues').value = '';
+    document.getElementById('customSegmentModal').classList.add('show');
+}
+function closeCustomSegmentModal() { document.getElementById('customSegmentModal').classList.remove('show'); }
+
+async function saveCustomSegment() {
+    const title = document.getElementById('csTitle').value.trim();
+    if (!title) { alert('الرجاء إدخال عنوان المقطع'); return; }
+    const seg = {
+        id: 'seg_' + generateId(),
+        custom: true,
+        level: parseInt(document.getElementById('csLevel').value),
+        title,
+        desc: document.getElementById('csDesc').value.trim(),
+        competency: document.getElementById('csCompetency').value.trim(),
+        components: document.getElementById('csComponents').value.trim(),
+        resources: document.getElementById('csResources').value.trim(),
+        values: document.getElementById('csValues').value.trim(),
+    };
+    cachedData.customSegments = cachedData.customSegments || [];
+    cachedData.customSegments.push(seg);
+    currentLevelSeg = seg.level;
+    renderSegments();
+    closeCustomSegmentModal();
+    await saveToCloud();
+}
+
+async function deleteCustomSegment(id) {
+    if (!confirm('حذف هذا المقطع؟')) return;
+    cachedData.customSegments = (cachedData.customSegments || []).filter(s => s.id !== id);
+    renderSegments();
+    await saveToCloud();
+}
+
+// ============================================================
+// 6. محرّك بناء المذكرة
+// ============================================================
+let currentLevelMemo = 1;
+
+function renderLevelTabsMemo() {
+    document.getElementById('levelTabsMemo').innerHTML = [1,2,3,4].map(l =>
+        `<div class="level-tab ${l === currentLevelMemo ? 'active' : ''}" onclick="switchLevelMemo(${l})">السنة ${['الأولى','الثانية','الثالثة','الرابعة'][l-1]}</div>`
+    ).join('');
+    updateMemoSelect();
+}
+function switchLevelMemo(l) { currentLevelMemo = l; renderLevelTabsMemo(); }
+
+function updateMemoSelect() {
+    const sel = document.getElementById('memoSegmentSelect');
+    const builtin = ALL_SEGMENTS[currentLevelMemo];
+    const custom = (cachedData.customSegments || []).filter(s => s.level === currentLevelMemo);
+    sel.innerHTML = [...builtin, ...custom].map(s => `<option value="${s.id}">${escapeHtml(s.title)}</option>`).join('');
+}
+
+function findSegment(id) {
+    for (const lvl of [1,2,3,4]) {
+        const s = ALL_SEGMENTS[lvl].find(x => x.id === id);
+        if (s) return { ...s, level: lvl };
+    }
+    return (cachedData.customSegments || []).find(x => x.id === id);
+}
+
+function generateMemo() {
+    const segId = document.getElementById('memoSegmentSelect').value;
+    const domain = document.getElementById('memoDomainSelect').value;
+    const seg = findSegment(segId);
+    if (!seg) { alert('اختر مقطعاً'); return; }
+
+    const domainLabels = { oral: 'فهم المنطوق وإنتاجه', written: 'فهم المكتوب', production: 'الإنتاج الكتابي', integration: 'الإدماج والتقويم' };
+    const levelNames = ['الأولى','الثانية','الثالثة','الرابعة'];
+
+    let html = `
+        <div style="background:#fff; border-radius:var(--radius); padding:30px; box-shadow:var(--shadow);">
+            <div style="text-align:center; border-bottom:3px double var(--primary); padding-bottom:15px; margin-bottom:20px;">
+                <div style="font-size:13px; color:var(--text-muted);">الجمهورية الجزائرية الديمقراطية الشعبية — وزارة التربية الوطنية</div>
+                <div style="font-size:15px; color:var(--primary); font-weight:700; margin:4px 0;">مديرية التربية لولاية قسنطينة — المقاطعة الثانية</div>
+                <div style="font-size:18px; color:var(--gold-deep); font-weight:700; margin-top:8px;">مذكرة تحضير — ${domainLabels[domain]}</div>
+                <div style="font-size:13px; color:var(--text-muted); margin-top:4px;">المقطع: <b>${escapeHtml(seg.title)}</b> | المستوى: <b>السنة ${levelNames[currentLevelMemo-1]} متوسط</b></div>
+            </div>
+
+            <div class="memo-title-bar"><i class="fas fa-user-edit"></i> المعلومات العامة</div>
+            ${memoField('المؤسسة', 'text', '')}
+            ${memoField('الأستاذ(ة)', 'text', currentUser ? (currentUser.fullName || '') : '')}
+            ${memoField('السنة الدراسية', 'text', new Date().getFullYear() + '/' + (new Date().getFullYear()+1))}
+            ${memoField('التاريخ', 'date', new Date().toISOString().split('T')[0])}
+            ${memoField('المدة', 'text', domain === 'written' ? 'ساعتان' : 'ساعة واحدة')}
+
+            <div class="memo-title-bar"><i class="fas fa-book-reader"></i> الشق النظري — المرجعية الرسمية</div>
+            ${memoField('الكفاءة الختامية', 'textarea', seg.competency || '')}
+            ${memoField('مركبات الكفاءة', 'textarea', seg.components || '')}
+            ${memoField('الموارد المعرفية والمنهجية', 'textarea', seg.resources || '')}
+            ${memoField('القيم والكفاءات العرضية', 'textarea', seg.values || '')}
+    `;
+
+    if (domain === 'oral') {
+        html += `
+            <div class="memo-title-bar gold"><i class="fas fa-headphones"></i> سيرورة ميدان فهم المنطوق (3 حصص)</div>
+            ${memoField('🚀 وضعية الانطلاق (الوضعية الأم)', 'textarea', `السياق: تنتقى الوضعية في سياق مقطع "${seg.title}" وتكون من اهتمامات المتعلم وذات دلالة.\n\nالمهمات: ينتج (مشافهة) خطابات شفهية بتوظيف الموارد المدرجة.\n\nالسند: نص منطوق مناسب.`)}
+            ${memoField('🎧 الإسماع الأول — الفهم العام', 'textarea', 'مراقبة الفهم العام لمضمون النص المنطوق. طرح أسئلة الفهم الحرفي.')}
+            ${memoField('❓ أسئلة الإسماع الأول (فهم حرفي)', 'textarea', '')}
+            ${memoField('🎧 الإسماع الثاني — الفهم التفصيلي', 'textarea', 'التعمق في فهم النص وتحليل جزئياته. طرح أسئلة الفهم الاستنتاجي.')}
+            ${memoField('❓ أسئلة الإسماع الثاني (فهم استنتاجي)', 'textarea', '')}
+            ${memoField('🎧 الإسماع الثالث — التحليل والتركيب', 'textarea', 'فتح النقاش والحوار والنقد. استخلاص القيم والمواقف.')}
+            ${memoField('❓ أسئلة الإسماع الثالث (فهم ناقد/إبداعي)', 'textarea', '')}
+            ${memoField('🎤 الإنتاج الشفهي', 'textarea', 'تلخيص المضمون، إتمام المقطع، اقتراح الحل، لعب الأدوار...')}
+            ${memoField('✅ التقويم الإدماجي', 'textarea', '')}
+        `;
+    } else if (domain === 'written') {
+        html += `
+            <div class="memo-title-bar gold"><i class="fas fa-book-open"></i> سيرورة ميدان فهم المكتوب (6 حصص)</div>
+            ${memoField('🚀 وضعية الانطلاق', 'textarea', `تنتقى الوضعية في سياق مقطع "${seg.title}". بناء فرضيات حول النص انطلاقاً من: العنوان، الصور، الكلمات المفتاحية، بنية النص.`)}
+            ${memoField('📖 القراءة الصامتة (الحصة 1)', 'textarea', 'مطالبة المتعلمين بقراءة النص قراءة لا صوت فيها ولا همس. البحث عن إجابات للأسئلة: ما موضوع النص؟ من يكتب؟ أين؟ متى؟ لماذا؟')}
+            ${memoField('🔊 القراءة الجهرية النموذجية (الحصة 2)', 'textarea', 'قراءة نموذجية للأستاذ مع مراعاة مخارج الحروف، علامات الوقف، النبر، التنغيم. ثم قراءات فردية.')}
+            ${memoField('❓ أسئلة الفهم العام (حرفي/استنتاجي)', 'textarea', '')}
+            ${memoField('🔍 القراءة التحليلية (الحصة 3)', 'textarea', 'تحليل النص، استخراج الفكرة العامة والأفكار الأساسية، مناقشة القيم، إبداء الرأي.')}
+            ${memoField('❓ أسئلة الفهم التحليلي (تفسيري/ناقد/إبداعي)', 'textarea', '')}
+            ${memoField('📚 الظواهر اللغوية (الحصة 4)', 'textarea', 'المستوى الصوتي، المعجمي، الصرفي، التركيبي، الدلالي.')}
+            ${memoField('📖 دراسة النص الأدبي (الحصة 5)', 'textarea', 'تحليل الجوانب الجمالية والبلاغية.')}
+            ${memoField('✅ التقويم والإدماج (الحصة 6)', 'textarea', '')}
+        `;
+    } else if (domain === 'production') {
+        html += `
+            <div class="memo-title-bar gold"><i class="fas fa-pen-fancy"></i> سيرورة ميدان الإنتاج الكتابي (3 حصص)</div>
+            ${memoField('🚀 وضعية الانطلاق', 'textarea', `تنتقى الوضعية في سياق مقطع "${seg.title}".`)}
+            ${memoField('📄 تقديم التقنية/النمط (الحصة 1)', 'textarea', 'التعرف على النمط المستهدف، خطاطته، مؤشراته، روابطه.')}
+            ${memoField('✍️ التدريب (الحصة 2)', 'textarea', 'استثمار السند (النص) للمحاكاة.')}
+            ${memoField('📝 الإنتاج الكتابي (الحصة 3)', 'textarea', 'اختيار النمط: ...\nالموضوع: ...\nالتعليمة: ...')}
+            ${memoField('✅ التقويم', 'textarea', 'وفق شبكة المعايير: الوجاهة، الاستعمال السليم للأدوات، الانسجام، الإتقان.')}
+        `;
+    } else {
+        html += `
+            <div class="memo-title-bar gold"><i class="fas fa-layer-group"></i> الإدماج والتقويم</div>
+            ${memoField('🚀 وضعية الانطلاق', 'textarea', `تذكير بالوضعية المشكلة الأم لمقطع "${seg.title}".`)}
+            ${memoField('📋 الوضعية الإدماجية التقويمية', 'textarea', 'السياق:\nالأسناد:\nالتعليمة:')}
+            ${memoField('📊 شبكة التقويم بالمعايير', 'textarea', 'الوجاهة (3): ...\nالاستعمال السليم للأدوات (3): ...\nالانسجام (3): ...\nالإتقان (1): ...')}
+            ${memoField('🔧 المعالجة', 'textarea', 'الأنشطة العلاجية المقترحة:')}
+        `;
+    }
+
+    html += `
+            <div class="memo-title-bar gold"><i class="fas fa-comment-dots"></i> ملاحظات الأستاذ</div>
+            ${memoField('ملاحظات', 'textarea', '')}
+        </div>
+    `;
+
+    document.getElementById('memoOutput').innerHTML = html;
+}
+
+function memoField(label, type, value) {
+    if (type === 'textarea') {
+        return `<div class="memo-field"><label>${label}</label><textarea>${escapeHtml(value || '')}</textarea></div>`;
+    }
+    return `<div class="memo-field"><label>${label}</label><input type="${type}" value="${escapeHtml(value || '')}"></div>`;
+}
+
+function exportMemoWord() {
+    const content = document.getElementById('memoOutput').innerHTML;
+    if (!content.trim()) { alert('ولّد المذكرة أولاً'); return; }
+    const html = `<html dir="rtl" lang="ar"><head><meta charset="UTF-8"><style>
+        body { font-family: 'Simplified Arabic', Arial; padding: 30px; direction: rtl; line-height: 1.8; }
+        .memo-field { border-bottom: 1px dashed #ddd; padding: 8px 0; }
+        .memo-field label { font-weight: 700; color: #1a3d6e; display: block; margin-bottom: 4px; }
+        .memo-title-bar { background: #1a3d6e; color: #fff; padding: 8px 14px; margin: 16px 0 10px; }
+        .memo-title-bar.gold { background: #c49b3f; }
+        .comp-grid { display: block; }
+        .comp-item { margin-bottom: 10px; }
+    </style></head><body>${content}</body></html>`;
+    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `مذكرة_${new Date().toISOString().slice(0,10)}.doc`;
+    link.click();
+}
+
+async function saveMemoToCloud() {
+    const content = document.getElementById('memoOutput').innerHTML;
+    if (!content.trim()) { alert('ولّد المذكرة أولاً'); return; }
+    const memo = {
+        id: 'memo_' + generateId(),
+        segTitle: document.getElementById('memoSegmentSelect').selectedOptions[0].text,
+        level: currentLevelMemo,
+        domain: document.getElementById('memoDomainSelect').value,
+        html: content,
+        createdAt: new Date().toISOString(),
+        createdBy: currentUser ? (currentUser.fullName || '') : '',
+    };
+    cachedData.memos = cachedData.memos || [];
+    cachedData.memos.push(memo);
+    const ok = await saveToCloud();
+    if (ok) alert('✅ تم الحفظ في السحابة');
+}
+
+// ============================================================
+// 7. بنك الأسئلة
+// ============================================================
+function renderBank() {
+    const container = document.getElementById('bankContainer');
+    container.innerHTML = READING_LEVELS.map(lvl => `
+        <div class="rubric-card" style="--accent:${lvl.color}">
+            <div class="rubric-head" style="cursor:default;">
+                <div class="titles">
+                    <h3>${escapeHtml(lvl.name)} <span>${escapeHtml(lvl.subtitle)}</span></h3>
+                    <div class="desc">${escapeHtml(lvl.desc)}</div>
+                </div>
+                <button class="btn btn-outline gen-btn" onclick="generateBankFor('${lvl.key}')"><i class="fas fa-wand-magic-sparkles"></i> توليد</button>
+            </div>
+            <div class="rubric-body" style="display:block;">
+                <div class="skill-checks" id="bankchecks-${lvl.key}">
+                    ${lvl.skills.map((s, i) => `<label><input type="checkbox" value="${i}"> ${escapeHtml(s.skill)}</label>`).join('')}
+                </div>
+                <textarea id="bankquestions-${lvl.key}" placeholder="الأسئلة المولّدة..." style="width:100%; min-height:100px; padding:10px; border:1px solid var(--border-color); border-radius:8px; font-family:inherit; font-size:13px;"></textarea>
+            </div>
+        </div>
+    `).join('');
+}
+
+function generateBankFor(levelKey) {
+    const lvl = READING_LEVELS.find(l => l.key === levelKey);
+    if (!lvl) return;
+    const checks = document.querySelectorAll(`#bankchecks-${levelKey} input:checked`);
+    if (checks.length === 0) { alert('اختر مهارة واحدة على الأقل'); return; }
+    const lines = [];
+    checks.forEach(chk => {
+        const idx = parseInt(chk.value, 10);
+        const s = lvl.skills[idx];
+        if (s) lines.push(s.question);
+    });
+    const textarea = document.getElementById('bankquestions-' + levelKey);
+    const existing = textarea.value.trim();
+    const generated = lines.join('\n');
+    textarea.value = existing ? (existing + '\n' + generated) : generated;
+}
+
+function generateAllBankQuestions() {
+    READING_LEVELS.forEach(lvl => {
+        const checks = document.querySelectorAll(`#bankchecks-${lvl.key} input:checked`);
+        if (checks.length > 0) generateBankFor(lvl.key);
+    });
+}
+
+function clearBank() {
+    READING_LEVELS.forEach(lvl => {
+        document.getElementById('bankquestions-' + lvl.key).value = '';
+        document.querySelectorAll(`#bankchecks-${lvl.key} input`).forEach(c => c.checked = false);
+    });
+}
+
+function exportBankWord() {
+    let html = '<h2>بنك أسئلة الفهم القرائي</h2>';
+    READING_LEVELS.forEach(lvl => {
+        const questions = document.getElementById('bankquestions-' + lvl.key).value.trim();
+        if (questions) {
+            html += `<h3 style="color:${lvl.color};">${lvl.name} ${lvl.subtitle}</h3><div style="white-space:pre-line;">${escapeHtml(questions)}</div><hr>`;
+        }
+    });
+    if (html === '<h2>بنك أسئلة الفهم القرائي</h2>') { alert('لا توجد أسئلة لتوليدها'); return; }
+    const doc = `<html dir="rtl" lang="ar"><head><meta charset="UTF-8"><style>body{font-family:'Simplified Arabic',Arial;padding:30px;direction:rtl;line-height:1.8;}</style></head><body>${html}</body></html>`;
+    const blob = new Blob(['\ufeff', doc], { type: 'application/msword' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'بنك_الأسئلة.doc';
+    link.click();
+}
+
+// ============================================================
+// 8. التبويبات + البدء
+// ============================================================
+function setupMainTabs() {
+    document.querySelectorAll('.main-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById('panel-' + tab.dataset.maintab).classList.add('active');
+            if (tab.dataset.maintab === 'segments') renderSegments();
+            if (tab.dataset.maintab === 'memo') updateMemoSelect();
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const portalUser = getPortalSession();
+    if (!portalUser) { window.location.href = 'index.html'; return; }
+    currentUser = portalUser;
+    document.getElementById('userNameLabel').textContent = currentUser.fullName || currentUser.username || '';
+
+    document.getElementById('ssoLoadingScreen').style.display = 'none';
+    document.getElementById('appScreen').style.display = 'block';
+
+    setupMainTabs();
+    renderTheory();
+    renderLevelTabsSeg();
+    renderLevelTabsMemo();
+    renderBank();
+
+    await ensureAnonAuth();
+    await listenToCloudData();
+    renderSegments();
+    updateMemoSelect();
+});
+</script>
+
+</body>
+</html>
