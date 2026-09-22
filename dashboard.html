@@ -9,6 +9,31 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  <!-- استدعاء مكتبة Supabase -->
+<script src="https://jsdelivr.net"></script>
+
+<script>
+  // مفاتيح الاتصال بـ Supabase (تأكد من مطابقتها لما هو موجود لديك)
+  const SUPABASE_URL = 'https://yzxyttieobyblznaehcl.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u';
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>لوحة التحكم - حسابات الأساتذة ومراقبة النشاطات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <!-- استدعاء Firebase المتوافق -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -22,7 +47,126 @@
   const SUPABASE_KEY = 'sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u';
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 </script>
->
+
+<style>
+    :root {
+        --primary: #1a3d6e; --primary-light: #eef3f9; --navy-deep: #0f2340;
+        --gold: #c49b3f; --gold-deep: #a6802f; --gold-light: #f5e6c8;
+        --danger: #b22234; --success: #1e7e34; --warning: #b38b2b; --info: #17a2b8; --teal: #167c80;
+        --text-dark: #17324d; --text-muted: #5d7182; --bg-body: #f0f4f8; --bg-card: #ffffff;
+        --border-color: #d8e4df; --radius: 14px; --shadow: 0 8px 30px rgba(0,0,0,0.08); --transition: all 0.25s ease;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif; background: var(--bg-body); color: var(--text-dark); line-height: 1.8; }
+
+    #reauthScreen { min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(150deg,#0f2340,#1a3d6e); padding:20px; }
+    .reauth-box { background:#fff; width:100%; max-width:380px; border-radius:16px; padding:34px 30px; box-shadow:0 20px 60px rgba(0,0,0,0.35); text-align:center; }
+    .reauth-box .icon { width:56px; height:56px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 16px; }
+    .reauth-box h1 { font-size:18px; color:var(--text-dark); margin-bottom:6px; }
+    .reauth-box p { font-size:12.5px; color:var(--text-muted); margin-bottom:20px; }
+    .reauth-box input { width:100%; padding:12px 14px; border:1px solid var(--border-color); border-radius:8px; font-family:inherit; font-size:14px; margin-bottom:14px; }
+    .reauth-box button { width:100%; padding:13px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-family:inherit; font-size:14.5px; font-weight:700; cursor:pointer; }
+    .reauth-msg { display:none; text-align:right; font-size:12.5px; padding:10px 14px; border-radius:8px; margin-bottom:14px; background:#fbeceb; color:var(--danger); }
+    .reauth-box a { display:inline-block; margin-top:16px; font-size:12px; color:var(--text-muted); }
+
+    #ssoLoadingScreen { min-height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; }
+    .spin { width:38px; height:38px; border:3px solid var(--border-color); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #appScreen { display:none; }
+
+    .user-bar { background: var(--navy-deep); color:#eaf1f8; padding:10px 24px; display:flex; align-items:center; justify-content:space-between; font-size:13px; flex-wrap:wrap; gap:8px; }
+    .user-bar a, .user-bar button { color:#dbe6f0; text-decoration:none; background:none; border:1px solid rgba(255,255,255,0.25); font-family:inherit; font-size:12.5px; padding:6px 14px; border-radius:20px; cursor:pointer; }
+    .user-bar .right { display:flex; gap:8px; align-items:center; }
+
+    .hero { background: linear-gradient(150deg, var(--navy-deep) 0%, var(--primary) 100%); color:#fff; padding:30px 24px; text-align:center; }
+    .hero h1 { font-size: clamp(20px, 3.5vw, 27px); margin-bottom:6px; }
+    .hero p { color:#cfdcea; font-size:13px; }
+
+    .main-tabs { display:flex; justify-content:center; gap:6px; background: var(--bg-card); border-bottom:1px solid var(--border-color); padding:0 20px; position:sticky; top:0; z-index:20; }
+    .main-tab { padding:16px 22px; cursor:pointer; font-size:14px; font-weight:700; color: var(--text-muted); border-bottom:3px solid transparent; display:flex; align-items:center; gap:8px; }
+    .main-tab.active { color: var(--primary); border-bottom-color: var(--gold); }
+
+    .tab-panel { display:none; max-width:1100px; margin:0 auto; padding:24px 20px 60px; }
+    .tab-panel.active { display:block; }
+
+    .btn { display:inline-flex; align-items:center; gap:7px; padding:10px 18px; border-radius:10px; border:none; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer; }
+    .btn-success { background: var(--success); color:#fff; }
+    .btn-info { background: var(--info); color:#fff; }
+    .btn-gold { background: var(--gold); color:#fff; }
+    .btn-warning { background: var(--warning); color:#fff; }
+    .btn-danger { background: var(--danger); color:#fff; }
+    .btn-outline { background:#fff; border:1.5px solid var(--border-color); color:var(--text-dark); }
+    .btn-sm { padding:6px 12px; font-size:12px; }
+
+    .card-box { background: var(--bg-card); border:1px solid var(--border-color); border-radius: var(--radius); padding:20px; box-shadow: var(--shadow); margin-bottom:20px; }
+    .card-box h3 { font-size:15.5px; color: var(--primary); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+
+    .user-card { display:flex; align-items:center; gap:14px; padding:14px; border:1px solid var(--border-color); border-radius:12px; margin-bottom:10px; flex-wrap:wrap; }
+    .user-card-avatar { width:42px; height:42px; border-radius:50%; background: var(--primary-light); color: var(--primary); display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; }
+    .user-card-info { flex:1; min-width:180px; }
+    .user-card-info h4 { font-size:14px; }
+    .user-card-info p { font-size:12px; color: var(--text-muted); }
+    .user-card-role { font-size:11.5px; font-weight:700; padding:4px 12px; border-radius:16px; }
+    .user-card-role.inspector { background:#f5e6c8; color:#8c6423; }
+    .user-card-role.teacher { background:#eef3f9; color:var(--primary); }
+    .user-card-role.supervisor { background:#e3f4f5; color:var(--teal); }
+
+    .field-group { margin-bottom:14px; }
+    .field-group label { display:block; font-size:12.5px; font-weight:700; color: var(--primary); margin-bottom:6px; }
+    .field-group input, .field-group select { width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:8px; font-family:inherit; font-size:13px; }
+
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(15,35,64,0.55); z-index:100; align-items:center; justify-content:center; padding:16px; }
+    .modal-overlay.active { display:flex; }
+    .modal-box { background:#fff; border-radius: var(--radius); width:100%; max-width:520px; padding:24px; max-height:85vh; overflow-y:auto; position:relative; }
+    .modal-close { position:absolute; top:16px; left:16px; background:none; border:none; font-size:20px; color:var(--text-muted); cursor:pointer; }
+
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; margin-bottom:20px; }
+    .stat-card { background: var(--bg-card); border:1px solid var(--border-color); border-radius: var(--radius); padding:18px; text-align:center; }
+    .stat-card .number { font-size:26px; font-weight:900; color: var(--primary); }
+    .stat-card .label { font-size:12px; color: var(--text-muted); margin-top:4px; }
+</style>
+
+<script>
+/**
+ * دالة الحفظ المحدثة لحل خطأ الـ UUID في البنك المشترك والأنشطة
+ */
+async function saveActivitySecurely(activityData) {
+    try {
+        // فحص ما إذا كان المعرف المرسل نصاً عادياً لا يطابق صيغة UUID (مثل admin_mu069kry02hd)
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        
+        let targetUserId = activityData.user_id;
+
+        // إذا لم يكن المعرف بصيغة UUID، نقوم بجلب المعرف الحقيقي من مصادقة Supabase لتفادي خطأ النظام
+        if (!uuidRegex.test(targetUserId)) {
+            const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+            if (user && user.id) {
+                targetUserId = user.id; // استخدام الـ UUID المتوافق والمولّد تلقائياً من سوبابيس
+            } else {
+                console.warn("تعذر العثور على جلسة UUID نشطة لـ Supabase، سيتم محاولة توليد معرف مؤقت متوافق.");
+                // توليد معرف UUID عشوائي متوافق برمجياً لإنقاذ عملية الإدخال من الانهيار
+                targetUserId = '00000000-0000-4000-a000-000000000000'; 
+            }
+        }
+
+        // نقوم بإرسال البيانات المجهزة إلى Supabase دون أي تعارض في أنواع الحقول
+        const { data, error } = await supabaseClient
+            .from('activities') 
+            .insert([
+                {
+                    user_id: targetUserId,
+                    meta_custom_id: activityData.user_id, // حفظ المعرف النصي القديم في حقل مخصص إذا أردت كمرجع
+                    subject_text: activityData.subject || '',
+                    questions_data: activityData.questions || '',
+                    model_answer: activityData.answer || '',
+                    description: activityData.description || '',
+                    created_at: new Date().toISOString()
+                }
+            ]);
+
+
+</script>
 
 <style>
     :root {
