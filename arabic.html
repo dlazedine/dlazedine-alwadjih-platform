@@ -707,10 +707,7 @@ html, body {
         <span>الجمهورية الجزائرية الديمقراطية الشعبية — وزارة التربية الوطنية — المفتشية العامة للبيداغوجيا</span>
     </div>
     <div class="actions">
-        <!-- زر العودة إلى البوابة الرئيسية -->
-        <a href="index.html" class="btn-top" style="background:var(--gold); color:var(--primary-deep); font-weight:800; border-color:var(--gold); text-decoration:none;">
-            <i class="fas fa-arrow-right"></i> العودة إلى البوابة الرئيسية
-        </a>
+   
         <a href="moualaja.html" class="btn-top" style="text-decoration:none;">
             <i class="fas fa-stethoscope"></i> المعالجة البيداغوجية
         </a>
@@ -718,7 +715,7 @@ html, body {
             <i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة
         </a>
         <a href="dashboard.html" class="btn-top" style="text-decoration:none;">
-            <i class="fas fa-chart-line"></i> لوحة المتابعة والتفتيش
+            <i class="fas fa-chart-line"></i> لوحة التّحكم
         </a>
         <span id="cloudSyncStatusBadge" class="btn-top" style="cursor:default; background:rgba(30,126,52,0.25); border-color:#28a745; color:#fff;">
             <i class="fas fa-cloud-check"></i> متصل بالسحابة
@@ -761,7 +758,7 @@ html, body {
     <div class="tabs-nav">
         <button class="tab-btn active" onclick="switchTab('theory')">
             <i class="fas fa-scroll"></i>
-            <span>الشق النظري والديداكتيكي</span>
+            <span>القسم النظري والديداكتيكي</span>
             <span class="badge-pill">المرجعية</span>
         </button>
         <button class="tab-btn" onclick="switchTab('segments')">
@@ -1143,16 +1140,16 @@ html, body {
         </div>
 
         <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:15px;">
-            <a href="index.html" class="btn btn-sm btn-gold" style="text-decoration:none;"><i class="fas fa-arrow-right"></i> العودة إلى البوابة الرئيسية</a>
+            <a href="index.html" class="btn btn-sm btn-gold" style="text-decoration:none;"><i class="fas fa-arrow-right"></i>  البوابة الرئيسية</a>
             <a href="moualaja.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-stethoscope"></i> سجلات المعالجة البيداغوجية</a>
             <a href="amal.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
-            <a href="dashboard.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-chart-line"></i> لوحة المتابعة والتفتيش</a>
+            <a href="dashboard.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-chart-line"></i> لوحة التّحكم</a>
         </div>
 
         <div class="footer-content" style="border-top:1px solid var(--border); padding-top:14px; margin-top:8px;">
-            <span class="brand"><i class="fas fa-feather-pointed"></i> بوابة تعليمية اللغة العربية ومصمم المذكرات</span>
+            <span class="brand"><i class="fas fa-feather-pointed"></i> بوابة تعليمية اللغة العربية </span>
             <span>إشراف وتأطير: مفتش التعليم المتوسط <strong>درويش الهلالي</strong></span>
-            <span>المقاطعة الثانية قسنطينة · هاتف: 0779353736</span>
+            <span>المقاطعة الثانية قسنطينة · هاتف: 0659681227</span>
         </div>
     </footer>
 </div>
@@ -1767,9 +1764,9 @@ function renderTheorySection() {
     const evalBody = document.getElementById('evalGridTableBody');
     if (evalBody) {
         const criteria = [
-            { name: 'م1: الوجاهة والمالءمة (3 ن)', desc: 'احترام حجم المنتج · احترام النمط المطلوب · االستجابة لتعليمة الموضوع وعدم الخروج عنها.' },
-            { name: 'م2: االستعمال السليم للغة (3 ن)', desc: 'توظيف الظواهر اللغوية المقررة · سالمة التراكيب والصرف · احترام الرسم الإملائي ومخارج الحروف وعالمات الوقف.' },
-            { name: 'م3: االنسجام والترابط (3 ن)', desc: 'تسلسل الأفكار منطقياً · حسن توظيف الروابط وحروف العطف والتحليل · مالءمة الأفكار للموضوع.' },
+            { name: 'م1: الوجاهة والملاءمة (3 ن)', desc: 'احترام حجم المنتج · احترام النمط المطلوب · الاستجابة لتعليمة الموضوع وعدم الخروج عنها.' },
+            { name: 'م2: الاستعمال السليم للغة (3 ن)', desc: 'توظيف الظواهر اللغوية المقررة · سالمة التراكيب والصرف · احترام الرسم الإملائي ومخارج الحروف وعالمات الوقف.' },
+            { name: 'م3: الانسجام والترابط (3 ن)', desc: 'تسلسل الأفكار منطقياً · حسن توظيف الروابط وحروف العطف والتحليل · مالءمة الأفكار للموضوع.' },
             { name: 'م4: الإتقان والأصالة (1 ن)', desc: 'جمال العرض وحسن الخط · إبداء الرأي المستقل والابتكار · ثراء الشواهد والقيم التربوية المستخلصة.' }
         ];
         evalBody.innerHTML = criteria.map(c => `
@@ -1786,7 +1783,7 @@ function renderTheorySection() {
     if (crossContainer) {
         const cross = [
             { title: 'الهوية الوطنية والاعتزاز', text: 'يقف للعلم باحترام · يتحدث بلغة عربية فصيحة · يحيي المناسبات الوطنية والدينية · يستشهد بالقرآن والشعر.' },
-            { title: 'المواطنة والسلوك المدني', text: 'يتعاون مع زمالئه · يحافظ على المحيط المدرسي والبيئة · يمارس الحوار الهادئ وينبذ العنف والتعصب.' },
+            { title: 'المواطنة والسلوك المدني', text: 'يتعاون مع زملائه · يحافظ على المحيط المدرسي والبيئة · يمارس الحوار الهادئ وينبذ العنف والتعصب.' },
             { title: 'الطابع الفكري والمنهجي', text: 'يبحث في السندات · يخطط لعمله وينظم أفكاره · يميّز بين الحقيقة والرأي · يلتزم بالوقت المحدد للنشاط.' },
             { title: 'التواصل والعمل الفوجي', text: 'يحسن الإصغاء للآخرين · يشارك بفاعلية في الفوج · يتقبل النقد الهادف · يدافع عن رأيه بالأدلة المنطقية.' }
         ];
@@ -2177,7 +2174,7 @@ function openMemoModalFor(segId) {
         <div class="field-row">
             <div class="field">
                 <label>المؤسسة التربوية:</label>
-                <input type="text" id="memo_school" value="${escapeHtml(savedMemo.school || 'متوسطة الشهداء')}">
+                <input type="text" id="memo_school" value="${escapeHtml(savedMemo.school || 'متوسطة قريبة رابح')}">
             </div>
             <div class="field">
                 <label>الأستاذ(ة):</label>
@@ -2193,8 +2190,8 @@ function openMemoModalFor(segId) {
             </div>
         </div>
 
-        <!-- الشق النظري (المرجعية الرسمية) -->
-        <div class="memo-section-title"><i class="fas fa-scroll"></i> 2. الشق النظري (المرجعية الديداكتيكية الرسمية)</div>
+        <!-- القسم النظري (المرجعية الرسمية) -->
+        <div class="memo-section-title"><i class="fas fa-scroll"></i> 2. القسم النظري (المرجعية الديداكتيكية الرسمية)</div>
         <div class="field">
             <label>الكفاءة الختامية للميدان:</label>
             <textarea id="memo_competency">${escapeHtml(savedMemo.competency || seg.competencies?.listening || seg.competency || '')}</textarea>
@@ -2214,8 +2211,8 @@ function openMemoModalFor(segId) {
             </div>
         </div>
 
-        <!-- الشق التطبيقي البيداغوجي المخصص حسب الميدان -->
-        <div class="memo-section-title gold"><i class="fas fa-pen-ruler"></i> 3. الشق التطبيقي وسيرورة بناء الحصة</div>
+        <!-- القسم التطبيقي البيداغوجي المخصص حسب الميدان -->
+        <div class="memo-section-title gold"><i class="fas fa-pen-ruler"></i> 3. القسم التطبيقي وسيرورة بناء الحصة</div>
         <div class="field">
             <label>🚀 وضعية الانطلاق والتمهيد:</label>
             <textarea id="memo_launch">${escapeHtml(savedMemo.launch || (seg.motherSituation?.context || 'إثارة دافعية المتعلمين عبر استرجاع المكتسبات القبلية وربطها بموضوع الحصة...'))}</textarea>
