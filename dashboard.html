@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>لوحة التحكم - حسابات الأساتذة ومراقبة النشاطات</title>
+<title>لوحة التحكم - حسابات الأساتذة ومراقبة النشاطات والمعالجة البيداغوجية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -77,17 +77,18 @@
     .hero h1 { font-size: clamp(20px, 3.5vw, 27px); margin-bottom:6px; }
     .hero p { color:#cfdcea; font-size:13px; }
 
-    .main-tabs { display:flex; justify-content:center; gap:6px; background: var(--bg-card); border-bottom:1px solid var(--border-color); padding:0 20px; position:sticky; top:0; z-index:20; }
-    .main-tab { padding:16px 22px; cursor:pointer; font-size:14px; font-weight:700; color: var(--text-muted); border-bottom:3px solid transparent; display:flex; align-items:center; gap:8px; }
+    .main-tabs { display:flex; justify-content:center; gap:6px; background: var(--bg-card); border-bottom:1px solid var(--border-color); padding:0 20px; position:sticky; top:0; z-index:20; overflow-x:auto; }
+    .main-tab { padding:16px 22px; cursor:pointer; font-size:14px; font-weight:700; color: var(--text-muted); border-bottom:3px solid transparent; display:flex; align-items:center; gap:8px; white-space:nowrap; }
     .main-tab.active { color: var(--primary); border-bottom-color: var(--gold); }
 
     .tab-panel { display:none; max-width:1100px; margin:0 auto; padding:24px 20px 60px; }
     .tab-panel.active { display:block; }
 
-    .btn { display:inline-flex; align-items:center; gap:7px; padding:10px 18px; border-radius:10px; border:none; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer; }
+    .btn { display:inline-flex; align-items:center; gap:7px; padding:10px 18px; border-radius:10px; border:none; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer; transition:var(--transition); }
+    .btn:hover { opacity:0.92; transform:translateY(-1px); }
     .btn-success { background: var(--success); color:#fff; }
     .btn-info { background: var(--info); color:#fff; }
-    .btn-gold { background: var(--gold); color:#fff; }
+    .btn-gold { background: var(--gold); color:#0f2340; }
     .btn-warning { background: var(--warning); color:#fff; }
     .btn-danger { background: var(--danger); color:#fff; }
     .btn-outline { background:#fff; border:1.5px solid var(--border-color); color:var(--text-dark); }
@@ -162,6 +163,7 @@
     <div class="user-bar">
         <div class="right">
             <a href="index.html"><i class="fas fa-arrow-right"></i> البوابة</a>
+            <a href="moualaja.html"><i class="fas fa-hand-holding-heart"></i> منصة المعالجة</a>
             <span>مرحباً، <b id="userNameLabel" style="color:var(--gold-light)"></b></span>
         </div>
         <button onclick="handleLogout()"><i class="fas fa-arrow-right-from-bracket"></i> تسجيل الخروج</button>
@@ -169,12 +171,14 @@
 
     <div class="hero">
         <h1><i class="fas fa-user-shield"></i> لوحة التحكم</h1>
-        <p>إدارة حسابات الأساتذة ومراقبة النشاطات — مكان واحد موحّد لكل أدوات المنظومة</p>
+        <p>إدارة حسابات الأساتذة ومراقبة النشاطات وسجلات المعالجة البيداغوجية — مكان واحد موحّد لكل أدوات المنظومة</p>
     </div>
 
+    <!-- التعديل الأول: شريط التبويبات الثلاثي -->
     <div class="main-tabs">
         <div class="main-tab active" data-maintab="users"><i class="fas fa-users-cog"></i> إدارة المستخدمين</div>
         <div class="main-tab" data-maintab="monitor"><i class="fas fa-satellite-dish"></i> مراقبة النشاطات</div>
+        <div class="main-tab" data-maintab="pedagogical"><i class="fas fa-chalkboard-teacher"></i> المعالجة البيداغوجية</div>
     </div>
 
     <!-- ============ إدارة المستخدمين ============ -->
@@ -227,6 +231,55 @@
                 </div>
             </div>
             <div class="log-feed" id="logFeed"><div style="text-align:center; color:var(--text-muted); padding:20px;">جارٍ تحميل السجل...</div></div>
+        </div>
+    </div>
+
+    <!-- التعديل الثاني: لوحة المعالجة البيداغوجية ============ -->
+    <div class="tab-panel" id="panel-pedagogical">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="number" id="pedTotalRecords">0</div><div class="label">إجمالي السجلات</div></div>
+            <div class="stat-card"><div class="number" id="pedTotalTeachers">0</div><div class="label">الأساتذة المُنشِئون</div></div>
+            <div class="stat-card"><div class="number" id="pedTotalStudents">0</div><div class="label">إجمالي المتعلمين</div></div>
+            <div class="stat-card"><div class="number" id="pedTotalPlans">0</div><div class="label">خطط معالجة</div></div>
+        </div>
+
+        <div class="card-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+                <h3 style="margin-bottom:0;"><i class="fas fa-list-alt"></i> كل السجلات المُضافة من الأساتذة</h3>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <select id="pedFilterTeacher" onchange="renderPedagogicalTable()" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border-color); font-family:inherit;">
+                        <option value="">كل الأساتذة</option>
+                    </select>
+                    <select id="pedFilterType" onchange="renderPedagogicalTable()" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border-color); font-family:inherit;">
+                        <option value="">كل الأنواع</option>
+                        <option value="with_plan">يحتوي خطة معالجة</option>
+                        <option value="with_students">يحتوي متعلمين</option>
+                    </select>
+                    <button class="btn btn-sm btn-info" onclick="loadPedagogicalRecords()"><i class="fas fa-sync"></i> تحديث</button>
+                    <button class="btn btn-sm btn-gold" onclick="exportPedagogicalCSV()"><i class="fas fa-download"></i> تصدير CSV</button>
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="teacher-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>المؤسسة</th>
+                            <th>الأستاذ</th>
+                            <th>الأقسام</th>
+                            <th>التلاميذ</th>
+                            <th>المعايير</th>
+                            <th>المتعلمون</th>
+                            <th>خطة</th>
+                            <th>التاريخ</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pedTableBody">
+                        <tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;">اضغط "تحديث"</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -298,16 +351,12 @@ function ensureAnonAuth() {
     return Promise.race([p, t]);
 }
 
-// ⚡ إصلاح تقني: بعد توحيد الدخول عبر Firebase، لم تعد هناك جلسة Supabase Auth
-// حقيقية عند فتح لوحة التحكم — فتفشل قراءة activity_log / activities بصمت إن
-// كانت محمية بسياسات RLS تشترط "مستخدم موثّق". نُنشئ هنا جلسة Supabase مجهولة
-// موثّقة فعلياً قبل أي استعلام مراقبة، دون تغيير أي هوية أو بيانات.
 function ensureSupabaseSession() {
     if (!sbMain) return Promise.resolve(null);
     const attempt = sbMain.auth.getSession().then(({ data }) => {
         if (data && data.session) return data.session;
         return sbMain.auth.signInAnonymously().then(({ data: signInData, error }) => {
-            if (error) { console.error('⚠️ تعذّر إنشاء جلسة Supabase موثّقة (قد تفشل المراقبة):', error); return null; }
+            if (error) { console.error('⚠️ تعذّر إنشاء جلسة Supabase موثّقة:', error); return null; }
             return signInData ? signInData.session : null;
         });
     }).catch((e) => { console.error('⚠️ Supabase ensureSupabaseSession:', e); return null; });
@@ -395,6 +444,7 @@ function enterApp(user) {
     setupMainTabs();
     renderUsersList();
     initMonitor();
+    loadPedagogicalRecords();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -433,13 +483,17 @@ function setupMainTabs() {
             document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             tab.classList.add('active');
-            document.getElementById('panel-' + tab.dataset.maintab).classList.add('active');
+            const targetPanel = document.getElementById('panel-' + tab.dataset.maintab);
+            if (targetPanel) targetPanel.classList.add('active');
+            if (tab.dataset.maintab === 'pedagogical') {
+                loadPedagogicalRecords();
+            }
         });
     });
 }
 
 // ============================================================
-//  3. إدارة المستخدمين (منقولة من منصة المعالجة البيداغوجية)
+//  3. إدارة المستخدمين
 // ============================================================
 function renderUsersList() {
     const container = document.getElementById('usersListContainer');
@@ -685,9 +739,7 @@ function downloadCSVTemplate() {
 }
 
 // ============================================================
-//  4. مراقبة النشاطات (منقولة من منصة الأعمال الموجهة)
-//  ⚡ مُعدَّلة لتُطابق حسابات الأساتذة الموحّدة (Firestore) بدل جدول
-//     profiles في Supabase الذي لم يعد مستعملاً لتسجيل الدخول.
+//  4. مراقبة النشاطات
 // ============================================================
 let _logCache = [];
 let _realtimeChannel = null;
@@ -814,6 +866,278 @@ function subscribeRealtime() {
             showToast((iconMap[action] || '🔔') + ' ' + payload.new.teacher_name + ' ' + (actionLabelMap[action] || 'قام بعملية') + titlePart, toastTypeMap[action] || 'info', 4000);
         })
         .subscribe();
+}
+
+// ============================================================
+//  التعديل الثالث: تبويب المعالجة البيداغوجية
+// ============================================================
+let _pedRecords = [];
+
+async function loadPedagogicalRecords() {
+    const tbody = document.getElementById('pedTableBody');
+    if (!tbody) return;
+    if (!sbMain) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:var(--danger); padding:20px;">Supabase غير متاح</td></tr>';
+        return;
+    }
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> جارٍ التحميل...</td></tr>';
+    try {
+        await ensureSupabaseSession();
+        const { data, error } = await sbMain
+            .from('traitement_records')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        _pedRecords = data || [];
+
+        const totalRecordsEl = document.getElementById('pedTotalRecords');
+        const totalTeachersEl = document.getElementById('pedTotalTeachers');
+        const totalStudentsEl = document.getElementById('pedTotalStudents');
+        const totalPlansEl = document.getElementById('pedTotalPlans');
+
+        if (totalRecordsEl) totalRecordsEl.textContent = _pedRecords.length;
+        if (totalTeachersEl) totalTeachersEl.textContent = new Set(_pedRecords.map(r => r.created_by_name || r.enseignant).filter(Boolean)).size;
+        if (totalStudentsEl) totalStudentsEl.textContent = _pedRecords.reduce((s, r) => s + (r.total_students || 0), 0);
+        if (totalPlansEl) totalPlansEl.textContent = _pedRecords.filter(r => r.plan && Object.keys(r.plan).length > 0).length;
+
+        // فلتر الأساتذة
+        const teacherSelect = document.getElementById('pedFilterTeacher');
+        if (teacherSelect) {
+            const prev = teacherSelect.value;
+            const teachers = [...new Set(_pedRecords.map(r => r.created_by_name || r.enseignant).filter(Boolean))];
+            teacherSelect.innerHTML = '<option value="">كل الأساتذة</option>' +
+                teachers.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+            teacherSelect.value = prev;
+        }
+
+        renderPedagogicalTable();
+        showToast('✅ تم تحميل ' + _pedRecords.length + ' سجل معالجة', 'success');
+    } catch(e) {
+        console.error(e);
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:var(--danger); padding:20px;">خطأ في جلب السجلات: ${escapeHtml(e.message || '')}</td></tr>`;
+    }
+}
+
+function renderPedagogicalTable() {
+    const tbody = document.getElementById('pedTableBody');
+    if (!tbody) return;
+    const teacherFilter = document.getElementById('pedFilterTeacher')?.value || '';
+    const typeFilter = document.getElementById('pedFilterType')?.value || '';
+    let rows = _pedRecords;
+    if (teacherFilter) rows = rows.filter(r => (r.created_by_name === teacherFilter || r.enseignant === teacherFilter));
+    if (typeFilter === 'with_plan') rows = rows.filter(r => r.plan && Object.keys(r.plan).length > 0);
+    if (typeFilter === 'with_students') rows = rows.filter(r => (r.students || []).some(c => (c.students || []).length > 0));
+
+    if (rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد سجلات مطابقة</td></tr>';
+        return;
+    }
+    tbody.innerHTML = rows.map((r, i) => {
+        const criteriaCount = Array.isArray(r.criteria) ? r.criteria.length : 0;
+        const studentsCount = Array.isArray(r.students)
+            ? r.students.reduce((s, c) => s + ((c.students || []).length), 0)
+            : (r.total_students || 0);
+        const hasPlan = r.plan && Object.keys(r.plan).length > 0;
+        return `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${escapeHtml(r.etablissement || '—')}</td>
+                <td><strong>${escapeHtml(r.created_by_name || r.enseignant || '—')}</strong></td>
+                <td>${escapeHtml(r.classes || '—')}</td>
+                <td>${r.nb_eleves || 0}</td>
+                <td><span style="background:#eef3f9; color:#1a3d6e; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:700;">${criteriaCount}</span></td>
+                <td><span style="background:#e5f4ed; color:#155724; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:700;">${studentsCount}</span></td>
+                <td>${hasPlan ? '<i class="fas fa-check-circle" style="color:var(--success);"></i>' : '<i class="fas fa-times-circle" style="color:var(--text-muted);"></i>'}</td>
+                <td style="font-size:12px; color:var(--text-muted); white-space:nowrap;">${r.created_at ? new Date(r.created_at).toLocaleString('ar-DZ') : '—'}</td>
+                <td style="white-space:nowrap;">
+                    <button class="btn btn-sm btn-info" onclick="viewPedRecord('${r.id}')" title="عرض تفاصيل"><i class="fas fa-eye"></i></button>
+                    <button class="btn btn-sm btn-gold" onclick="exportPedRecordWord('${r.id}')" title="تصدير Word"><i class="fas fa-file-word"></i></button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function viewPedRecord(id) {
+    const r = _pedRecords.find(x => x.id === id);
+    if (!r) return;
+    const plan = r.plan || {};
+    const criteria = r.criteria || [];
+    const students = r.students || [];
+
+    let planHtml = Object.entries({
+        'طبيعة الصعوبة': plan.difficultyType,
+        'مصدر الصعوبة': plan.difficultySource,
+        'تنويع الأنشطة': plan.activityType,
+        'أعمال تكميلية': plan.complementaryWork,
+        'استثمار المشاريع': plan.projectInvestment,
+        'استغلال السندات': plan.resourceExploitation,
+        'توقيت المعالجة': plan.timing,
+        'مخطط زمني': plan.schedulePlan,
+        'تفويج المتعلمين': plan.periodDetermination,
+        'أنماط المعالجة': plan.treatmentModes,
+        'نمط التقييم': plan.evaluationMode,
+        'تسيير الأنشطة': plan.managementMode,
+        'ملاحظات': plan.additionalNotes
+    }).filter(([_, v]) => v).map(([k, v]) => `<tr><td style="padding:6px;border:1px solid #ddd;background:#f8fbfd;width:35%;"><strong>${k}</strong></td><td style="padding:6px;border:1px solid #ddd;">${escapeHtml(v)}</td></tr>`).join('');
+
+    let criteriaHtml = criteria.map((c, i) => `
+        <tr>
+            <td style="padding:6px;border:1px solid #ddd;text-align:center;">${i+1}</td>
+            <td style="padding:6px;border:1px solid #ddd;">${escapeHtml(c.competence || '')}</td>
+            <td style="padding:6px;border:1px solid #ddd;">${escapeHtml(c.critere || '')}</td>
+            <td style="padding:6px;border:1px solid #ddd;text-align:center;">${escapeHtml(c.level || '—')}</td>
+            <td style="padding:6px;border:1px solid #ddd;text-align:center;">${escapeHtml(c.category || '—')}</td>
+        </tr>
+    `).join('');
+
+    let studentsHtml = students.map(c => {
+        const list = c.students || [];
+        if (!list.length) return '';
+        return `
+            <div style="margin:10px 0; padding:10px; background:#f0f4f8; border-radius:8px;">
+                <strong style="color:var(--primary);">${escapeHtml(c.competence || '')} › ${escapeHtml(c.critere || '')}</strong>
+                <span style="background:#e5f4ed; color:#155724; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:700; margin-right:8px;">${list.length} متعلم</span>
+                <ul style="margin:8px 20px;">
+                    ${list.map(s => {
+                        const name = typeof s === 'object' ? (s.name || '') : s;
+                        const treatment = typeof s === 'object' ? (s.treatmentType || '') : '';
+                        return `<li>${escapeHtml(name)} ${treatment ? `<span style="color:var(--text-muted); font-size:12px;">(${escapeHtml(treatment)})</span>` : ''}</li>`;
+                    }).join('')}
+                </ul>
+            </div>
+        `;
+    }).join('');
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed; inset:0; background:rgba(15,35,64,0.65); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px;';
+    const modal = document.createElement('div');
+    modal.style.cssText = 'background:#fff; border-radius:14px; padding:24px; max-width:900px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.3);';
+    modal.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:2px solid var(--gold); padding-bottom:10px;">
+            <h3 style="margin:0; color:var(--primary);"><i class="fas fa-file-alt"></i> تفاصيل سجل المعالجة البيداغوجية</h3>
+            <button onclick="this.closest('div').parentElement.parentElement.remove()" style="background:none;border:none;font-size:26px;cursor:pointer;color:var(--text-muted);">&times;</button>
+        </div>
+        <p><strong>المؤسسة:</strong> ${escapeHtml(r.etablissement || '—')}</p>
+        <p><strong>الأستاذ:</strong> ${escapeHtml(r.created_by_name || r.enseignant || '—')} | <strong>الأقسام:</strong> ${escapeHtml(r.classes || '—')} | <strong>عدد التلاميذ:</strong> ${r.nb_eleves || 0}</p>
+        <h4 style="color:var(--primary); margin-top:18px;">📚 المعايير المستهدفة</h4>
+        <table style="width:100%; border-collapse:collapse; margin-top:6px;">${criteriaHtml || '<tr><td style="padding:10px;">لا توجد معايير</td></tr>'}</table>
+        <h4 style="color:var(--primary); margin-top:18px;">🎯 خطة المعالجة المقررة</h4>
+        <table style="width:100%; border-collapse:collapse; margin-top:6px;">${planHtml || '<tr><td style="padding:10px;">لم يتم إعداد خطة بعد</td></tr>'}</table>
+        <h4 style="color:var(--primary); margin-top:18px;">👥 قائمة المتعلمين المعنيين</h4>
+        ${studentsHtml || '<p style="color:var(--text-muted); padding:8px 0;">لا يوجد متعلمون مسجلون في هذا السجل</p>'}
+    `;
+    overlay.appendChild(modal);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
+}
+
+function exportPedRecordWord(id) {
+    const r = _pedRecords.find(x => x.id === id);
+    if (!r) return;
+    const plan = r.plan || {};
+    const criteria = r.criteria || [];
+    const students = r.students || [];
+    const inspectorName = 'درويش الهلالي';
+
+    let criteriaRows = criteria.map((c, i) => `
+        <tr>
+            <td style="border:1px solid #333;padding:6px;text-align:center;">${i+1}</td>
+            <td style="border:1px solid #333;padding:6px;">${escapeHtml(c.competence || '')}</td>
+            <td style="border:1px solid #333;padding:6px;">${escapeHtml(c.critere || '')}</td>
+            <td style="border:1px solid #333;padding:6px;text-align:center;">${escapeHtml(c.level || '—')}</td>
+            <td style="border:1px solid #333;padding:6px;text-align:center;">${escapeHtml(c.category || '—')}</td>
+        </tr>
+    `).join('');
+
+    let planRows = Object.entries({
+        'طبيعة الصعوبة': plan.difficultyType,
+        'مصدر الصعوبة': plan.difficultySource,
+        'تنويع الأنشطة': plan.activityType,
+        'أعمال تكميلية': plan.complementaryWork,
+        'استثمار المشاريع': plan.projectInvestment,
+        'استغلال السندات': plan.resourceExploitation,
+        'توقيت المعالجة': plan.timing,
+        'مخطط زمني': plan.schedulePlan,
+        'تفويج المتعلمين': plan.periodDetermination,
+        'أنماط المعالجة': plan.treatmentModes,
+        'نمط التقييم': plan.evaluationMode,
+        'تسيير الأنشطة': plan.managementMode,
+        'الأنشطة المقترحة': plan.additionalNotes
+    }).filter(([_, v]) => v).map(([k, v]) => `<tr><td style="border:1px solid #333;padding:6px;width:35%;background:#f0f4f8;"><strong>${k}</strong></td><td style="border:1px solid #333;padding:6px;">${escapeHtml(v)}</td></tr>`).join('');
+
+    let studentsRows = students.map(c => {
+        const list = c.students || [];
+        if (!list.length) return '';
+        const names = list.map(s => typeof s === 'object' ? `${s.name || ''} (${s.treatmentType || 'عامة'})` : s).join('، ');
+        return `<tr><td style="border:1px solid #333;padding:6px;background:#f0f4f8;"><strong>${escapeHtml(c.critere || '')}</strong></td><td style="border:1px solid #333;padding:6px;">${escapeHtml(names)}</td></tr>`;
+    }).join('');
+
+    let html = `
+        <div style="text-align:center;border-bottom:2px solid #1a3d6e;padding-bottom:10px;margin-bottom:15px;">
+            <h3>الجمهورية الجزائرية الديمقراطية الشعبية</h3>
+            <h4>وزارة التربية الوطنية</h4>
+            <h3 style="color:#1a3d6e;">تقرير المعالجة البيداغوجية</h3>
+        </div>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">
+            <tr><td style="border:1px solid #333;padding:6px;width:30%;"><strong>المؤسسة</strong></td><td style="border:1px solid #333;padding:6px;">${escapeHtml(r.etablissement || '')}</td></tr>
+            <tr><td style="border:1px solid #333;padding:6px;"><strong>الأستاذ</strong></td><td style="border:1px solid #333;padding:6px;">${escapeHtml(r.created_by_name || r.enseignant || '')}</td></tr>
+            <tr><td style="border:1px solid #333;padding:6px;"><strong>الأقسام</strong></td><td style="border:1px solid #333;padding:6px;">${escapeHtml(r.classes || '')}</td></tr>
+            <tr><td style="border:1px solid #333;padding:6px;"><strong>عدد التلاميذ</strong></td><td style="border:1px solid #333;padding:6px;">${r.nb_eleves || 0}</td></tr>
+            <tr><td style="border:1px solid #333;padding:6px;"><strong>المعيدون</strong></td><td style="border:1px solid #333;padding:6px;">${r.nb_redoublants || 0}</td></tr>
+        </table>
+        <h4 style="color:#1a3d6e; margin-top:15px;">📚 المعايير المستهدفة</h4>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">
+            <thead><tr style="background:#eef3f9;">
+                <th style="border:1px solid #333;padding:6px;">#</th>
+                <th style="border:1px solid #333;padding:6px;">الكفاءة</th>
+                <th style="border:1px solid #333;padding:6px;">المعيار</th>
+                <th style="border:1px solid #333;padding:6px;">مستوى التملك</th>
+                <th style="border:1px solid #333;padding:6px;">الفئة</th>
+            </tr></thead>
+            <tbody>${criteriaRows || '<tr><td colspan="5" style="border:1px solid #333;padding:6px;text-align:center;">لا توجد معايير</td></tr>'}</tbody>
+        </table>
+        <h4 style="color:#1a3d6e; margin-top:15px;">🎯 خطة المعالجة</h4>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">${planRows || '<tr><td style="border:1px solid #333;padding:6px;text-align:center;">لم تعد الخطة بعد</td></tr>'}</table>
+        <h4 style="color:#1a3d6e; margin-top:15px;">👥 المتعلمون المعنيون</h4>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">${studentsRows || '<tr><td style="border:1px solid #333;padding:6px;text-align:center;">لا يوجد متعلمون مسجلون</td></tr>'}</table>
+        <div style="margin-top:25px;display:flex;justify-content:space-between;">
+            <div><strong>توقيع الأستاذ(ة):</strong> .....................</div>
+            <div><strong>المفتش:</strong> ${inspectorName} — ${formatDateGeorgian()}</div>
+        </div>
+    `;
+
+    const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>body{font-family:'Tajawal',Arial;direction:rtl;padding:30px;font-size:13.5px;line-height:1.7;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #333;padding:6px;}</style></head><body>${html}</body></html>`;
+    const blob = new Blob(['\ufeff', fullHtml], { type: 'application/msword;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `تقرير_معالجة_${r.enseignant || 'أستاذ'}_${formatDateGeorgian()}.doc`;
+    link.click();
+    showToast('✅ تم تصدير تقرير Word', 'success');
+}
+
+function exportPedagogicalCSV() {
+    if (!_pedRecords || _pedRecords.length === 0) {
+        showToast('لا توجد سجلات لتصديرها', 'warning');
+        return;
+    }
+    let csv = '\uFEFF';
+    csv += 'المعرف,المؤسسة,الأستاذ,الأقسام,عدد التلاميذ,المعيدون,الفئة ج,الفئة د,عدد المعايير,عدد المتعلمين في المعالجة,خطة معالجة,تاريخ الإضافة\n';
+    _pedRecords.forEach(r => {
+        const critCount = Array.isArray(r.criteria) ? r.criteria.length : 0;
+        const studCount = Array.isArray(r.students)
+            ? r.students.reduce((s, c) => s + ((c.students || []).length), 0)
+            : (r.total_students || 0);
+        const hasPlan = (r.plan && Object.keys(r.plan).length > 0) ? 'نعم' : 'لا';
+        const dateStr = r.created_at ? new Date(r.created_at).toLocaleString('ar-DZ') : '';
+        csv += `"${r.id || ''}","${r.etablissement || ''}","${r.created_by_name || r.enseignant || ''}","${r.classes || ''}","${r.nb_eleves || 0}","${r.nb_redoublants || 0}","${r.categorie_c || 0}","${r.categorie_d || 0}","${critCount}","${studCount}","${hasPlan}","${dateStr}"\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `سجلات_المعالجة_${formatDateGeorgian()}.csv`;
+    link.click();
+    showToast('✅ تم تصدير ملف CSV', 'success');
 }
 </script>
 
