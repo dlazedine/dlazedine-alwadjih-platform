@@ -164,14 +164,37 @@
         <div class="right">
             <a href="index.html"><i class="fas fa-arrow-right"></i> البوابة</a>
             <a href="moualaja.html"><i class="fas fa-hand-holding-heart"></i> منصة المعالجة</a>
+            <a href="ta3limia_arabic.html" style="background:rgba(196,155,63,0.25); border-color:var(--gold); color:#f5e6c8;"><i class="fas fa-book-open-reader"></i> تعليمية العربية ومصمم المذكرات</a>
+            <a href="amal.html"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
             <span>مرحباً، <b id="userNameLabel" style="color:var(--gold-light)"></b></span>
         </div>
         <button onclick="handleLogout()"><i class="fas fa-arrow-right-from-bracket"></i> تسجيل الخروج</button>
     </div>
 
     <div class="hero">
-        <h1><i class="fas fa-user-shield"></i> لوحة التحكم</h1>
-        <p>إدارة حسابات الأساتذة ومراقبة النشاطات وسجلات المعالجة البيداغوجية — مكان واحد موحّد لكل أدوات المنظومة</p>
+        <div style="display:flex; justify-content:space-between; align-items:center; max-width:1100px; margin:0 auto; flex-wrap:wrap; gap:16px;">
+            <div style="display:flex; align-items:center; gap:14px; text-align:right;">
+                <div style="width:52px; height:52px; border-radius:12px; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; font-size:24px; color:var(--gold-light);">
+                    <i class="fas fa-landmark"></i>
+                </div>
+                <div>
+                    <h1 style="margin:0; font-size:clamp(18px, 3vw, 24px);"><i class="fas fa-user-shield"></i> لوحة التحكم</h1>
+                    <p style="margin:0; color:#cfdcea; font-size:12.5px;">إدارة حسابات الأساتذة ومراقبة النشاطات وسجلات المعالجة البيداغوجية</p>
+                </div>
+            </div>
+
+            <!-- بطاقة شعار المقاطعة في الترويسة مع زر التغيير والظهور الفوري -->
+            <div class="muqataa-logo-box" onclick="changeFooterLogo()" title="انقر لتغيير أو رفع شعار المقاطعة" style="cursor:pointer; display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.1); padding:8px 16px; border-radius:12px; border:1px dashed rgba(255,255,255,0.35); transition:var(--transition);">
+                <img id="heroMuqataaLogo" class="muqataa-logo-img" alt="شعار المقاطعة" style="display:none; max-width:48px; max-height:48px; object-fit:contain; border-radius:6px; background:#fff; padding:2px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+                <div id="heroMuqataaPlaceholder" class="muqataa-logo-placeholder" style="width:44px; height:44px; border-radius:8px; background:rgba(196,155,63,0.3); display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--gold-light); font-size:16px;">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:12.5px; font-weight:700; color:#fff;" id="heroMuqataaLabel">المقاطعة الثانية - قسنطينة</div>
+                    <div style="font-size:10.5px; color:var(--gold-light);"><i class="fas fa-camera"></i> تغيير شعار المقاطعة</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- التعديل الأول: شريط التبويبات الثلاثي -->
@@ -257,6 +280,7 @@
                     </select>
                     <button class="btn btn-sm btn-info" onclick="loadPedagogicalRecords()"><i class="fas fa-sync"></i> تحديث</button>
                     <button class="btn btn-sm btn-gold" onclick="exportPedagogicalCSV()"><i class="fas fa-download"></i> تصدير CSV</button>
+                    <button class="btn btn-sm btn-success" onclick="openAddPedModal()"><i class="fas fa-plus-circle"></i> إضافة سجل جديد</button>
                 </div>
             </div>
             <div style="overflow-x:auto;">
@@ -279,6 +303,41 @@
                         <tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;">اضغط "تحديث"</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- تذييل لوحة التحكم مع الشعار الرسمي والشعار المخصص للمقاطعة -->
+    <div style="max-width:1100px; margin:25px auto 40px; padding:0 20px;">
+        <div class="card-box" style="text-align:center; padding:22px 20px; border-top:4px solid var(--gold);">
+            <div style="display:flex; justify-content:center; align-items:center; gap:36px; flex-wrap:wrap; margin-bottom:12px;">
+                <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
+                    <div style="width:48px; height:48px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:20px;">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <span style="font-size:11.5px; color:var(--text-muted); font-weight:700;">وزارة التربية الوطنية</span>
+                </div>
+
+                <div class="footer-logo-editable" onclick="changeFooterLogo()" title="انقر لتغيير أو رفع شعار المقاطعة" style="cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 16px; border-radius:12px; border:2px dashed var(--border-color); transition:var(--transition); background:var(--bg-body);">
+                    <img id="footerMuqataaLogo" class="muqataa-logo-img" alt="شعار المقاطعة" style="display:none; max-width:64px; max-height:64px; object-fit:contain; border-radius:6px; filter:drop-shadow(0 2px 5px rgba(0,0,0,0.1));">
+                    <div id="footerMuqataaPlaceholder" class="muqataa-logo-placeholder" style="width:52px; height:52px; border-radius:10px; background:#fff; border:1.5px dashed var(--gold); display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--gold-deep); font-size:18px;">
+                        <i class="fas fa-shield-alt"></i>
+                        <span style="font-size:8.5px; font-weight:700; margin-top:1px;">رفع الشعار</span>
+                    </div>
+                    <span id="footerMuqataaLabel" style="font-size:12px; font-weight:700; color:var(--primary);">المقاطعة الثانية - قسنطينة</span>
+                    <span style="font-size:10px; color:var(--text-muted);"><i class="fas fa-sync-alt"></i> انقر لتعديل الشعار</span>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+                <a href="index.html" class="btn btn-sm btn-gold" style="text-decoration:none;"><i class="fas fa-home"></i> العودة إلى البوابة الرئيسية</a>
+                <a href="moualaja.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-stethoscope"></i> سجلات المعالجة البيداغوجية</a>
+                <a href="ta3limia_arabic.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-book-open-reader"></i> تعليمية العربية ومصمم المذكرات</a>
+                <a href="amal.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
+            </div>
+
+            <div style="font-size:12px; color:var(--text-muted); border-top:1px solid var(--border-color); padding-top:10px; margin-top:6px;">
+                مفتشية التعليم المتوسط لمادة اللغة العربية والتربية الإسلامية — المفتش: <strong>درويش الهلالي</strong> · هاتف: 0779353736
             </div>
         </div>
     </div>
@@ -445,12 +504,142 @@ function enterApp(user) {
     renderUsersList();
     initMonitor();
     loadPedagogicalRecords();
+    loadCustomFooterLogo();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!__portalUser || __portalUser.role !== 'inspector') return;
     document.getElementById('reauthWho').textContent = 'الدخول باسم: ' + (__portalUser.fullName || __portalUser.username);
+    loadCustomFooterLogo();
 });
+
+// ============================================================
+//  إدارة وتحديث شعار المقاطعة (حل مشكلة التحميل والعرض)
+// ============================================================
+function applyMuqataaLogo(dataUrl) {
+    const logoImgs = document.querySelectorAll('.muqataa-logo-img, #footerMuqataaLogo, #heroMuqataaLogo');
+    const placeholders = document.querySelectorAll('.muqataa-logo-placeholder, #footerMuqataaPlaceholder, #heroMuqataaPlaceholder');
+    
+    if (dataUrl && typeof dataUrl === 'string' && dataUrl.length > 50) {
+        logoImgs.forEach(img => {
+            img.onload = function() {
+                this.style.display = 'block';
+            };
+            img.onerror = function() {
+                this.style.display = 'none';
+            };
+            img.src = dataUrl;
+            img.style.display = 'block'; // مسح أي display: none سابق لضمان الظهور الفوري
+        });
+        placeholders.forEach(ph => { ph.style.display = 'none'; });
+    } else {
+        logoImgs.forEach(img => { img.style.display = 'none'; });
+        placeholders.forEach(ph => { ph.style.display = 'flex'; });
+    }
+}
+
+function changeFooterLogo() {
+    const session = (typeof getPortalSession === 'function' ? getPortalSession() : null) || (typeof currentUser !== 'undefined' ? currentUser : null);
+    if (session && session.role !== 'inspector' && session.role !== 'admin') {
+        showToast('⚠️ تغيير الشعار متاح لحساب المفتش فقط', 'warning');
+        return;
+    }
+    
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/png, image/jpeg, image/webp, image/svg+xml';
+    fileInput.style.display = 'none';
+    
+    fileInput.onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        showToast('⏳ جارٍ معالجة الصورة وحفظ الشعار...', 'info', 2000);
+        
+        // قراءة الصورة وضغطها بدقة عالية باستخدام Canvas لضمان الحفظ والعرض الفوري
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const rawData = evt.target.result;
+            const tempImg = new Image();
+            tempImg.onload = function() {
+                let width = tempImg.width;
+                let height = tempImg.height;
+                const maxDim = 320;
+                if (width > maxDim || height > maxDim) {
+                    if (width > height) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    } else {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(tempImg, 0, 0, width, height);
+                const optimizedDataUrl = canvas.toDataURL('image/png', 0.92);
+                
+                try {
+                    localStorage.setItem('footerMuqataaLogo', optimizedDataUrl);
+                } catch(err) {
+                    console.warn('LocalStorage quota:', err);
+                }
+                
+                // العرض الفوري والمباشر في الصفحة دون أي تأخير
+                applyMuqataaLogo(optimizedDataUrl);
+                
+                // حفظ الشعار في السحابة (Firestore) لمزامنته مع باقي الأجهزة والصفحات
+                if (typeof fbDb !== 'undefined' && fbDb) {
+                    try {
+                        fbDb.collection('platform_shared').doc('branding').set({
+                            muqataaLogo: optimizedDataUrl,
+                            updatedAt: new Date().toISOString()
+                        }, { merge: true }).catch(() => {});
+                    } catch(_) {}
+                }
+                
+                showToast('✅ تم رفع وتحديث شعار المقاطعة وظهوره بنجاح!', 'success');
+            };
+            tempImg.onerror = function() {
+                try { localStorage.setItem('footerMuqataaLogo', rawData); } catch(_) {}
+                applyMuqataaLogo(rawData);
+                showToast('✅ تم تحديث شعار المقاطعة', 'success');
+            };
+            tempImg.src = rawData;
+        };
+        reader.readAsDataURL(file);
+    };
+    
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    setTimeout(() => fileInput.remove(), 1500);
+}
+
+function loadCustomFooterLogo() {
+    try {
+        const savedLogo = localStorage.getItem('footerMuqataaLogo');
+        if (savedLogo) {
+            applyMuqataaLogo(savedLogo);
+        }
+        
+        // التحقق من السحابة في حال تم تحديثه من جهاز آخر
+        if (typeof fbDb !== 'undefined' && fbDb) {
+            fbDb.collection('platform_shared').doc('branding').get().then(doc => {
+                if (doc.exists && doc.data().muqataaLogo) {
+                    const cloudLogo = doc.data().muqataaLogo;
+                    if (cloudLogo !== savedLogo) {
+                        try { localStorage.setItem('footerMuqataaLogo', cloudLogo); } catch(_) {}
+                        applyMuqataaLogo(cloudLogo);
+                    }
+                }
+            }).catch(() => {});
+        }
+    } catch(e) {
+        console.warn('loadCustomFooterLogo warning:', e);
+    }
+}
 
 // ============================================================
 //  2. أدوات مساعدة
@@ -876,46 +1065,107 @@ let _pedRecords = [];
 async function loadPedagogicalRecords() {
     const tbody = document.getElementById('pedTableBody');
     if (!tbody) return;
-    if (!sbMain) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:var(--danger); padding:20px;">Supabase غير متاح</td></tr>';
-        return;
-    }
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> جارٍ التحميل...</td></tr>';
-    try {
-        await ensureSupabaseSession();
-        const { data, error } = await sbMain
-            .from('traitement_records')
-            .select('*')
-            .order('created_at', { ascending: false });
-        if (error) throw error;
-        _pedRecords = data || [];
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> جارٍ استرجاع سجلات المعالجة البيداغوجية من السحابة...</td></tr>';
+    
+    let records = [];
+    const idMap = new Map();
 
-        const totalRecordsEl = document.getElementById('pedTotalRecords');
-        const totalTeachersEl = document.getElementById('pedTotalTeachers');
-        const totalStudentsEl = document.getElementById('pedTotalStudents');
-        const totalPlansEl = document.getElementById('pedTotalPlans');
-
-        if (totalRecordsEl) totalRecordsEl.textContent = _pedRecords.length;
-        if (totalTeachersEl) totalTeachersEl.textContent = new Set(_pedRecords.map(r => r.created_by_name || r.enseignant).filter(Boolean)).size;
-        if (totalStudentsEl) totalStudentsEl.textContent = _pedRecords.reduce((s, r) => s + (r.total_students || 0), 0);
-        if (totalPlansEl) totalPlansEl.textContent = _pedRecords.filter(r => r.plan && Object.keys(r.plan).length > 0).length;
-
-        // فلتر الأساتذة
-        const teacherSelect = document.getElementById('pedFilterTeacher');
-        if (teacherSelect) {
-            const prev = teacherSelect.value;
-            const teachers = [...new Set(_pedRecords.map(r => r.created_by_name || r.enseignant).filter(Boolean))];
-            teacherSelect.innerHTML = '<option value="">كل الأساتذة</option>' +
-                teachers.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
-            teacherSelect.value = prev;
+    // 1. استرجاع السجلات المشتركة من Firebase Firestore (platform_shared/pedagogical_records)
+    if (typeof fbDb !== 'undefined' && fbDb) {
+        try {
+            await ensureAnonAuth();
+            const snap = await fbDb.collection('platform_shared').doc('pedagogical_records').get();
+            if (snap.exists) {
+                const data = snap.data();
+                if (data && data.recordsJson) {
+                    try {
+                        const parsed = JSON.parse(data.recordsJson);
+                        if (Array.isArray(parsed)) {
+                            parsed.forEach(r => { if (r && r.id) idMap.set(r.id, r); });
+                        }
+                    } catch(e) {
+                        console.warn('Failed parsing Firestore recordsJson:', e);
+                    }
+                }
+            }
+        } catch(err) {
+            console.warn('Firestore pedagogical_records fetch error:', err);
         }
-
-        renderPedagogicalTable();
-        showToast('✅ تم تحميل ' + _pedRecords.length + ' سجل معالجة', 'success');
-    } catch(e) {
-        console.error(e);
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:var(--danger); padding:20px;">خطأ في جلب السجلات: ${escapeHtml(e.message || '')}</td></tr>`;
     }
+
+    // 2. استرجاع السجلات من جدول Supabase (traitement_records) إن وُجدت
+    if (typeof sbMain !== 'undefined' && sbMain) {
+        try {
+            await ensureSupabaseSession();
+            const { data, error } = await sbMain
+                .from('traitement_records')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (!error && Array.isArray(data)) {
+                data.forEach(r => {
+                    if (r && r.id && !idMap.has(r.id)) {
+                        idMap.set(r.id, {
+                            ...r,
+                            enseignant: r.created_by_name || r.enseignant,
+                            nbEleves: r.nb_eleves,
+                            nbRedoublants: r.nb_redoublants,
+                            categorieC: r.categorie_c,
+                            categorieD: r.categorie_d
+                        });
+                    }
+                });
+            }
+        } catch(err) {
+            console.warn('Supabase traitement_records fetch error:', err);
+        }
+    }
+
+    // 3. استرجاع السجلات المحفوظة محلياً في المتصفح (traitementData)
+    try {
+        const local = JSON.parse(localStorage.getItem('traitementData') || '[]');
+        if (Array.isArray(local)) {
+            local.forEach(r => {
+                if (r && r.id && !idMap.has(r.id)) {
+                    idMap.set(r.id, r);
+                }
+            });
+        }
+    } catch(_) {}
+
+    records = Array.from(idMap.values());
+
+    // ترتيب السجلات بحسب التاريخ التنازلي
+    records.sort((a, b) => new Date(b.created_at || b.updatedAt || 0) - new Date(a.created_at || a.updatedAt || 0));
+    _pedRecords = records;
+
+    // تحديث بطاقات الإحصائيات الأربعة
+    const totalRecordsEl = document.getElementById('pedTotalRecords');
+    const totalTeachersEl = document.getElementById('pedTotalTeachers');
+    const totalStudentsEl = document.getElementById('pedTotalStudents');
+    const totalPlansEl = document.getElementById('pedTotalPlans');
+
+    if (totalRecordsEl) totalRecordsEl.textContent = _pedRecords.length;
+    if (totalTeachersEl) totalTeachersEl.textContent = new Set(_pedRecords.map(r => r.created_by_name || r.enseignant).filter(Boolean)).size;
+    if (totalStudentsEl) {
+        totalStudentsEl.textContent = _pedRecords.reduce((s, r) => {
+            const count = parseInt(r.total_students || r.categorieTotal || r.nb_eleves) || 0;
+            return s + count;
+        }, 0);
+    }
+    if (totalPlansEl) totalPlansEl.textContent = _pedRecords.filter(r => r.plan && Object.keys(r.plan).length > 0).length;
+
+    // تحديث قائمة فلتر الأساتذة
+    const teacherSelect = document.getElementById('pedFilterTeacher');
+    if (teacherSelect) {
+        const prev = teacherSelect.value;
+        const teachers = [...new Set(_pedRecords.map(r => r.created_by_name || r.enseignant).filter(Boolean))];
+        teacherSelect.innerHTML = '<option value="">كل الأساتذة</option>' +
+            teachers.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+        teacherSelect.value = prev;
+    }
+
+    renderPedagogicalTable();
+    showToast('✅ تم تحميل ' + _pedRecords.length + ' سجل معالجة بنجاح', 'success');
 }
 
 function renderPedagogicalTable() {
@@ -952,10 +1202,151 @@ function renderPedagogicalTable() {
                 <td style="white-space:nowrap;">
                     <button class="btn btn-sm btn-info" onclick="viewPedRecord('${r.id}')" title="عرض تفاصيل"><i class="fas fa-eye"></i></button>
                     <button class="btn btn-sm btn-gold" onclick="exportPedRecordWord('${r.id}')" title="تصدير Word"><i class="fas fa-file-word"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="deletePedRecord('${r.id}')" title="حذف السجل"><i class="fas fa-trash-alt"></i></button>
                 </td>
             </tr>
         `;
     }).join('');
+}
+
+async function deletePedRecord(id) {
+    if (!confirm('هل أنت متأكد من حذف هذا السجل نهائياً؟')) return;
+    _pedRecords = _pedRecords.filter(r => r.id !== id);
+    if (typeof fbDb !== 'undefined' && fbDb) {
+        try {
+            await ensureAnonAuth();
+            await fbDb.collection('platform_shared').doc('pedagogical_records').set({
+                updatedAt: new Date().toISOString(),
+                recordsJson: JSON.stringify(_pedRecords)
+            }, { merge: true });
+        } catch(e) {
+            console.warn('Delete error:', e);
+        }
+    }
+    try {
+        const local = JSON.parse(localStorage.getItem('traitementData') || '[]').filter(r => r.id !== id);
+        localStorage.setItem('traitementData', JSON.stringify(local));
+    } catch(_) {}
+    
+    if (typeof sbMain !== 'undefined' && sbMain) {
+        try {
+            await sbMain.from('activity_log').insert({
+                teacher_id: currentUser ? currentUser.id : 'inspector',
+                teacher_name: currentUser ? (currentUser.fullName || 'المفتش') : 'المفتش',
+                action: 'delete',
+                activity_title: 'حذف سجل معالجة بيداغوجية',
+                created_at: new Date().toISOString()
+            });
+        } catch(_) {}
+    }
+    
+    document.getElementById('pedTotalRecords').textContent = _pedRecords.length;
+    document.getElementById('pedTotalTeachers').textContent = new Set(_pedRecords.map(r => r.created_by_name || r.enseignant).filter(Boolean)).size;
+    document.getElementById('pedTotalStudents').textContent = _pedRecords.reduce((s, r) => s + (parseInt(r.total_students || r.nb_eleves) || 0), 0);
+    document.getElementById('pedTotalPlans').textContent = _pedRecords.filter(r => r.plan && Object.keys(r.plan).length > 0).length;
+    renderPedagogicalTable();
+    showToast('🗑️ تم حذف السجل بنجاح', 'info');
+}
+
+function openAddPedModal() {
+    const overlay = document.createElement('div');
+    overlay.id = 'addPedModalOverlay';
+    overlay.style.cssText = 'position:fixed; inset:0; background:rgba(15,35,64,0.65); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px;';
+    overlay.innerHTML = `
+        <div style="background:#fff; border-radius:14px; padding:26px; max-width:600px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.3); direction:rtl; text-align:right;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:2px solid var(--gold); padding-bottom:10px;">
+                <h3 style="margin:0; color:var(--primary); font-size:16px;"><i class="fas fa-plus-circle"></i> إضافة سجل معالجة بيداغوجية</h3>
+                <button onclick="document.getElementById('addPedModalOverlay').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-muted);">&times;</button>
+            </div>
+            <div class="field-group" style="margin-bottom:12px;"><label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px;">المؤسسة / المتوسطة</label><input type="text" id="newPedSchool" placeholder="مثال: متوسطة كاتب ياسين" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-family:inherit;"></div>
+            <div class="field-group" style="margin-bottom:12px;"><label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px;">اسم الأستاذ(ة)</label><input type="text" id="newPedTeacher" placeholder="مثال: بن عيسى رفيق" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-family:inherit;"></div>
+            <div class="field-group" style="margin-bottom:12px;"><label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px;">الأقسام المعنية</label><input type="text" id="newPedClasses" placeholder="مثال: 2م1 - 2م2" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-family:inherit;"></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+                <div><label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px;">تعداد التلاميذ</label><input type="number" id="newPedStudents" value="35" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-family:inherit;"></div>
+                <div><label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px;">المتعلمون في المعالجة</label><input type="number" id="newPedRemediationCount" value="6" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-family:inherit;"></div>
+            </div>
+            <div class="field-group" style="margin-bottom:12px;"><label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px;">طبيعة الصعوبة المستهدفة</label><input type="text" id="newPedDifficulty" placeholder="مثال: صعوبات لغوية وإملائية في رسم الهمزات" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-family:inherit;"></div>
+            <div class="field-group" style="margin-bottom:16px;"><label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px;">الأنشطة المقترحة للخطة</label><textarea id="newPedPlanActivity" placeholder="ورشات علاجية مكيفة وسياقية فردية وجماعية" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;height:70px;font-family:inherit;"></textarea></div>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button class="btn btn-outline" onclick="document.getElementById('addPedModalOverlay').remove()">إلغاء</button>
+                <button class="btn btn-success" onclick="saveNewPedRecord()"><i class="fas fa-save"></i> حفظ ومزامنة سحابية</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+async function saveNewPedRecord() {
+    const school = document.getElementById('newPedSchool')?.value.trim();
+    const teacher = document.getElementById('newPedTeacher')?.value.trim();
+    const classes = document.getElementById('newPedClasses')?.value.trim();
+    const nbEleves = parseInt(document.getElementById('newPedStudents')?.value) || 30;
+    const remediationCount = parseInt(document.getElementById('newPedRemediationCount')?.value) || 5;
+    const difficulty = document.getElementById('newPedDifficulty')?.value.trim() || 'صعوبة بيداغوجية عامة';
+    const planActivity = document.getElementById('newPedPlanActivity')?.value.trim() || 'أنشطة علاجية مخصصة';
+
+    if (!school || !teacher) {
+        showToast('يرجى ملء اسم المؤسسة والأستاذ', 'error');
+        return;
+    }
+
+    const newRecord = {
+        id: 'rec_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+        etablissement: school,
+        enseignant: teacher,
+        classes: classes,
+        nb_eleves: nbEleves,
+        nb_redoublants: 2,
+        categorie_c: Math.ceil(remediationCount * 0.7),
+        categorie_d: Math.floor(remediationCount * 0.3),
+        total_students: remediationCount,
+        criteria: [{ competence: 'فهم المكتوب / النظام اللغوي', critere: difficulty, level: 'مقبول', category: 'الفئة ج' }],
+        students: [{ competence: 'فهم المكتوب', critere: difficulty, students: [{ name: 'تلميذ 1' }, { name: 'تلميذ 2' }] }],
+        plan: {
+            difficultyType: difficulty,
+            activityType: planActivity,
+            timing: 'المعالجة الفورية والمؤجلة'
+        },
+        created_by_name: teacher,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+    };
+
+    _pedRecords.unshift(newRecord);
+
+    if (typeof fbDb !== 'undefined' && fbDb) {
+        try {
+            await ensureAnonAuth();
+            await fbDb.collection('platform_shared').doc('pedagogical_records').set({
+                updatedAt: new Date().toISOString(),
+                recordsJson: JSON.stringify(_pedRecords)
+            }, { merge: true });
+        } catch(e) {
+            console.warn('Save to Firestore warning:', e);
+        }
+    }
+
+    try {
+        const local = JSON.parse(localStorage.getItem('traitementData') || '[]');
+        local.unshift(newRecord);
+        localStorage.setItem('traitementData', JSON.stringify(local));
+    } catch(_) {}
+
+    if (typeof sbMain !== 'undefined' && sbMain) {
+        try {
+            await sbMain.from('activity_log').insert({
+                teacher_id: currentUser ? currentUser.id : 'inspector',
+                teacher_name: teacher,
+                action: 'create',
+                activity_title: `معالجة بيداغوجية: ${school} - ${classes}`,
+                created_at: new Date().toISOString()
+            });
+        } catch(_) {}
+    }
+
+    document.getElementById('addPedModalOverlay')?.remove();
+    loadPedagogicalRecords();
+    showToast('✅ تم إضافة السجل ومزامنته سحابياً بنجاح!', 'success');
 }
 
 function viewPedRecord(id) {
