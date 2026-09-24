@@ -62,7 +62,6 @@
         padding-bottom: env(safe-area-inset-bottom, 0px);
         line-height: 1.7;
     }
-    /* خلفية بنسيج ورقي خفيف جداً بدل تدرّج لوني نمطي */
     body {
         background-image:
             radial-gradient(circle at 1px 1px, rgba(15,35,64,0.045) 1px, transparent 0);
@@ -354,7 +353,7 @@
 </head>
 <body>
 
-    <!-- ============ شاشة الدخول الموحّدة (تفتح كل الأدوات) ============ -->
+    <!-- ============ شاشة الدخول الموحّدة ============ -->
     <div id="gateScreen">
         <div class="gate-box">
             <div class="gate-icon"><i class="fas fa-shield-halved"></i></div>
@@ -473,20 +472,27 @@
 
 <script>
 // ============================================================
-//  نظام الدخول الموحّد للبوابة — نفس آلية Firestore المستخدمة في
-//  منصة المعالجة البيداغوجية، بحيث تكون الحسابات موحّدة بين الأداتين.
+//  نظام الدخول الموحّد — يقرأ من:
+//  - platform_shared/users        (بيانات شخصية بدون passwordHash)
+//  - platform_shared/credentials  (userId → passwordHash)
 // ============================================================
 const SESSION_KEY = 'pgb_session';
 const SESSION_DURATION = 2 * 60 * 60 * 1000; // ساعتان
 
-let cachedUsers = [];
-let cloudUsersReady = false;
-let cloudUsersReadyPromise = null;
+let cachedUsers = [];          // قائمة الملفات الشخصية
+let cachedCredentials = {};    // {userId: passwordHash}
+let cloudReady = false;
+let cloudReadyPromise = null;
 
-function getUsersCloudDocRef() {
+function getUsersDocRef() {
     if (!fbDb) return null;
     try { return fbDb.collection('platform_shared').doc('users'); }
     catch(e) { console.error('⚠️ تعذّر الوصول لقاعدة البيانات السحابية:', e); return null; }
+}
+function getCredentialsDocRef() {
+    if (!fbDb) return null;
+    try { return fbDb.collection('platform_shared').doc('credentials'); }
+    catch(e) { return null; }
 }
 
 function ensureFirebaseAnonymousAuth() {
@@ -500,34 +506,50 @@ function ensureFirebaseAnonymousAuth() {
     return Promise.race([authPromise, timeoutPromise]);
 }
 
-function listenToCloudUsers() {
-    if (cloudUsersReadyPromise) return cloudUsersReadyPromise;
-    const docRef = getUsersCloudDocRef();
-    if (!docRef) {
-        cloudUsersReady = true;
-        cloudUsersReadyPromise = Promise.resolve(cachedUsers);
-        return cloudUsersReadyPromise;
+function listenToCloudData() {
+    if (cloudReadyPromise) return cloudReadyPromise;
+    const usersRef = getUsersDocRef();
+    const credsRef = getCredentialsDocRef();
+    if (!usersRef || !credsRef) {
+        cloudReady = true;
+        cloudReadyPromise = Promise.resolve({ users: cachedUsers, credentials: cachedCredentials });
+        return cloudReadyPromise;
     }
-    const snapshotPromise = new Promise((resolve) => {
-        docRef.onSnapshot(
+
+    const usersPromise = new Promise((resolve) => {
+        usersRef.onSnapshot(
             (doc) => {
                 cachedUsers = (doc.exists && Array.isArray(doc.data().list)) ? doc.data().list : [];
-                cloudUsersReady = true;
                 resolve(cachedUsers);
             },
             (error) => {
-                console.error('⚠️ تعذّر الاتصال بقاعدة البيانات السحابية:', error);
-                cloudUsersReady = true;
+                console.error('⚠️ تعذّر الاتصال بقائمة المستخدمين:', error);
                 resolve(cachedUsers);
             }
         );
     });
-    const timeoutPromise = new Promise((resolve) => setTimeout(() => { cloudUsersReady = true; resolve(cachedUsers); }, 8000));
-    cloudUsersReadyPromise = Promise.race([snapshotPromise, timeoutPromise]);
-    return cloudUsersReadyPromise;
+
+    const credsPromise = new Promise((resolve) => {
+        credsRef.onSnapshot(
+            (doc) => {
+                cachedCredentials = (doc.exists && typeof doc.data().hashes === 'object') ? doc.data().hashes : {};
+                resolve(cachedCredentials);
+            },
+            (error) => {
+                console.error('⚠️ تعذّر الاتصال بقائمة كلمات المرور:', error);
+                resolve(cachedCredentials);
+            }
+        );
+    });
+
+    const timeoutPromise = new Promise((resolve) => setTimeout(() => { cloudReady = true; resolve(); }, 8000));
+    cloudReadyPromise = Promise.race([Promise.all([usersPromise, credsPromise]), timeoutPromise])
+        .then(() => { cloudReady = true; return { users: cachedUsers, credentials: cachedCredentials }; });
+    return cloudReadyPromise;
 }
 
 function getUsers() { return cachedUsers; }
+function getCredentials() { return cachedCredentials; }
 
 function findUserByUsername(username) {
     return cachedUsers.find(u => u.username.toLowerCase() === username.toLowerCase());
@@ -563,29 +585,83 @@ function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
+// ============================================================
+//  هجرة تلقائية: نقل passwordHash من users القديم إلى credentials
+// ============================================================
+async function migrateLegacyUsers() {
+    try {
+        const usersRef = getUsersDocRef();
+        const credsRef = getCredentialsDocRef();
+        if (!usersRef || !credsRef) return;
+        const snap = await usersRef.get();
+        if (!snap.exists) return;
+        const data = snap.data();
+        if (!data || !Array.isArray(data.list)) return;
+
+        const legacyWithHash = data.list.filter(u => u.passwordHash);
+        if (legacyWithHash.length === 0) return;
+
+        const credsSnap = await credsRef.get();
+        const existingCreds = (credsSnap.exists && credsSnap.data().hashes) ? credsSnap.data().hashes : {};
+
+        let migrated = 0;
+        legacyWithHash.forEach(u => {
+            if (!existingCreds[u.id] && u.passwordHash) {
+                existingCreds[u.id] = u.passwordHash;
+                migrated++;
+            }
+        });
+
+        await credsRef.set({ hashes: existingCreds, updatedAt: new Date().toISOString() }, { merge: true });
+
+        const sanitized = data.list.map(u => {
+            const copy = { ...u };
+            delete copy.passwordHash;
+            return copy;
+        });
+        await usersRef.set({ list: sanitized, updatedAt: new Date().toISOString() });
+
+        cachedUsers = sanitized;
+        cachedCredentials = existingCreds;
+        if (migrated > 0) console.log('✅ تم ترحيل ' + migrated + ' كلمة مرور إلى credentials');
+    } catch (e) {
+        console.warn('Migration warning:', e);
+    }
+}
+
+// ============================================================
+//  إنشاء حساب المدير الأول عند أول تشغيل
+// ============================================================
 async function initializeUsers() {
     try {
         await ensureFirebaseAnonymousAuth();
-        await listenToCloudUsers();
+        await listenToCloudData();
+        await migrateLegacyUsers();
+
         if (!cachedUsers || cachedUsers.length === 0) {
             const randomPassword = generateRandomPassword(10);
             const adminPasswordHash = await hashPassword(randomPassword);
+            const adminId = 'admin_' + generateId();
             const initialUsers = [{
-                id: 'admin_' + generateId(),
+                id: adminId,
                 username: 'admin',
                 fullName: 'درويش الهلالي',
                 email: 'dlazedine68@gmail.com',
                 school: 'المقاطعة الثانية - قسنطينة',
                 role: 'inspector',
-                passwordHash: adminPasswordHash,
                 createdAt: new Date().toISOString(),
                 lastLogin: null,
                 mustChangePassword: true,
                 active: true
             }];
             cachedUsers = initialUsers;
-            const docRef = getUsersCloudDocRef();
-            if (docRef) await docRef.set({ list: initialUsers, updatedAt: new Date().toISOString() });
+            cachedCredentials = { [adminId]: adminPasswordHash };
+
+            const usersRef = getUsersDocRef();
+            const credsRef = getCredentialsDocRef();
+            if (usersRef) await usersRef.set({ list: initialUsers, updatedAt: new Date().toISOString() });
+            if (credsRef) await credsRef.set({ hashes: cachedCredentials, updatedAt: new Date().toISOString() });
+
             window.__freshAdminPassword = randomPassword;
         }
         return cachedUsers;
@@ -595,15 +671,15 @@ async function initializeUsers() {
     }
 }
 
-// ============ الجلسة المشتركة (تُقرأ تلقائياً من كل أداة أخرى) ============
+// ============================================================
+//  الجلسة المشتركة
+// ============================================================
 function saveSession(user) {
     const session = {
         user: { id: user.id, username: user.username, fullName: user.fullName, role: user.role, email: user.email, school: user.school },
         startedAt: Date.now(),
         expiresAt: Date.now() + SESSION_DURATION
     };
-    // نحفظها دائماً في التخزين الدائم (localStorage) لأن الغرض هو دخول موحّد
-    // يعمل عند الانتقال من البوابة إلى أي أداة أخرى — وليس لجلسة تصفح واحدة فقط.
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
     localStorage.setItem(SESSION_KEY + '_persistent', JSON.stringify(session));
 }
@@ -623,7 +699,29 @@ function clearSession() {
     localStorage.removeItem(SESSION_KEY + '_persistent');
 }
 
-// ============ واجهة الدخول ============
+// ============================================================
+//  تحديث lastLogin
+// ============================================================
+async function updateLastLogin(userId) {
+    try {
+        const idx = cachedUsers.findIndex(u => u.id === userId);
+        if (idx === -1) return;
+        cachedUsers[idx].lastLogin = new Date().toISOString();
+        const usersRef = getUsersDocRef();
+        if (usersRef) {
+            await usersRef.set({
+                list: cachedUsers,
+                updatedAt: new Date().toISOString()
+            }, { merge: true });
+        }
+    } catch(e) {
+        console.warn('تعذّر تحديث lastLogin:', e);
+    }
+}
+
+// ============================================================
+//  واجهة الدخول
+// ============================================================
 function showGateMsg(text, type) {
     const el = document.getElementById('gateMsg');
     el.textContent = text;
@@ -645,7 +743,7 @@ async function handleGateLogin(event) {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحقق...';
 
     try {
-        if (!cloudUsersReady) await listenToCloudUsers();
+        if (!cloudReady) await listenToCloudData();
 
         const user = findUserByUsername(username);
         if (!user) {
@@ -656,13 +754,22 @@ async function handleGateLogin(event) {
             showGateMsg('هذا الحساب معطّل حالياً. يرجى التواصل مع المدير.', 'error');
             return false;
         }
-        const valid = await verifyPassword(password, user.passwordHash);
+
+        const hash = cachedCredentials[user.id];
+        if (!hash) {
+            showGateMsg('لا توجد كلمة مرور مسجّلة لهذا الحساب. يرجى التواصل مع المدير.', 'error');
+            return false;
+        }
+
+        const valid = await verifyPassword(password, hash);
         if (!valid) {
             showGateMsg('كلمة المرور غير صحيحة', 'error');
             return false;
         }
 
         saveSession(user);
+        // تحديث lastLogin بدون انتظار (لا يعطل الدخول إن فشل)
+        updateLastLogin(user.id).catch(() => {});
         enterApp(user);
         return false;
     } catch(e) {
@@ -686,7 +793,7 @@ function enterApp(user) {
     document.getElementById('gateScreen').style.display = 'none';
     document.getElementById('appScreen').style.display = 'block';
     document.getElementById('gateUserName').textContent = user.fullName || user.username;
-    // بطاقة التقييم محصورة بالمفتش فقط
+    // بطاقة التقييم ولوحة التحكم محصورتان بالمفتش فقط
     const taqyimRow = document.getElementById('taqyimRow');
     if (taqyimRow && user.role !== 'inspector') {
         taqyimRow.remove();

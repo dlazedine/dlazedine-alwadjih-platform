@@ -71,7 +71,7 @@
 
     .user-bar { background: var(--navy-deep); color:#eaf1f8; padding:10px 24px; display:flex; align-items:center; justify-content:space-between; font-size:13px; flex-wrap:wrap; gap:8px; }
     .user-bar a, .user-bar button { color:#dbe6f0; text-decoration:none; background:none; border:1px solid rgba(255,255,255,0.25); font-family:inherit; font-size:12.5px; padding:6px 14px; border-radius:20px; cursor:pointer; }
-    .user-bar .right { display:flex; gap:8px; align-items:center; }
+    .user-bar .right { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 
     .hero { background: linear-gradient(150deg, var(--navy-deep) 0%, var(--primary) 100%); color:#fff; padding:30px 24px; text-align:center; }
     .hero h1 { font-size: clamp(20px, 3.5vw, 27px); margin-bottom:6px; }
@@ -164,8 +164,9 @@
         <div class="right">
             <a href="index.html"><i class="fas fa-arrow-right"></i> البوابة</a>
             <a href="moualaja.html"><i class="fas fa-hand-holding-heart"></i> منصة المعالجة</a>
-            <a href="ta3limia_arabic.html" style="background:rgba(196,155,63,0.25); border-color:var(--gold); color:#f5e6c8;"><i class="fas fa-book-open-reader"></i> تعليمية العربية ومصمم المذكرات</a>
+            <a href="arabic.html" style="background:rgba(196,155,63,0.25); border-color:var(--gold); color:#f5e6c8;"><i class="fas fa-book-open-reader"></i> تعليمية العربية ومصمم المذكرات</a>
             <a href="amal.html"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
+            <a href="niqash.html"><i class="fas fa-comments"></i> ركن النقاش</a>
             <span>مرحباً، <b id="userNameLabel" style="color:var(--gold-light)"></b></span>
         </div>
         <button onclick="handleLogout()"><i class="fas fa-arrow-right-from-bracket"></i> تسجيل الخروج</button>
@@ -183,7 +184,7 @@
                 </div>
             </div>
 
-            <!-- بطاقة شعار المقاطعة في الترويسة مع زر التغيير والظهور الفوري -->
+            <!-- بطاقة شعار المقاطعة في الترويسة -->
             <div class="muqataa-logo-box" onclick="changeFooterLogo()" title="انقر لتغيير أو رفع شعار المقاطعة" style="cursor:pointer; display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.1); padding:8px 16px; border-radius:12px; border:1px dashed rgba(255,255,255,0.35); transition:var(--transition);">
                 <img id="heroMuqataaLogo" class="muqataa-logo-img" alt="شعار المقاطعة" style="display:none; max-width:48px; max-height:48px; object-fit:contain; border-radius:6px; background:#fff; padding:2px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
                 <div id="heroMuqataaPlaceholder" class="muqataa-logo-placeholder" style="width:44px; height:44px; border-radius:8px; background:rgba(196,155,63,0.3); display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--gold-light); font-size:16px;">
@@ -197,7 +198,7 @@
         </div>
     </div>
 
-    <!-- التعديل الأول: شريط التبويبات الثلاثي -->
+    <!-- شريط التبويبات الثلاثي -->
     <div class="main-tabs">
         <div class="main-tab active" data-maintab="users"><i class="fas fa-users-cog"></i> إدارة المستخدمين</div>
         <div class="main-tab" data-maintab="monitor"><i class="fas fa-satellite-dish"></i> مراقبة النشاطات</div>
@@ -257,7 +258,7 @@
         </div>
     </div>
 
-    <!-- التعديل الثاني: لوحة المعالجة البيداغوجية ============ -->
+    <!-- ============ المعالجة البيداغوجية ============ -->
     <div class="tab-panel" id="panel-pedagogical">
         <div class="stats-grid">
             <div class="stat-card"><div class="number" id="pedTotalRecords">0</div><div class="label">إجمالي السجلات</div></div>
@@ -307,7 +308,7 @@
         </div>
     </div>
 
-    <!-- تذييل لوحة التحكم مع الشعار الرسمي والشعار المخصص للمقاطعة -->
+    <!-- تذييل لوحة التحكم -->
     <div style="max-width:1100px; margin:25px auto 40px; padding:0 20px;">
         <div class="card-box" style="text-align:center; padding:22px 20px; border-top:4px solid var(--gold);">
             <div style="display:flex; justify-content:center; align-items:center; gap:36px; flex-wrap:wrap; margin-bottom:12px;">
@@ -332,8 +333,9 @@
             <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
                 <a href="index.html" class="btn btn-sm btn-gold" style="text-decoration:none;"><i class="fas fa-home"></i> العودة إلى البوابة الرئيسية</a>
                 <a href="moualaja.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-stethoscope"></i> سجلات المعالجة البيداغوجية</a>
-                <a href="ta3limia_arabic.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-book-open-reader"></i> تعليمية العربية ومصمم المذكرات</a>
+                <a href="arabic.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-book-open-reader"></i> تعليمية العربية ومصمم المذكرات</a>
                 <a href="amal.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
+                <a href="niqash.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-comments"></i> ركن النقاش</a>
             </div>
 
             <div style="font-size:12px; color:var(--text-muted); border-top:1px solid var(--border-color); padding-top:10px; margin-top:6px;">
@@ -389,7 +391,8 @@ if (!__portalUser || __portalUser.role !== 'inspector') {
 }
 
 let currentUser = null;
-let cachedUsers = [];
+let cachedUsers = [];          // الملفات الشخصية فقط (بدون hash)
+let cachedCredentials = {};    // معرّف المستخدم → passwordHash
 
 async function hashPassword(password) {
     const encoder = new TextEncoder();
@@ -423,46 +426,159 @@ function ensureSupabaseSession() {
     return Promise.race([attempt, timeout]);
 }
 
-function getUsersCloudDocRef() {
+// ============================================================
+//  مستندات Firestore المنفصلة:
+//  - platform_shared/users        → بيانات عامة (بدون passwordHash)
+//  - platform_shared/credentials  → {"userId": "passwordHash", ...}
+// ============================================================
+function getUsersDocRef() {
     if (!fbDb) return null;
     try { return fbDb.collection('platform_shared').doc('users'); }
     catch (e) { return null; }
 }
+function getCredentialsDocRef() {
+    if (!fbDb) return null;
+    try { return fbDb.collection('platform_shared').doc('credentials'); }
+    catch (e) { return null; }
+}
 
-let cloudUsersReadyPromise = null;
-function listenToCloudUsers() {
-    if (cloudUsersReadyPromise) return cloudUsersReadyPromise;
-    const docRef = getUsersCloudDocRef();
-    if (!docRef) { cloudUsersReadyPromise = Promise.resolve(cachedUsers); return cloudUsersReadyPromise; }
-    const snapshotPromise = new Promise((resolve) => {
-        docRef.onSnapshot(
+let cloudReadyPromise = null;
+function listenToCloudData() {
+    if (cloudReadyPromise) return cloudReadyPromise;
+    const usersRef = getUsersDocRef();
+    const credsRef = getCredentialsDocRef();
+    if (!usersRef || !credsRef) {
+        cloudReadyPromise = Promise.resolve({ users: cachedUsers, credentials: cachedCredentials });
+        return cloudReadyPromise;
+    }
+
+    const usersPromise = new Promise((resolve) => {
+        usersRef.onSnapshot(
             (doc) => {
                 cachedUsers = (doc.exists && Array.isArray(doc.data().list)) ? doc.data().list : [];
-                resolve(cachedUsers);
-                if (document.getElementById('appScreen').style.display !== 'none') renderUsersList();
+                resolve();
+                if (document.getElementById('appScreen') && document.getElementById('appScreen').style.display !== 'none') {
+                    renderUsersList();
+                }
             },
-            () => { resolve(cachedUsers); }
+            (err) => { console.error('users snapshot error:', err); resolve(); }
         );
     });
-    const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(cachedUsers), 8000));
-    cloudUsersReadyPromise = Promise.race([snapshotPromise, timeoutPromise]);
-    return cloudUsersReadyPromise;
+
+    const credsPromise = new Promise((resolve) => {
+        credsRef.onSnapshot(
+            (doc) => {
+                cachedCredentials = (doc.exists && typeof doc.data().hashes === 'object') ? doc.data().hashes : {};
+                resolve();
+            },
+            (err) => { console.error('credentials snapshot error:', err); resolve(); }
+        );
+    });
+
+    const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 8000));
+    cloudReadyPromise = Promise.race([Promise.all([usersPromise, credsPromise]), timeoutPromise])
+        .then(() => ({ users: cachedUsers, credentials: cachedCredentials }));
+    return cloudReadyPromise;
 }
+
 function getUsers() { return cachedUsers; }
+function getCredentials() { return cachedCredentials; }
+
+// حفظ قائمة المستخدمين (بدون كلمات مرور) في users
 async function saveUsers(users) {
-    cachedUsers = users;
+    // تأكد من إزالة أي passwordHash قبل الحفظ (تنظيف دفاعي)
+    const sanitized = users.map(u => {
+        const copy = { ...u };
+        delete copy.passwordHash;
+        return copy;
+    });
+    cachedUsers = sanitized;
     try {
-        const docRef = getUsersCloudDocRef();
+        const docRef = getUsersDocRef();
         if (!docRef) throw new Error('لا يوجد اتصال');
-        await docRef.set({ list: users, updatedAt: new Date().toISOString() });
+        await docRef.set({ list: sanitized, updatedAt: new Date().toISOString() });
         return true;
     } catch (e) {
         console.error(e);
-        showToast('⚠️ تعذّر حفظ التغييرات على الخادم', 'error');
+        showToast('⚠️ تعذّر حفظ قائمة المستخدمين', 'error');
         return false;
     }
 }
 
+// حفظ hash كلمة المرور في credentials
+async function saveCredentialHash(userId, passwordHash) {
+    const creds = { ...cachedCredentials };
+    if (passwordHash === null) {
+        delete creds[userId];
+    } else {
+        creds[userId] = passwordHash;
+    }
+    cachedCredentials = creds;
+    try {
+        const docRef = getCredentialsDocRef();
+        if (!docRef) throw new Error('لا يوجد اتصال');
+        await docRef.set({ hashes: creds, updatedAt: new Date().toISOString() });
+        return true;
+    } catch (e) {
+        console.error(e);
+        showToast('⚠️ تعذّر حفظ كلمة المرور على الخادم', 'error');
+        return false;
+    }
+}
+
+// ============================================================
+//  هجرة تلقائية: نقل passwordHash من users القديم إلى credentials
+// ============================================================
+async function migrateLegacyUsers() {
+    try {
+        const usersRef = getUsersDocRef();
+        const credsRef = getCredentialsDocRef();
+        if (!usersRef || !credsRef) return;
+        const snap = await usersRef.get();
+        if (!snap.exists) return;
+        const data = snap.data();
+        if (!data || !Array.isArray(data.list)) return;
+
+        const legacyWithHash = data.list.filter(u => u.passwordHash);
+        if (legacyWithHash.length === 0) return;
+
+        const credsSnap = await credsRef.get();
+        const existingCreds = (credsSnap.exists && credsSnap.data().hashes) ? credsSnap.data().hashes : {};
+
+        let migrated = 0;
+        legacyWithHash.forEach(u => {
+            if (!existingCreds[u.id] && u.passwordHash) {
+                existingCreds[u.id] = u.passwordHash;
+                migrated++;
+            }
+        });
+
+        // 1) نقل الـ hashes إلى credentials
+        await credsRef.set({ hashes: existingCreds, updatedAt: new Date().toISOString() }, { merge: true });
+
+        // 2) إزالة passwordHash من users
+        const sanitized = data.list.map(u => {
+            const copy = { ...u };
+            delete copy.passwordHash;
+            return copy;
+        });
+        await usersRef.set({ list: sanitized, updatedAt: new Date().toISOString() });
+
+        cachedUsers = sanitized;
+        cachedCredentials = existingCreds;
+
+        if (migrated > 0) {
+            console.log('✅ تم ترحيل ' + migrated + ' كلمة مرور إلى credentials');
+            showToast('✅ تم ترحيل بيانات الدخول بنجاح إلى المستند الآمن', 'success', 4000);
+        }
+    } catch (e) {
+        console.warn('Migration warning:', e);
+    }
+}
+
+// ============================================================
+//  إعادة تأكيد الهوية
+// ============================================================
 async function handleReauth(event) {
     event.preventDefault();
     const btn = document.getElementById('reauthBtn');
@@ -473,11 +589,37 @@ async function handleReauth(event) {
     msg.style.display = 'none';
     try {
         await ensureAnonAuth();
-        await listenToCloudUsers();
+        await listenToCloudData();
+        await migrateLegacyUsers();
+
         const user = cachedUsers.find(u => u.id === __portalUser.id);
-        if (!user) { msg.textContent = 'تعذّر العثور على حسابك.'; msg.style.display = 'block'; return false; }
-        const valid = await verifyPassword(password, user.passwordHash);
-        if (!valid) { msg.textContent = 'كلمة المرور غير صحيحة.'; msg.style.display = 'block'; return false; }
+        if (!user) {
+            msg.textContent = 'تعذّر العثور على حسابك.';
+            msg.style.display = 'block';
+            return false;
+        }
+        const hash = cachedCredentials[user.id];
+        if (!hash) {
+            msg.textContent = 'لا توجد كلمة مرور مسجّلة لهذا الحساب.';
+            msg.style.display = 'block';
+            return false;
+        }
+        const valid = await verifyPassword(password, hash);
+        if (!valid) {
+            msg.textContent = 'كلمة المرور غير صحيحة.';
+            msg.style.display = 'block';
+            return false;
+        }
+
+        // تحديث lastLogin
+        try {
+            const idx = cachedUsers.findIndex(u => u.id === user.id);
+            if (idx !== -1) {
+                cachedUsers[idx].lastLogin = new Date().toISOString();
+                await saveUsers(cachedUsers);
+            }
+        } catch(_) {}
+
         document.getElementById('reauthScreen').style.display = 'none';
         enterApp(user);
     } catch (e) {
@@ -514,22 +656,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================================
-//  إدارة وتحديث شعار المقاطعة (حل مشكلة التحميل والعرض)
+//  إدارة شعار المقاطعة
 // ============================================================
 function applyMuqataaLogo(dataUrl) {
     const logoImgs = document.querySelectorAll('.muqataa-logo-img, #footerMuqataaLogo, #heroMuqataaLogo');
     const placeholders = document.querySelectorAll('.muqataa-logo-placeholder, #footerMuqataaPlaceholder, #heroMuqataaPlaceholder');
-    
     if (dataUrl && typeof dataUrl === 'string' && dataUrl.length > 50) {
         logoImgs.forEach(img => {
-            img.onload = function() {
-                this.style.display = 'block';
-            };
-            img.onerror = function() {
-                this.style.display = 'none';
-            };
+            img.onload = function() { this.style.display = 'block'; };
+            img.onerror = function() { this.style.display = 'none'; };
             img.src = dataUrl;
-            img.style.display = 'block'; // مسح أي display: none سابق لضمان الظهور الفوري
+            img.style.display = 'block';
         });
         placeholders.forEach(ph => { ph.style.display = 'none'; });
     } else {
@@ -539,24 +676,16 @@ function applyMuqataaLogo(dataUrl) {
 }
 
 function changeFooterLogo() {
-    const session = (typeof getPortalSession === 'function' ? getPortalSession() : null) || (typeof currentUser !== 'undefined' ? currentUser : null);
-    if (session && session.role !== 'inspector' && session.role !== 'admin') {
-        showToast('⚠️ تغيير الشعار متاح لحساب المفتش فقط', 'warning');
-        return;
-    }
-    
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = 'image/png, image/jpeg, image/webp, image/svg+xml';
     fileInput.style.display = 'none';
-    
+
     fileInput.onchange = function(e) {
         const file = e.target.files[0];
         if (!file) return;
-        
         showToast('⏳ جارٍ معالجة الصورة وحفظ الشعار...', 'info', 2000);
-        
-        // قراءة الصورة وضغطها بدقة عالية باستخدام Canvas لضمان الحفظ والعرض الفوري
+
         const reader = new FileReader();
         reader.onload = function(evt) {
             const rawData = evt.target.result;
@@ -566,13 +695,8 @@ function changeFooterLogo() {
                 let height = tempImg.height;
                 const maxDim = 320;
                 if (width > maxDim || height > maxDim) {
-                    if (width > height) {
-                        height = Math.round((height * maxDim) / width);
-                        width = maxDim;
-                    } else {
-                        width = Math.round((width * maxDim) / height);
-                        height = maxDim;
-                    }
+                    if (width > height) { height = Math.round((height * maxDim) / width); width = maxDim; }
+                    else { width = Math.round((width * maxDim) / height); height = maxDim; }
                 }
                 const canvas = document.createElement('canvas');
                 canvas.width = width;
@@ -580,17 +704,10 @@ function changeFooterLogo() {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(tempImg, 0, 0, width, height);
                 const optimizedDataUrl = canvas.toDataURL('image/png', 0.92);
-                
-                try {
-                    localStorage.setItem('footerMuqataaLogo', optimizedDataUrl);
-                } catch(err) {
-                    console.warn('LocalStorage quota:', err);
-                }
-                
-                // العرض الفوري والمباشر في الصفحة دون أي تأخير
+
+                try { localStorage.setItem('footerMuqataaLogo', optimizedDataUrl); } catch(err) {}
                 applyMuqataaLogo(optimizedDataUrl);
-                
-                // حفظ الشعار في السحابة (Firestore) لمزامنته مع باقي الأجهزة والصفحات
+
                 if (typeof fbDb !== 'undefined' && fbDb) {
                     try {
                         fbDb.collection('platform_shared').doc('branding').set({
@@ -599,8 +716,7 @@ function changeFooterLogo() {
                         }, { merge: true }).catch(() => {});
                     } catch(_) {}
                 }
-                
-                showToast('✅ تم رفع وتحديث شعار المقاطعة وظهوره بنجاح!', 'success');
+                showToast('✅ تم رفع وتحديث شعار المقاطعة بنجاح!', 'success');
             };
             tempImg.onerror = function() {
                 try { localStorage.setItem('footerMuqataaLogo', rawData); } catch(_) {}
@@ -611,7 +727,7 @@ function changeFooterLogo() {
         };
         reader.readAsDataURL(file);
     };
-    
+
     document.body.appendChild(fileInput);
     fileInput.click();
     setTimeout(() => fileInput.remove(), 1500);
@@ -620,11 +736,8 @@ function changeFooterLogo() {
 function loadCustomFooterLogo() {
     try {
         const savedLogo = localStorage.getItem('footerMuqataaLogo');
-        if (savedLogo) {
-            applyMuqataaLogo(savedLogo);
-        }
-        
-        // التحقق من السحابة في حال تم تحديثه من جهاز آخر
+        if (savedLogo) applyMuqataaLogo(savedLogo);
+
         if (typeof fbDb !== 'undefined' && fbDb) {
             fbDb.collection('platform_shared').doc('branding').get().then(doc => {
                 if (doc.exists && doc.data().muqataaLogo) {
@@ -636,13 +749,11 @@ function loadCustomFooterLogo() {
                 }
             }).catch(() => {});
         }
-    } catch(e) {
-        console.warn('loadCustomFooterLogo warning:', e);
-    }
+    } catch(e) { console.warn('loadCustomFooterLogo warning:', e); }
 }
 
 // ============================================================
-//  2. أدوات مساعدة
+//  أدوات مساعدة
 // ============================================================
 function generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
 function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
@@ -677,12 +788,16 @@ function setupMainTabs() {
             if (tab.dataset.maintab === 'pedagogical') {
                 loadPedagogicalRecords();
             }
+            if (tab.dataset.maintab === 'monitor') {
+                refreshLog();
+                renderTeacherStats();
+            }
         });
     });
 }
 
 // ============================================================
-//  3. إدارة المستخدمين
+//  إدارة المستخدمين
 // ============================================================
 function renderUsersList() {
     const container = document.getElementById('usersListContainer');
@@ -763,26 +878,35 @@ async function saveUser() {
     if (editId) {
         const idx = users.findIndex(u => u.id === editId);
         if (idx !== -1) {
-            users[idx].fullName = fullName; users[idx].username = username; users[idx].email = email;
-            users[idx].school = school; users[idx].role = role;
-            if (password) users[idx].passwordHash = await hashPassword(password);
+            users[idx].fullName = fullName;
+            users[idx].username = username;
+            users[idx].email = email;
+            users[idx].school = school;
+            users[idx].role = role;
+            // لا passwordHash في users — يُحفظ في credentials
             const saved = await saveUsers(users);
-            if (saved) { showToast('✅ تم تحديث بيانات المستخدم وحفظه على الخادم', 'success'); closeUserModal(); }
+            if (password) {
+                const hash = await hashPassword(password);
+                await saveCredentialHash(editId, hash);
+            }
+            if (saved) { showToast('✅ تم تحديث بيانات المستخدم على الخادم', 'success'); closeUserModal(); }
             else showToast('❌ لم يتم حفظ التغييرات على الخادم', 'error');
             renderUsersList();
         }
     } else {
         const newPassword = password || generateRandomPassword();
-        const passwordHash = await hashPassword(newPassword);
+        const newId = 'user_' + generateId();
         const newUser = {
-            id: 'user_' + generateId(), username, fullName, email, school, role, passwordHash,
+            id: newId, username, fullName, email, school, role,
             createdAt: new Date().toISOString(), lastLogin: null, mustChangePassword: !password, active: true
         };
         users.push(newUser);
         const saved = await saveUsers(users);
         if (!saved) { showToast('❌ لم يتم حفظ الحساب الجديد على الخادم', 'error'); return; }
+        const hash = await hashPassword(newPassword);
+        await saveCredentialHash(newId, hash);
         if (!password) {
-            alert(`🔑 تم إنشاء المستخدم بنجاح وحُفظ على الخادم!\n\nاسم المستخدم: ${username}\nكلمة المرور: ${newPassword}\n\n⚠️ احفظ كلمة المرور وأرسلها للأستاذ`);
+            alert(`🔑 تم إنشاء المستخدم بنجاح!\n\nاسم المستخدم: ${username}\nكلمة المرور: ${newPassword}\n\n⚠️ احفظ كلمة المرور وأرسلها للأستاذ`);
         }
         showToast('✅ تم إضافة المستخدم وحفظه على الخادم بنجاح', 'success');
         closeUserModal();
@@ -809,15 +933,16 @@ async function resetUserPassword(userId) {
     if (!user) return;
     if (!confirm(`هل تريد إعادة تعيين كلمة المرور للـ ${user.fullName}؟`)) return;
     const newPassword = generateRandomPassword();
+    const hash = await hashPassword(newPassword);
+    await saveCredentialHash(userId, hash);
     const users = getUsers();
     const idx = users.findIndex(u => u.id === userId);
     if (idx !== -1) {
-        users[idx].passwordHash = await hashPassword(newPassword);
         users[idx].mustChangePassword = true;
         await saveUsers(users);
-        alert(`🔑 تم إعادة تعيين كلمة المرور!\n\nاسم المستخدم: ${user.username}\nكلمة المرور الجديدة: ${newPassword}\n\n⚠️ احفظ كلمة المرور وأرسلها للأستاذ`);
-        showToast('✅ تم إعادة تعيين كلمة المرور', 'success');
     }
+    alert(`🔑 تم إعادة تعيين كلمة المرور!\n\nاسم المستخدم: ${user.username}\nكلمة المرور الجديدة: ${newPassword}\n\n⚠️ احفظ كلمة المرور وأرسلها للأستاذ`);
+    showToast('✅ تم إعادة تعيين كلمة المرور', 'success');
 }
 
 async function toggleUserActive(userId) {
@@ -842,6 +967,7 @@ async function deleteUser(userId) {
     if (!confirm(`تأكيد أخير: سيتم حذف جميع بيانات هذا المستخدم. متابعة؟`)) return;
     const users = getUsers().filter(u => u.id !== userId);
     await saveUsers(users);
+    await saveCredentialHash(userId, null);
     showToast('✅ تم حذف المستخدم', 'success');
     renderUsersList();
 }
@@ -857,6 +983,7 @@ async function importUsersFromCSV(event) {
             if (lines.length < 2) { showToast('الملف فارغ أو لا يحتوي على بيانات', 'error'); return; }
             const dataLines = lines.slice(1);
             const users = getUsers();
+            const creds = { ...cachedCredentials };
             let imported = 0, skipped = 0;
             const credentials = [];
             for (const line of dataLines) {
@@ -868,15 +995,23 @@ async function importUsersFromCSV(event) {
                 if (exists) { skipped++; continue; }
                 const password = generateRandomPassword();
                 const passwordHash = await hashPassword(password);
+                const newId = 'user_' + generateId();
                 users.push({
-                    id: 'user_' + generateId(), username, fullName, email: email || '', school: school || '',
-                    role: role || 'teacher', passwordHash, createdAt: new Date().toISOString(),
+                    id: newId, username, fullName, email: email || '', school: school || '',
+                    role: role || 'teacher', createdAt: new Date().toISOString(),
                     lastLogin: null, mustChangePassword: true, active: true
                 });
+                creds[newId] = passwordHash;
                 credentials.push({ fullName, username, password });
                 imported++;
             }
             await saveUsers(users);
+            // حفظ كل credentials دفعة واحدة
+            cachedCredentials = creds;
+            try {
+                const credsRef = getCredentialsDocRef();
+                if (credsRef) await credsRef.set({ hashes: creds, updatedAt: new Date().toISOString() });
+            } catch(_) {}
             renderUsersList();
             showToast(`✅ تم استيراد ${imported} مستخدم (تم تخطي ${skipped})`, 'success');
             if (credentials.length > 0) {
@@ -928,7 +1063,7 @@ function downloadCSVTemplate() {
 }
 
 // ============================================================
-//  4. مراقبة النشاطات
+//  مراقبة النشاطات
 // ============================================================
 let _logCache = [];
 let _realtimeChannel = null;
@@ -936,7 +1071,7 @@ let _realtimeChannel = null;
 async function initMonitor() {
     await ensureAnonAuth();
     await ensureSupabaseSession();
-    await listenToCloudUsers();
+    await listenToCloudData();
     await refreshLog();
     await renderTeacherStats();
     subscribeRealtime();
@@ -996,7 +1131,7 @@ async function renderTeacherStats() {
     if (!sbMain) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--danger); padding:20px;">خدمة المراقبة غير متاحة</td></tr>'; return; }
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> جارٍ تحميل الإحصائيات...</td></tr>';
     try {
-        await listenToCloudUsers();
+        await listenToCloudData();
         const teachers = getUsers().filter(u => u.role !== 'inspector');
 
         const { data: activities, error: aErr } = await sbMain.from('activities').select('id, owner_id, title, created_at');
@@ -1058,7 +1193,7 @@ function subscribeRealtime() {
 }
 
 // ============================================================
-//  التعديل الثالث: تبويب المعالجة البيداغوجية
+//  المعالجة البيداغوجية
 // ============================================================
 let _pedRecords = [];
 
@@ -1066,11 +1201,10 @@ async function loadPedagogicalRecords() {
     const tbody = document.getElementById('pedTableBody');
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> جارٍ استرجاع سجلات المعالجة البيداغوجية من السحابة...</td></tr>';
-    
+
     let records = [];
     const idMap = new Map();
 
-    // 1. استرجاع السجلات المشتركة من Firebase Firestore (platform_shared/pedagogical_records)
     if (typeof fbDb !== 'undefined' && fbDb) {
         try {
             await ensureAnonAuth();
@@ -1083,17 +1217,12 @@ async function loadPedagogicalRecords() {
                         if (Array.isArray(parsed)) {
                             parsed.forEach(r => { if (r && r.id) idMap.set(r.id, r); });
                         }
-                    } catch(e) {
-                        console.warn('Failed parsing Firestore recordsJson:', e);
-                    }
+                    } catch(e) { console.warn('Failed parsing Firestore recordsJson:', e); }
                 }
             }
-        } catch(err) {
-            console.warn('Firestore pedagogical_records fetch error:', err);
-        }
+        } catch(err) { console.warn('Firestore pedagogical_records fetch error:', err); }
     }
 
-    // 2. استرجاع السجلات من جدول Supabase (traitement_records) إن وُجدت
     if (typeof sbMain !== 'undefined' && sbMain) {
         try {
             await ensureSupabaseSession();
@@ -1115,30 +1244,22 @@ async function loadPedagogicalRecords() {
                     }
                 });
             }
-        } catch(err) {
-            console.warn('Supabase traitement_records fetch error:', err);
-        }
+        } catch(err) { console.warn('Supabase traitement_records fetch error:', err); }
     }
 
-    // 3. استرجاع السجلات المحفوظة محلياً في المتصفح (traitementData)
     try {
         const local = JSON.parse(localStorage.getItem('traitementData') || '[]');
         if (Array.isArray(local)) {
             local.forEach(r => {
-                if (r && r.id && !idMap.has(r.id)) {
-                    idMap.set(r.id, r);
-                }
+                if (r && r.id && !idMap.has(r.id)) idMap.set(r.id, r);
             });
         }
     } catch(_) {}
 
     records = Array.from(idMap.values());
-
-    // ترتيب السجلات بحسب التاريخ التنازلي
     records.sort((a, b) => new Date(b.created_at || b.updatedAt || 0) - new Date(a.created_at || a.updatedAt || 0));
     _pedRecords = records;
 
-    // تحديث بطاقات الإحصائيات الأربعة
     const totalRecordsEl = document.getElementById('pedTotalRecords');
     const totalTeachersEl = document.getElementById('pedTotalTeachers');
     const totalStudentsEl = document.getElementById('pedTotalStudents');
@@ -1154,7 +1275,6 @@ async function loadPedagogicalRecords() {
     }
     if (totalPlansEl) totalPlansEl.textContent = _pedRecords.filter(r => r.plan && Object.keys(r.plan).length > 0).length;
 
-    // تحديث قائمة فلتر الأساتذة
     const teacherSelect = document.getElementById('pedFilterTeacher');
     if (teacherSelect) {
         const prev = teacherSelect.value;
@@ -1219,15 +1339,13 @@ async function deletePedRecord(id) {
                 updatedAt: new Date().toISOString(),
                 recordsJson: JSON.stringify(_pedRecords)
             }, { merge: true });
-        } catch(e) {
-            console.warn('Delete error:', e);
-        }
+        } catch(e) { console.warn('Delete error:', e); }
     }
     try {
         const local = JSON.parse(localStorage.getItem('traitementData') || '[]').filter(r => r.id !== id);
         localStorage.setItem('traitementData', JSON.stringify(local));
     } catch(_) {}
-    
+
     if (typeof sbMain !== 'undefined' && sbMain) {
         try {
             await sbMain.from('activity_log').insert({
@@ -1239,7 +1357,7 @@ async function deletePedRecord(id) {
             });
         } catch(_) {}
     }
-    
+
     document.getElementById('pedTotalRecords').textContent = _pedRecords.length;
     document.getElementById('pedTotalTeachers').textContent = new Set(_pedRecords.map(r => r.created_by_name || r.enseignant).filter(Boolean)).size;
     document.getElementById('pedTotalStudents').textContent = _pedRecords.reduce((s, r) => s + (parseInt(r.total_students || r.nb_eleves) || 0), 0);
@@ -1285,10 +1403,7 @@ async function saveNewPedRecord() {
     const difficulty = document.getElementById('newPedDifficulty')?.value.trim() || 'صعوبة بيداغوجية عامة';
     const planActivity = document.getElementById('newPedPlanActivity')?.value.trim() || 'أنشطة علاجية مخصصة';
 
-    if (!school || !teacher) {
-        showToast('يرجى ملء اسم المؤسسة والأستاذ', 'error');
-        return;
-    }
+    if (!school || !teacher) { showToast('يرجى ملء اسم المؤسسة والأستاذ', 'error'); return; }
 
     const newRecord = {
         id: 'rec_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
@@ -1302,11 +1417,7 @@ async function saveNewPedRecord() {
         total_students: remediationCount,
         criteria: [{ competence: 'فهم المكتوب / النظام اللغوي', critere: difficulty, level: 'مقبول', category: 'الفئة ج' }],
         students: [{ competence: 'فهم المكتوب', critere: difficulty, students: [{ name: 'تلميذ 1' }, { name: 'تلميذ 2' }] }],
-        plan: {
-            difficultyType: difficulty,
-            activityType: planActivity,
-            timing: 'المعالجة الفورية والمؤجلة'
-        },
+        plan: { difficultyType: difficulty, activityType: planActivity, timing: 'المعالجة الفورية والمؤجلة' },
         created_by_name: teacher,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -1321,9 +1432,7 @@ async function saveNewPedRecord() {
                 updatedAt: new Date().toISOString(),
                 recordsJson: JSON.stringify(_pedRecords)
             }, { merge: true });
-        } catch(e) {
-            console.warn('Save to Firestore warning:', e);
-        }
+        } catch(e) { console.warn('Save to Firestore warning:', e); }
     }
 
     try {

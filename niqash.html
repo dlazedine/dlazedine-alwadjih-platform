@@ -12,7 +12,7 @@
 <meta name="application-name" content="ركن النقاش">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="msapplication-TileColor" content="#1a3d6e">
-<meta name="description" content="ركن المحادثة الجماعية والمناقشات التربوية ودفتر الملاحظات للأساتذة - المقاطعة الثانية قسنطينة">
+<meta name="description" content="ركن المحادثة الجماعية والمناقشات التربوية ودفتر الملاحظات وتبادل الملفات للأساتذة - المقاطعة الثانية قسنطينة">
 <meta name="author" content="درويش الهلالي">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,7 +46,7 @@
 
 <style>
 /* ============================================================
-   الجذور والثوابت — مطابقة لمنصة المعالجة البيداغوجية
+   الجذور والثوابت
    ============================================================ */
 :root {
     --primary: #1a3d6e;
@@ -81,7 +81,7 @@ body {
     padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* شريط المستخدم */
+/* شريط المستخدم الموحّد */
 .user-bar {
     background: var(--navy-deep); color: #eaf1f8;
     padding: 10px 24px; display: flex; align-items: center; justify-content: space-between;
@@ -92,9 +92,19 @@ body {
     border: 1px solid rgba(255,255,255,0.25); font-family: inherit;
     font-size: 12.5px; padding: 6px 14px; border-radius: 20px;
     cursor: pointer; transition: var(--transition);
+    display: inline-flex; align-items: center; gap: 6px;
 }
-.user-bar a:hover, .user-bar button:hover { background: rgba(255,255,255,0.1); }
+.user-bar a:hover, .user-bar button:hover { background: rgba(255,255,255,0.12); }
 .user-bar .who { font-weight: 700; color: var(--gold-light); }
+.user-bar .left-group, .user-bar .right-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.user-bar .badge-role {
+    background: var(--gold); color: var(--primary); padding: 2px 9px;
+    border-radius: 20px; font-size: 10.5px; font-weight: 700;
+}
+.user-bar .btn-logout {
+    background: var(--danger); color: #fff;
+    border-color: var(--danger);
+}
 
 /* الترويسة */
 .hero {
@@ -207,12 +217,12 @@ body {
 .chat-wrap {
     background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow);
     border: 1px solid var(--border-color); overflow: hidden;
-    display: flex; flex-direction: column; height: 65vh; min-height: 420px;
+    display: flex; flex-direction: column; height: 68vh; min-height: 460px;
 }
-.chat-feed { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.chat-feed { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
 .chat-feed::-webkit-scrollbar { width: 6px; }
 .chat-feed::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
-.chat-bubble { max-width: 78%; padding: 10px 14px; border-radius: 14px; position: relative; }
+.chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 14px; position: relative; }
 .chat-bubble.mine {
     align-self: flex-start; background: var(--primary-light); border: 1px solid #cfe0f0;
     border-bottom-right-radius: 4px;
@@ -228,8 +238,44 @@ body {
 }
 .chat-bubble .cb-text { font-size: 14px; color: var(--text-dark); white-space: pre-wrap; word-break: break-word; }
 .chat-bubble .cb-time { font-size: 10.5px; color: var(--text-muted); margin-top: 4px; text-align: left; }
+
+/* مرفقات المحادثة */
+.chat-attachment {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 10px; padding: 8px 12px; margin-top: 8px;
+    transition: var(--transition);
+}
+.chat-attachment:hover { background: #fff; border-color: var(--gold); }
+.chat-attachment .att-icon {
+    width: 38px; height: 38px; border-radius: 8px; display: flex;
+    align-items: center; justify-content: center; color: #fff; font-size: 16px;
+    flex-shrink: 0;
+}
+.chat-attachment .att-icon.pdf { background: #dc3545; }
+.chat-attachment .att-icon.doc { background: #2b579a; }
+.chat-attachment .att-icon.xls { background: #217346; }
+.chat-attachment .att-icon.ppt { background: #d24726; }
+.chat-attachment .att-icon.img { background: #17a2b8; }
+.chat-attachment .att-icon.generic { background: #6c7a8d; }
+.chat-attachment .att-info { flex: 1; min-width: 0; }
+.chat-attachment .att-name {
+    font-size: 12.5px; font-weight: 700; color: var(--text-dark);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chat-attachment .att-size { font-size: 10.5px; color: var(--text-muted); }
+.chat-attachment .att-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.chat-attachment .att-actions button {
+    background: none; border: none; cursor: pointer; color: var(--primary);
+    width: 30px; height: 30px; border-radius: 50%; font-size: 13px;
+    transition: var(--transition); display: flex; align-items: center; justify-content: center;
+}
+.chat-attachment .att-actions button:hover { background: var(--primary-light); }
+.chat-attachment .att-actions .del:hover { background: #fbeceb; color: var(--danger); }
+
 .chat-input-row {
-    display: flex; gap: 10px; padding: 14px; border-top: 1px solid var(--border-color); background: #fafcff;
+    display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--border-color); background: #fafcff;
+    align-items: flex-end;
 }
 .chat-input-row textarea {
     flex: 1; resize: none; min-height: 44px; max-height: 120px; padding: 10px 14px;
@@ -237,12 +283,44 @@ body {
     font-size: 14px; line-height: 1.6;
 }
 .chat-input-row textarea:focus { outline: none; border-color: var(--gold); }
-.chat-input-row button {
-    width: 46px; height: 46px; border-radius: 50%; border: none; background: var(--primary);
-    color: #fff; font-size: 16px; cursor: pointer; flex-shrink: 0; transition: var(--transition);
+.chat-input-row .btn-attach {
+    width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--border-color);
+    background: #fff; color: var(--primary); font-size: 16px; cursor: pointer;
+    flex-shrink: 0; transition: var(--transition);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
 }
-.chat-input-row button:hover { background: var(--navy-deep); transform: scale(1.05); }
+.chat-input-row .btn-attach:hover { background: var(--primary-light); border-color: var(--primary); }
+.chat-input-row .btn-attach.has-file { background: var(--gold); border-color: var(--gold); color: #fff; }
+.chat-input-row .btn-attach .file-count {
+    position: absolute; top: -4px; left: -4px;
+    background: var(--danger); color: #fff; font-size: 9.5px; font-weight: 700;
+    width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+}
+.chat-input-row .btn-send {
+    width: 44px; height: 44px; border-radius: 50%; border: none; background: var(--primary);
+    color: #fff; font-size: 16px; cursor: pointer; flex-shrink: 0; transition: var(--transition);
+    display: flex; align-items: center; justify-content: center;
+}
+.chat-input-row .btn-send:hover { background: var(--navy-deep); transform: scale(1.05); }
 .chat-hint { padding: 6px 18px; font-size: 11.5px; color: var(--text-muted); background: #fafcff; text-align: center; }
+
+/* شريط معاينة المرفقات قبل الإرسال */
+.pending-attachments-bar {
+    display: none; padding: 8px 14px; background: #fff9ec; border-top: 1px solid #ecdcae;
+    gap: 8px; flex-wrap: wrap; align-items: center; font-size: 12px;
+}
+.pending-attachments-bar.show { display: flex; }
+.pending-attachments-bar .pending-item {
+    background: #fff; border: 1px solid var(--border-color); border-radius: 8px;
+    padding: 4px 10px; display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; font-weight: 600; color: var(--text-dark);
+}
+.pending-attachments-bar .pending-item .remove-pending {
+    cursor: pointer; color: var(--danger); font-weight: 700;
+}
+.pending-attachments-bar .label { color: var(--gold-deep); font-weight: 700; }
 
 /* ============================================================
    المناقشات التربوية
@@ -285,6 +363,61 @@ body {
 .reply-item .ri-head { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
 .reply-item .ri-time { font-size: 11px; color: var(--text-muted); font-weight: 400; margin-inline-start: auto; }
 .reply-item p { font-size: 13.5px; color: var(--text-dark); white-space: pre-wrap; }
+
+/* مرفقات المناقشات */
+.thread-attachments, .reply-attachments { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; }
+.thread-attachments .attachment-chip, .reply-attachments .attachment-chip {
+    background: #fff; border: 1px solid var(--border-color); border-radius: 8px;
+    padding: 6px 10px; display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; transition: var(--transition); max-width: 100%;
+}
+.thread-attachments .attachment-chip:hover, .reply-attachments .attachment-chip:hover {
+    border-color: var(--gold); background: #fdfaf3;
+}
+.thread-attachments .att-icon, .reply-attachments .att-icon {
+    width: 26px; height: 26px; border-radius: 6px; display: flex;
+    align-items: center; justify-content: center; color: #fff; font-size: 12px; flex-shrink: 0;
+}
+.thread-attachments .att-icon.pdf, .reply-attachments .att-icon.pdf { background: #dc3545; }
+.thread-attachments .att-icon.doc, .reply-attachments .att-icon.doc { background: #2b579a; }
+.thread-attachments .att-icon.xls, .reply-attachments .att-icon.xls { background: #217346; }
+.thread-attachments .att-icon.ppt, .reply-attachments .att-icon.ppt { background: #d24726; }
+.thread-attachments .att-icon.img, .reply-attachments .att-icon.img { background: #17a2b8; }
+.thread-attachments .att-icon.generic, .reply-attachments .att-icon.generic { background: #6c7a8d; }
+.thread-attachments .att-name, .reply-attachments .att-name {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
+    color: var(--text-dark); font-weight: 600;
+}
+.thread-attachments .att-download, .reply-attachments .att-download {
+    background: none; border: none; cursor: pointer; color: var(--primary); font-size: 13px;
+    padding: 2px 4px; border-radius: 4px;
+}
+.thread-attachments .att-download:hover, .reply-attachments .att-download:hover {
+    background: var(--primary-light);
+}
+
+/* شريط مرفقات الموضوع الجديد */
+.modal-attachment-bar {
+    display: flex; flex-direction: column; gap: 8px;
+    background: #fafcff; border: 1px dashed var(--border-color);
+    border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;
+}
+.modal-attachment-bar .att-header {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12.5px; color: var(--text-muted);
+}
+.modal-attachment-bar .att-header label { font-weight: 700; color: var(--primary); width: auto; }
+.modal-attachment-bar .att-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.modal-attachment-bar .att-list:empty::before {
+    content: 'لم يتم اختيار مرفقات بعد';
+    font-size: 11.5px; color: var(--text-muted); font-style: italic;
+}
+.modal-attachment-bar .pending-item {
+    background: #fff; border: 1px solid var(--border-color); border-radius: 8px;
+    padding: 4px 10px; display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; font-weight: 600; color: var(--text-dark);
+}
+.modal-attachment-bar .remove-pending { cursor: pointer; color: var(--danger); font-weight: 700; }
 
 /* ============================================================
    دفتر الملاحظات
@@ -345,34 +478,49 @@ body {
     .tab-content { padding: 16px 12px 40px; }
     .modal-box { padding: 20px 15px; border-radius: 15px; }
     .chat-wrap { height: 72vh; }
-    .chat-bubble { max-width: 90%; }
+    .chat-bubble { max-width: 92%; }
     .field-group label { width: 100%; }
     .notes-grid { grid-template-columns: 1fr; }
+    .chat-attachment .att-name { max-width: 120px; }
 }
 </style>
 </head>
 <body>
 
+<!-- شاشة التحميل SSO -->
 <div id="ssoLoadingScreen">
     <div class="spinner"></div>
-    <div class="who">جارٍ التحقق من الدخول...</div>
+    <div class="who">جارٍ التحقق من الدخول الموحّد...</div>
 </div>
 
+<!-- التطبيق -->
 <div id="appScreen" class="hidden">
 
+    <!-- شريط المستخدم الموحّد -->
     <div class="user-bar">
-        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <div class="left-group">
             <a href="index.html"><i class="fas fa-arrow-right"></i> البوابة</a>
-            <span>مرحباً، <span class="who" id="userNameLabel"></span></span>
+            <a href="moualaja.html"><i class="fas fa-stethoscope"></i> المعالجة</a>
+            <a href="amal.html"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
+            <a href="arabic.html"><i class="fas fa-book-open-reader"></i> تعليمية العربية</a>
+            <a href="dashboard.html" id="dashboardLink" style="display:none; background:rgba(196,155,63,0.25); border-color:var(--gold); color:#f5e6c8;">
+                <i class="fas fa-user-shield"></i> لوحة التحكم
+            </a>
         </div>
-        <button onclick="handleLogout()"><i class="fas fa-arrow-right-from-bracket"></i> تسجيل الخروج</button>
+        <div class="right-group">
+            <span>مرحباً، <span class="who" id="userNameLabel"></span></span>
+            <span class="badge-role" id="userRoleBadge">—</span>
+            <button onclick="handleLogout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> خروج</button>
+        </div>
     </div>
 
+    <!-- الترويسة -->
     <div class="hero">
         <h1><i class="fas fa-comments"></i> ركن النقاش والمحادثة التربوية</h1>
-        <p>فضاء تفاعلي جماعي للأساتذة: محادثة حيّة، مناقشات تربوية حول الممارسات الصفية، ودفتر شخصي لتدوين الملاحظات والأفكار.</p>
+        <p>فضاء تفاعلي جماعي للأساتذة: محادثة حيّة، مناقشات تربوية، دفتر ملاحظات شخصي، وتبادل الملفات (Word، Excel، PPT، صور، PDF).</p>
     </div>
 
+    <!-- التبويبات -->
     <div class="nav-tabs">
         <div class="nav-tab active" data-tab="chat"><i class="fas fa-comment-dots"></i> المحادثة الجماعية</div>
         <div class="nav-tab" data-tab="discuss"><i class="fas fa-people-group"></i> المناقشات التربوية</div>
@@ -383,10 +531,26 @@ body {
     <div class="tab-content active" id="panel-chat">
         <div class="chat-wrap">
             <div class="chat-feed" id="chatFeed"></div>
-            <div class="chat-hint"><i class="fas fa-circle-info"></i> هذه المحادثة مشتركة بين جميع الأساتذة والمفتش — يرجى الالتزام بأدب النقاش المهني.</div>
+            <div class="chat-hint">
+                <i class="fas fa-circle-info"></i>
+                محادثة مشتركة بين جميع الأساتذة والمفتش — يمكنك إرفاق ملفات (Word، Excel، PPT، صور، PDF) بحجم أقصى 700 كيلوبايت.
+            </div>
+            <!-- شريط المرفقات المؤقتة قبل الإرسال -->
+            <div class="pending-attachments-bar" id="pendingBar">
+                <span class="label"><i class="fas fa-paperclip"></i> مرفقات جاهزة للإرسال:</span>
+                <div id="pendingList" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+            </div>
             <div class="chat-input-row">
                 <textarea id="chatInput" placeholder="اكتب رسالتك هنا... (Enter للإرسال، Shift+Enter لسطر جديد)" rows="1"></textarea>
-                <button onclick="sendChatMessage()" title="إرسال"><i class="fas fa-paper-plane"></i></button>
+                <!-- زر المرفقات -->
+                <button class="btn-attach" id="attachBtn" onclick="document.getElementById('chatFileInput').click()" title="إرفاق ملف">
+                    <i class="fas fa-paperclip"></i>
+                    <span class="file-count" id="attachCount" style="display:none;">0</span>
+                </button>
+                <input type="file" id="chatFileInput" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" style="display:none;">
+                <button class="btn-send" onclick="sendChatMessage()" title="إرسال">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -395,12 +559,13 @@ body {
     <div class="tab-content" id="panel-discuss">
         <div class="section-toolbar">
             <div class="filter-chips" id="discussFilters">
-                <div class="filter-chip active" data-cat="الكل">الكل</div>
-                <div class="filter-chip" data-cat="اللغة العربية">اللغة العربية</div>
-                <div class="filter-chip" data-cat="الرياضيات">الرياضيات</div>
-                <div class="filter-chip" data-cat="التربية الإسلامية">التربية الإسلامية</div>
+                <div class="filter-chip active" data-cat="كل المواضيع">كل المواضيع</div>
+                <div class="filter-chip" data-cat="ميدان فهم المنطوق وإنتاجه">فهم المنطوق</div>
+                <div class="filter-chip" data-cat="ميدان فهم المكتوب">فهم المكتوب</div>
+                <div class="filter-chip" data-cat="ميدان الإنتاج الكتابي">الإنتاج الكتابي</div>
+                <div class="filter-chip" data-cat="المعالجة البيداغوجية">المعالجة البيداغوجية</div>
+                <div class="filter-chip" data-cat="الأعمال الموجهة">الأعمال الموجهة</div>
                 <div class="filter-chip" data-cat="تسيير الصف">تسيير الصف</div>
-                <div class="filter-chip" data-cat="عام">عام</div>
             </div>
             <button class="btn btn-gold" onclick="openNewThreadModal()"><i class="fas fa-plus"></i> موضوع نقاش جديد</button>
         </div>
@@ -419,17 +584,17 @@ body {
         <div class="notes-grid" id="notesGrid"></div>
     </div>
 
-    <!-- ============ تذييل الصفحة ============ -->
+    <!-- تذييل الصفحة -->
     <div style="max-width:1100px; margin:0 auto; padding:0 20px;">
         <div class="app-footer">
             <div class="footer-content">
                 <span class="brand"><i class="fas fa-comments"></i> ركن النقاش والمحادثة التربوية</span>
-                <span><i class="fas fa-user-tie"></i> درويش الهلالي - مفتش مادة اللغة العربية والتربية الإسلامية</span>
+                <span><i class="fas fa-user-tie"></i> درويش الهلالي - مفتش التعليم المتوسط</span>
                 <span><i class="fas fa-envelope"></i> dlazedine68@gmail.com</span>
-                <span><i class="fas fa-phone-alt"></i> 0779353736</span>
+                <span><i class="fas fa-phone-alt"></i> 0659681227</span>
             </div>
             <div class="footer-bottom">
-                <i class="fas fa-shield-alt"></i> جزء من بوابة الأدوات الرقمية للممارسة المهنية — © 2026
+                <i class="fas fa-shield-alt"></i> ركن النقاش — بوابة الأدوات الرقمية للممارسة المهنية © 2026
             </div>
         </div>
     </div>
@@ -448,17 +613,32 @@ body {
         <div class="field-group">
             <label>التصنيف</label>
             <select id="newThreadCat">
-                <option>اللغة العربية</option>
-                <option>الرياضيات</option>
-                <option>التربية الإسلامية</option>
+                <option>ميدان فهم المنطوق وإنتاجه</option>
+                <option>ميدان فهم المكتوب</option>
+                <option>ميدان الإنتاج الكتابي</option>
+                <option>المعالجة البيداغوجية</option>
+                <option>الأعمال الموجهة</option>
                 <option>تسيير الصف</option>
-                <option>عام</option>
+                <option>قضايا عامة</option>
             </select>
         </div>
         <div class="field-group">
             <label>تفاصيل الموضوع</label>
             <textarea id="newThreadBody" placeholder="اشرح فكرتك أو استفسارك بالتفصيل..."></textarea>
         </div>
+
+        <!-- مرفقات الموضوع -->
+        <div class="modal-attachment-bar">
+            <div class="att-header">
+                <label><i class="fas fa-paperclip"></i> مرفقات (اختياري — حد أقصى 700KB لكل ملف)</label>
+                <button class="btn btn-sm btn-outline" onclick="document.getElementById('threadFileInput').click()">
+                    <i class="fas fa-plus"></i> إضافة مرفق
+                </button>
+                <input type="file" id="threadFileInput" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" style="display:none;">
+            </div>
+            <div class="att-list" id="threadAttachList"></div>
+        </div>
+
         <button class="btn btn-gold" onclick="createThread()"><i class="fas fa-paper-plane"></i> نشر الموضوع</button>
     </div>
 </div>
@@ -471,7 +651,7 @@ body {
     </div>
 </div>
 
-<!-- ============ نافذة ملاحظة جديدة / تعديل ============ -->
+<!-- ============ نافذة ملاحظة ============ -->
 <div class="modal-overlay" id="noteModal">
     <div class="modal-box">
         <button class="modal-close" onclick="closeModal('noteModal')"><i class="fas fa-times"></i></button>
@@ -501,17 +681,23 @@ body {
 
 <script>
 /* ============================================================
-   1. الثوابت والجلسة (SSO موحّد مع بقية المنصة)
+   1. الثوابت والجلسة الموحّدة
    ============================================================ */
 const SESSION_KEY = 'pgb_session';
+const MAX_FILE_SIZE = 700 * 1024; // 700 كيلوبايت (حد Firestore الآمن)
+
 let currentUser = null;
-let cloudReady = false;
 let chatData = { messages: [] };
 let discussData = { threads: [] };
 let notesData = { notes: [] };
 let activeThreadId = null;
-let activeDiscussFilter = 'الكل';
+let activeDiscussFilter = 'كل المواضيع';
 let unsubChat = null, unsubDiscuss = null, unsubNotes = null;
+
+// مرفقات مؤقتة قبل الإرسال في المحادثة
+let pendingChatAttachments = [];   // [{id, name, size, type, dataUrl}]
+// مرفقات مؤقتة قبل نشر الموضوع الجديد
+let pendingThreadAttachments = []; // [{id, name, size, type, dataUrl}]
 
 function getPortalSession() {
     try {
@@ -522,9 +708,13 @@ function getPortalSession() {
         return session.user || null;
     } catch (e) { return null; }
 }
+
 function handleLogout() {
-    if (!confirm('هل تريد تسجيل الخروج؟')) return;
-    try { sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem(SESSION_KEY + '_persistent'); } catch (e) {}
+    if (!confirm('هل تريد تسجيل الخروج والعودة إلى البوابة؟')) return;
+    try {
+        sessionStorage.removeItem(SESSION_KEY);
+        localStorage.removeItem(SESSION_KEY + '_persistent');
+    } catch (e) {}
     window.location.href = 'index.html';
 }
 
@@ -552,7 +742,78 @@ function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
 /* ============================================================
-   3. Firebase: مصادقة ومزامنة سحابية
+   3. أنواع الملفات وأيقوناتها
+   ============================================================ */
+function getFileTypeInfo(fileName, mimeType) {
+    const name = (fileName || '').toLowerCase();
+    const mime = (mimeType || '').toLowerCase();
+    if (mime.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/.test(name)) {
+        return { type: 'img', icon: 'fa-image', label: 'صورة' };
+    }
+    if (mime.includes('pdf') || name.endsWith('.pdf')) {
+        return { type: 'pdf', icon: 'fa-file-pdf', label: 'PDF' };
+    }
+    if (mime.includes('word') || /\.(doc|docx)$/.test(name)) {
+        return { type: 'doc', icon: 'fa-file-word', label: 'Word' };
+    }
+    if (mime.includes('excel') || mime.includes('spreadsheet') || /\.(xls|xlsx|csv)$/.test(name)) {
+        return { type: 'xls', icon: 'fa-file-excel', label: 'Excel' };
+    }
+    if (mime.includes('presentation') || mime.includes('powerpoint') || /\.(ppt|pptx)$/.test(name)) {
+        return { type: 'ppt', icon: 'fa-file-powerpoint', label: 'PowerPoint' };
+    }
+    return { type: 'generic', icon: 'fa-file', label: 'ملف' };
+}
+function formatFileSize(bytes) {
+    if (!bytes) return '0 بايت';
+    if (bytes < 1024) return bytes + ' بايت';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' ك.ب';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' م.ب';
+}
+
+/* ============================================================
+   4. رفع الملفات كـ base64
+   ============================================================ */
+function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+    });
+}
+
+async function processFileSelection(files) {
+    const results = [];
+    for (const file of files) {
+        if (file.size > MAX_FILE_SIZE) {
+            alert(`⚠️ الملف "${file.name}" تجاوز الحجم الأقصى (${formatFileSize(MAX_FILE_SIZE)}). الحجم الحالي: ${formatFileSize(file.size)}\n\nملاحظة: نستخدم Firestore للتخزين المباشر، لذا الحد الأقصى 700 ك.ب. للملفات الأكبر، يمكنك مشاركتها عبر رابط خارجي (Google Drive مثلاً).`);
+            continue;
+        }
+        try {
+            const dataUrl = await readFileAsDataURL(file);
+            const typeInfo = getFileTypeInfo(file.name, file.type);
+            results.push({
+                id: generateId(),
+                name: file.name,
+                size: file.size,
+                mimeType: file.type || 'application/octet-stream',
+                type: typeInfo.type,
+                icon: typeInfo.icon,
+                label: typeInfo.label,
+                dataUrl: dataUrl,
+                uploadedAt: Date.now()
+            });
+        } catch (err) {
+            console.error('file read error:', err);
+            alert('⚠️ تعذّر قراءة الملف: ' + file.name);
+        }
+    }
+    return results;
+}
+
+/* ============================================================
+   5. Firebase: مصادقة ومزامنة
    ============================================================ */
 function ensureAnonAuth() {
     if (!fbAuth) return Promise.resolve(null);
@@ -569,7 +830,7 @@ function docRef(name) {
 }
 function listenChat() {
     const ref = docRef('discussion_chat');
-    if (!ref) { cloudReady = true; return; }
+    if (!ref) return;
     unsubChat = ref.onSnapshot((doc) => {
         chatData = (doc.exists && doc.data()) ? doc.data() : { messages: [] };
         if (!Array.isArray(chatData.messages)) chatData.messages = [];
@@ -599,10 +860,14 @@ async function saveChat() {
     const ref = docRef('discussion_chat');
     if (!ref) { alert('⚠️ الخدمة السحابية غير متاحة حالياً'); return false; }
     try {
-        if (chatData.messages.length > 200) chatData.messages = chatData.messages.slice(-200);
+        if (chatData.messages.length > 100) chatData.messages = chatData.messages.slice(-100);
         await ref.set({ messages: chatData.messages, updatedAt: new Date().toISOString() });
         return true;
-    } catch (e) { console.error(e); alert('⚠️ تعذّر الإرسال — تحقق من الاتصال'); return false; }
+    } catch (e) {
+        console.error(e);
+        alert('⚠️ تعذّر الإرسال — قد يكون حجم المرفقات تجاوز الحد المسموح. جرّب ملفات أصغر.');
+        return false;
+    }
 }
 async function saveDiscuss() {
     const ref = docRef('discussion_threads');
@@ -610,7 +875,11 @@ async function saveDiscuss() {
     try {
         await ref.set({ threads: discussData.threads, updatedAt: new Date().toISOString() });
         return true;
-    } catch (e) { console.error(e); alert('⚠️ تعذّر الحفظ — تحقق من الاتصال'); return false; }
+    } catch (e) {
+        console.error(e);
+        alert('⚠️ تعذّر الحفظ — قد يكون حجم المرفقات تجاوز الحد. جرّب ملفات أصغر.');
+        return false;
+    }
 }
 async function saveNotes() {
     const ref = docRef('teacher_notes');
@@ -618,11 +887,15 @@ async function saveNotes() {
     try {
         await ref.set({ notes: notesData.notes, updatedAt: new Date().toISOString() });
         return true;
-    } catch (e) { console.error(e); alert('⚠️ تعذّر الحفظ — تحقق من الاتصال'); return false; }
+    } catch (e) {
+        console.error(e);
+        alert('⚠️ تعذّر الحفظ — تحقق من الاتصال');
+        return false;
+    }
 }
 
 /* ============================================================
-   4. المحادثة الجماعية
+   6. المحادثة الجماعية
    ============================================================ */
 function renderChat() {
     const feed = document.getElementById('chatFeed');
@@ -630,13 +903,29 @@ function renderChat() {
         feed.innerHTML = `<div class="empty-state"><i class="fas fa-comment-slash"></i>لا توجد رسائل بعد — كن أول من يبدأ النقاش!</div>`;
         return;
     }
-    const wasNearBottom = (feed.scrollTop + feed.clientHeight) >= (feed.scrollHeight - 60);
+    const wasNearBottom = (feed.scrollTop + feed.clientHeight) >= (feed.scrollHeight - 80);
     feed.innerHTML = chatData.messages.map(m => {
         const mine = currentUser && m.authorId === currentUser.id;
+        const attachmentsHtml = (m.attachments && m.attachments.length)
+            ? m.attachments.map(att => `
+                <div class="chat-attachment">
+                    <div class="att-icon ${att.type}"><i class="fas ${att.icon}"></i></div>
+                    <div class="att-info">
+                        <div class="att-name" title="${escapeHtml(att.name)}">${escapeHtml(att.name)}</div>
+                        <div class="att-size">${att.label} · ${formatFileSize(att.size)}</div>
+                    </div>
+                    <div class="att-actions">
+                        <button onclick="downloadAttachment('${m.id}', '${att.id}')" title="تحميل"><i class="fas fa-download"></i></button>
+                        ${mine ? `<button class="del" onclick="deleteChatMessage('${m.id}')" title="حذف الرسالة"><i class="fas fa-trash"></i></button>` : ''}
+                    </div>
+                </div>
+            `).join('')
+            : '';
         return `
         <div class="chat-bubble ${mine ? 'mine' : 'theirs'}">
             <div class="cb-head">${escapeHtml(m.authorName)} <span class="cb-role">${roleLabel(m.authorRole)}</span></div>
-            <div class="cb-text">${escapeHtml(m.text)}</div>
+            ${m.text ? `<div class="cb-text">${escapeHtml(m.text)}</div>` : ''}
+            ${attachmentsHtml}
             <div class="cb-time">${fullDateTime(m.createdAt)}</div>
         </div>`;
     }).join('');
@@ -645,56 +934,183 @@ function renderChat() {
         feed.dataset.firstRender = '1';
     }
 }
+
 async function sendChatMessage() {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
-    if (!text || !currentUser) return;
+    const hasAttachments = pendingChatAttachments.length > 0;
+    if (!text && !hasAttachments) return;
+    if (!currentUser) return;
+
     chatData.messages.push({
-        id: generateId(), text,
-        authorId: currentUser.id, authorName: currentUser.fullName || currentUser.username,
-        authorRole: currentUser.role, createdAt: Date.now()
+        id: generateId(),
+        text: text,
+        attachments: pendingChatAttachments.slice(),
+        authorId: currentUser.id,
+        authorName: currentUser.fullName || currentUser.username,
+        authorRole: currentUser.role,
+        createdAt: Date.now()
     });
+
+    // مسح الواجهة
     input.value = '';
     input.style.height = 'auto';
+    pendingChatAttachments = [];
+    updatePendingChatBar();
     renderChat();
     await saveChat();
 }
+
+async function deleteChatMessage(messageId) {
+    if (!confirm('هل تريد حذف هذه الرسالة؟')) return;
+    chatData.messages = chatData.messages.filter(m => m.id !== messageId);
+    renderChat();
+    await saveChat();
+}
+
+function downloadAttachment(messageId, attachmentId) {
+    const msg = chatData.messages.find(m => m.id === messageId);
+    if (!msg || !msg.attachments) return;
+    const att = msg.attachments.find(a => a.id === attachmentId);
+    if (!att || !att.dataUrl) { alert('⚠️ الملف غير متوفر'); return; }
+    const link = document.createElement('a');
+    link.href = att.dataUrl;
+    link.download = att.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+/* ============================================================
+   7. شريط المرفقات المؤقتة في المحادثة
+   ============================================================ */
+function updatePendingChatBar() {
+    const bar = document.getElementById('pendingBar');
+    const list = document.getElementById('pendingList');
+    const btn = document.getElementById('attachBtn');
+    const count = document.getElementById('attachCount');
+
+    if (pendingChatAttachments.length === 0) {
+        bar.classList.remove('show');
+        btn.classList.remove('has-file');
+        count.style.display = 'none';
+    } else {
+        bar.classList.add('show');
+        btn.classList.add('has-file');
+        count.style.display = 'flex';
+        count.textContent = pendingChatAttachments.length;
+        list.innerHTML = pendingChatAttachments.map(att => `
+            <span class="pending-item">
+                <i class="fas ${att.icon}"></i>
+                ${escapeHtml(att.name)}
+                <span class="remove-pending" onclick="removePendingChatAttachment('${att.id}')">×</span>
+            </span>
+        `).join('');
+    }
+}
+
+function removePendingChatAttachment(id) {
+    pendingChatAttachments = pendingChatAttachments.filter(a => a.id !== id);
+    updatePendingChatBar();
+}
+
+/* ============================================================
+   8. ربط حقل رفع الملفات في المحادثة
+   ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
+    // الإدخال
     const input = document.getElementById('chatInput');
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
-    });
-    input.addEventListener('input', () => {
-        input.style.height = 'auto';
-        input.style.height = Math.min(input.scrollHeight, 120) + 'px';
-    });
+    if (input) {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+        });
+        input.addEventListener('input', () => {
+            input.style.height = 'auto';
+            input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+        });
+    }
+
+    // زر المرفقات في المحادثة
+    const chatFileInput = document.getElementById('chatFileInput');
+    if (chatFileInput) {
+        chatFileInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files || []);
+            if (files.length === 0) return;
+            const processed = await processFileSelection(files);
+            pendingChatAttachments = pendingChatAttachments.concat(processed);
+            updatePendingChatBar();
+            e.target.value = '';
+        });
+    }
+
+    // زر المرفقات في نافذة الموضوع الجديد
+    const threadFileInput = document.getElementById('threadFileInput');
+    if (threadFileInput) {
+        threadFileInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files || []);
+            if (files.length === 0) return;
+            const processed = await processFileSelection(files);
+            pendingThreadAttachments = pendingThreadAttachments.concat(processed);
+            updatePendingThreadBar();
+            e.target.value = '';
+        });
+    }
 });
 
 /* ============================================================
-   5. المناقشات التربوية
+   9. المناقشات التربوية
    ============================================================ */
 function openNewThreadModal() {
     document.getElementById('newThreadTitle').value = '';
     document.getElementById('newThreadBody').value = '';
-    document.getElementById('newThreadCat').value = 'اللغة العربية';
+    document.getElementById('newThreadCat').value = 'ميدان فهم المكتوب';
+    pendingThreadAttachments = [];
+    updatePendingThreadBar();
     openModal('threadModal');
 }
+
+function updatePendingThreadBar() {
+    const list = document.getElementById('threadAttachList');
+    if (!list) return;
+    list.innerHTML = pendingThreadAttachments.map(att => `
+        <span class="pending-item">
+            <i class="fas ${att.icon}"></i>
+            ${escapeHtml(att.name)} (${formatFileSize(att.size)})
+            <span class="remove-pending" onclick="removePendingThreadAttachment('${att.id}')">×</span>
+        </span>
+    `).join('');
+}
+
+function removePendingThreadAttachment(id) {
+    pendingThreadAttachments = pendingThreadAttachments.filter(a => a.id !== id);
+    updatePendingThreadBar();
+}
+
 async function createThread() {
     const title = document.getElementById('newThreadTitle').value.trim();
     const body = document.getElementById('newThreadBody').value.trim();
     const cat = document.getElementById('newThreadCat').value;
     if (!title) { alert('يرجى كتابة عنوان للموضوع'); return; }
+
     const thread = {
-        id: generateId(), title, body, category: cat,
-        authorId: currentUser.id, authorName: currentUser.fullName || currentUser.username,
-        authorRole: currentUser.role, createdAt: Date.now(), replies: []
+        id: generateId(),
+        title, body,
+        category: cat,
+        attachments: pendingThreadAttachments.slice(),
+        authorId: currentUser.id,
+        authorName: currentUser.fullName || currentUser.username,
+        authorRole: currentUser.role,
+        createdAt: Date.now(),
+        replies: []
     };
+
     discussData.threads.unshift(thread);
+    pendingThreadAttachments = [];
     closeModal('threadModal');
     renderThreads();
-    const ok = await saveDiscuss();
-    if (ok) { /* toast-free success */ }
+    await saveDiscuss();
 }
+
 function setDiscussFilter(cat) {
     activeDiscussFilter = cat;
     document.querySelectorAll('#discussFilters .filter-chip').forEach(c => {
@@ -702,45 +1118,75 @@ function setDiscussFilter(cat) {
     });
     renderThreads();
 }
+
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('discussFilters').addEventListener('click', (e) => {
-        const chip = e.target.closest('.filter-chip');
-        if (chip) setDiscussFilter(chip.dataset.cat);
-    });
+    const filtersContainer = document.getElementById('discussFilters');
+    if (filtersContainer) {
+        filtersContainer.addEventListener('click', (e) => {
+            const chip = e.target.closest('.filter-chip');
+            if (chip) setDiscussFilter(chip.dataset.cat);
+        });
+    }
 });
+
 function renderThreads() {
     const list = document.getElementById('threadList');
     let threads = discussData.threads.slice().sort((a,b) => b.createdAt - a.createdAt);
-    if (activeDiscussFilter !== 'الكل') threads = threads.filter(t => t.category === activeDiscussFilter);
+    if (activeDiscussFilter !== 'كل المواضيع') {
+        threads = threads.filter(t => t.category === activeDiscussFilter);
+    }
     if (!threads.length) {
         list.innerHTML = `<div class="empty-state"><i class="fas fa-comments"></i>لا توجد مواضيع في هذا التصنيف بعد — ابدأ أول نقاش!</div>`;
         return;
     }
-    list.innerHTML = threads.map(t => `
+    list.innerHTML = threads.map(t => {
+        const attCount = (t.attachments && t.attachments.length) || 0;
+        return `
         <div class="thread-card" onclick="openThread('${t.id}')">
             <div class="tc-top">
                 <h4>${escapeHtml(t.title)}</h4>
                 <span class="thread-cat">${escapeHtml(t.category)}</span>
             </div>
             <p>${escapeHtml(t.body || '')}</p>
+            ${attCount > 0 ? `<div class="thread-attachments">${t.attachments.map(att => `
+                <span class="attachment-chip">
+                    <span class="att-icon ${att.type}"><i class="fas ${att.icon}"></i></span>
+                    <span class="att-name">${escapeHtml(att.name)}</span>
+                </span>
+            `).join('')}</div>` : ''}
             <div class="thread-meta">
                 <span><i class="fas fa-user"></i> ${escapeHtml(t.authorName)}</span>
                 <span><i class="fas fa-clock"></i> ${timeAgo(t.createdAt)}</span>
                 <span><i class="fas fa-reply"></i> ${(t.replies||[]).length} رد</span>
+                ${attCount > 0 ? `<span><i class="fas fa-paperclip"></i> ${attCount} مرفق</span>` : ''}
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
+
 function openThread(id) {
     activeThreadId = id;
     renderThreadDetail(id);
     openModal('threadDetailModal');
 }
+
 function renderThreadDetail(id) {
     const t = discussData.threads.find(x => x.id === id);
     const box = document.getElementById('threadDetailContent');
     if (!t) { box.innerHTML = `<div class="empty-state"><i class="fas fa-circle-exclamation"></i>تعذّر العثور على الموضوع.</div>`; return; }
     const replies = (t.replies || []).slice().sort((a,b) => a.createdAt - b.createdAt);
+
+    const threadAttachmentsHtml = (t.attachments && t.attachments.length)
+        ? `<div class="thread-attachments" style="margin:12px 0;">${t.attachments.map(att => `
+            <span class="attachment-chip">
+                <span class="att-icon ${att.type}"><i class="fas ${att.icon}"></i></span>
+                <span class="att-name" title="${escapeHtml(att.name)}">${escapeHtml(att.name)}</span>
+                <button class="att-download" onclick="downloadThreadAttachment('${t.id}', '${att.id}')" title="تحميل"><i class="fas fa-download"></i></button>
+            </span>
+        `).join('')}</div>`
+        : '';
+
     box.innerHTML = `
         <div class="thread-detail-head">
             <h3 style="border:none; padding:0; margin:0;"><i class="fas fa-comments"></i> ${escapeHtml(t.title)}</h3>
@@ -751,40 +1197,136 @@ function renderThreadDetail(id) {
             <span><i class="fas fa-clock"></i> ${fullDateTime(t.createdAt)}</span>
         </div>
         <p style="font-size:14px; line-height:1.8; color:var(--text-dark); background:var(--bg-body); padding:12px 14px; border-radius:10px;">${escapeHtml(t.body || '')}</p>
+        ${threadAttachmentsHtml}
         <h4 style="margin-top:20px; font-size:14px; color:var(--primary);"><i class="fas fa-reply-all"></i> الردود (${replies.length})</h4>
         <div class="reply-list">
-            ${replies.length ? replies.map(r => `
+            ${replies.length ? replies.map(r => {
+                const replyAtt = (r.attachments && r.attachments.length)
+                    ? `<div class="reply-attachments">${r.attachments.map(att => `
+                        <span class="attachment-chip">
+                            <span class="att-icon ${att.type}"><i class="fas ${att.icon}"></i></span>
+                            <span class="att-name" title="${escapeHtml(att.name)}">${escapeHtml(att.name)}</span>
+                            <button class="att-download" onclick="downloadReplyAttachment('${t.id}', '${r.id}', '${att.id}')" title="تحميل"><i class="fas fa-download"></i></button>
+                        </span>
+                    `).join('')}</div>`
+                    : '';
+                return `
                 <div class="reply-item">
                     <div class="ri-head"><i class="fas fa-user-circle"></i> ${escapeHtml(r.authorName)} <span style="font-weight:400; color:var(--text-muted);">· ${roleLabel(r.authorRole)}</span><span class="ri-time">${timeAgo(r.createdAt)}</span></div>
                     <p>${escapeHtml(r.text)}</p>
+                    ${replyAtt}
                 </div>
-            `).join('') : `<div class="empty-state" style="padding:20px;"><i class="fas fa-reply"></i>لا توجد ردود بعد — كن أول من يرد.</div>`}
+            `}).join('') : `<div class="empty-state" style="padding:20px;"><i class="fas fa-reply"></i>لا توجد ردود بعد — كن أول من يرد.</div>`}
         </div>
         <div class="field-group" style="margin-top:10px;">
             <textarea id="replyText" placeholder="اكتب ردك هنا..." style="min-height:70px;"></textarea>
         </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('replyFileInput').click()">
+                <i class="fas fa-paperclip"></i> إرفاق ملف
+            </button>
+            <input type="file" id="replyFileInput" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" style="display:none;">
+            <span id="replyAttachIndicator" style="font-size:12px; color:var(--text-muted);"></span>
+        </div>
+        <div id="replyAttachList" class="thread-attachments" style="margin-bottom:10px;"></div>
         <button class="btn btn-teal" onclick="addReply('${t.id}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button>
     `;
+
+    // ربط زر إرفاق في الرد
+    const replyFileInput = document.getElementById('replyFileInput');
+    if (replyFileInput) {
+        replyFileInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files || []);
+            if (files.length === 0) return;
+            const processed = await processFileSelection(files);
+            pendingReplyAttachments = pendingReplyAttachments.concat(processed);
+            updatePendingReplyBar();
+            e.target.value = '';
+        });
+    }
+    updatePendingReplyBar();
 }
+
+// مرفقات الرد
+let pendingReplyAttachments = [];
+
+function updatePendingReplyBar() {
+    const list = document.getElementById('replyAttachList');
+    const indicator = document.getElementById('replyAttachIndicator');
+    if (!list) return;
+    if (pendingReplyAttachments.length === 0) {
+        list.innerHTML = '';
+        if (indicator) indicator.textContent = '';
+        return;
+    }
+    if (indicator) indicator.textContent = `${pendingReplyAttachments.length} ملف جاهز للإرفاق`;
+    list.innerHTML = pendingReplyAttachments.map(att => `
+        <span class="attachment-chip">
+            <span class="att-icon ${att.type}"><i class="fas ${att.icon}"></i></span>
+            <span class="att-name">${escapeHtml(att.name)}</span>
+            <span style="cursor:pointer; color:var(--danger); font-weight:700;" onclick="removePendingReplyAttachment('${att.id}')">×</span>
+        </span>
+    `).join('');
+}
+
+function removePendingReplyAttachment(id) {
+    pendingReplyAttachments = pendingReplyAttachments.filter(a => a.id !== id);
+    updatePendingReplyBar();
+}
+
 async function addReply(threadId) {
     const ta = document.getElementById('replyText');
     const text = ta.value.trim();
-    if (!text) return;
+    const hasAttachments = pendingReplyAttachments.length > 0;
+    if (!text && !hasAttachments) return;
     const t = discussData.threads.find(x => x.id === threadId);
     if (!t) return;
     if (!Array.isArray(t.replies)) t.replies = [];
     t.replies.push({
-        id: generateId(), text, authorId: currentUser.id,
+        id: generateId(),
+        text,
+        attachments: pendingReplyAttachments.slice(),
+        authorId: currentUser.id,
         authorName: currentUser.fullName || currentUser.username,
-        authorRole: currentUser.role, createdAt: Date.now()
+        authorRole: currentUser.role,
+        createdAt: Date.now()
     });
+    pendingReplyAttachments = [];
     renderThreadDetail(threadId);
     renderThreads();
     await saveDiscuss();
 }
 
+function downloadThreadAttachment(threadId, attId) {
+    const t = discussData.threads.find(x => x.id === threadId);
+    if (!t || !t.attachments) return;
+    const att = t.attachments.find(a => a.id === attId);
+    if (!att || !att.dataUrl) { alert('⚠️ الملف غير متوفر'); return; }
+    const link = document.createElement('a');
+    link.href = att.dataUrl;
+    link.download = att.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function downloadReplyAttachment(threadId, replyId, attId) {
+    const t = discussData.threads.find(x => x.id === threadId);
+    if (!t || !t.replies) return;
+    const r = t.replies.find(x => x.id === replyId);
+    if (!r || !r.attachments) return;
+    const att = r.attachments.find(a => a.id === attId);
+    if (!att || !att.dataUrl) { alert('⚠️ الملف غير متوفر'); return; }
+    const link = document.createElement('a');
+    link.href = att.dataUrl;
+    link.download = att.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 /* ============================================================
-   6. دفتر ملاحظاتي (خاص بكل أستاذ)
+   10. دفتر الملاحظات
    ============================================================ */
 function myNotes() {
     if (!currentUser) return [];
@@ -836,7 +1378,8 @@ async function deleteNote(id) {
 }
 function renderNotes() {
     const grid = document.getElementById('notesGrid');
-    const q = (document.getElementById('notesSearch').value || '').trim().toLowerCase();
+    const searchInput = document.getElementById('notesSearch');
+    const q = (searchInput ? searchInput.value : '').trim().toLowerCase();
     let list = myNotes().sort((a,b) => (b.updatedAt||b.createdAt) - (a.updatedAt||a.createdAt));
     if (q) list = list.filter(n => (n.title + ' ' + n.content).toLowerCase().includes(q));
     if (!list.length) {
@@ -862,7 +1405,7 @@ function renderNotes() {
 }
 
 /* ============================================================
-   7. التبويبات + الإقلاع
+   11. التبويبات + الإقلاع
    ============================================================ */
 function setupMainTabs() {
     document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -870,16 +1413,25 @@ function setupMainTabs() {
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
             tab.classList.add('active');
-            document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+            const panel = document.getElementById('panel-' + tab.dataset.tab);
+            if (panel) panel.classList.add('active');
         });
     });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
     const portalUser = getPortalSession();
-    if (!portalUser) { window.location.href = 'index.html'; return; }
+    if (!portalUser) { window.location.replace('index.html'); return; }
+
     currentUser = portalUser;
     document.getElementById('userNameLabel').textContent = currentUser.fullName || currentUser.username || '';
+    document.getElementById('userRoleBadge').textContent = currentUser.role === 'inspector' ? 'مفتش' : 'أستاذ(ة)';
+
+    // إظهار رابط لوحة التحكم للمفتش فقط
+    if (currentUser.role === 'inspector') {
+        const dash = document.getElementById('dashboardLink');
+        if (dash) dash.style.display = 'inline-flex';
+    }
 
     document.getElementById('ssoLoadingScreen').style.display = 'none';
     document.getElementById('appScreen').classList.remove('hidden');

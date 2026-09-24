@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>بطاقة الأداء التكاملي للمعلم والمتعلم</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,43 +10,180 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
-    </script>
-    <!-- FileSaver -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js">
-    </script>
-    <!-- SheetJS (XLSX) للتصدير إلى Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        // ⚡ حماية الوصول: هذه الأداة من صلاحية المفتش فقط
+        (function checkAccess() {
+            function getPortalSession() {
+                try {
+                    const raw = sessionStorage.getItem('pgb_session') || localStorage.getItem('pgb_session_persistent');
+                    if (!raw) return null;
+                    const session = JSON.parse(raw);
+                    if (!session || Date.now() > session.expiresAt) return null;
+                    return session.user || null;
+                } catch(e) { return null; }
+            }
+            const user = getPortalSession();
+            if (!user || user.role !== 'inspector') {
+                window.location.replace('index.html');
+            }
+        })();
     </script>
 
     <style>
-        /* ===== جميع الأنماط السابقة ===== */
+        /* ============================================================
+           نظام الألوان الأنيق — هادئ وراقٍ
+           ============================================================ */
+        :root {
+            --primary: #2c3e50;          /* رمادي مزرق هادئ */
+            --primary-light: #f5f7fa;    /* خلفية ناعمة جداً */
+            --navy-deep: #1a2531;        /* غامق هادئ */
+            --gold: #c49b3f;             /* الذهبي (محفوظ كلمسة هوية) */
+            --gold-deep: #a6802f;
+            --gold-light: #faf3e3;
+            --danger: #c0392b;
+            --success: #27ae60;
+            --warning: #d4a017;
+            --info: #3498db;
+            --teal: #16a085;
+            --text-dark: #2c3e50;
+            --text-muted: #7f8c9b;
+            --bg-body: #fafbfc;
+            --bg-card: #ffffff;
+            --border-color: #e4e8ec;
+            --radius: 14px;
+            --shadow: 0 4px 20px rgba(44, 62, 80, 0.06);
+            --transition: all 0.25s ease;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
-            background: #f0f4f8;
+            background: #fafbfc;
             min-height: 100vh;
             padding: 20px;
+            padding-top: 70px;
+            color: var(--text-dark);
         }
+
+        /* ============================================================
+           الشريط العلوي الموحّد
+           ============================================================ */
+        .portal-top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            min-height: 56px;
+            background: #2c3e50;
+            z-index: 1100;
+            border-bottom: 2px solid #c49b3f;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            flex-wrap: wrap;
+            gap: 8px;
+            font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
+        }
+        .portal-top-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .portal-top-link {
+            color: #eaf1f8;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .portal-top-link:hover, .portal-top-link.active {
+            background: #c49b3f;
+            color: #2c3e50;
+            border-color: #c49b3f;
+            transform: translateY(-1px);
+        }
+        .portal-top-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .portal-top-btn {
+            background: linear-gradient(135deg, #c49b3f, #a6802f);
+            color: #2c3e50;
+            border: none;
+            font-weight: 800;
+            font-size: 12px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(196,155,63,0.3);
+            text-decoration: none;
+            font-family: inherit;
+        }
+        .portal-top-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(196,155,63,0.5);
+            background: #fff;
+            color: #2c3e50;
+        }
+        .portal-top-btn-secondary {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .portal-top-btn-secondary:hover {
+            background: rgba(255,255,255,0.25);
+            color: #fff;
+        }
+        .portal-top-btn-logout {
+            background: rgba(192, 57, 43, 0.85);
+            color: #fff;
+            border: 1px solid rgba(192, 57, 43, 0.9);
+        }
+        .portal-top-btn-logout:hover {
+            background: #c0392b;
+            color: #fff;
+        }
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
         }
+
         .card {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(12px);
-            border-radius: 32px;
+            background: #ffffff;
+            border-radius: 24px;
             padding: 30px 35px;
-            box-shadow: 0 30px 60px rgba(15, 35, 64, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 20px rgba(44, 62, 80, 0.06);
+            border: 1px solid #e4e8ec;
             display: flex;
             flex-direction: column;
         }
+
         .header {
             display: flex;
             justify-content: space-between;
@@ -55,31 +192,32 @@
             gap: 15px;
             margin-bottom: 30px;
             padding-bottom: 20px;
-            border-bottom: 2px solid rgba(196, 155, 63, 0.15);
+            border-bottom: 1px solid #e4e8ec;
         }
         .header-title h1 {
             font-size: 26px;
             font-weight: 700;
-            color: #0f2340;
+            color: var(--text-dark);
         }
         .header-title p {
-            color: #6b6b8a;
+            color: var(--text-muted);
             font-size: 13px;
             margin-top: 4px;
         }
         .badge {
-            background: linear-gradient(135deg, #1a3d6e, #c49b3f);
-            color: white;
+            background: #f5f7fa;
+            color: var(--primary);
             padding: 8px 22px;
             border-radius: 50px;
             font-weight: 600;
             font-size: 14px;
-            box-shadow: 0 6px 18px rgba(26, 61, 110, 0.25);
+            border: 1px solid var(--border-color);
         }
+
         .admin-header {
-            background: #f7f5ef;
-            border: 1.5px solid #e0daf0;
-            border-radius: 20px;
+            background: #fafbfc;
+            border: 1px solid #e4e8ec;
+            border-radius: 16px;
             padding: 20px 24px;
             margin-bottom: 25px;
             direction: rtl;
@@ -88,7 +226,7 @@
         .admin-header .republic {
             font-size: 14px;
             font-weight: 700;
-            color: #0f2340;
+            color: var(--text-dark);
             text-align: center;
             margin-bottom: 6px;
             letter-spacing: 0.5px;
@@ -96,7 +234,7 @@
         .admin-header .ministry {
             font-size: 16px;
             font-weight: 700;
-            color: #1a3d6e;
+            color: var(--text-dark);
             text-align: center;
             text-decoration: underline;
             text-underline-offset: 4px;
@@ -104,7 +242,7 @@
         }
         .admin-header .ref {
             font-size: 12px;
-            color: #5d7182;
+            color: var(--text-muted);
             text-align: left;
             margin-bottom: 10px;
             font-weight: 600;
@@ -114,38 +252,38 @@
             grid-template-columns: 1fr 1fr;
             gap: 6px 20px;
             font-size: 13px;
-            color: #0f2340;
+            color: var(--text-dark);
             padding: 8px 0;
-            border-top: 1px dashed #d8e4df;
-            border-bottom: 1px dashed #d8e4df;
+            border-top: 1px dashed #d8dde3;
+            border-bottom: 1px dashed #d8dde3;
             margin-bottom: 10px;
         }
         .admin-header .sub-header span {
             font-weight: 600;
-            color: #1a3d6e;
+            color: var(--primary);
         }
         .admin-header .sub-header input {
             border: none;
-            border-bottom: 1.5px solid #d8e4df;
+            border-bottom: 1.5px solid #d8dde3;
             background: transparent;
             padding: 2px 6px;
             font-size: 13px;
             font-family: inherit;
-            color: #1a1a3a;
+            color: var(--text-dark);
             width: 120px;
         }
         .admin-header .sub-header input:focus {
             outline: none;
-            border-bottom-color: #c49b3f;
+            border-bottom-color: var(--gold);
         }
         .admin-header .main-title {
             font-size: 20px;
             font-weight: 800;
-            color: #0f2340;
+            color: var(--text-dark);
             text-align: center;
             margin: 12px 0 10px 0;
             letter-spacing: 1px;
-            border-bottom: 3px double #c49b3f;
+            border-bottom: 2px solid var(--gold);
             padding-bottom: 8px;
         }
         .admin-header .details-grid {
@@ -153,7 +291,7 @@
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 8px 15px;
             font-size: 13px;
-            color: #0f2340;
+            color: var(--text-dark);
             margin-top: 8px;
         }
         .admin-header .details-grid .field {
@@ -164,32 +302,33 @@
         }
         .admin-header .details-grid .field label {
             font-weight: 600;
-            color: #1a3d6e;
+            color: var(--primary);
             min-width: 90px;
         }
         .admin-header .details-grid .field input,
         .admin-header .details-grid .field select {
             border: none;
-            border-bottom: 1.5px solid #d8e4df;
+            border-bottom: 1.5px solid #d8dde3;
             background: transparent;
             padding: 2px 6px;
             font-size: 13px;
             font-family: inherit;
-            color: #1a1a3a;
+            color: var(--text-dark);
             flex: 1;
             min-width: 80px;
         }
         .admin-header .details-grid .field input:focus,
         .admin-header .details-grid .field select:focus {
             outline: none;
-            border-bottom-color: #c49b3f;
+            border-bottom-color: var(--gold);
         }
+
         .dynamic-fields {
-            background: #f7f5ef;
+            background: #fafbfc;
             border-radius: 12px;
             padding: 15px 20px;
             margin-bottom: 20px;
-            border: 1px solid #eef3f9;
+            border: 1px solid #e4e8ec;
         }
         .dynamic-fields .field-group {
             display: grid;
@@ -203,7 +342,7 @@
         }
         .dynamic-fields label {
             font-weight: 600;
-            color: #1a3d6e;
+            color: var(--primary);
             font-size: 13px;
             display: block;
             margin-bottom: 2px;
@@ -212,7 +351,7 @@
         .dynamic-fields input {
             width: 100%;
             padding: 6px 10px;
-            border: 1.5px solid #d8e4df;
+            border: 1px solid #d8dde3;
             border-radius: 10px;
             font-size: 13px;
             background: white;
@@ -221,7 +360,7 @@
         .dynamic-fields select:focus,
         .dynamic-fields input:focus {
             outline: none;
-            border-color: #c49b3f;
+            border-color: var(--gold);
         }
         .subject-fields {
             display: none;
@@ -229,7 +368,7 @@
             padding: 12px 16px;
             background: white;
             border-radius: 10px;
-            border: 1px solid #eef3f9;
+            border: 1px solid #e4e8ec;
         }
         .subject-fields.active {
             display: block;
@@ -246,37 +385,39 @@
         }
         .subject-fields label {
             font-weight: 600;
-            color: #1a3d6e;
+            color: var(--primary);
             font-size: 12px;
         }
         .subject-fields select,
         .subject-fields input {
             width: 100%;
             padding: 4px 8px;
-            border: 1.5px solid #d8e4df;
+            border: 1px solid #d8dde3;
             border-radius: 8px;
             font-size: 12px;
-            background: #f7f5ef;
+            background: #fafbfc;
             font-family: inherit;
         }
         .subject-fields .hint {
             font-size: 11px;
-            color: #6b7c8c;
+            color: var(--text-muted);
             font-style: italic;
             margin-top: 2px;
         }
 
-        /* ===== التبويبات الموحدة ===== */
+        /* ============================================================
+           التبويبات الموحّدة
+           ============================================================ */
         .unified-tabs {
             margin-top: 12px;
             border-radius: 16px;
             overflow: hidden;
-            border: 1px solid #eef3f9;
+            border: 1px solid #e4e8ec;
         }
         .unified-tabs-header {
             display: flex;
-            background: #eef3f9;
-            border-bottom: 1px solid #eef3f9;
+            background: #f5f7fa;
+            border-bottom: 1px solid #e4e8ec;
             flex-wrap: wrap;
         }
         .unified-tab-btn {
@@ -286,7 +427,7 @@
             cursor: pointer;
             font-size: 13px;
             font-weight: 600;
-            color: #6b7c8c;
+            color: var(--text-muted);
             transition: 0.2s;
             font-family: inherit;
             border-bottom: 3px solid transparent;
@@ -295,12 +436,12 @@
             text-align: center;
         }
         .unified-tab-btn:hover {
-            background: #f5e6c8;
-            color: #1a3d6e;
+            background: #faf3e3;
+            color: var(--primary);
         }
         .unified-tab-btn.active {
-            color: #1a3d6e;
-            border-bottom-color: #c49b3f;
+            color: var(--primary);
+            border-bottom-color: var(--gold);
             background: white;
         }
         .unified-tab-content {
@@ -318,46 +459,46 @@
             gap: 16px;
         }
         .unified-tab-content .dict-item {
-            background: #f7f5ef;
+            background: #fafbfc;
             padding: 14px 18px;
             border-radius: 14px;
-            border-right: 3px solid #c49b3f;
+            border-right: 3px solid var(--gold);
         }
         .unified-tab-content .dict-item h5 {
-            color: #1a3d6e;
+            color: var(--text-dark);
             font-size: 15px;
             margin-bottom: 4px;
         }
         .unified-tab-content .dict-item p {
-            color: #5a5a7a;
+            color: var(--text-muted);
             font-size: 13px;
             line-height: 1.6;
         }
         .unified-tab-content .dict-item .keywords {
-            color: #c49b3f;
+            color: var(--gold-deep);
             font-size: 12px;
             font-weight: 600;
             margin-top: 4px;
         }
         .unified-tab-content .roadmap-item {
-            background: #f5faff;
+            background: #f5f9fb;
             padding: 14px 18px;
             border-radius: 14px;
-            border-right: 3px solid #167c80;
+            border-right: 3px solid var(--teal);
         }
         .unified-tab-content .roadmap-item h5 {
-            color: #123a5e;
+            color: var(--text-dark);
             font-size: 15px;
             margin-bottom: 4px;
         }
         .unified-tab-content .roadmap-item p {
-            color: #123a5e;
+            color: var(--text-dark);
             font-size: 13px;
             line-height: 1.6;
         }
         .unified-tab-content .roadmap-item .badge-21 {
             display: inline-block;
-            background: #167c80;
+            background: var(--teal);
             color: white;
             font-size: 11px;
             padding: 2px 12px;
@@ -365,27 +506,27 @@
             margin-top: 4px;
         }
         .unified-tab-content .curriculum-item {
-            background: #f7f5ef;
+            background: #fafbfc;
             padding: 14px 18px;
             border-radius: 14px;
-            border-right: 3px solid #1a3d6e;
+            border-right: 3px solid var(--primary);
         }
         .unified-tab-content .curriculum-item h5 {
-            color: #1a3d6e;
+            color: var(--text-dark);
             font-size: 15px;
             margin-bottom: 4px;
         }
         .unified-tab-content .curriculum-item p {
-            color: #5a5a7a;
+            color: var(--text-muted);
             font-size: 13px;
             line-height: 1.6;
         }
         .unified-tab-content .footnote {
             font-size: 11px;
-            color: #8fa0b0;
+            color: var(--text-muted);
             margin-top: 12px;
             padding-top: 10px;
-            border-top: 1px dashed #d8e4df;
+            border-top: 1px dashed #d8dde3;
             text-align: center;
         }
         .unified-tab-content .grid-2col {
@@ -407,88 +548,92 @@
             }
         }
 
-        /* ===== أزرار التصدير ===== */
-        .export-btn.excel {
-            background: linear-gradient(135deg, #217346, #1a5e3a);
-            box-shadow: 0 6px 20px rgba(33, 115, 70, 0.2);
+        /* ============================================================
+           أزرار التصدير
+           ============================================================ */
+        .export-btn {
+            padding: 10px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(44, 62, 80, 0.15);
+            font-family: inherit;
         }
-        .export-btn.excel:hover {
-            box-shadow: 0 10px 28px rgba(33, 115, 70, 0.3);
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(44, 62, 80, 0.25);
+            opacity: 0.95;
         }
-        .export-btn.import {
-            background: linear-gradient(135deg, #b38b2b, #a6802f);
-            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.2);
-        }
-        .export-btn.import:hover {
-            box-shadow: 0 10px 28px rgba(243, 156, 18, 0.3);
-        }
-        .export-btn.lang {
-            background: linear-gradient(135deg, #17a2b8, #123a5e);
-            box-shadow: 0 6px 20px rgba(41, 128, 185, 0.2);
-        }
-        .export-btn.lang:hover {
-            box-shadow: 0 10px 28px rgba(41, 128, 185, 0.3);
-        }
-        .export-btn.print {
-            background: linear-gradient(135deg, #8c6423, #6b4d1f);
-            box-shadow: 0 6px 20px rgba(142, 68, 173, 0.2);
-        }
-        .export-btn.print:hover {
-            box-shadow: 0 10px 28px rgba(142, 68, 173, 0.3);
-        }
-        .export-btn.json {
-            background: linear-gradient(135deg, #0f6469, #167c80);
-            box-shadow: 0 6px 20px rgba(22, 160, 133, 0.2);
-        }
-        .export-btn.json:hover {
-            box-shadow: 0 10px 28px rgba(22, 160, 133, 0.3);
+        .export-btn.word { background: #2b5797; }
+        .export-btn.archive { background: #27ae60; }
+        .export-btn.danger { background: #c0392b; }
+        .export-btn.excel { background: #217346; }
+        .export-btn.import { background: #d4a017; }
+        .export-btn.lang { background: #3498db; }
+        .export-btn.print { background: #8c6423; }
+        .export-btn.roadmap { background: #16a085; }
+        .export-btn.json { background: #16a085; }
+        .export-btn.small {
+            padding: 6px 14px;
+            font-size: 12px;
+            border-radius: 30px;
         }
 
-        /* ===== شريط اللغة ===== */
+        /* ============================================================
+           شريط اللغة
+           ============================================================ */
         .lang-bar {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
             margin-bottom: 10px;
             padding: 8px 12px;
-            background: #f5e6c8;
+            background: #faf3e3;
             border-radius: 30px;
             align-items: center;
         }
         .lang-bar .lang-label {
             font-size: 12px;
-            color: #5d7182;
+            color: var(--text-muted);
             font-weight: 600;
         }
         .lang-btn {
             padding: 4px 16px;
-            border: 1.5px solid #d8e4df;
+            border: 1.5px solid #d8dde3;
             border-radius: 30px;
             background: white;
             cursor: pointer;
             font-size: 12px;
             font-weight: 600;
-            color: #1a3d6e;
+            color: var(--primary);
             transition: 0.2s;
             font-family: inherit;
         }
         .lang-btn:hover {
-            background: #1a3d6e;
+            background: var(--primary);
             color: white;
         }
         .lang-btn.active {
-            background: #1a3d6e;
+            background: var(--primary);
             color: white;
-            border-color: #1a3d6e;
+            border-color: var(--primary);
         }
 
+        /* ============================================================
+           عناوين الأقسام والمؤشرات
+           ============================================================ */
         .section-title {
             font-size: 18px;
             font-weight: 700;
-            color: #0f2340;
+            color: var(--text-dark);
             margin: 25px 0 10px 0;
             padding-right: 14px;
-            border-right: 4px solid #c49b3f;
+            border-right: 3px solid var(--gold);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -497,19 +642,19 @@
         .section-title .weight {
             font-size: 12px;
             font-weight: 400;
-            color: #6b7c8c;
-            background: #f5e6c8;
+            color: var(--text-muted);
+            background: #faf3e3;
             padding: 2px 14px;
             border-radius: 30px;
         }
         .section-definition {
             font-size: 13px;
-            color: #4a4a6a;
-            background: #f7f5ef;
+            color: var(--text-muted);
+            background: #fafbfc;
             padding: 10px 16px;
             border-radius: 14px;
             margin-bottom: 12px;
-            border-right: 3px solid #c49b3f;
+            border-right: 3px solid var(--gold);
             line-height: 1.7;
         }
         .indicators-grid {
@@ -518,18 +663,18 @@
             gap: 12px;
         }
         .indicator-item {
-            background: white;
+            background: #ffffff;
             padding: 14px 18px;
-            border-radius: 16px;
-            border: 1px solid #eef3f9;
+            border-radius: 12px;
+            border: 1px solid #e4e8ec;
             transition: 0.2s;
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
         .indicator-item:hover {
-            border-color: #d8e4df;
-            box-shadow: 0 4px 16px rgba(26, 61, 110, 0.06);
+            border-color: #cdd5dd;
+            box-shadow: 0 4px 16px rgba(44, 62, 80, 0.06);
         }
         .indicator-top {
             display: flex;
@@ -540,22 +685,22 @@
         .indicator-name {
             font-size: 13px;
             font-weight: 600;
-            color: #0f2340;
+            color: var(--text-dark);
             line-height: 1.3;
         }
         .indicator-code {
             font-size: 10px;
-            color: #8fa0b0;
-            background: #f5f3fc;
+            color: var(--text-muted);
+            background: #f5f7fa;
             padding: 2px 10px;
             border-radius: 30px;
             white-space: nowrap;
         }
         .indicator-competency {
             font-size: 11px;
-            color: #c49b3f;
-            background: #faf7ff;
-            border-right: 3px solid #d8e4df;
+            color: var(--gold-deep);
+            background: #faf9f5;
+            border-right: 3px solid #e4e8ec;
             padding: 3px 8px;
             border-radius: 6px;
             line-height: 1.4;
@@ -570,21 +715,21 @@
             flex: 1;
             min-width: 90px;
             padding: 6px 10px;
-            border: 1.5px solid #d8e4df;
+            border: 1.5px solid #d8dde3;
             border-radius: 10px;
             font-size: 13px;
-            background: #f7f5ef;
+            background: #fafbfc;
             font-family: inherit;
             cursor: pointer;
         }
         .indicator-controls select:focus {
-            border-color: #c49b3f;
+            border-color: var(--gold);
             outline: none;
         }
         .indicator-score {
             font-weight: 700;
             font-size: 15px;
-            color: #0f2340;
+            color: var(--text-dark);
             min-width: 35px;
             text-align: center;
         }
@@ -593,27 +738,23 @@
             font-weight: 600;
             padding: 2px 12px;
             border-radius: 30px;
-            background: #f5e6c8;
-            color: #1a3d6e;
+            background: #faf3e3;
+            color: var(--primary);
         }
-        .level-excellent {
-            border-right: 4px solid #1e7e34;
-        }
-        .level-good {
-            border-right: 4px solid #17a2b8;
-        }
-        .level-acceptable {
-            border-right: 4px solid #c49b3f;
-        }
-        .level-weak {
-            border-right: 4px solid #b22234;
-        }
+        .level-excellent { border-right: 4px solid var(--success); }
+        .level-good { border-right: 4px solid var(--info); }
+        .level-acceptable { border-right: 4px solid var(--gold); }
+        .level-weak { border-right: 4px solid var(--danger); }
+
+        /* ============================================================
+           لوحة النتائج
+           ============================================================ */
         .results-panel {
             margin-top: 35px;
             padding: 25px 28px;
-            background: linear-gradient(135deg, #f7f5ef, #f5e6c8);
-            border-radius: 28px;
-            border: 1px solid rgba(196, 155, 63, 0.12);
+            background: #fafbfc;
+            border-radius: 20px;
+            border: 1px solid #e4e8ec;
             flex: 1;
         }
         .results-grid {
@@ -622,9 +763,7 @@
             gap: 25px;
         }
         @media (max-width: 750px) {
-            .results-grid {
-                grid-template-columns: 1fr;
-            }
+            .results-grid { grid-template-columns: 1fr; }
         }
         .result-score-box {
             display: flex;
@@ -632,19 +771,20 @@
             justify-content: center;
             align-items: center;
             background: white;
-            border-radius: 24px;
+            border-radius: 20px;
             padding: 25px 20px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 2px 10px rgba(44, 62, 80, 0.04);
+            border: 1px solid #e4e8ec;
         }
         .final-score {
             font-size: 56px;
             font-weight: 800;
-            color: #1a3d6e;
+            color: var(--primary);
             line-height: 1;
         }
         .final-label {
             font-size: 16px;
-            color: #4a4a6a;
+            color: var(--text-muted);
             font-weight: 600;
             margin-top: 4px;
         }
@@ -654,8 +794,8 @@
             border-radius: 40px;
             font-weight: 700;
             font-size: 17px;
-            background: #eef3f9;
-            color: #1a3d6e;
+            background: #f5f7fa;
+            color: var(--primary);
         }
         .result-details {
             display: grid;
@@ -667,17 +807,18 @@
             padding: 14px 16px;
             border-radius: 16px;
             text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.03);
+            border: 1px solid #e4e8ec;
         }
         .result-detail-item .label {
             font-size: 11px;
-            color: #6b7c8c;
+            color: var(--text-muted);
             font-weight: 500;
         }
         .result-detail-item .value {
             font-size: 20px;
             font-weight: 700;
-            color: #0f2340;
+            color: var(--text-dark);
         }
         .charts-row {
             display: grid;
@@ -686,19 +827,18 @@
             margin-top: 25px;
         }
         @media (max-width: 650px) {
-            .charts-row {
-                grid-template-columns: 1fr;
-            }
+            .charts-row { grid-template-columns: 1fr; }
         }
         .chart-box {
             background: white;
             padding: 18px;
             border-radius: 20px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 2px 10px rgba(44, 62, 80, 0.04);
+            border: 1px solid #e4e8ec;
         }
         .chart-box h4 {
             text-align: center;
-            color: #1a3d6e;
+            color: var(--primary);
             font-size: 14px;
             margin-bottom: 10px;
         }
@@ -706,27 +846,33 @@
             max-height: 200px;
             max-width: 100%;
         }
+
+        /* ============================================================
+           التوصيات
+           ============================================================ */
         .recommendations {
             margin-top: 25px;
             background: white;
             padding: 20px 24px;
             border-radius: 20px;
-            border-right: 5px solid #c49b3f;
+            border-right: 4px solid var(--gold);
+            border: 1px solid #e4e8ec;
+            border-right-width: 4px;
         }
         .recommendations h4 {
-            color: #0f2340;
+            color: var(--text-dark);
             font-size: 16px;
             margin-bottom: 10px;
         }
         .recommendations .rec-sub {
             font-weight: 600;
-            color: #1a3d6e;
+            color: var(--primary);
             margin-top: 8px;
             margin-bottom: 4px;
             font-size: 14px;
         }
         .recommendations .rec-sub.roadmap {
-            color: #123a5e;
+            color: var(--teal);
         }
         .recommendations ul {
             list-style: none;
@@ -736,104 +882,23 @@
             gap: 8px;
         }
         .recommendations ul li {
-            background: #eef3f9;
+            background: #f5f7fa;
             padding: 5px 16px;
             border-radius: 30px;
             font-size: 13px;
-            color: #3d3a5a;
+            color: var(--text-dark);
         }
+
         .export-buttons {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
             margin-top: 22px;
         }
-        .export-btn {
-            padding: 10px 24px;
-            background: linear-gradient(135deg, #1a3d6e, #c49b3f);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 6px 20px rgba(26, 61, 110, 0.2);
-            font-family: inherit;
-        }
-        .export-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 28px rgba(26, 61, 110, 0.3);
-        }
-        .export-btn.word {
-            background: linear-gradient(135deg, #2b5797, #1a3a6b);
-            box-shadow: 0 6px 20px rgba(43, 87, 151, 0.2);
-        }
-        .export-btn.word:hover {
-            box-shadow: 0 10px 28px rgba(43, 87, 151, 0.3);
-        }
-        .export-btn.archive {
-            background: linear-gradient(135deg, #1e7e34, #1a6b2c);
-            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.2);
-        }
-        .export-btn.archive:hover {
-            box-shadow: 0 10px 28px rgba(46, 204, 113, 0.3);
-        }
-        .export-btn.danger {
-            background: linear-gradient(135deg, #b22234, #8f1a29);
-            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.2);
-        }
-        .export-btn.danger:hover {
-            box-shadow: 0 10px 28px rgba(231, 76, 60, 0.3);
-        }
-        .export-btn.small {
-            padding: 6px 14px;
-            font-size: 12px;
-            border-radius: 30px;
-        }
-        .export-btn.excel {
-            background: linear-gradient(135deg, #217346, #1a5e3a);
-            box-shadow: 0 6px 20px rgba(33, 115, 70, 0.2);
-        }
-        .export-btn.excel:hover {
-            box-shadow: 0 10px 28px rgba(33, 115, 70, 0.3);
-        }
-        .export-btn.import {
-            background: linear-gradient(135deg, #b38b2b, #a6802f);
-            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.2);
-        }
-        .export-btn.import:hover {
-            box-shadow: 0 10px 28px rgba(243, 156, 18, 0.3);
-        }
-        .export-btn.lang {
-            background: linear-gradient(135deg, #17a2b8, #123a5e);
-            box-shadow: 0 6px 20px rgba(41, 128, 185, 0.2);
-        }
-        .export-btn.lang:hover {
-            box-shadow: 0 10px 28px rgba(41, 128, 185, 0.3);
-        }
-        .export-btn.print {
-            background: linear-gradient(135deg, #8c6423, #6b4d1f);
-            box-shadow: 0 6px 20px rgba(142, 68, 173, 0.2);
-        }
-        .export-btn.print:hover {
-            box-shadow: 0 10px 28px rgba(142, 68, 173, 0.3);
-        }
-        .export-btn.roadmap {
-            background: linear-gradient(135deg, #123a5e, #167c80);
-            box-shadow: 0 6px 20px rgba(18, 58, 94, 0.2);
-        }
-        .export-btn.roadmap:hover {
-            box-shadow: 0 10px 28px rgba(18, 58, 94, 0.3);
-        }
-        .export-btn.json {
-            background: linear-gradient(135deg, #0f6469, #167c80);
-            box-shadow: 0 6px 20px rgba(22, 160, 133, 0.2);
-        }
-        .export-btn.json:hover {
-            box-shadow: 0 10px 28px rgba(22, 160, 133, 0.3);
-        }
 
+        /* ============================================================
+           السجل
+           ============================================================ */
         .archive-table {
             width: 100%;
             border-collapse: collapse;
@@ -844,19 +909,19 @@
         .archive-table td {
             padding: 10px 12px;
             text-align: center;
-            border-bottom: 1px solid #eef3f9;
+            border-bottom: 1px solid #e4e8ec;
         }
         .archive-table th {
-            background: #eef3f9;
-            color: #1a3d6e;
+            background: #f5f7fa;
+            color: var(--primary);
             font-weight: 700;
         }
         .archive-table tr:hover {
-            background: #f7f5ef;
+            background: #fafbfc;
         }
         .archive-empty {
             text-align: center;
-            color: #8fa0b0;
+            color: var(--text-muted);
             padding: 20px;
             font-size: 13px;
         }
@@ -871,72 +936,51 @@
             border-radius: 16px;
             padding: 14px;
             text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.03);
+            border: 1px solid #e4e8ec;
         }
         .stats-summary-item .num {
             font-size: 24px;
             font-weight: 800;
-            color: #1a3d6e;
+            color: var(--primary);
         }
         .stats-summary-item .lbl {
             font-size: 11px;
-            color: #6b7c8c;
+            color: var(--text-muted);
             margin-top: 4px;
         }
 
-        /* ===== إعدادات الطباعة ===== */
+        /* ============================================================
+           الطباعة
+           ============================================================ */
         @media print {
-            .no-print {
-                display: none !important;
-            }
-            .card {
-                box-shadow: none !important;
-                background: white !important;
-                padding: 20px !important;
-            }
-            .admin-header {
-                background: white !important;
-                border: 1px solid #ccc !important;
-            }
-            .results-panel {
-                background: white !important;
-                border: 1px solid #ccc !important;
-            }
-            .export-buttons {
-                display: none !important;
-            }
-            .unified-tabs-header {
-                background: #f5e6c8 !important;
-            }
-            .unified-tab-btn {
-                border-bottom: 2px solid transparent !important;
-            }
-            .unified-tab-btn.active {
-                border-bottom: 2px solid #1a3d6e !important;
-            }
-            body {
-                background: white !important;
-                padding: 10px !important;
-            }
-            .indicator-item {
-                break-inside: avoid;
-                border: 1px solid #eee !important;
-            }
-            .charts-row {
-                break-inside: avoid;
-            }
+            .no-print { display: none !important; }
+            .card { box-shadow: none !important; background: white !important; padding: 20px !important; }
+            .admin-header { background: white !important; border: 1px solid #ccc !important; }
+            .results-panel { background: white !important; border: 1px solid #ccc !important; }
+            .export-buttons { display: none !important; }
+            .unified-tabs-header { background: #f5e6c8 !important; }
+            .unified-tab-btn { border-bottom: 2px solid transparent !important; }
+            .unified-tab-btn.active { border-bottom: 2px solid #2c3e50 !important; }
+            body { background: white !important; padding: 10px !important; padding-top: 10px !important; }
+            .portal-top-bar { display: none !important; }
+            .indicator-item { break-inside: avoid; border: 1px solid #eee !important; }
+            .charts-row { break-inside: avoid; }
         }
 
+        /* ============================================================
+           الفوتر
+           ============================================================ */
         .ministry-footer {
             margin-top: 40px;
             padding: 20px 30px;
-            background: linear-gradient(135deg, #0f2340, #123a5e);
+            background: #2c3e50;
             border-radius: 16px;
             color: white;
             text-align: center;
             font-size: 14px;
             line-height: 2;
-            border-top: 4px solid #c49b3f;
+            border-top: 3px solid var(--gold);
             user-select: none;
             pointer-events: none;
             flex-shrink: 0;
@@ -966,99 +1010,58 @@
         }
 
         @media (max-width: 600px) {
-            .card {
-                padding: 16px;
-            }
-            .indicators-grid {
-                grid-template-columns: 1fr;
-            }
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .final-score {
-                font-size: 40px;
-            }
-            .result-details {
-                grid-template-columns: 1fr;
-            }
-            .export-buttons {
-                flex-direction: column;
-            }
-            .export-btn {
-                width: 100%;
-                text-align: center;
-            }
-            .ministry-footer {
-                padding: 16px 20px;
-                font-size: 12px;
-            }
-            .ministry-footer .logo-text {
-                font-size: 16px;
-            }
-            .admin-header .details-grid .field {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .admin-header .details-grid .field label {
-                min-width: auto;
-            }
-            .admin-header .sub-header {
-                grid-template-columns: 1fr;
-            }
-            .admin-header .sub-header input {
-                width: 100%;
-            }
-            .dynamic-fields .field-group {
-                grid-template-columns: 1fr;
-            }
-            .subject-fields .field-row {
-                grid-template-columns: 1fr;
-            }
-            .unified-tab-content .grid-2col {
-                grid-template-columns: 1fr;
-            }
-            .unified-tab-content .dict-grid {
-                grid-template-columns: 1fr;
-            }
-            .lang-bar {
-                flex-wrap: wrap;
-            }
-            .lang-btn {
-                padding: 3px 12px;
-                font-size: 11px;
-            }
+            .card { padding: 16px; }
+            .indicators-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; align-items: stretch; }
+            .final-score { font-size: 40px; }
+            .result-details { grid-template-columns: 1fr; }
+            .export-buttons { flex-direction: column; }
+            .export-btn { width: 100%; text-align: center; }
+            .ministry-footer { padding: 16px 20px; font-size: 12px; }
+            .ministry-footer .logo-text { font-size: 16px; }
+            .admin-header .details-grid .field { flex-direction: column; align-items: stretch; }
+            .admin-header .details-grid .field label { min-width: auto; }
+            .admin-header .sub-header { grid-template-columns: 1fr; }
+            .admin-header .sub-header input { width: 100%; }
+            .dynamic-fields .field-group { grid-template-columns: 1fr; }
+            .subject-fields .field-row { grid-template-columns: 1fr; }
+            .unified-tab-content .grid-2col { grid-template-columns: 1fr; }
+            .unified-tab-content .dict-grid { grid-template-columns: 1fr; }
+            .lang-bar { flex-wrap: wrap; }
+            .lang-btn { padding: 3px 12px; font-size: 11px; }
         }
     </style>
 </head>
 <body>
 
-    <script>
-        // ⚡ حماية الوصول: هذه الأداة من صلاحية المفتش فقط، ولا تملك نظام دخول خاص بها —
-        // يجب الدخول أولاً عبر البوابة الرئيسية (index.html) بحساب له صلاحية "مفتش".
-        (function checkAccess() {
-            function getPortalSession() {
-                try {
-                    const raw = sessionStorage.getItem('pgb_session') || localStorage.getItem('pgb_session_persistent');
-                    if (!raw) return null;
-                    const session = JSON.parse(raw);
-                    if (!session || Date.now() > session.expiresAt) return null;
-                    return session.user || null;
-                } catch(e) { return null; }
-            }
-            const user = getPortalSession();
-            if (!user || user.role !== 'inspector') {
-                // إعادة توجيه فورية إلى البوابة — دون عرض أي محتوى من هذه الأداة
-                window.location.replace('index.html');
-            }
-        })();
-    </script>
     <noscript>
         <p style="text-align:center; padding:40px; font-family:Tahoma;">يجب تفعيل JavaScript وتسجيل الدخول عبر البوابة الرئيسية لاستعمال هذه الأداة.</p>
     </noscript>
+
+    <!-- شريط البوابة العلوي الموحد -->
+    <header class="portal-top-bar no-print">
+        <nav class="portal-top-links">
+            <a href="index.html" class="portal-top-link"><i class="fas fa-th-large"></i> البوابة الرئيسية</a>
+            <a href="moualaja.html" class="portal-top-link"><i class="fas fa-stethoscope"></i> المعالجة البيداغوجية</a>
+            <a href="amal.html" class="portal-top-link"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
+            <a href="arabic.html" class="portal-top-link"><i class="fas fa-book-open-reader"></i> تعليمية العربية</a>
+            <a href="niqash.html" class="portal-top-link"><i class="fas fa-comments"></i> ركن النقاش</a>
+            <a href="dashboard.html" class="portal-top-link"><i class="fas fa-chart-line"></i> لوحة التّحكم</a>
+        </nav>
+
+        <div class="portal-top-actions">
+            <span id="userBadge" style="display:inline-flex; align-items:center; gap:6px; color:#fff; font-size:12px; background:rgba(255,255,255,0.15); padding:5px 12px; border-radius:20px; font-weight:600;">
+                <i class="fas fa-user-circle"></i>
+                <span id="userBadgeName">—</span>
+            </span>
+            <button class="portal-top-btn portal-top-btn-secondary" onclick="window.print()" title="طباعة البطاقة">
+                <i class="fas fa-print"></i> طباعة
+            </button>
+            <button class="portal-top-btn portal-top-btn-logout" onclick="logoutPortal()" title="تسجيل الخروج">
+                <i class="fas fa-sign-out-alt"></i> خروج
+            </button>
+        </div>
+    </header>
 
     <div class="container">
         <div class="card">
@@ -1067,10 +1070,10 @@
             <div class="header">
                 <div class="header-title">
                     <h1 id="mainTitle">📋 بطاقة الأداء التكاملي</h1>
-                    <p id="subTitle">بطاقة تقييم أداء المتعلم والمعلم وفق مهارات القرن الحادي والعشرين </p>
+                    <p id="subTitle">بطاقة تقييم أداء المتعلم والمعلم وفق مهارات القرن الحادي والعشرين</p>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
-                    <a href="index.html" class="no-print" style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:#1a3d6e; text-decoration:none; border:1px solid #d8e4df; padding:6px 14px; border-radius:20px; background:#fff;">
+                    <a href="index.html" class="no-print" style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:#2c3e50; text-decoration:none; border:1px solid #e4e8ec; padding:6px 14px; border-radius:20px; background:#fff;">
                         <i class="fas fa-arrow-right"></i> البوابة
                     </a>
                     <div class="badge">⭐ مهارات القرن 21</div>
@@ -1095,7 +1098,7 @@
                 <div class="sub-header">
                     <span id="labelWilaya">مديرية التربية لولاية: <input type="text" id="adminWilaya" value="قسنطينة" /></span>
                     <span id="labelSchool">المتوسطة: <input type="text" id="adminSchool" value="بحري صالح" /></span>
-                    <span id="labelMunicipality">مفتشية التربية والتعليم المتوسط : <input type="text" id="adminMunicipality" value="قسنطينة" /></span>
+                    <span id="labelMunicipality">مفتشية التربية والتعليم المتوسط: <input type="text" id="adminMunicipality" value="قسنطينة" /></span>
                     <span id="labelDistrict">المقاطعة: <input type="text" id="adminDistrict" value="الثانية" /></span>
                 </div>
 
@@ -1140,13 +1143,13 @@
                             <option value="12" selected>12</option>
                         </select>
                     </div>
-                    <div class="field"><label id="labelGradeDate">تاريخ الدَّرجـة:</label> <input type="text" id="gradeDate" value="2020-01-01" /></div>
+                    <div class="field"><label id="labelGradeDate">تاريخ الدَّرجـة:</label> <input type="text" id="gradeDate" value="2020-01-01" /></div>
                     <div class="field"><label id="labelQualification">المؤهّل العلمي:</label> <input type="text" id="qualification" value="ليسانس" /></div>
                     <div class="field"><label id="labelLastInspection">تاريخ آخر تفتيش:</label> <input type="text" id="lastInspection" value="2025-03-15" /></div>
                     <div class="field"><label id="labelPreviousScore">العلامة السابقة:</label> <input type="text" id="previousScore" value="16.5" /></div>
                     <div class="field"><label id="labelInspectionDate">تاريخ التّفتيش:</label> <input type="date" id="inspectionDate" value="2026-08-29" /></div>
                     <div class="field"><label id="labelClassTime">زمن الحصّة:</label> <input type="text" id="classTime" value="60 دقيقة" /></div>
-                    <div class="field"><label id="labelClassLevel">القسم:</label> <input type="text" id="ClassLevel" value="1م1 - 2م2 - 3م3 - " /></div>
+                    <div class="field"><label id="labelClassLevel">القسم:</label> <input type="text" id="ClassLevel" value="1م1 - 2م2 - 3م3" /></div>
                     <div class="field"><label id="labelStudentCount">عدد التّلاميذ:</label> <input type="number" id="studentCount" value="35" /></div>
                     <div class="field">
                         <label id="labelLearningSegment">المقطع التعلمي:</label>
@@ -1199,36 +1202,36 @@
                     <div class="field-row">
                         <div>
                             <label id="labelMainActivity">📌 النشاط الرئيسي:</label>
-                            <input type="text" id="mainActivity" readonly style="background:#eef3f9; font-weight:600;" />
+                            <input type="text" id="mainActivity" readonly style="background:#f5f7fa; font-weight:600;" />
                             <div class="hint" id="mainActivityHint"></div>
                         </div>
                         <div>
                             <label id="labelPedagogicalObjectives">📌 الأهداف البيداغوجية:</label>
-                            <input type="text" id="pedagogicalObjectives" readonly style="background:#eef3f9; font-weight:600;" />
+                            <input type="text" id="pedagogicalObjectives" readonly style="background:#f5f7fa; font-weight:600;" />
                             <div class="hint" id="objectivesHint"></div>
                         </div>
                     </div>
                     <div class="field-row" style="margin-top:8px;">
                         <div>
                             <label id="labelTargetCompetencies">📌 الكفاءات المستهدفة:</label>
-                            <input type="text" id="targetCompetencies" readonly style="background:#eef3f9; font-weight:600;" />
+                            <input type="text" id="targetCompetencies" readonly style="background:#f5f7fa; font-weight:600;" />
                             <div class="hint" id="competenciesHint"></div>
                         </div>
                         <div>
                             <label id="labelEvaluationActivities">📌 أنشطة التقويم:</label>
-                            <input type="text" id="evaluationActivities" readonly style="background:#eef3f9; font-weight:600;" />
+                            <input type="text" id="evaluationActivities" readonly style="background:#f5f7fa; font-weight:600;" />
                             <div class="hint" id="evaluationHint"></div>
                         </div>
                     </div>
                     <div class="field-row" style="margin-top:8px;">
                         <div>
                             <label id="labelSegmentsCount">📌 عدد المقاطع:</label>
-                            <input type="text" id="segmentsCount" readonly style="background:#eef3f9; font-weight:600;" />
+                            <input type="text" id="segmentsCount" readonly style="background:#f5f7fa; font-weight:600;" />
                             <div class="hint" id="segmentsHint"></div>
                         </div>
                         <div>
                             <label id="labelYearFocus">📌 التركيز حسب السنة:</label>
-                            <input type="text" id="yearFocus" readonly style="background:#eef3f9; font-weight:600;" />
+                            <input type="text" id="yearFocus" readonly style="background:#f5f7fa; font-weight:600;" />
                             <div class="hint" id="yearFocusHint"></div>
                         </div>
                     </div>
@@ -1257,22 +1260,22 @@
                 </div>
 
                 <div class="unified-tab-content active" id="tab-dictionary">
-                    <h4 style="color:#1a3d6e; margin-bottom:14px; font-size:18px;" id="dictTitle">📖 قاموس البطاقة</h4>
+                    <h4 style="color:#2c3e50; margin-bottom:14px; font-size:18px;" id="dictTitle">📖 قاموس البطاقة</h4>
                     <div id="dictionaryContent"></div>
                 </div>
 
                 <div class="unified-tab-content" id="tab-curriculum">
-                    <h4 style="color:#1a3d6e; margin-bottom:14px; font-size:18px;" id="curriculumTitle">📘 بطاقة المنهاج الرسمي</h4>
+                    <h4 style="color:#2c3e50; margin-bottom:14px; font-size:18px;" id="curriculumTitle">📘 بطاقة المنهاج الرسمي</h4>
                     <div id="curriculumCardContent">
-                        <p style="color:#8fa0b0; font-size:13px;" id="curriculumPlaceholder">اختر المادة والسنة لعرض بطاقة المنهاج الرسمي.</p>
+                        <p style="color:#7f8c9b; font-size:13px;" id="curriculumPlaceholder">اختر المادة والسنة لعرض بطاقة المنهاج الرسمي.</p>
                     </div>
                     <div class="footnote" id="curriculumFootnote">⚠️ هذه البطاقة مرجع تربوي تركيبي مبني على بنية المنهاج الرسمي، ولا تُغني عن الرجوع إلى المنهاج الرسمي والوثيقة المرافقة الصادرَين عن وزارة التربية الوطنية لكل مادة وسنة دراسية.</div>
                 </div>
 
                 <div class="unified-tab-content" id="tab-roadmap">
-                    <h4 style="color:#123a5e; margin-bottom:14px; font-size:18px;" id="roadmapTitle">🌍 خارطة الطريق الاستراتيجية</h4>
+                    <h4 style="color:#16a085; margin-bottom:14px; font-size:18px;" id="roadmapTitle">🌍 خارطة الطريق الاستراتيجية</h4>
                     <div id="roadmapCardContent">
-                        <p style="color:#8fa0b0; font-size:13px;" id="roadmapPlaceholder">جارٍ تحميل خارطة الطريق...</p>
+                        <p style="color:#7f8c9b; font-size:13px;" id="roadmapPlaceholder">جارٍ تحميل خارطة الطريق...</p>
                     </div>
                     <div class="footnote" id="roadmapFootnote">📌 استناداً إلى الملخص التنفيذي للمركز الإقليمي للجودة والتميز في التعليم واليونسكو (2021) — متوافق مع أهداف التنمية المستدامة للأمم المتحدة ومعايير منظمة التعاون الاقتصادي والتنمية (OECD).</div>
                 </div>
@@ -1305,34 +1308,34 @@
                     <div class="result-score-box">
                         <div class="final-label" id="labelFinalRaw">النتيجة النهائية (خام)</div>
                         <div class="final-score" id="finalScore">0.00</div>
-                        <div style="font-size:14px; color:#5d7182;">/ 20</div>
+                        <div style="font-size:14px; color:#7f8c9b;">/ 20</div>
                         <div class="final-level" id="finalLevel">—</div>
                     </div>
                     <div>
-                        <div style="font-weight:600; color:#0f2340; margin-bottom:10px; font-size:15px;" id="labelAdjusted">📊 النتيجة المعدلة (حسب الدرجة والإطار)</div>
-                        <div style="background:white; border-radius:16px; padding:15px; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                        <div style="font-weight:600; color:#2c3e50; margin-bottom:10px; font-size:15px;" id="labelAdjusted">📊 النتيجة المعدلة (حسب الدرجة والإطار)</div>
+                        <div style="background:white; border-radius:16px; padding:15px; box-shadow:0 2px 8px rgba(44,62,80,0.03); border:1px solid #e4e8ec;">
                             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                                <div><div style="font-size:12px; color:#6b7c8c;" id="labelAdjScore">العلامة المعدلة</div><div style="font-size:28px; font-weight:800; color:#1a3d6e;" id="adjustedScore">0.00</div></div>
-                                <div><div style="font-size:12px; color:#6b7c8c;" id="labelAdjLevel">المستوى</div><div style="font-size:18px; font-weight:700; padding:4px 16px; border-radius:30px; background:#f5e6c8; color:#1a3d6e;" id="adjustedLevel">—</div></div>
-                                <div><div style="font-size:12px; color:#6b7c8c;" id="labelCeiling">سقف التقدير</div><div style="font-size:18px; font-weight:700; color:#0f2340;" id="scoreCeiling">0.00</div></div>
+                                <div><div style="font-size:12px; color:#7f8c9b;" id="labelAdjScore">العلامة المعدلة</div><div style="font-size:28px; font-weight:800; color:#2c3e50;" id="adjustedScore">0.00</div></div>
+                                <div><div style="font-size:12px; color:#7f8c9b;" id="labelAdjLevel">المستوى</div><div style="font-size:18px; font-weight:700; padding:4px 16px; border-radius:30px; background:#faf3e3; color:#2c3e50;" id="adjustedLevel">—</div></div>
+                                <div><div style="font-size:12px; color:#7f8c9b;" id="labelCeiling">سقف التقدير</div><div style="font-size:18px; font-weight:700; color:#2c3e50;" id="scoreCeiling">0.00</div></div>
                             </div>
-                            <div style="margin-top:8px; font-size:12px; color:#5d7182; border-top:1px solid #eef3f9; padding-top:8px;" id="gradeInfo">الدرجة: 12 | الإطار: تعليم متوسط</div>
+                            <div style="margin-top:8px; font-size:12px; color:#7f8c9b; border-top:1px solid #f0f3f6; padding-top:8px;" id="gradeInfo">الدرجة: 12 | الإطار: تعليم متوسط</div>
                         </div>
                         <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                            <div style="background:white; border-radius:12px; padding:10px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
-                                <div style="font-size:10px; color:#6b7c8c;" id="labelRawScore">العلامة الخام</div>
-                                <div style="font-size:20px; font-weight:700; color:#0f2340;" id="rawScoreDisplay">0.00</div>
+                            <div style="background:white; border-radius:12px; padding:10px; text-align:center; box-shadow:0 2px 8px rgba(44,62,80,0.03); border:1px solid #e4e8ec;">
+                                <div style="font-size:10px; color:#7f8c9b;" id="labelRawScore">العلامة الخام</div>
+                                <div style="font-size:20px; font-weight:700; color:#2c3e50;" id="rawScoreDisplay">0.00</div>
                             </div>
-                            <div style="background:white; border-radius:12px; padding:10px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
-                                <div style="font-size:10px; color:#6b7c8c;" id="labelCoefficient">معامل التصحيح</div>
-                                <div style="font-size:20px; font-weight:700; color:#0f2340;" id="coefficientDisplay">0.00</div>
+                            <div style="background:white; border-radius:12px; padding:10px; text-align:center; box-shadow:0 2px 8px rgba(44,62,80,0.03); border:1px solid #e4e8ec;">
+                                <div style="font-size:10px; color:#7f8c9b;" id="labelCoefficient">معامل التصحيح</div>
+                                <div style="font-size:20px; font-weight:700; color:#2c3e50;" id="coefficientDisplay">0.00</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div style="margin-top:20px;">
-                    <div style="font-weight:600; color:#0f2340; margin-bottom:10px; font-size:15px;" id="labelAxisDetails">📊 تفاصيل المحاور</div>
+                    <div style="font-weight:600; color:#2c3e50; margin-bottom:10px; font-size:15px;" id="labelAxisDetails">📊 تفاصيل المحاور</div>
                     <div class="result-details" id="axisDetails">
                         <div class="result-detail-item"><div class="label" id="labelAxis1">الأداء التربوي</div><div class="value" id="axis1Val">0</div></div>
                         <div class="result-detail-item"><div class="label" id="labelAxis2">فعالية التعلم</div><div class="value" id="axis2Val">0</div></div>
@@ -1372,7 +1375,7 @@
             <!-- ===== ARCHIVE ===== -->
             <div class="results-panel" id="archiveCard" style="margin-top:20px;">
                 <div class="section-title" id="archiveTitle">📂 السجل والإحصائيات التراكمية والمقارنة</div>
-                <p style="font-size:13px; color:#6b7c8c; margin-bottom:14px;" id="archiveDesc">
+                <p style="font-size:13px; color:#7f8c9b; margin-bottom:14px;" id="archiveDesc">
                     كل بطاقة تُحفظ محلياً في متصفحك (لا تُرسل لأي خادم). استعمل السجل لمقارنة عدة حصص تفتيشية أو أساتذة، ولعرض إحصائيات تراكمية عبر الزمن.
                 </p>
                 <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;" class="no-print">
@@ -1400,8 +1403,8 @@
 
             <!-- ===== FOOTER ===== -->
             <div class="ministry-footer">
-                <div class="logo-text"> وزارة التربية الوطنية <span></span>
-                <div class="sub"> المفتشية العامة</div>
+                <div class="logo-text"> وزارة التربية الوطنية <span>•</span> المفتشية العامة</div>
+                <div class="sub"> المديرية العامة للتعليم</div>
                 <div class="motto">"بالعلم نبني المستقبل" / Éduquer pour un avenir meilleur</div>
                 <div class="version">هذا النموذج مقترح على وزارة التربية الوطنية • نموذج من إعداد مفتش التربية والتكوين درويش لهلالي: 2026/08/29</div>
             </div>
@@ -1409,8 +1412,6 @@
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- ==================== JAVASCRIPT ==================== -->
     <script>
         // ============================================================
         // 0. TRADUCTIONS
@@ -1436,7 +1437,7 @@
                 framework: 'الإطـــــار:',
                 scale: 'السلّم:',
                 grade: 'الدرجة:',
-                gradeDate: 'تاريخ الدَّرجـة:',
+                gradeDate: 'تاريخ الدَّرجـة:',
                 qualification: 'المؤهّل العلمي:',
                 lastInspection: 'تاريخ آخر تفتيش:',
                 previousScore: 'العلامة السابقة:',
@@ -1726,6 +1727,42 @@
 
         let currentLang = 'ar';
 
+        // ============================================================
+        //  جلسة SSO
+        // ============================================================
+        const SESSION_KEY = 'pgb_session';
+        let currentUser = null;
+
+        function getPortalSession() {
+            try {
+                const raw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY + '_persistent');
+                if (!raw) return null;
+                const session = JSON.parse(raw);
+                if (!session || Date.now() > session.expiresAt) return null;
+                return session.user || null;
+            } catch (e) { return null; }
+        }
+
+        function logoutPortal() {
+            if (!confirm('هل تريد تسجيل الخروج والعودة إلى البوابة؟')) return;
+            try {
+                sessionStorage.removeItem(SESSION_KEY);
+                localStorage.removeItem(SESSION_KEY + '_persistent');
+            } catch(e) {}
+            window.location.href = 'index.html';
+        }
+
+        function applySessionUI() {
+            const user = getPortalSession();
+            if (!user) {
+                window.location.replace('index.html');
+                return;
+            }
+            currentUser = user;
+            const nameEl = document.getElementById('userBadgeName');
+            if (nameEl) nameEl.textContent = user.fullName || user.username || 'مستخدم';
+        }
+
         function setLanguage(lang) {
             currentLang = lang;
             const t = LANG[lang];
@@ -1738,8 +1775,6 @@
             document.getElementById('labelMinistry').textContent = t.ministry;
             document.getElementById('labelInspectorateGeneral').textContent = t.inspectorateGeneral;
             document.getElementById('labelCardTitle').textContent = t.cardTitle;
-            // نحافظ على القيم التي أدخلها المستخدم فعلاً (الولاية/المتوسطة/المفتشية/المقاطعة)
-            // بدل استبدالها بقيم افتراضية جاهزة في كل مرة يُبدَّل فيها لسان الواجهة
             const wilayaVal = document.getElementById('adminWilaya')?.value ?? '';
             const schoolVal = document.getElementById('adminSchool')?.value ?? '';
             const municipalityVal = document.getElementById('adminMunicipality')?.value ?? '';
@@ -1844,7 +1879,7 @@
         }
 
         // ============================================================
-        // 0-bis. DICTIONARY RENDER
+        //  قاموس البطاقة
         // ============================================================
         function renderDictionary(lang) {
             const container = document.getElementById('dictionaryContent');
@@ -2040,7 +2075,7 @@
             const data = dictData[lang] || dictData.ar;
             let html = '';
             data.sections.forEach(section => {
-                html += `<h5 style="color:#1a3d6e; margin:12px 0 8px 0;">${section.title}</h5><div class="dict-grid">`;
+                html += `<h5 style="color:#2c3e50; margin:12px 0 8px 0;">${section.title}</h5><div class="dict-grid">`;
                 section.items.forEach(item => {
                     html += `
                         <div class="dict-item">
@@ -2056,19 +2091,21 @@
         }
 
         // ============================================================
-        // 0-ter. UNIFIED TABS SWITCH
+        //  التبويبات الموحّدة
         // ============================================================
         function switchUnifiedTab(tabId) {
             document.querySelectorAll('.unified-tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.unified-tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            document.querySelector(`.unified-tab-btn[data-tab="${tabId}"]`).classList.add('active');
+            const target = document.getElementById(tabId);
+            if (target) target.classList.add('active');
+            const btn = document.querySelector(`.unified-tab-btn[data-tab="${tabId}"]`);
+            if (btn) btn.classList.add('active');
             if (tabId === 'tab-curriculum') renderCurriculumCard();
             if (tabId === 'tab-roadmap') renderRoadmapCard();
         }
 
         // ============================================================
-        // 1. DATA
+        //  البيانات
         // ============================================================
         const INDICATORS = {
             section1: [
@@ -2133,53 +2170,39 @@
         function getLevelsForSection(secKey) {
             return secKey === 'section4' ? LEVELS_MASTERY : LEVELS;
         }
-
         function getDefaultLevelValue(secKey) {
             return secKey === 'section4' ? 'partial' : 'acceptable';
         }
-
         function findLevel(val) {
             return LEVELS.find(l => l.value === val) || LEVELS_MASTERY.find(l => l.value === val);
         }
 
         // ============================================================
-        // 2. NOTATION SCALE
+        //  سلم التنقيط
         // ============================================================
         const NOTATION_SCALE = {
             '0-9': {
-                'تعليم أساسي': { ceiling: 13.5, levels: { faible: 9, moyen: 10.5, bien: 11.5, tresBien: 12.5,
-                        excellent: 13.5 } },
-                'تعليم متوسط': { ceiling: 13.5, levels: { faible: 9, moyen: 10.5, bien: 11.5, tresBien: 12.5,
-                        excellent: 13.5 } },
-                'قسم أول': { ceiling: 13.5, levels: { faible: 9, moyen: 10.5, bien: 11.5, tresBien: 12.5,
-                        excellent: 13.5 } },
-                'قسم ثان': { ceiling: 13.5, levels: { faible: 9, moyen: 10.5, bien: 11.5, tresBien: 12.5,
-                        excellent: 13.5 } },
-                'مميز': { ceiling: 13.5, levels: { faible: 9, moyen: 10.5, bien: 11.5, tresBien: 12.5,
-                        excellent: 13.5 } }
+                'تعليم أساسي': { ceiling: 13.5, levels: { faible: 9, moyen: 10.5, bien: 11.5, tresBien: 12.5, excellent: 13.5 } },
+                'تعليم متوسط': { ceiling: 13.5, levels: { faible: 9, moyen: 10.5, bien: 11.5, tresBien: 12.5, excellent: 13.5 } },
+                'قسم أول': { ceiling: 13.5, levels: { faible: 9, moyen: 10.5, bien: 11.5, tresBien: 12.5, excellent: 13.5 } },
+                'قسم ثان': { ceiling: 13.5, levels: { faible: 9, moyen: 10.5, bien: 11.5, tresBien: 12.5, excellent: 13.5 } },
+                'مميز': { ceiling: 13.5, levels: { faible: 9, moyen: 10.5, bien: 11.5, tresBien: 12.5, excellent: 13.5 } }
             },
             '10-12': {
-                'تعليم أساسي': { ceiling: 18.5, levels: { faible: 14.5, moyen: 15.5, bien: 16.5, tresBien: 17.5,
-                        excellent: 18.5 } },
-                'تعليم متوسط': { ceiling: 18.5, levels: { faible: 14.5, moyen: 15.5, bien: 16.5, tresBien: 17.5,
-                        excellent: 18.5 } },
-                'قسم أول': { ceiling: 18.5, levels: { faible: 14.5, moyen: 15.5, bien: 16.5, tresBien: 17.5,
-                        excellent: 18.5 } },
-                'قسم ثان': { ceiling: 18.5, levels: { faible: 14.5, moyen: 15.5, bien: 16.5, tresBien: 17.5,
-                        excellent: 18.5 } },
-                'مميز': { ceiling: 18.5, levels: { faible: 14.5, moyen: 15.5, bien: 16.5, tresBien: 17.5,
-                        excellent: 18.5 } }
+                'تعليم أساسي': { ceiling: 18.5, levels: { faible: 14.5, moyen: 15.5, bien: 16.5, tresBien: 17.5, excellent: 18.5 } },
+                'تعليم متوسط': { ceiling: 18.5, levels: { faible: 14.5, moyen: 15.5, bien: 16.5, tresBien: 17.5, excellent: 18.5 } },
+                'قسم أول': { ceiling: 18.5, levels: { faible: 14.5, moyen: 15.5, bien: 16.5, tresBien: 17.5, excellent: 18.5 } },
+                'قسم ثان': { ceiling: 18.5, levels: { faible: 14.5, moyen: 15.5, bien: 16.5, tresBien: 17.5, excellent: 18.5 } },
+                'مميز': { ceiling: 18.5, levels: { faible: 14.5, moyen: 15.5, bien: 16.5, tresBien: 17.5, excellent: 18.5 } }
             }
         };
 
         // ============================================================
-        // 3. SUBJECT DATA
+        //  بيانات المواد
         // ============================================================
         const SUBJECT_DATA = {
             'اللغة العربية': {
-                fields: ['فهم المنطوق وإنتاجه', 'فهم المكتوب / قراءة ودراسة نص', 'فهم المكتوب / ظاهرة لغوية',
-                    'الإنتاج الكتابي'
-                ],
+                fields: ['فهم المنطوق وإنتاجه', 'فهم المكتوب / قراءة ودراسة نص', 'فهم المكتوب / ظاهرة لغوية', 'الإنتاج الكتابي'],
                 years: ['سنة أولى', 'سنة ثانية', 'سنة ثالثة', 'سنة رابعة'],
                 mainActivity: 'قراءة ودراسة النصوص الأدبية والوظيفية',
                 objectives: 'تنمية المهارات اللغوية والتواصلية، تعزيز القدرة على التحليل والنقد',
@@ -2209,9 +2232,7 @@
                 }
             },
             'العلوم الطبيعية والحياة': {
-                fields: ['بنية الكائن الحي ووظائفه', 'التغذية عند الكائنات الحية', 'العلاقات بين الكائنات الحية والوسط',
-                    'التناسل عند الكائنات الحية', 'الظواهر الجيولوجية'
-                ],
+                fields: ['بنية الكائن الحي ووظائفه', 'التغذية عند الكائنات الحية', 'العلاقات بين الكائنات الحية والوسط', 'التناسل عند الكائنات الحية', 'الظواهر الجيولوجية'],
                 years: ['سنة أولى', 'سنة ثانية', 'سنة ثالثة', 'سنة رابعة'],
                 mainActivity: 'الملاحظة والتجريب والاستقصاء العلمي',
                 objectives: 'فهم الظواهر الطبيعية، اكتساب منهجية البحث العلمي',
@@ -2241,9 +2262,7 @@
                 }
             },
             'اللغة الفرنسية': {
-                fields: ['Compréhension de l\'oral', 'Compréhension de l\'écrit', 'Production écrite',
-                    'Production orale', 'Grammaire et conjugaison'
-                ],
+                fields: ['Compréhension de l\'oral', 'Compréhension de l\'écrit', 'Production écrite', 'Production orale', 'Grammaire et conjugaison'],
                 years: ['Première année', 'Deuxième année', 'Troisième année', 'Quatrième année'],
                 mainActivity: 'Lecture et étude de textes, expression écrite et orale',
                 objectives: 'Développer les compétences linguistiques et communicatives en français',
@@ -2258,9 +2277,7 @@
                 }
             },
             'اللغة الإنجليزية': {
-                fields: ['Listening and Speaking', 'Reading and Writing', 'Grammar and Vocabulary',
-                    'Projects and Situations'
-                ],
+                fields: ['Listening and Speaking', 'Reading and Writing', 'Grammar and Vocabulary', 'Projects and Situations'],
                 years: ['First Year', 'Second Year', 'Third Year', 'Fourth Year'],
                 mainActivity: 'Interactive activities, project-based learning',
                 objectives: 'Develop English language skills for communication',
@@ -2352,7 +2369,7 @@
         };
 
         // ============================================================
-        // 4. ROADMAP DATA
+        //  خارطة الطريق
         // ============================================================
         const ROADMAP_DATA = {
             title: 'دمج مهارات القرن الحادي والعشرين في المناهج الدراسية',
@@ -2396,12 +2413,12 @@
         };
 
         // ============================================================
-        // 5. STATE
+        //  الحالة
         // ============================================================
         const state = {};
 
         // ============================================================
-        // 6. DYNAMIC SUBJECT FIELDS
+        //  الحقول الديناميكية للمواد
         // ============================================================
         function updateSubjectFields() {
             const subject = document.getElementById('subjectSelect').value;
@@ -2472,7 +2489,7 @@
         }
 
         // ============================================================
-        // 6-bis. CURRICULUM CARD
+        //  بطاقة المنهاج
         // ============================================================
         function renderCurriculumCard() {
             const container = document.getElementById('curriculumCardContent');
@@ -2481,12 +2498,12 @@
             const year = document.getElementById('subjectYear').value;
             const data = SUBJECT_DATA[subject];
             if (!data) {
-                container.innerHTML = `<p style="color:#8fa0b0; font-size:13px;">${LANG[currentLang].curriculumPlaceholder}</p>`;
+                container.innerHTML = `<p style="color:#7f8c9b; font-size:13px;">${LANG[currentLang].curriculumPlaceholder}</p>`;
                 return;
             }
             const yearData = (data.yearSpecific && data.yearSpecific[year]) ? data.yearSpecific[year] : null;
             container.innerHTML = `
-                <h5 style="color:#1a3d6e; margin-bottom:10px;">📘 ${subject}${year ? ' — ' + year : ''}</h5>
+                <h5 style="color:#2c3e50; margin-bottom:10px;">📘 ${subject}${year ? ' — ' + year : ''}</h5>
                 <div class="grid-2col">
                     <div class="curriculum-item">
                         <h5>🗂️ الميادين/المجالات</h5>
@@ -2517,19 +2534,19 @@
         }
 
         // ============================================================
-        // 6-ter. ROADMAP CARD
+        //  بطاقة خارطة الطريق
         // ============================================================
         function renderRoadmapCard() {
             const container = document.getElementById('roadmapCardContent');
             if (!container) return;
             const data = ROADMAP_DATA;
             if (!data) {
-                container.innerHTML = `<p style="color:#8fa0b0; font-size:13px;">${LANG[currentLang].roadmapPlaceholder}</p>`;
+                container.innerHTML = `<p style="color:#7f8c9b; font-size:13px;">${LANG[currentLang].roadmapPlaceholder}</p>`;
                 return;
             }
             let html = `
-                <h5 style="color:#123a5e; margin-bottom:6px;">${data.title}</h5>
-                <p style="color:#123a5e; font-size:12px; margin-bottom:12px;">${data.subtitle} — ${data.source}</p>
+                <h5 style="color:#16a085; margin-bottom:6px;">${data.title}</h5>
+                <p style="color:#2c3e50; font-size:12px; margin-bottom:12px;">${data.subtitle} — ${data.source}</p>
                 <div class="grid-2col">
             `;
             data.pillars.forEach(p => {
@@ -2538,8 +2555,8 @@
                         <h5>${p.title}</h5>
                         <p>${p.description}</p>
                         <div class="badge-21">${p.keywords}</div>
-                        ${p.unesco ? `<div style="font-size:11px; color:#167c80; margin-top:6px; font-style:italic;">📌 ${p.unesco}</div>` : ''}
-                        ${p.alignment ? `<div style="font-size:11px; color:#167c80; margin-top:6px;">✅ ${p.alignment}</div>` : ''}
+                        ${p.unesco ? `<div style="font-size:11px; color:#16a085; margin-top:6px; font-style:italic;">📌 ${p.unesco}</div>` : ''}
+                        ${p.alignment ? `<div style="font-size:11px; color:#16a085; margin-top:6px;">✅ ${p.alignment}</div>` : ''}
                     </div>
                 `;
             });
@@ -2548,7 +2565,7 @@
         }
 
         // ============================================================
-        // 7. BUILD UI
+        //  بناء المؤشرات
         // ============================================================
         function buildIndicators() {
             const containers = {
@@ -2591,7 +2608,7 @@
         }
 
         // ============================================================
-        // 8. UPDATE
+        //  التحديث عند تغيير القيم
         // ============================================================
         function updateScore(indId) {
             const sel = document.getElementById('sel-' + indId);
@@ -2622,7 +2639,7 @@
         }
 
         // ============================================================
-        // 9. CALCULATE
+        //  حساب النتائج
         // ============================================================
         function calculateResults() {
             const axisScores = {
@@ -2653,11 +2670,10 @@
             document.getElementById('rawScoreDisplay').textContent = finalOn20.toFixed(2);
 
             let levelText = 'ضعيف';
-            let color = '#b22234';
-            if (finalOn20 >= 17) { levelText = 'ممتاز';
-                color = '#1e7e34'; } else if (finalOn20 >= 14) { levelText = 'جيد';
-                color = '#17a2b8'; } else if (finalOn20 >= 10) { levelText = 'مقبول';
-                color = '#c49b3f'; }
+            let color = '#c0392b';
+            if (finalOn20 >= 17) { levelText = 'ممتاز'; color = '#27ae60'; }
+            else if (finalOn20 >= 14) { levelText = 'جيد'; color = '#3498db'; }
+            else if (finalOn20 >= 10) { levelText = 'مقبول'; color = '#c49b3f'; }
 
             const el = document.getElementById('finalLevel');
             el.textContent = levelText;
@@ -2677,7 +2693,7 @@
         }
 
         // ============================================================
-        // 10. CALCULATE ADJUSTED SCORE
+        //  النتيجة المعدلة
         // ============================================================
         function calculateAdjustedScore() {
             const grade = parseInt(document.getElementById('grade').value) || 0;
@@ -2717,14 +2733,13 @@
                 `الدرجة: ${grade} | الإطار: ${framework} | سقف التقدير: ${ceiling}/20`;
 
             let levelText = 'الفرق';
-            let levelColor = '#b22234';
-            if (adjustedScore >= levels.excellent) { levelText = 'ممتاز';
-                levelColor = '#1e7e34'; } else if (adjustedScore >= levels.tresBien) { levelText = 'حسن جداً';
-                levelColor = '#17a2b8'; } else if (adjustedScore >= levels.bien) { levelText = 'حسن';
-                levelColor = '#1e7e34'; } else if (adjustedScore >= levels.moyen) { levelText = 'متوسط';
-                levelColor = '#c49b3f'; } else if (adjustedScore >= levels.faible) { levelText = 'الفرق';
-                levelColor = '#b22234'; } else { levelText = 'أقل من الفرق';
-                levelColor = '#b22234'; }
+            let levelColor = '#c0392b';
+            if (adjustedScore >= levels.excellent) { levelText = 'ممتاز'; levelColor = '#27ae60'; }
+            else if (adjustedScore >= levels.tresBien) { levelText = 'حسن جداً'; levelColor = '#3498db'; }
+            else if (adjustedScore >= levels.bien) { levelText = 'حسن'; levelColor = '#27ae60'; }
+            else if (adjustedScore >= levels.moyen) { levelText = 'متوسط'; levelColor = '#c49b3f'; }
+            else if (adjustedScore >= levels.faible) { levelText = 'الفرق'; levelColor = '#c0392b'; }
+            else { levelText = 'أقل من الفرق'; levelColor = '#c0392b'; }
 
             const levelEl = document.getElementById('adjustedLevel');
             levelEl.textContent = levelText;
@@ -2733,28 +2748,22 @@
         }
 
         // ============================================================
-        // 11. CHARTS
+        //  المخططات
         // ============================================================
         let pieChart, barChart;
 
         function updateCharts(axisScores) {
             const labels = ['الأداء التربوي', 'فعالية التعلم', 'التخطيط', 'أداء المتعلم', 'الكفاءات والإدماج'];
             const scores = [
-                axisScores.section1.total,
-                axisScores.section2.total,
-                axisScores.section3.total,
-                axisScores.section4.total,
-                axisScores.section5.total
+                axisScores.section1.total, axisScores.section2.total, axisScores.section3.total,
+                axisScores.section4.total, axisScores.section5.total
             ];
             const maxes = [
-                axisScores.section1.max,
-                axisScores.section2.max,
-                axisScores.section3.max,
-                axisScores.section4.max,
-                axisScores.section5.max
+                axisScores.section1.max, axisScores.section2.max, axisScores.section3.max,
+                axisScores.section4.max, axisScores.section5.max
             ];
             const pcts = scores.map((s, i) => maxes[i] > 0 ? (s / maxes[i]) * 100 : 0);
-            const colors = ['#c49b3f', '#17a2b8', '#1e7e34', '#b38b2b', '#c49b3f'];
+            const colors = ['#c49b3f', '#3498db', '#27ae60', '#d4a017', '#16a085'];
 
             const pieCtx = document.getElementById('pieChart').getContext('2d');
             if (pieChart) pieChart.destroy();
@@ -2796,23 +2805,18 @@
         }
 
         // ============================================================
-        // 12. RECOMMENDATIONS
+        //  التوصيات
         // ============================================================
         function generateRecommendations(axisScores, finalScore) {
             const teacherList = document.getElementById('recListTeacher');
             const studentList = document.getElementById('recListStudent');
 
             const axes = [
-                { key: 'section1', label: 'الأداء التربوي', score: axisScores.section1.total, max: axisScores.section1
-                        .max },
-                { key: 'section2', label: 'فعالية التعلم', score: axisScores.section2.total, max: axisScores.section2
-                        .max },
-                { key: 'section3', label: 'التخطيط والإعداد', score: axisScores.section3.total, max: axisScores.section3
-                        .max },
-                { key: 'section4', label: 'أداء المتعلم', score: axisScores.section4.total, max: axisScores.section4
-                        .max },
-                { key: 'section5', label: 'التقويم بالكفاءات والإدماج', score: axisScores.section5.total, max: axisScores.section5
-                        .max }
+                { key: 'section1', label: 'الأداء التربوي', score: axisScores.section1.total, max: axisScores.section1.max },
+                { key: 'section2', label: 'فعالية التعلم', score: axisScores.section2.total, max: axisScores.section2.max },
+                { key: 'section3', label: 'التخطيط والإعداد', score: axisScores.section3.total, max: axisScores.section3.max },
+                { key: 'section4', label: 'أداء المتعلم', score: axisScores.section4.total, max: axisScores.section4.max },
+                { key: 'section5', label: 'التقويم بالكفاءات والإدماج', score: axisScores.section5.total, max: axisScores.section5.max }
             ];
 
             const teacherRecs = [];
@@ -2873,9 +2877,6 @@
             studentList.innerHTML = studentRecs.map(r => '<li>' + r + '</li>').join('');
         }
 
-        // ============================================================
-        // 12-bis. STRATEGIC RECOMMENDATIONS
-        // ============================================================
         function generateStrategicRecommendations(axisScores, finalScore) {
             const strategicList = document.getElementById('recListStrategic');
             const recs = [];
@@ -2916,7 +2917,7 @@
         }
 
         // ============================================================
-        // 13. EXPORT FUNCTIONS
+        //  بيانات التقرير
         // ============================================================
         function getReportData() {
             const getVal = (id) => document.getElementById(id)?.value || '';
@@ -2957,7 +2958,7 @@
                     lastInspection: getVal('lastInspection'),
                     previousScore: getVal('previousScore'),
                     classTime: getVal('classTime'),
-                                  ClassLevel: getVal('ClassLevel'),
+                    ClassLevel: getVal('ClassLevel'),
                     studentCount: getVal('studentCount'),
                     learningSegment: getVal('learningSegment'),
                     content: getVal('content'),
@@ -2994,11 +2995,14 @@
                         INDICATORS.section4.reduce((s, i) => s + i.weight, 0),
                         INDICATORS.section5.reduce((s, i) => s + i.weight, 0)
                     ],
-                    colors: ['#c49b3f', '#17a2b8', '#1e7e34', '#b38b2b', '#c49b3f']
+                    colors: ['#c49b3f', '#3498db', '#27ae60', '#d4a017', '#16a085']
                 }
             };
         }
 
+        // ============================================================
+        //  تصدير Excel
+        // ============================================================
         function exportExcel() {
             const d = getReportData();
             const data = [];
@@ -3063,19 +3067,9 @@
             ]);
             archive.forEach(c => {
                 data.push([
-                    c.date || '—',
-                    c.teacher || '—',
-                    c.subject || '—',
-                    c.cls || '—',
-                    c.score || '0',
-                    c.level || '—',
-                    c.adjustedScore || '0',
-                    c.adjustedLevel || '—',
-                    c.a1 || '0',
-                    c.a2 || '0',
-                    c.a3 || '0',
-                    c.a4 || '0',
-                    c.a5 || '0'
+                    c.date || '—', c.teacher || '—', c.subject || '—', c.cls || '—',
+                    c.score || '0', c.level || '—', c.adjustedScore || '0', c.adjustedLevel || '—',
+                    c.a1 || '0', c.a2 || '0', c.a3 || '0', c.a4 || '0', c.a5 || '0'
                 ]);
             });
             const wb = XLSX.utils.book_new();
@@ -3089,7 +3083,6 @@
             saveAs(blob, `سجل_بطاقات_الأداء_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
 
-        // ===== زر تصدير السجل كـ JSON (جديد) =====
         function exportArchiveJSON() {
             const archive = getArchive();
             if (!archive.length) {
@@ -3129,59 +3122,58 @@
         }
 
         // ============================================================
-        // 14. EXPORT WORD & PDF & ROADMAP
+        //  تصدير Word
         // ============================================================
         function exportWord() {
             const d = getReportData();
             const chartData = d.chartData;
-            const pcts = chartData.scores.map((s, i) => chartData.maxes[i] > 0 ? (parseFloat(s) / chartData.maxes[i]) * 100 :
-                0);
+            const pcts = chartData.scores.map((s, i) => chartData.maxes[i] > 0 ? (parseFloat(s) / chartData.maxes[i]) * 100 : 0);
 
             const htmlParts = [];
             htmlParts.push(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>تقرير بطاقة الأداء التكاملي</title>
             <style>
                 body { font-family: 'Arial', sans-serif; padding: 40px 50px; background: #fff; }
-                h1 { color: #1a3d6e; border-bottom: 3px solid #c49b3f; padding-bottom: 10px; font-size: 26px; }
-                .admin-header { background: #eef3f9; padding: 20px 25px; border-radius: 12px; margin-bottom: 25px; border: 1.5px solid #e0daf0; }
-                .admin-header .republic { font-weight: 700; text-align: center; font-size: 18px; color: #0f2340; margin-bottom: 4px; }
-                .admin-header .ministry { font-weight: 700; text-align: center; font-size: 20px; color: #1a3d6e; text-decoration: underline; }
+                h1 { color: #2c3e50; border-bottom: 3px solid #c49b3f; padding-bottom: 10px; font-size: 26px; }
+                .admin-header { background: #f5f7fa; padding: 20px 25px; border-radius: 12px; margin-bottom: 25px; border: 1.5px solid #e4e8ec; }
+                .admin-header .republic { font-weight: 700; text-align: center; font-size: 18px; color: #2c3e50; margin-bottom: 4px; }
+                .admin-header .ministry { font-weight: 700; text-align: center; font-size: 20px; color: #2c3e50; text-decoration: underline; }
                 .admin-header .ref { text-align: left; font-size: 13px; color: #666; font-weight: 600; margin-bottom: 8px; }
-                .admin-header .sub-header { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; font-size: 15px; padding: 10px 0; border-top: 2px solid #d8e4df; border-bottom: 2px solid #d8e4df; margin: 8px 0; }
-                .admin-header .sub-header span { font-weight: 600; color: #1a3d6e; }
-                .admin-header .main-title { font-size: 24px; font-weight: 800; text-align: center; margin: 12px 0 10px 0; border-bottom: 3px double #c49b3f; padding-bottom: 10px; color: #0f2340; }
+                .admin-header .sub-header { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; font-size: 15px; padding: 10px 0; border-top: 2px solid #e4e8ec; border-bottom: 2px solid #e4e8ec; margin: 8px 0; }
+                .admin-header .sub-header span { font-weight: 600; color: #2c3e50; }
+                .admin-header .main-title { font-size: 24px; font-weight: 800; text-align: center; margin: 12px 0 10px 0; border-bottom: 3px double #c49b3f; padding-bottom: 10px; color: #2c3e50; }
                 .admin-header .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; font-size: 14px; margin-top: 10px; }
-                .admin-header .details-grid .field { display: flex; gap: 4px; padding: 3px 0; border-bottom: 1px solid #eef3f9; }
-                .admin-header .details-grid .field label { font-weight: 600; color: #1a3d6e; min-width: 95px; font-size: 14px; }
-                .admin-header .details-grid .field span { color: #0f2340; font-weight: 500; font-size: 14px; }
-                .subject-info { background: #eef3f9; padding: 12px 18px; border-radius: 10px; margin: 10px 0; border-right: 4px solid #c49b3f; }
-                .subject-info strong { color: #1a3d6e; }
+                .admin-header .details-grid .field { display: flex; gap: 4px; padding: 3px 0; border-bottom: 1px solid #f0f3f6; }
+                .admin-header .details-grid .field label { font-weight: 600; color: #2c3e50; min-width: 95px; font-size: 14px; }
+                .admin-header .details-grid .field span { color: #2c3e50; font-weight: 500; font-size: 14px; }
+                .subject-info { background: #f5f7fa; padding: 12px 18px; border-radius: 10px; margin: 10px 0; border-right: 4px solid #c49b3f; }
+                .subject-info strong { color: #2c3e50; }
                 .subject-info .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
-                .section-title { font-size: 18px; font-weight: 700; color: #0f2340; margin: 20px 0 8px 0; border-right: 4px solid #c49b3f; padding-right: 12px; }
+                .section-title { font-size: 18px; font-weight: 700; color: #2c3e50; margin: 20px 0 8px 0; border-right: 4px solid #c49b3f; padding-right: 12px; }
                 .axis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 15px 0; }
-                .axis div { background: #f7f5ef; padding: 10px 16px; border-radius: 8px; font-size: 14px; }
+                .axis div { background: #f5f7fa; padding: 10px 16px; border-radius: 8px; font-size: 14px; }
                 table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 13px; }
                 th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: right; }
-                th { background: #1a3d6e; color: white; font-size: 14px; }
-                .rec { background: #f7f5ef; padding: 15px 20px; border-radius: 10px; margin: 15px 0; }
+                th { background: #2c3e50; color: white; font-size: 14px; }
+                .rec { background: #f5f7fa; padding: 15px 20px; border-radius: 10px; margin: 15px 0; }
                 .rec li { margin: 4px 0; font-size: 13px; }
-                .rec-sub { font-weight: 600; color: #1a3d6e; margin-top: 10px; font-size: 15px; }
-                .rec-sub.roadmap { color: #123a5e; }
-                .score-box { background: #f5e6c8; padding: 25px; text-align: center; border-radius: 14px; margin: 20px 0; }
-                .score-box .final-score { font-size: 48px; font-weight: 800; color: #1a3d6e; }
-                .score-box .final-label { font-size: 16px; color: #5d7182; }
-                .score-box .final-level { font-size: 20px; font-weight: 600; color: #1a3d6e; margin-top: 6px; }
-                .adjusted-score-box { background: #f5e6c8; padding: 20px; border-radius: 12px; margin: 15px 0; border-right: 4px solid #1a3d6e; }
+                .rec-sub { font-weight: 600; color: #2c3e50; margin-top: 10px; font-size: 15px; }
+                .rec-sub.roadmap { color: #16a085; }
+                .score-box { background: #faf3e3; padding: 25px; text-align: center; border-radius: 14px; margin: 20px 0; }
+                .score-box .final-score { font-size: 48px; font-weight: 800; color: #2c3e50; }
+                .score-box .final-label { font-size: 16px; color: #7f8c9b; }
+                .score-box .final-level { font-size: 20px; font-weight: 600; color: #2c3e50; margin-top: 6px; }
+                .adjusted-score-box { background: #faf3e3; padding: 20px; border-radius: 12px; margin: 15px 0; border-right: 4px solid #2c3e50; }
                 .charts-row-word { display: flex; justify-content: space-between; gap: 30px; margin: 20px 0; }
-                .chart-box-word { flex: 1; background: #f7f5ef; padding: 15px; border-radius: 12px; border: 1px solid #eef3f9; text-align: center; }
-                .chart-box-word h4 { color: #1a3d6e; font-size: 15px; margin-bottom: 10px; }
+                .chart-box-word { flex: 1; background: #f5f7fa; padding: 15px; border-radius: 12px; border: 1px solid #e4e8ec; text-align: center; }
+                .chart-box-word h4 { color: #2c3e50; font-size: 15px; margin-bottom: 10px; }
                 .chart-table { width: 100%; border-collapse: collapse; margin: 5px auto; font-size: 13px; }
                 .chart-table td { padding: 4px 10px; border: 1px solid #ddd; text-align: center; }
-                .bar-container { background: #f5e6c8; border-radius: 4px; height: 20px; overflow: hidden; }
+                .bar-container { background: #faf3e3; border-radius: 4px; height: 20px; overflow: hidden; }
                 .bar-fill { height: 100%; border-radius: 4px; }
                 .legend-color { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-left: 4px; vertical-align: middle; }
-                .roadmap-box { background: #f0f7fa; padding: 20px; border-radius: 12px; margin: 15px 0; border-right: 4px solid #123a5e; }
-                .roadmap-box h4 { color: #123a5e; margin-bottom: 8px; }
-                .ministry-footer { margin-top: 30px; padding: 20px 30px; background: #0f2340; border-radius: 12px; color: white; text-align: center; font-size: 14px; line-height: 2; border-top: 4px solid #c49b3f; }
+                .roadmap-box { background: #f0f7fa; padding: 20px; border-radius: 12px; margin: 15px 0; border-right: 4px solid #16a085; }
+                .roadmap-box h4 { color: #16a085; margin-bottom: 8px; }
+                .ministry-footer { margin-top: 30px; padding: 20px 30px; background: #2c3e50; border-radius: 12px; color: white; text-align: center; font-size: 14px; line-height: 2; border-top: 4px solid #c49b3f; }
                 .ministry-footer .logo-text { font-size: 20px; font-weight: 700; }
                 .ministry-footer .logo-text span { color: #c49b3f; }
                 .ministry-footer .sub { font-size: 13px; opacity: 0.85; }
@@ -3259,26 +3251,26 @@
                 <table style="width:100%; border:none; margin:0;">
                     <tr>
                         <td style="border:none; text-align:center; padding:5px 15px;">
-                            <div style="font-size:13px; color:#5d7182;">العلامة الخام</div>
-                            <div style="font-size:28px; font-weight:700; color:#0f2340;">${d.score}</div>
-                            <div style="font-size:12px; color:#5d7182;">/ 20</div>
+                            <div style="font-size:13px; color:#7f8c9b;">العلامة الخام</div>
+                            <div style="font-size:28px; font-weight:700; color:#2c3e50;">${d.score}</div>
+                            <div style="font-size:12px; color:#7f8c9b;">/ 20</div>
                         </td>
                         <td style="border:none; text-align:center; padding:5px 15px;">
-                            <div style="font-size:13px; color:#5d7182;">معامل التصحيح</div>
-                            <div style="font-size:28px; font-weight:700; color:#0f2340;">${d.coefficient}</div>
+                            <div style="font-size:13px; color:#7f8c9b;">معامل التصحيح</div>
+                            <div style="font-size:28px; font-weight:700; color:#2c3e50;">${d.coefficient}</div>
                         </td>
-                        <td style="border:none; text-align:center; padding:5px 15px; background:#f5e6c8; border-radius:8px;">
-                            <div style="font-size:13px; color:#5d7182;">العلامة المعدلة</div>
-                            <div style="font-size:36px; font-weight:800; color:#1a3d6e;">${d.adjustedScore}</div>
-                            <div style="font-size:12px; color:#5d7182;">سقف التقدير: ${d.scoreCeiling}</div>
+                        <td style="border:none; text-align:center; padding:5px 15px; background:#faf3e3; border-radius:8px;">
+                            <div style="font-size:13px; color:#7f8c9b;">العلامة المعدلة</div>
+                            <div style="font-size:36px; font-weight:800; color:#2c3e50;">${d.adjustedScore}</div>
+                            <div style="font-size:12px; color:#7f8c9b;">سقف التقدير: ${d.scoreCeiling}</div>
                         </td>
                         <td style="border:none; text-align:center; padding:5px 15px;">
-                            <div style="font-size:13px; color:#5d7182;">المستوى</div>
-                            <div style="font-size:24px; font-weight:700; padding:4px 16px; border-radius:30px; background:#f5e6c8; color:#1a3d6e;">${d.adjustedLevel}</div>
+                            <div style="font-size:13px; color:#7f8c9b;">المستوى</div>
+                            <div style="font-size:24px; font-weight:700; padding:4px 16px; border-radius:30px; background:#faf3e3; color:#2c3e50;">${d.adjustedLevel}</div>
                         </td>
                     </tr>
                 </table>
-                <div style="text-align:center; font-size:13px; color:#5d7182; margin-top:8px; border-top:1px solid #d8e4df; padding-top:8px;">
+                <div style="text-align:center; font-size:13px; color:#7f8c9b; margin-top:8px; border-top:1px solid #e4e8ec; padding-top:8px;">
                     الدرجة: ${d.adminData.grade} | الإطار: ${d.adminData.framework} | سقف التقدير: ${d.scoreCeiling}/20
                 </div>
             </div>`);
@@ -3298,19 +3290,19 @@
                                     <td>${pcts[i].toFixed(1)}%</td>
                                 </tr>
                             `).join('')}
-                            <tr style="background:#f5e6c8; font-weight:700;">
+                            <tr style="background:#faf3e3; font-weight:700;">
                                 <td>المجموع</td>
                                 <td>${(parseFloat(d.a1) + parseFloat(d.a2) + parseFloat(d.a3) + parseFloat(d.a4) + parseFloat(d.a5)).toFixed(1)}</td>
                                 <td>${d.score} / 20</td>
                             </tr>
                         </tbody>
                     </table>
-                    <div style="margin-top:8px; font-size:12px; color:#5d7182;">
+                    <div style="margin-top:8px; font-size:12px; color:#7f8c9b;">
                         <span class="legend-color" style="background:#c49b3f"></span> الأداء التربوي &nbsp;
-                        <span class="legend-color" style="background:#17a2b8"></span> فعالية التعلم &nbsp;
-                        <span class="legend-color" style="background:#1e7e34"></span> التخطيط &nbsp;
-                        <span class="legend-color" style="background:#b38b2b"></span> أداء المتعلم &nbsp;
-                        <span class="legend-color" style="background:#c49b3f"></span> الكفاءات والإدماج
+                        <span class="legend-color" style="background:#3498db"></span> فعالية التعلم &nbsp;
+                        <span class="legend-color" style="background:#27ae60"></span> التخطيط &nbsp;
+                        <span class="legend-color" style="background:#d4a017"></span> أداء المتعلم &nbsp;
+                        <span class="legend-color" style="background:#16a085"></span> الكفاءات والإدماج
                     </div>
                 </div>
                 <div class="chart-box-word">
@@ -3325,13 +3317,13 @@
                                         <div class="bar-container">
                                             <div class="bar-fill" style="width:${pcts[i]}%; background:${chartData.colors[i]};"></div>
                                         </div>
-                                        <span style="font-size:12px; font-weight:600; color:#0f2340;">${pcts[i].toFixed(1)}%</span>
+                                        <span style="font-size:12px; font-weight:600; color:#2c3e50;">${pcts[i].toFixed(1)}%</span>
                                     </td>
                                 </tr>
                             `).join('')}
                         </tbody>
                     </table>
-                    <div style="margin-top:8px; font-size:12px; color:#5d7182;">
+                    <div style="margin-top:8px; font-size:12px; color:#7f8c9b;">
                         * النسبة المئوية = (الدرجة المحققة ÷ الوزن الإجمالي) × 100
                     </div>
                 </div>
@@ -3360,13 +3352,13 @@
             // Roadmap
             htmlParts.push(`<div class="roadmap-box">
                 <h4>🌍 خارطة الطريق الاستراتيجية لدمج مهارات القرن الحادي والعشرين</h4>
-                <p style="font-size:13px; color:#123a5e;">استناداً إلى المركز الإقليمي للجودة والتميز في التعليم واليونسكو (2021)</p>
+                <p style="font-size:13px; color:#16a085;">استناداً إلى المركز الإقليمي للجودة والتميز في التعليم واليونسكو (2021)</p>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px;">
                     ${ROADMAP_DATA.pillars.map(p => `
-                        <div style="background:white; padding:12px 16px; border-radius:10px; border-right:3px solid #123a5e;">
-                            <h5 style="color:#123a5e; font-size:14px;">${p.title}</h5>
+                        <div style="background:white; padding:12px 16px; border-radius:10px; border-right:3px solid #16a085;">
+                            <h5 style="color:#16a085; font-size:14px;">${p.title}</h5>
                             <p style="font-size:12px; color:#4a5a6a;">${p.description.substring(0, 120)}${p.description.length > 120 ? '...' : ''}</p>
-                            <div style="font-size:10px; color:#167c80; margin-top:4px;">${p.keywords}</div>
+                            <div style="font-size:10px; color:#16a085; margin-top:4px;">${p.keywords}</div>
                         </div>
                     `).join('')}
                 </div>
@@ -3377,7 +3369,7 @@
                 <div class="final-label">النتيجة النهائية (خام)</div>
                 <div class="final-score">${d.score} / 20</div>
                 <div class="final-level">المستوى: ${d.level}</div>
-                <div style="margin-top:10px; font-size:14px; color:#1a3d6e; border-top:1px solid #d8e4df; padding-top:10px;">
+                <div style="margin-top:10px; font-size:14px; color:#2c3e50; border-top:1px solid #e4e8ec; padding-top:10px;">
                     <strong>النتيجة المعدلة:</strong> ${d.adjustedScore} / ${d.scoreCeiling} &nbsp;|&nbsp; <strong>المستوى:</strong> ${d.adjustedLevel}
                 </div>
             </div>`);
@@ -3407,14 +3399,14 @@
             htmlParts.push(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>تقرير خارطة الطريق الاستراتيجية</title>
             <style>
                 body { font-family: 'Arial', sans-serif; padding: 40px 50px; background: #fff; }
-                h1 { color: #123a5e; border-bottom: 3px solid #167c80; padding-bottom: 10px; }
-                .header-box { background: #f0f7fa; padding: 20px; border-radius: 12px; margin-bottom: 25px; border-right: 4px solid #123a5e; }
+                h1 { color: #16a085; border-bottom: 3px solid #16a085; padding-bottom: 10px; }
+                .header-box { background: #f0f7fa; padding: 20px; border-radius: 12px; margin-bottom: 25px; border-right: 4px solid #16a085; }
                 .roadmap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 15px 0; }
-                .roadmap-item { background: white; padding: 14px 18px; border-radius: 10px; border-right: 3px solid #123a5e; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
-                .roadmap-item h5 { color: #123a5e; font-size: 15px; margin-bottom: 4px; }
-                .roadmap-item p { color: #123a5e; font-size: 13px; line-height: 1.6; }
-                .badge { display: inline-block; background: #167c80; color: white; font-size: 11px; padding: 2px 12px; border-radius: 30px; margin-top: 4px; }
-                .score-summary { background: #eef3f9; padding: 20px; border-radius: 12px; margin: 20px 0; border-right: 4px solid #c49b3f; }
+                .roadmap-item { background: white; padding: 14px 18px; border-radius: 10px; border-right: 3px solid #16a085; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+                .roadmap-item h5 { color: #16a085; font-size: 15px; margin-bottom: 4px; }
+                .roadmap-item p { color: #2c3e50; font-size: 13px; line-height: 1.6; }
+                .badge { display: inline-block; background: #16a085; color: white; font-size: 11px; padding: 2px 12px; border-radius: 30px; margin-top: 4px; }
+                .score-summary { background: #f5f7fa; padding: 20px; border-radius: 12px; margin: 20px 0; border-right: 4px solid #c49b3f; }
                 .footer { margin-top: 30px; color: #999; font-size: 11px; text-align: center; border-top: 1px solid #eee; padding-top: 15px; }
                 @media print { .no-print { display: none; } }
                 @media (max-width: 600px) { .roadmap-grid { grid-template-columns: 1fr; } }
@@ -3424,13 +3416,13 @@
                 <h1>🌍 ${ROADMAP_DATA.title}</h1>
                 <p style="color:#2a5a6a;">${ROADMAP_DATA.subtitle}</p>
                 <p style="font-size:13px; color:#4a6a7a;">📌 ${ROADMAP_DATA.source}</p>
-                <div style="margin-top:10px; font-size:13px; color:#0f2340;">
+                <div style="margin-top:10px; font-size:13px; color:#2c3e50;">
                     <strong>الأستاذ:</strong> ${d.teacher} &nbsp;|&nbsp; <strong>المادة:</strong> ${d.subject} &nbsp;|&nbsp; <strong>السنة:</strong> ${d.subjectYear}
                 </div>
             </div>`);
 
             htmlParts.push(`<div class="score-summary">
-                <h4 style="color:#1a3d6e;">📊 ملخص الأداء</h4>
+                <h4 style="color:#2c3e50;">📊 ملخص الأداء</h4>
                 <table style="width:100%; border-collapse:collapse; margin-top:8px;">
                     <tr><td style="padding:4px 8px; border-bottom:1px solid #eee;"><strong>العلامة الخام:</strong></td><td style="padding:4px 8px; border-bottom:1px solid #eee;">${d.score} / 20</td></tr>
                     <tr><td style="padding:4px 8px; border-bottom:1px solid #eee;"><strong>المستوى:</strong></td><td style="padding:4px 8px; border-bottom:1px solid #eee;">${d.level}</td></tr>
@@ -3453,14 +3445,14 @@
                         <h5>${p.title}</h5>
                         <p>${p.description}</p>
                         <div class="badge">${p.keywords}</div>
-                        ${p.unesco ? `<div style="font-size:11px; color:#167c80; margin-top:6px; font-style:italic;">📌 ${p.unesco}</div>` : ''}
-                        ${p.alignment ? `<div style="font-size:11px; color:#167c80; margin-top:6px;">✅ ${p.alignment}</div>` : ''}
+                        ${p.unesco ? `<div style="font-size:11px; color:#16a085; margin-top:6px; font-style:italic;">📌 ${p.unesco}</div>` : ''}
+                        ${p.alignment ? `<div style="font-size:11px; color:#16a085; margin-top:6px;">✅ ${p.alignment}</div>` : ''}
                     </div>
                 `).join('')}
             </div>`);
 
-            htmlParts.push(`<div style="background:#eef3f9; padding:15px 20px; border-radius:12px; margin:15px 0; border-right:4px solid #c49b3f;">
-                <h4 style="color:#1a3d6e;">💡 التوصيات الاستراتيجية</h4>
+            htmlParts.push(`<div style="background:#f5f7fa; padding:15px 20px; border-radius:12px; margin:15px 0; border-right:4px solid #c49b3f;">
+                <h4 style="color:#2c3e50;">💡 التوصيات الاستراتيجية</h4>
                 <ul style="list-style:none; padding:0;">
                     ${d.strategicRecs.map(r => `<li style="padding:4px 0; border-bottom:1px solid #eee; font-size:13px;">• ${r}</li>`).join('')}
                 </ul>
@@ -3478,7 +3470,7 @@
         }
 
         // ============================================================
-        // 15. ARCHIVE
+        //  السجل
         // ============================================================
         const ARCHIVE_KEY = 'integratedEvalArchive_v5';
         let statsTrendChart = null;
@@ -3491,28 +3483,19 @@
                 localStorage.setItem(t, t);
                 localStorage.removeItem(t);
                 return true;
-            } catch (e) {
-                return false;
-            }
+            } catch (e) { return false; }
         }
 
         function getArchive() {
             if (!isStorageAvailable()) return [];
-            try {
-                return JSON.parse(localStorage.getItem(ARCHIVE_KEY)) || [];
-            } catch (e) {
-                return [];
-            }
+            try { return JSON.parse(localStorage.getItem(ARCHIVE_KEY)) || []; }
+            catch (e) { return []; }
         }
 
         function setArchive(list) {
             if (!isStorageAvailable()) return false;
-            try {
-                localStorage.setItem(ARCHIVE_KEY, JSON.stringify(list));
-                return true;
-            } catch (e) {
-                return false;
-            }
+            try { localStorage.setItem(ARCHIVE_KEY, JSON.stringify(list)); return true; }
+            catch (e) { return false; }
         }
 
         function saveCurrentCard() {
@@ -3580,7 +3563,7 @@
                     <thead><tr><th>تحديد</th><th>التاريخ</th><th>الأستاذ</th><th>المادة</th><th>القسم</th><th>العلامة</th><th>المستوى</th><th>حذف</th></tr></thead>
                     <tbody>${rows}</tbody>
                 </table>
-                <div style="font-size:12px; color:#8fa0b0; margin-top:6px;">📌 عدد البطاقات المحفوظة: ${archive.length}</div>
+                <div style="font-size:12px; color:#7f8c9b; margin-top:6px;">📌 عدد البطاقات المحفوظة: ${archive.length}</div>
             `;
         }
 
@@ -3596,10 +3579,8 @@
             const summaryEl = document.getElementById('statsSummary');
             if (!archive.length) {
                 summaryEl.innerHTML = '<div class="archive-empty">لا توجد بيانات كافية لعرض إحصائيات. احفظ بطاقة واحدة على الأقل.</div>';
-                if (statsTrendChart) { statsTrendChart.destroy();
-                    statsTrendChart = null; }
-                if (statsDistChart) { statsDistChart.destroy();
-                    statsDistChart = null; }
+                if (statsTrendChart) { statsTrendChart.destroy(); statsTrendChart = null; }
+                if (statsDistChart) { statsDistChart.destroy(); statsDistChart = null; }
                 return;
             }
 
@@ -3648,7 +3629,7 @@
                     labels: Object.keys(levelCounts),
                     datasets: [{
                         data: Object.values(levelCounts),
-                        backgroundColor: ['#1e7e34', '#17a2b8', '#c49b3f', '#b22234']
+                        backgroundColor: ['#27ae60', '#3498db', '#c49b3f', '#c0392b']
                     }]
                 },
                 options: { responsive: true }
@@ -3679,10 +3660,8 @@
                 { key: 'a5', label: 'الكفاءات والإدماج' }
             ];
 
-            const headerCells = selected.map(c => `<th>${c.teacher || '—'}<br><span style="font-weight:400; font-size:11px;">${c.date || ''}</span></th>`)
-                .join('');
-            const bodyRows = rows.map(r => `<tr><td style="text-align:right; font-weight:600;">${r.label}</td>${selected.map(c => `<td>${c[r.key]}</td>`).join('')}</tr>`)
-                .join('');
+            const headerCells = selected.map(c => `<th>${c.teacher || '—'}<br><span style="font-weight:400; font-size:11px;">${c.date || ''}</span></th>`).join('');
+            const bodyRows = rows.map(r => `<tr><td style="text-align:right; font-weight:600;">${r.label}</td>${selected.map(c => `<td>${c[r.key]}</td>`).join('')}</tr>`).join('');
 
             panel.innerHTML = `
                 <div class="section-title" style="margin-top:0;">⚖️ مقارنة ${selected.length} بطاقات</div>
@@ -3694,7 +3673,7 @@
             `;
 
             const axisLabels = ['الأداء التربوي', 'فعالية التعلم', 'التخطيط', 'أداء المتعلم', 'الكفاءات والإدماج'];
-            const palette = ['#c49b3f', '#17a2b8', '#1e7e34', '#b38b2b', '#c49b3f', '#b22234', '#167c80'];
+            const palette = ['#c49b3f', '#3498db', '#27ae60', '#d4a017', '#16a085', '#c0392b', '#2c3e50'];
             const datasets = selected.map((c, i) => ({
                 label: c.teacher || ('بطاقة ' + (i + 1)),
                 data: [parseFloat(c.a1) || 0, parseFloat(c.a2) || 0, parseFloat(c.a3) || 0, parseFloat(c.a4) || 0, parseFloat(c.a5) || 0],
@@ -3710,17 +3689,18 @@
         }
 
         // ============================================================
-        // 16. INIT
+        //  الإقلاع
         // ============================================================
-        buildIndicators();
-        updateSubjectFields();
-        renderRoadmapCard();
-        renderArchiveList();
-        renderDictionary('ar');
-        calculateResults();
+        document.addEventListener('DOMContentLoaded', () => {
+            applySessionUI();
+            buildIndicators();
+            updateSubjectFields();
+            renderRoadmapCard();
+            renderArchiveList();
+            renderDictionary('ar');
+            calculateResults();
+        });
     </script>
-
-    </div><!-- /.container -->
 
 </body>
 </html>
