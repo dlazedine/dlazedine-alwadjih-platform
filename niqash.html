@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ركن النقاش والمحادثة التربوية — درويش الهلالي</title>
 
-<meta name="theme-color" content="#1a3d6e">
+<meta name="theme-color" content="#2c3e50">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ركن النقاش">
 <meta name="application-name" content="ركن النقاش">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="msapplication-TileColor" content="#1a3d6e">
+<meta name="msapplication-TileColor" content="#2c3e50">
 <meta name="description" content="ركن المحادثة الجماعية والمناقشات التربوية ودفتر الملاحظات وتبادل الملفات للأساتذة - المقاطعة الثانية قسنطينة">
 <meta name="author" content="درويش الهلالي">
 
@@ -46,28 +46,28 @@
 
 <style>
 /* ============================================================
-   الجذور والثوابت
+   الجذور والثوابت — نظام ألوان أنيق هادئ
    ============================================================ */
 :root {
-    --primary: #1a3d6e;
-    --primary-light: #eef3f9;
-    --navy-deep: #0f2340;
+    --primary: #2c3e50;
+    --primary-light: #f5f7fa;
+    --navy-deep: #1a2531;
     --gold: #c49b3f;
     --gold-deep: #a6802f;
-    --gold-light: #f5e6c8;
-    --danger: #b22234;
-    --success: #1e7e34;
-    --warning: #b38b2b;
-    --info: #17a2b8;
-    --teal: #167c80;
-    --teal-dark: #0f6469;
-    --text-dark: #17324d;
-    --text-muted: #5d7182;
-    --bg-body: #f0f4f8;
+    --gold-light: #faf3e3;
+    --danger: #c0392b;
+    --success: #27ae60;
+    --warning: #d4a017;
+    --info: #3498db;
+    --teal: #16a085;
+    --teal-dark: #13806b;
+    --text-dark: #2c3e50;
+    --text-muted: #7f8c9b;
+    --bg-body: #fafbfc;
     --bg-card: #ffffff;
-    --border-color: #d8e4df;
+    --border-color: #e4e8ec;
     --radius: 14px;
-    --shadow: 0 8px 30px rgba(0,0,0,0.08);
+    --shadow: 0 4px 20px rgba(44, 62, 80, 0.06);
     --transition: all 0.25s ease;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -83,7 +83,7 @@ body {
 
 /* شريط المستخدم الموحّد */
 .user-bar {
-    background: var(--navy-deep); color: #eaf1f8;
+    background: var(--primary); color: #eaf1f8;
     padding: 10px 24px; display: flex; align-items: center; justify-content: space-between;
     font-size: 13px; flex-wrap: wrap; gap: 8px;
 }
@@ -108,12 +108,12 @@ body {
 
 /* الترويسة */
 .hero {
-    background: linear-gradient(150deg, var(--navy-deep) 0%, var(--primary) 100%);
+    background: linear-gradient(150deg, var(--primary) 0%, #1f2f3d 100%);
     color: #fff; padding: 34px 24px; text-align: center; position: relative; overflow: hidden;
 }
 .hero::after {
     content: ''; position: absolute; inset: 0;
-    background: radial-gradient(circle at 90% -10%, rgba(196,155,63,0.35), transparent 55%);
+    background: radial-gradient(circle at 90% -10%, rgba(196,155,63,0.3), transparent 55%);
     pointer-events: none;
 }
 .hero h1 {
@@ -127,7 +127,7 @@ body {
     display: flex; gap: 6px; background: var(--bg-card);
     border-bottom: 1px solid var(--border-color); padding: 8px 20px;
     position: sticky; top: 0; z-index: 20;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    box-shadow: 0 2px 10px rgba(44,62,80,0.03);
     overflow-x: auto; flex-wrap: wrap; margin: 0; justify-content: center;
 }
 .nav-tabs::-webkit-scrollbar { height: 4px; }
@@ -140,10 +140,6 @@ body {
 }
 .nav-tab:hover { color: var(--primary); background: var(--primary-light); }
 .nav-tab.active { color: var(--primary); border-bottom-color: var(--gold); background: var(--primary-light); }
-.nav-tab .tab-badge {
-    background: var(--danger); color: #fff; font-size: 10.5px; font-weight: 700;
-    border-radius: 999px; padding: 1px 7px; margin-inline-start: 2px;
-}
 
 .tab-content { display: none; max-width: 1100px; margin: 0 auto; padding: 26px 20px 60px; }
 .tab-content.active { display: block; animation: fadeIn 0.25s; }
@@ -156,23 +152,22 @@ body {
     font-weight: 700; cursor: pointer; transition: var(--transition);
     text-decoration: none; color: #fff; background: var(--primary);
 }
-.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(26,61,110,0.2); }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(44,62,80,0.15); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .btn-primary { background: var(--primary); color: #fff; }
-.btn-primary:hover { background: var(--navy-deep); }
 .btn-gold { background: var(--gold); color: #fff; }
 .btn-gold:hover { background: var(--gold-deep); }
 .btn-outline { background: #fff; border: 1.5px solid var(--border-color); color: var(--text-dark); }
 .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: #fff; }
 .btn-danger { background: var(--danger); color: #fff; }
-.btn-danger:hover { background: #8f1a29; }
+.btn-danger:hover { background: #a03225; }
 .btn-success { background: var(--success); color: #fff; }
 .btn-teal { background: var(--teal); color: #fff; }
 .btn-sm { padding: 6px 12px; font-size: 12px; }
 
 /* النوافذ المنبثقة */
 .modal-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(15,35,64,0.55);
+    display: none; position: fixed; inset: 0; background: rgba(44,62,80,0.55);
     z-index: 100; align-items: flex-start; justify-content: center;
     padding: 30px 16px; overflow-y: auto;
 }
@@ -180,7 +175,7 @@ body {
 .modal-box {
     background: #fff; border-radius: var(--radius); padding: 30px;
     max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin-bottom: 30px;
+    box-shadow: 0 20px 60px rgba(44,62,80,0.25); margin-bottom: 30px;
     position: relative; animation: slideUp 0.3s ease;
 }
 @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -219,12 +214,33 @@ body {
     border: 1px solid var(--border-color); overflow: hidden;
     display: flex; flex-direction: column; height: 68vh; min-height: 460px;
 }
+.chat-header-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px; background: #fafbfc; border-bottom: 1px solid var(--border-color);
+    gap: 10px; flex-wrap: wrap;
+}
+.chat-header-bar .title {
+    font-size: 13px; font-weight: 700; color: var(--primary);
+    display: flex; align-items: center; gap: 6px;
+}
+.chat-header-bar .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn-clear-chat {
+    background: var(--danger); color: #fff; border: none;
+    font-family: inherit; font-size: 12px; font-weight: 700;
+    padding: 6px 14px; border-radius: 20px; cursor: pointer;
+    display: none; align-items: center; gap: 6px;
+    transition: var(--transition);
+}
+.btn-clear-chat:hover { background: #a03225; transform: translateY(-1px); }
+.btn-clear-chat.visible { display: inline-flex; }
+
 .chat-feed { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
 .chat-feed::-webkit-scrollbar { width: 6px; }
 .chat-feed::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
 .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 14px; position: relative; }
 .chat-bubble.mine {
-    align-self: flex-start; background: var(--primary-light); border: 1px solid #cfe0f0;
+    align-self: flex-start; background: var(--primary-light); border: 1px solid #d8e3ed;
     border-bottom-right-radius: 4px;
 }
 .chat-bubble.theirs {
@@ -242,7 +258,7 @@ body {
 /* مرفقات المحادثة */
 .chat-attachment {
     display: flex; align-items: center; gap: 10px;
-    background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.06);
+    background: rgba(255,255,255,0.75); border: 1px solid rgba(0,0,0,0.06);
     border-radius: 10px; padding: 8px 12px; margin-top: 8px;
     transition: var(--transition);
 }
@@ -308,7 +324,7 @@ body {
 
 /* شريط معاينة المرفقات قبل الإرسال */
 .pending-attachments-bar {
-    display: none; padding: 8px 14px; background: #fff9ec; border-top: 1px solid #ecdcae;
+    display: none; padding: 8px 14px; background: var(--gold-light); border-top: 1px solid #ecdcae;
     gap: 8px; flex-wrap: wrap; align-items: center; font-size: 12px;
 }
 .pending-attachments-bar.show { display: flex; }
@@ -342,7 +358,7 @@ body {
 .thread-card {
     background: var(--bg-card); border: 1px solid var(--border-color); border-right: 4px solid var(--teal);
     border-radius: var(--radius); padding: 16px 18px; cursor: pointer; transition: var(--transition);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow); position: relative;
 }
 .thread-card:hover { transform: translateY(-2px); border-right-color: var(--gold); }
 .thread-card .tc-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
@@ -359,7 +375,7 @@ body {
 
 .thread-detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
 .reply-list { display: flex; flex-direction: column; gap: 12px; margin: 18px 0; max-height: 45vh; overflow-y: auto; padding-inline-end: 4px; }
-.reply-item { background: var(--bg-body); border-radius: 10px; padding: 12px 14px; border: 1px solid var(--border-color); }
+.reply-item { background: var(--bg-body); border-radius: 10px; padding: 12px 14px; border: 1px solid var(--border-color); position: relative; }
 .reply-item .ri-head { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
 .reply-item .ri-time { font-size: 11px; color: var(--text-muted); font-weight: 400; margin-inline-start: auto; }
 .reply-item p { font-size: 13.5px; color: var(--text-dark); white-space: pre-wrap; }
@@ -448,8 +464,9 @@ body {
 /* Footer */
 .app-footer {
     margin-top: 40px; padding: 20px 30px;
-    background: linear-gradient(145deg, #f8faff, #eef3f9);
-    border-top: 4px solid var(--gold); border-radius: var(--radius); text-align: center;
+    background: linear-gradient(145deg, #f8fafc, #f0f3f6);
+    border-top: 3px solid var(--gold); border-radius: var(--radius); text-align: center;
+    border: 1px solid var(--border-color);
 }
 .app-footer .footer-content { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 15px 40px; }
 .app-footer .footer-content span { font-size: 13.5px; color: var(--text-muted); }
@@ -459,7 +476,7 @@ body {
 .app-footer .footer-bottom { margin-top: 8px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 10px; }
 
 /* Toast + spinner */
-.spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(26,61,110,0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(44,62,80,0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 #ssoLoadingScreen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
@@ -482,6 +499,8 @@ body {
     .field-group label { width: 100%; }
     .notes-grid { grid-template-columns: 1fr; }
     .chat-attachment .att-name { max-width: 120px; }
+    .chat-header-bar .actions { width: 100%; }
+    .btn-clear-chat { width: 100%; justify-content: center; }
 }
 </style>
 </head>
@@ -530,6 +549,16 @@ body {
     <!-- ============ المحادثة الجماعية ============ -->
     <div class="tab-content active" id="panel-chat">
         <div class="chat-wrap">
+            <!-- شريط علوي للمحادثة (مع زر إفراغ الساحة للمفتش) -->
+            <div class="chat-header-bar">
+                <span class="title"><i class="fas fa-comments"></i> ساحة النقاش الجماعية</span>
+                <div class="actions">
+                    <button class="btn-clear-chat" id="clearChatBtn" onclick="clearAllChat()" title="إفراغ ساحة النقاش بالكامل (للمفتش فقط)">
+                        <i class="fas fa-broom"></i> إفراغ الساحة
+                    </button>
+                </div>
+            </div>
+
             <div class="chat-feed" id="chatFeed"></div>
             <div class="chat-hint">
                 <i class="fas fa-circle-info"></i>
@@ -542,7 +571,6 @@ body {
             </div>
             <div class="chat-input-row">
                 <textarea id="chatInput" placeholder="اكتب رسالتك هنا... (Enter للإرسال، Shift+Enter لسطر جديد)" rows="1"></textarea>
-                <!-- زر المرفقات -->
                 <button class="btn-attach" id="attachBtn" onclick="document.getElementById('chatFileInput').click()" title="إرفاق ملف">
                     <i class="fas fa-paperclip"></i>
                     <span class="file-count" id="attachCount" style="display:none;">0</span>
@@ -684,7 +712,7 @@ body {
    1. الثوابت والجلسة الموحّدة
    ============================================================ */
 const SESSION_KEY = 'pgb_session';
-const MAX_FILE_SIZE = 700 * 1024; // 700 كيلوبايت (حد Firestore الآمن)
+const MAX_FILE_SIZE = 700 * 1024; // 700 كيلوبايت
 
 let currentUser = null;
 let chatData = { messages: [] };
@@ -694,10 +722,10 @@ let activeThreadId = null;
 let activeDiscussFilter = 'كل المواضيع';
 let unsubChat = null, unsubDiscuss = null, unsubNotes = null;
 
-// مرفقات مؤقتة قبل الإرسال في المحادثة
-let pendingChatAttachments = [];   // [{id, name, size, type, dataUrl}]
-// مرفقات مؤقتة قبل نشر الموضوع الجديد
-let pendingThreadAttachments = []; // [{id, name, size, type, dataUrl}]
+// مرفقات مؤقتة
+let pendingChatAttachments = [];
+let pendingThreadAttachments = [];
+let pendingReplyAttachments = [];
 
 function getPortalSession() {
     try {
@@ -737,12 +765,12 @@ function fullDateTime(ts) {
            d.toLocaleTimeString('ar-DZ', { hour:'2-digit', minute:'2-digit' });
 }
 function roleLabel(role) { return role === 'inspector' ? 'مفتش' : 'أستاذ(ة)'; }
-const TAG_COLORS = { 'تحضير':'#1a3d6e', 'تقييم':'#b38b2b', 'ملاحظة صف':'#167c80', 'فكرة':'#c49b3f', 'تذكير':'#b22234' };
+const TAG_COLORS = { 'تحضير':'#2c3e50', 'تقييم':'#d4a017', 'ملاحظة صف':'#16a085', 'فكرة':'#c49b3f', 'تذكير':'#c0392b' };
 function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
 /* ============================================================
-   3. أنواع الملفات وأيقوناتها
+   3. أنواع الملفات
    ============================================================ */
 function getFileTypeInfo(fileName, mimeType) {
     const name = (fileName || '').toLowerCase();
@@ -772,7 +800,7 @@ function formatFileSize(bytes) {
 }
 
 /* ============================================================
-   4. رفع الملفات كـ base64
+   4. قراءة الملفات
    ============================================================ */
 function readFileAsDataURL(file) {
     return new Promise((resolve, reject) => {
@@ -787,7 +815,7 @@ async function processFileSelection(files) {
     const results = [];
     for (const file of files) {
         if (file.size > MAX_FILE_SIZE) {
-            alert(`⚠️ الملف "${file.name}" تجاوز الحجم الأقصى (${formatFileSize(MAX_FILE_SIZE)}). الحجم الحالي: ${formatFileSize(file.size)}\n\nملاحظة: نستخدم Firestore للتخزين المباشر، لذا الحد الأقصى 700 ك.ب. للملفات الأكبر، يمكنك مشاركتها عبر رابط خارجي (Google Drive مثلاً).`);
+            alert(`⚠️ الملف "${file.name}" تجاوز الحجم الأقصى (${formatFileSize(MAX_FILE_SIZE)}). الحجم الحالي: ${formatFileSize(file.size)}`);
             continue;
         }
         try {
@@ -813,7 +841,7 @@ async function processFileSelection(files) {
 }
 
 /* ============================================================
-   5. Firebase: مصادقة ومزامنة
+   5. Firebase
    ============================================================ */
 function ensureAnonAuth() {
     if (!fbAuth) return Promise.resolve(null);
@@ -865,7 +893,7 @@ async function saveChat() {
         return true;
     } catch (e) {
         console.error(e);
-        alert('⚠️ تعذّر الإرسال — قد يكون حجم المرفقات تجاوز الحد المسموح. جرّب ملفات أصغر.');
+        alert('⚠️ تعذّر الإرسال — قد يكون حجم المرفقات تجاوز الحد المسموح.');
         return false;
     }
 }
@@ -877,7 +905,7 @@ async function saveDiscuss() {
         return true;
     } catch (e) {
         console.error(e);
-        alert('⚠️ تعذّر الحفظ — قد يكون حجم المرفقات تجاوز الحد. جرّب ملفات أصغر.');
+        alert('⚠️ تعذّر الحفظ — قد يكون حجم المرفقات تجاوز الحد.');
         return false;
     }
 }
@@ -904,8 +932,11 @@ function renderChat() {
         return;
     }
     const wasNearBottom = (feed.scrollTop + feed.clientHeight) >= (feed.scrollHeight - 80);
+    const isInspector = currentUser && currentUser.role === 'inspector';
+
     feed.innerHTML = chatData.messages.map(m => {
         const mine = currentUser && m.authorId === currentUser.id;
+        const canDelete = mine || isInspector;
         const attachmentsHtml = (m.attachments && m.attachments.length)
             ? m.attachments.map(att => `
                 <div class="chat-attachment">
@@ -916,14 +947,17 @@ function renderChat() {
                     </div>
                     <div class="att-actions">
                         <button onclick="downloadAttachment('${m.id}', '${att.id}')" title="تحميل"><i class="fas fa-download"></i></button>
-                        ${mine ? `<button class="del" onclick="deleteChatMessage('${m.id}')" title="حذف الرسالة"><i class="fas fa-trash"></i></button>` : ''}
                     </div>
                 </div>
             `).join('')
             : '';
         return `
         <div class="chat-bubble ${mine ? 'mine' : 'theirs'}">
-            <div class="cb-head">${escapeHtml(m.authorName)} <span class="cb-role">${roleLabel(m.authorRole)}</span></div>
+            <div class="cb-head">
+                ${escapeHtml(m.authorName)}
+                <span class="cb-role">${roleLabel(m.authorRole)}</span>
+                ${canDelete ? `<button class="del" onclick="deleteChatMessage('${m.id}')" title="حذف الرسالة" style="background:none; border:none; cursor:pointer; color:var(--danger); font-size:12px; margin-inline-start:auto; padding:2px 6px;"><i class="fas fa-trash"></i></button>` : ''}
+            </div>
             ${m.text ? `<div class="cb-text">${escapeHtml(m.text)}</div>` : ''}
             ${attachmentsHtml}
             <div class="cb-time">${fullDateTime(m.createdAt)}</div>
@@ -952,7 +986,6 @@ async function sendChatMessage() {
         createdAt: Date.now()
     });
 
-    // مسح الواجهة
     input.value = '';
     input.style.height = 'auto';
     pendingChatAttachments = [];
@@ -962,8 +995,31 @@ async function sendChatMessage() {
 }
 
 async function deleteChatMessage(messageId) {
-    if (!confirm('هل تريد حذف هذه الرسالة؟')) return;
+    const msg = chatData.messages.find(m => m.id === messageId);
+    if (!msg) return;
+    const isInspector = currentUser && currentUser.role === 'inspector';
+    const isOwn = currentUser && msg.authorId === currentUser.id;
+    if (!isInspector && !isOwn) {
+        alert('⚠️ لا يمكنك حذف رسائل الآخرين.');
+        return;
+    }
+    if (!confirm('هل تريد حذف هذه الرسالة نهائياً؟')) return;
     chatData.messages = chatData.messages.filter(m => m.id !== messageId);
+    renderChat();
+    await saveChat();
+}
+
+// 🧹 إفراغ ساحة النقاش بالكامل (للمفتش فقط)
+async function clearAllChat() {
+    if (!currentUser || currentUser.role !== 'inspector') {
+        alert('⚠️ هذا الإجراء متاح للمفتش فقط.');
+        return;
+    }
+    const count = chatData.messages.length;
+    if (count === 0) { alert('ساحة النقاش فارغة بالفعل.'); return; }
+    if (!confirm(`⚠️ هل تريد حذف جميع الرسائل (${count} رسالة) نهائياً؟\nلا يمكن التراجع عن هذا الإجراء!`)) return;
+    if (!confirm('تأكيد أخير: سيتم حذف كل رسائل المحادثة الجماعية.')) return;
+    chatData.messages = [];
     renderChat();
     await saveChat();
 }
@@ -982,7 +1038,7 @@ function downloadAttachment(messageId, attachmentId) {
 }
 
 /* ============================================================
-   7. شريط المرفقات المؤقتة في المحادثة
+   7. شريط المرفقات المؤقتة
    ============================================================ */
 function updatePendingChatBar() {
     const bar = document.getElementById('pendingBar');
@@ -1015,10 +1071,9 @@ function removePendingChatAttachment(id) {
 }
 
 /* ============================================================
-   8. ربط حقل رفع الملفات في المحادثة
+   8. ربط الحقول
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
-    // الإدخال
     const input = document.getElementById('chatInput');
     if (input) {
         input.addEventListener('keydown', (e) => {
@@ -1030,7 +1085,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // زر المرفقات في المحادثة
     const chatFileInput = document.getElementById('chatFileInput');
     if (chatFileInput) {
         chatFileInput.addEventListener('change', async (e) => {
@@ -1043,7 +1097,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // زر المرفقات في نافذة الموضوع الجديد
     const threadFileInput = document.getElementById('threadFileInput');
     if (threadFileInput) {
         threadFileInput.addEventListener('change', async (e) => {
@@ -1107,6 +1160,43 @@ async function createThread() {
     discussData.threads.unshift(thread);
     pendingThreadAttachments = [];
     closeModal('threadModal');
+    renderThreads();
+    await saveDiscuss();
+}
+
+// 🗑️ حذف موضوع نقاش (للمفتش أو لصاحب الموضوع)
+async function deleteThread(threadId) {
+    const thread = discussData.threads.find(t => t.id === threadId);
+    if (!thread) return;
+    const isInspector = currentUser && currentUser.role === 'inspector';
+    const isOwn = currentUser && thread.authorId === currentUser.id;
+    if (!isInspector && !isOwn) {
+        alert('⚠️ لا يمكنك حذف مواضيع الآخرين.');
+        return;
+    }
+    if (!confirm(`⚠️ هل تريد حذف موضوع "${thread.title}" بكل ردوده؟\nلا يمكن التراجع عن هذا الإجراء.`)) return;
+    discussData.threads = discussData.threads.filter(t => t.id !== threadId);
+    activeThreadId = null;
+    closeModal('threadDetailModal');
+    renderThreads();
+    await saveDiscuss();
+}
+
+// 🗑️ حذف رد (للمفتش أو لصاحب الرد)
+async function deleteReply(threadId, replyId) {
+    const thread = discussData.threads.find(t => t.id === threadId);
+    if (!thread || !thread.replies) return;
+    const reply = thread.replies.find(r => r.id === replyId);
+    if (!reply) return;
+    const isInspector = currentUser && currentUser.role === 'inspector';
+    const isOwn = currentUser && reply.authorId === currentUser.id;
+    if (!isInspector && !isOwn) {
+        alert('⚠️ لا يمكنك حذف ردود الآخرين.');
+        return;
+    }
+    if (!confirm('هل تريد حذف هذا الرد نهائياً؟')) return;
+    thread.replies = thread.replies.filter(r => r.id !== replyId);
+    renderThreadDetail(threadId);
     renderThreads();
     await saveDiscuss();
 }
@@ -1176,6 +1266,8 @@ function renderThreadDetail(id) {
     const box = document.getElementById('threadDetailContent');
     if (!t) { box.innerHTML = `<div class="empty-state"><i class="fas fa-circle-exclamation"></i>تعذّر العثور على الموضوع.</div>`; return; }
     const replies = (t.replies || []).slice().sort((a,b) => a.createdAt - b.createdAt);
+    const isInspector = currentUser && currentUser.role === 'inspector';
+    const canDeleteThread = isInspector || (currentUser && t.authorId === currentUser.id);
 
     const threadAttachmentsHtml = (t.attachments && t.attachments.length)
         ? `<div class="thread-attachments" style="margin:12px 0;">${t.attachments.map(att => `
@@ -1189,8 +1281,13 @@ function renderThreadDetail(id) {
 
     box.innerHTML = `
         <div class="thread-detail-head">
-            <h3 style="border:none; padding:0; margin:0;"><i class="fas fa-comments"></i> ${escapeHtml(t.title)}</h3>
-            <span class="thread-cat">${escapeHtml(t.category)}</span>
+            <h3 style="border:none; padding:0; margin:0; flex:1;">
+                <i class="fas fa-comments"></i> ${escapeHtml(t.title)}
+            </h3>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <span class="thread-cat">${escapeHtml(t.category)}</span>
+                ${canDeleteThread ? `<button class="btn btn-sm btn-danger" onclick="deleteThread('${t.id}')" title="حذف الموضوع بكل ردوده"><i class="fas fa-trash"></i> حذف الموضوع</button>` : ''}
+            </div>
         </div>
         <div class="thread-meta" style="margin-bottom:14px;">
             <span><i class="fas fa-user"></i> ${escapeHtml(t.authorName)} (${roleLabel(t.authorRole)})</span>
@@ -1210,9 +1307,16 @@ function renderThreadDetail(id) {
                         </span>
                     `).join('')}</div>`
                     : '';
+                const canDelReply = isInspector || (currentUser && r.authorId === currentUser.id);
                 return `
                 <div class="reply-item">
-                    <div class="ri-head"><i class="fas fa-user-circle"></i> ${escapeHtml(r.authorName)} <span style="font-weight:400; color:var(--text-muted);">· ${roleLabel(r.authorRole)}</span><span class="ri-time">${timeAgo(r.createdAt)}</span></div>
+                    <div class="ri-head">
+                        <i class="fas fa-user-circle"></i>
+                        ${escapeHtml(r.authorName)}
+                        <span style="font-weight:400; color:var(--text-muted);">· ${roleLabel(r.authorRole)}</span>
+                        <span class="ri-time">${timeAgo(r.createdAt)}</span>
+                        ${canDelReply ? `<button onclick="deleteReply('${t.id}', '${r.id}')" title="حذف الرد" style="background:none; border:none; cursor:pointer; color:var(--danger); font-size:12px; padding:2px 6px;"><i class="fas fa-trash"></i></button>` : ''}
+                    </div>
                     <p>${escapeHtml(r.text)}</p>
                     ${replyAtt}
                 </div>
@@ -1232,7 +1336,6 @@ function renderThreadDetail(id) {
         <button class="btn btn-teal" onclick="addReply('${t.id}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button>
     `;
 
-    // ربط زر إرفاق في الرد
     const replyFileInput = document.getElementById('replyFileInput');
     if (replyFileInput) {
         replyFileInput.addEventListener('change', async (e) => {
@@ -1246,9 +1349,6 @@ function renderThreadDetail(id) {
     }
     updatePendingReplyBar();
 }
-
-// مرفقات الرد
-let pendingReplyAttachments = [];
 
 function updatePendingReplyBar() {
     const list = document.getElementById('replyAttachList');
@@ -1343,6 +1443,7 @@ function openNewNoteModal() {
 function editNote(id) {
     const n = notesData.notes.find(x => x.id === id);
     if (!n) return;
+    if (n.authorId !== currentUser.id) { alert('⚠️ لا يمكنك تعديل ملاحظات الآخرين.'); return; }
     document.getElementById('noteModalTitle').textContent = 'تعديل الملاحظة';
     document.getElementById('editNoteId').value = n.id;
     document.getElementById('noteTitle').value = n.title;
@@ -1371,8 +1472,11 @@ async function saveNote() {
     await saveNotes();
 }
 async function deleteNote(id) {
+    const n = notesData.notes.find(x => x.id === id);
+    if (!n) return;
+    if (n.authorId !== currentUser.id) { alert('⚠️ لا يمكنك حذف ملاحظات الآخرين.'); return; }
     if (!confirm('هل تريد حذف هذه الملاحظة نهائياً؟')) return;
-    notesData.notes = notesData.notes.filter(n => n.id !== id);
+    notesData.notes = notesData.notes.filter(x => x.id !== id);
     renderNotes();
     await saveNotes();
 }
@@ -1431,6 +1535,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (currentUser.role === 'inspector') {
         const dash = document.getElementById('dashboardLink');
         if (dash) dash.style.display = 'inline-flex';
+        // إظهار زر "إفراغ الساحة" للمفتش فقط
+        const clearBtn = document.getElementById('clearChatBtn');
+        if (clearBtn) clearBtn.classList.add('visible');
     }
 
     document.getElementById('ssoLoadingScreen').style.display = 'none';
