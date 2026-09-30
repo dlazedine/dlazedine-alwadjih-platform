@@ -591,40 +591,22 @@ async function handleReauth(event) {
     btn.disabled = true; btn.textContent = 'جارٍ التحقق...';
     msg.style.display = 'none';
     try {
-        await ensureAnonAuth();
-        await listenToCloudData();
-        await migrateLegacyUsers();
-
-        const user = cachedUsers.find(u => u.id === __portalUser.id);
-        if (!user) {
-            msg.textContent = 'تعذّر العثور على حسابك.';
+        // التحقق عبر Supabase (مصدر الحقيقة الوحيد للحسابات)
+        const c = await PortalCloud.ready;
+        const { data: u } = await c.auth.getUser();
+        if (!u || !u.user) {
+            msg.textContent = 'انتهت الجلسة، سجّل الدخول من البوابة.';
             msg.style.display = 'block';
             return false;
         }
-        const hash = cachedCredentials[user.id];
-        if (!hash) {
-            msg.textContent = 'لا توجد كلمة مرور مسجّلة لهذا الحساب.';
-            msg.style.display = 'block';
-            return false;
-        }
-        const valid = await verifyPassword(password, hash);
-        if (!valid) {
+        const { error } = await c.auth.signInWithPassword({ email: u.user.email, password });
+        if (error) {
             msg.textContent = 'كلمة المرور غير صحيحة.';
             msg.style.display = 'block';
             return false;
         }
-
-        // تحديث lastLogin
-        try {
-            const idx = cachedUsers.findIndex(u => u.id === user.id);
-            if (idx !== -1) {
-                cachedUsers[idx].lastLogin = new Date().toISOString();
-                await saveUsers(cachedUsers);
-            }
-        } catch(_) {}
-
         document.getElementById('reauthScreen').style.display = 'none';
-        enterApp(user);
+        enterApp(__portalUser);
     } catch (e) {
         console.error(e);
         msg.textContent = 'تعذّر التحقق — تحقق من اتصالك بالإنترنت.';
@@ -637,6 +619,7 @@ async function handleReauth(event) {
 
 function handleLogout() {
     if (!confirm('هل تريد تسجيل الخروج؟')) return;
+    try { PortalCloud.signOut(); } catch (e) {}
     try { sessionStorage.removeItem('pgb_session'); localStorage.removeItem('pgb_session_persistent'); } catch (e) {}
     window.location.href = 'index.html';
 }
