@@ -3682,7 +3682,11 @@ async function logActivityAction(action, activityTitle, extra) {
                 if (heroLogo) { heroLogo.src = ''; heroLogo.style.display = 'none'; }
             }
         }
-
+    window.changeFooterLogo = function() {
+        if (AuthSystem.currentProfile && AuthSystem.currentProfile.role !== 'admin') {
+            showToast('⚠️ تغيير الشعار متاح لحساب المفتش فقط', 'warning');
+            return;
+        }
         function changeFooterLogo() {
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
