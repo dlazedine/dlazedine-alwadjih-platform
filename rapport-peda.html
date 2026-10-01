@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>التقرير التربوي — الوجيه في الإشراف التربوي</title>
+<script src="supabase-config.js"></script>
+<script src="portal-cloud.js"></script>
+<style>
+:root{--ink:#1f3864;--gold:#c49b3f}
+*{box-sizing:border-box}body{margin:0;background:#e9e6dc;font-family:"Traditional Arabic",Amiri,Tahoma,serif;color:#111;font-size:14px;line-height:1.9}
+.bar{background:var(--ink);color:#fff;padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:4px solid var(--gold);font-family:Tajawal,Tahoma,sans-serif}
+.bar button,.bar a{background:transparent;color:#fff;border:1px solid #ffffff77;border-radius:9px;padding:5px 12px;font:inherit;cursor:pointer;text-decoration:none}.bar span{flex:1;font-size:.9rem}
+#sheet{width:210mm;max-width:100%;margin:12px auto;background:#fff;padding:12mm;box-shadow:0 2px 10px #0003}
+input,textarea{font:inherit;color:#111;border:0;border-bottom:1px dotted #888;background:transparent;padding:0 3px;field-sizing:content;min-width:3em;max-width:100%}
+input.auto{background:#f1efe6}input:focus,textarea:focus{outline:0;background:#fff8d9}input:disabled,textarea:disabled{color:#111;-webkit-text-fill-color:#111}
+.c{text-align:center}.u{text-decoration:underline}.b{font-weight:bold}
+.hd{display:flex;justify-content:space-between;gap:10px;margin-top:6px}.hd>div{flex:1}.hd .l{text-align:left}
+.code{text-align:left;font-weight:bold}
+.ttl{background:#5b9bd5;color:#fff;font-weight:bold;font-size:1.3rem;text-align:center;border:2px solid #fff;outline:1px solid #5b9bd5;width:55%;margin:8px auto;padding:2px 8px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ttl input{color:#fff;border:0;text-align:center;width:100%;font-weight:bold}.ttl input:disabled{color:#fff;-webkit-text-fill-color:#fff}
+.row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+table.two{width:100%;border-collapse:collapse;border-top:2px solid #000;border-bottom:2px solid #000;margin-top:8px}
+table.two td{width:50%;vertical-align:top;padding:4px 8px}table.two td:first-child{border-left:2px solid #000}
+.sh{font-weight:bold;text-decoration:underline;margin-top:6px}.ln{display:flex;flex-wrap:wrap;gap:4px 14px}
+textarea{width:100%;min-height:9em;border:1px solid #bbb;line-height:2;field-sizing:content}
+.pg2{break-before:page;margin-top:14px}.sig{display:flex;justify-content:space-around;margin-top:24px;font-weight:bold}
+.m{font-size:.85rem}.ok{color:#9fe3b5}.er{color:#ffb3b3}
+@page{size:A4;margin:10mm}
+@media print{input.auto{background:transparent}body{background:#fff}.bar{display:none}#sheet{box-shadow:none;margin:0;padding:0;width:auto}input,textarea{border-color:transparent}textarea{border:0}}
+@media(max-width:700px){#sheet{padding:8px}.ttl{width:90%}}
+</style>
+</head>
+<body>
+<div class="bar"><span id="who">جارٍ التحميل...</span><span id="sv" class="m"></span><button id="bs" onclick="save()">حفظ</button><label id="bp" class="m"><input type="checkbox" id="pub" onchange="pubT(this.checked)" style="min-width:0"> إتاحته للأستاذ</label><button id="ba" onclick="adopt()">اعتماد التاريخ والعلامة في ملف الأستاذ</button><button onclick="print()">طباعة</button><a id="bk" href="data-prof.html">رجوع</a></div>
+<datalist id="yn"><option>نعم</option><option>لا</option><option>/</option><option>نسبيا</option><option>مقبول</option><option>حسنة</option><option>ضعيفة</option><option>صحيحة</option><option>بنسبة مرضية</option></datalist>
+<div id="sheet"></div>
+<script>
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fd=v=>v?String(v).split('-').reverse().join('/'):'';
+const yrOf=s=>{const d=s?new Date(s):new Date(),y=d.getMonth()>=8?d.getFullYear():d.getFullYear()-1;return y+' / '+(y+1)};
+const AUTO=['inst','name','miss','birth','hire','frame','scale','degree','degree_date','qual','year','insp_name','last','pmark'];
+const B=()=>{const d=prof.data||{};return{inst:d.inst,name:d.name,miss:d.maiden,birth:[fd(d.birth_date),d.birth_place].filter(Boolean).join(' في: '),hire:fd(d.hire_date),frame:d.frame,scale:d.scale,degree:d.degree,degree_date:fd(d.degree_date),qual:d.qual,year:yrOf(rep.date)}};
+const R=[['ظروف التفتيش :',[[['تاريخ التفتيش:','date','date'],['من','from','time'],['إلى','to','time']],[['القسم:','cls'],['عدد التلاميذ','n']],[['القاعة : هل هي صالحة من حيث :']],[['الاستماع ؟','hear']],[['الإضاءة ؟','light'],['النظافة ؟','clean']],[['التدفئة ؟','heat'],['التهوية ؟','vent']]]],
+['تحضير الدرس :',[[['المقطع التعلمي:','seg']],[['الميدان:','dom']],[['محتواه المعرفي:','content']],[['هل هو مقرّر ؟','prog_ok']]]],
+['البرنامج :',[[['هل هو موزّع على السنة الدراسية:','dist']],[['هل التوزيع محترم ؟','dist_ok']]]],
+['المذكّرة :',[[['هل هي موجودة ؟','memo']],[['قيمتها:','memo_v']],[['الدفتر اليومي:','daily']]]],
+['دفتر النصوص :',[[['هل هو مستعمل حسب التوجيهات التربوية ؟','txt_use']],[['هل الأعمال المسجّلة فيه موجودة في دفاتر التلاميذ ؟','txt_in']],[['هل هو مراقب من حيث :']],[['البرنامج المقرّر:','txt_p'],['التدرّج:','txt_g']],[['الواجبات:','txt_d']]]]];
+const Lf=[['إنجاز الدرس :',[[['المعلومات : قيمتها:','info_v']],[['هل تسلسلها منطقي ؟','seq']],[['هل حقّق الدرس أهدافه ؟','goal']],[['مشاركة التلاميذ :','part']]]],
+['التطبيقات :',[[['هل هناك تطبيقات على الدروس ؟','app']],[['هل هي مناسبة ؟','app_ok']]]],
+['الوسائل التعليمية :',[[['استغلال السبورة:','board']],[['تنظيم السبورة:','board_o']],[['استغلال الكتاب:','book']],[['وسائل أخرى:','other']]]],
+['مراقبة أعمال التلاميذ :',[[['دفاتر التلاميذ : هل هي مراقبة ؟','nb']],[['هل يعتني بها التلاميذ ؟','care']],[['الفروض المنزلية :','hw']],[['هل هي كافية ؟','hw_en']],[['هل هي مصحّحة ومناسبة ؟','hw_c']],[['هل يحتفظ بها التلاميذ ؟','keep']]]]];
+let c,me,prof,rep={},repId=null,tm=null,published=false;
+const insp=()=>me.role==='inspector';
+const I=(k,t,w)=>{const a=AUTO.includes(k);return`<input data-k="${k}" type="${t||'text'}" ${(!t||t==='text')&&!a?'list="yn"':''} value="${esc(a?(B()[k]??rep[k]):rep[k])}" ${a?'disabled class="auto"':''} ${w?`style="width:${w}"`:''} oninput="S(this)">`};
+const seg=s=>`<span>${esc(s[0])} ${s[1]?I(s[1],s[2]):''}</span>`;
+const col=a=>a.map(([h,ls])=>`<div class="sh">${h}</div>${ls.map(l=>`<div class="ln">${l.map(seg).join('')}</div>`).join('')}`).join('');
+const info=(a,k,w)=>`<span>${a} ${I(k,'text',w)}</span>`;
+function build(){document.getElementById('sheet').innerHTML=`
+<div class="c b">الجمهوريّة الجزائريّة الديمقراطيّة الشعبيّة</div><div class="c b u">وزارة التربيّة الوطنيّة</div><div class="code">ت.إ.06</div>
+<div class="hd"><div>مديرية التربية لولاية قسنطينة<br>مفتشية التربية والتعليم المتوسط<br>مفتش المادة ${I('insp_name','x')}<br>المقاطعة الثانية</div><div class="l">المتوسطة: ${I('inst','x')}<br>${I('commune','x')}</div></div>
+<div class="ttl"><input data-k="title" value="${esc(rep.title)}" oninput="S(this)"></div>
+<div class="row"><span>المـادّة: ${I('subject','x')}</span><span>السّنة الدّراسيّة: ${I('year','x')}</span></div>
+<div class="row">${info('الاسم واللّقب:','name')}${info('لقب الآنسة:','miss')}${info('الجنسية :','nat')}</div>
+<div class="row">${info('تاريخ الميلاد ومكانه:','birth')}${info('تاريخ أوّل تعيين:','hire')}${info('الإطـــــار:','frame')}</div>
+<div class="row">${info('السلّم:','scale')}${info('الدرجة:','degree')}${info('تاريخ الدَّرجـة :','degree_date')}</div>
+<div class="row">${info('المؤهّل العلمي:','qual')}${info('تاريخ آخر تفتيش:','last')}${info('العلامة:','pmark')}</div>
+<table class="two"><tr><td>${col(R)}</td><td>${col(Lf)}</td></tr></table>
+<div class="pg2"><div class="c b u" style="font-size:1.2rem">الإرشادات التّربويّـــة</div><textarea data-k="guid" oninput="S(this)">${esc(rep.guid)}</textarea>
+<p class="b">التقدير العام بعد حضور الدرس، والاطلاع على الملف الإداري ومناقشة الأستاذ(ة) ${I('name','x')}:</p>
+<div class="row"><span>العلامة بالحروف: ${I('mark_l','x')}</span><span>تقرير حرّره مفتش المادة: ${I('insp_name','x')}</span></div>
+<div class="row"><span>العلامة بالأرقـــــام: ${I('mark','x')}</span></div>
+<div class="row"><span>اطلع عليه المعني في: ${I('seen','x')}</span><span>السيد(ة): ${I('who','x')}</span><span>في قسنطينة بتاريخ: ${I('rdate','x')}</span></div>
+<div class="sig"><span>الإمضاء</span><span>الإمضاء</span></div></div>`;
+if(!insp())document.querySelectorAll('#sheet input,#sheet textarea').forEach(e=>e.disabled=true)}
+function msg(t,e){const x=document.getElementById('sv');x.textContent=t;x.className='m '+(e?'er':'ok')}
+function S(e){rep[e.dataset.k]=e.value;if(e.dataset.k==='date')document.querySelectorAll('[data-k="year"]').forEach(o=>o.value=yrOf(rep.date));document.querySelectorAll(`[data-k="${e.dataset.k}"]`).forEach(o=>{if(o!==e)o.value=e.value});if(insp()){msg('جارٍ الحفظ...');clearTimeout(tm);tm=setTimeout(save,1000)}}
+async function save(){if(!insp())return;const now=new Date().toISOString();
+const r=repId?await c.from('wajih_reports').update({data:rep,published,updated_at:now}).eq('id',repId).select('id').single():await c.from('wajih_reports').insert({prof_id:prof.id,kind:'peda',data:rep,published,created_by:me.id,created_by_name:me.full_name||me.username}).select('id').single();
+if(r.error)return msg('تعذّر الحفظ: '+r.error.message,1);repId=r.data.id;history.replaceState(null,'','?prof='+prof.id+'&r='+repId);msg('تم الحفظ ✓')}
+async function pubT(v){published=v;await save()}
+async function adopt(){if(!rep.date||!rep.mark)return alert('أدخل تاريخ التفتيش والعلامة بالأرقام أولاً');await save();const i={...(prof.insp||{}),last_visit:rep.date,mark:rep.mark};
+const{error}=await c.from('wajih_prof').update({insp:i}).eq('id',prof.id);if(error)return msg(error.message,1);prof.insp=i;msg('اعتُمد في ملف الأستاذ ✓')}
+(async()=>{c=await PortalCloud.ready;const{data:s}=await c.auth.getSession();if(!s.session)return location.replace('index.html');
+const{data:p}=await c.from('wajih_profiles').select('*').eq('id',s.session.user.id).single();if(!p||!p.active)return location.replace('index.html');me=p;
+const q=new URLSearchParams(location.search),pid=q.get('prof'),rid=q.get('r');
+if(!rid&&!['inspector','supervisor'].includes(p.role))return location.replace('data-prof.html');
+const{data:pr}=await c.from('wajih_prof').select('*').eq('id',pid).single();if(!pr)return location.replace('data-prof.html');prof=pr;
+document.getElementById('bk').href='data-prof.html';document.getElementById('who').textContent='التقرير التربوي — '+((pr.data||{}).name||'');
+if(!insp()){bs.style.display=ba.style.display=bp.style.display='none'}
+if(rid){const{data:r}=await c.from('wajih_reports').select('*').eq('id',rid).single();if(!r)return location.replace('data-prof.html');rep=r.data;repId=r.id;published=!!r.published;pub.checked=published}
+if(!repId){const i=pr.insp||{};rep={title:'التقرير التّربــوي لأستاذ التّعليم',subject:'اللّغة العربيّة',nat:'جزائريّة',insp_name:me.full_name||'',last:fd(i.last_visit),pmark:i.mark,rdate:new Date().toLocaleDateString('fr-FR')}}
+build()})();
+</script>
+</body>
+</html>

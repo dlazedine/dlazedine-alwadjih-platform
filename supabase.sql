@@ -107,6 +107,25 @@ end $$;
 drop trigger if exists wj_prof_guard_t on wajih_prof;
 create trigger wj_prof_guard_t before insert or update on wajih_prof for each row execute function wj_prof_guard();
 
+-- التقارير (التقرير التربوي): يحررها المفتش، ويطلع عليها الأستاذ المعني بعد أن يتيحها له، دون تعديل
+create table if not exists wajih_reports(
+  id uuid primary key default gen_random_uuid(),
+  prof_id uuid not null references wajih_prof(id) on delete cascade,
+  kind text not null default 'peda',
+  data jsonb not null default '{}',
+  published boolean not null default false,
+  created_by uuid, created_by_name text,
+  created_at timestamptz default now(), updated_at timestamptz default now());
+alter table wajih_reports enable row level security;
+drop policy if exists r_sel on wajih_reports;
+create policy r_sel on wajih_reports for select using (wj_is_role(array['inspector','supervisor']) or (published and exists(select 1 from wajih_prof p where p.id=prof_id and p.user_id=auth.uid())));
+drop policy if exists r_ins on wajih_reports;
+create policy r_ins on wajih_reports for insert with check (wj_is_role(array['inspector']));
+drop policy if exists r_upd on wajih_reports;
+create policy r_upd on wajih_reports for update using (wj_is_role(array['inspector']));
+drop policy if exists r_del on wajih_reports;
+create policy r_del on wajih_reports for delete using (wj_is_role(array['inspector']));
+
 revoke all on function wj_email_for_username(text) from public;
 grant execute on function wj_email_for_username(text) to anon, authenticated;
 

@@ -45,7 +45,7 @@
 ## 📁 الملفات
 
 ```
-index.html · data-prof.html · arabic.html · moualaja.html · amal.html · niqash.html · cv.html · taqyim.html · dashboard.html
+index.html · data-prof.html · rapport-peda.html · rapport-tarsim.html · arabic.html · moualaja.html · amal.html · niqash.html · cv.html · taqyim.html · dashboard.html
 auth.js · app.js · niqash.js · style.css · niqash.css
 supabase-config.js   ← عنوان Supabase والمفتاح العام والمفاتيح المشتركة
 portal-cloud.js      ← الدخول والمزامنة (يُحمَّل في كل صفحة)
