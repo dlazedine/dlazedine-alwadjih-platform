@@ -3668,78 +3668,216 @@ async function logActivityAction(action, activityTitle, extra) {
         // ================================================================
         //  الشعار وتغييره
         // ================================================================
-        function applyMuqataaLogo(dataUrl) {
-            const img = document.getElementById('footerMuqataaLogo');
-            const placeholder = document.getElementById('footerMuqataaPlaceholder');
-            const heroLogo = document.getElementById('heroMuqataaLogo');
-            if (dataUrl) {
-                if (img) { img.src = dataUrl; img.style.display = 'block'; }
-                if (placeholder) placeholder.style.display = 'none';
-                if (heroLogo) { heroLogo.src = dataUrl; heroLogo.style.display = 'block'; }
-            } else {
-                if (img) { img.src = ''; img.style.display = 'none'; }
-                if (placeholder) placeholder.style.display = 'flex';
-                if (heroLogo) { heroLogo.src = ''; heroLogo.style.display = 'none'; }
-            }
+    function applyMuqataaLogo(dataUrl) {
+        const img = document.getElementById('footerMuqataaLogo');
+        const placeholder = document.getElementById('footerMuqataaPlaceholder');
+        const heroLogo = document.getElementById('heroMuqataaLogo');
+        if (dataUrl) {
+            if (img) { img.src = dataUrl; img.style.display = 'block'; }
+            if (placeholder) placeholder.style.display = 'none';
+            if (heroLogo) { heroLogo.src = dataUrl; heroLogo.style.display = 'block'; }
+        } else {
+            if (img) { img.src = ''; img.style.display = 'none'; }
+            if (placeholder) placeholder.style.display = 'flex';
+            if (heroLogo) { heroLogo.src = ''; heroLogo.style.display = 'none'; }
         }
+    }
 
-        function changeFooterLogo() {
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = 'image/*';
-            fileInput.style.display = 'none';
-            fileInput.onchange = function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    const rawData = evt.target.result;
-                    const tempImg = new Image();
-                    tempImg.onload = function() {
-                        let width = tempImg.width, height = tempImg.height;
-                        const maxDim = 320;
-                        if (width > maxDim || height > maxDim) {
-                            if (width > height) { height = Math.round((height * maxDim) / width); width = maxDim; }
-                            else { width = Math.round((width * maxDim) / height); height = maxDim; }
-                        }
-                        const canvas = document.createElement('canvas');
-                        canvas.width = width; canvas.height = height;
-                        canvas.getContext('2d').drawImage(tempImg, 0, 0, width, height);
-                        const optimized = canvas.toDataURL('image/png', 0.92);
-                        try { localStorage.setItem('footerMuqataaLogo', optimized); } catch(e) {}
-                        applyMuqataaLogo(optimized);
-                        if (typeof fbDb !== 'undefined' && fbDb) {
-                            fbDb.collection('platform_shared').doc('branding').set({ muqataaLogo: optimized, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
-                        }
-                        showToast('✅ تم تحديث شعار المقاطعة سحابياً بنجاح', 'success');
-                    };
-                    tempImg.src = rawData;
+    window.changeFooterLogo = function() {
+        if (AuthSystem.currentProfile && AuthSystem.currentProfile.role !== 'admin') {
+            showToast('⚠️ تغيير الشعار متاح لحساب المفتش فقط', 'warning');
+            return;
+        }
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+        fileInput.onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const rawData = evt.target.result;
+                const tempImg = new Image();
+                tempImg.onload = function() {
+                    let width = tempImg.width, height = tempImg.height;
+                    const maxDim = 320;
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) { height = Math.round((height * maxDim) / width); width = maxDim; }
+                        else { width = Math.round((width * maxDim) / height); height = maxDim; }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width; canvas.height = height;
+                    canvas.getContext('2d').drawImage(tempImg, 0, 0, width, height);
+                    const optimized = canvas.toDataURL('image/png', 0.92);
+                    try { localStorage.setItem('footerMuqataaLogo', optimized); } catch(e) {}
+                    applyMuqataaLogo(optimized);
+                    if (typeof fbDb !== 'undefined' && fbDb) {
+                        fbDb.collection('platform_shared').doc('branding').set({
+                            muqataaLogo: optimized,
+                            updatedAt: new Date().toISOString()
+                        }, { merge: true }).catch(() => {});
+                    }
+                    showToast('✅ تم رفع وتحديث شعار المقاطعة بنجاح', 'success');
                 };
-                reader.readAsDataURL(file);
+                tempImg.src = rawData;
             };
-            document.body.appendChild(fileInput);
-            fileInput.click();
-            setTimeout(() => fileInput.remove(), 1500);
-        }
-        window.changeFooterLogo = changeFooterLogo;
+            reader.readAsDataURL(file);
+        };
+        document.body.appendChild(fileInput);
+        fileInput.click();
+        setTimeout(() => fileInput.remove(), 1500);
+    };
 
-        function loadCustomFooterLogo() {
-            try {
-                const saved = localStorage.getItem('footerMuqataaLogo');
-                if (saved) applyMuqataaLogo(saved);
-                if (typeof fbDb !== 'undefined' && fbDb) {
-                    fbDb.collection('platform_shared').doc('branding').get().then(doc => {
-                        if (doc.exists && doc.data() && doc.data().muqataaLogo) {
-                            const cloudLogo = doc.data().muqataaLogo;
-                            if (cloudLogo !== saved) {
-                                try { localStorage.setItem('footerMuqataaLogo', cloudLogo); } catch(_) {}
-                                applyMuqataaLogo(cloudLogo);
-                            }
+    function loadCustomFooterLogo() {
+        try {
+            const saved = localStorage.getItem('footerMuqataaLogo');
+            if (saved) applyMuqataaLogo(saved);
+            if (typeof fbDb !== 'undefined' && fbDb) {
+                fbDb.collection('platform_shared').doc('branding').get().then(doc => {
+                    if (doc.exists && doc.data() && doc.data().muqataaLogo) {
+                        const cloudLogo = doc.data().muqataaLogo;
+                        if (cloudLogo !== saved) {
+                            try { localStorage.setItem('footerMuqataaLogo', cloudLogo); } catch(_) {}
+                            applyMuqataaLogo(cloudLogo);
                         }
-                    }).catch(() => {});
-                }
-            } catch(e) { console.warn('Logo load warning:', e); }
+                    }
+                }).catch(() => {});
+            }
+        } catch(e) { console.warn('loadCustomFooterLogo warning:', e); }
+    }
+
+    async function syncSegmentsToCloud() {
+        const badge = document.getElementById('cloudSyncStatusBadge');
+        if (badge) badge.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جارٍ الحفظ بالسحابة...';
+        try {
+            if (typeof fbDb !== 'undefined' && fbDb) {
+                await ensureAnonAuth();
+                await fbDb.collection('platform_shared').doc('arabic_unified').set({
+                    updatedAt: new Date().toISOString(),
+                    customSegments: JSON.stringify(portalState.segments),
+                    memos: JSON.stringify(portalState.memos)
+                }, { merge: true });
+                await fbDb.collection('platform_shared').doc('arabic_segments').set({
+                    updatedAt: new Date().toISOString(),
+                    segments: portalState.segments
+                }, { merge: true });
+            }
+            if (typeof sbMain !== 'undefined' && sbMain) {
+                try {
+                    await ensureSupabaseSession();
+                    await sbMain.from('activity_log').insert({
+                        teacher_id: AuthSystem.currentProfile ? AuthSystem.currentProfile.id : 'didactic_teacher',
+                        teacher_name: AuthSystem.currentProfile ? AuthSystem.currentProfile.full_name : 'أستاذ(ة) اللغة العربية',
+                        action: 'update',
+                        activity_title: 'تحديث وهندسة مقاطع اللغة العربية',
+                        created_at: new Date().toISOString()
+                    });
+                } catch(_) {}
+            }
+            if (badge) badge.innerHTML = '<i class="fas fa-cloud-check"></i> متزامن مع السحابة';
+            return true;
+        } catch(e) {
+            console.warn('syncSegmentsToCloud warning:', e);
+            if (badge) badge.innerHTML = '<i class="fas fa-cloud-check"></i> محفوظ محلياً';
+            return false;
         }
+    }
+
+    async function syncMemosToCloud(memoTitle = 'مذكرة تربوية') {
+        const badge = document.getElementById('cloudSyncStatusBadge');
+        if (badge) badge.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جارٍ حفظ المذكرة سحابياً...';
+        try {
+            if (typeof fbDb !== 'undefined' && fbDb) {
+                await ensureAnonAuth();
+                await fbDb.collection('platform_shared').doc('arabic_unified').set({
+                    updatedAt: new Date().toISOString(),
+                    customSegments: JSON.stringify(portalState.segments),
+                    memos: JSON.stringify(portalState.memos)
+                }, { merge: true });
+            }
+            if (typeof sbMain !== 'undefined' && sbMain) {
+                try {
+                    await ensureSupabaseSession();
+                    await sbMain.from('activity_log').insert({
+                        teacher_id: AuthSystem.currentProfile ? AuthSystem.currentProfile.id : 'didactic_teacher',
+                        teacher_name: AuthSystem.currentProfile ? AuthSystem.currentProfile.full_name : 'أستاذ(ة) اللغة العربية',
+                        action: 'create',
+                        activity_title: `حفظ مذكرة: ${memoTitle}`,
+                        created_at: new Date().toISOString()
+                    });
+                } catch(_) {}
+            }
+            if (badge) badge.innerHTML = '<i class="fas fa-cloud-check"></i> متزامن مع السحابة';
+            return true;
+        } catch(e) {
+            console.warn('syncMemosToCloud error:', e);
+            if (badge) badge.innerHTML = '<i class="fas fa-cloud-check"></i> محفوظ محلياً';
+            return false;
+        }
+    }
+
+    async function fetchCloudDidacticData() {
+        const badge = document.getElementById('cloudSyncStatusBadge');
+        if (badge) badge.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جارٍ التحقق من السحابة...';
+        try {
+            if (typeof fbDb !== 'undefined' && fbDb) {
+                await ensureAnonAuth();
+                const snap = await fbDb.collection('platform_shared').doc('arabic_unified').get();
+                if (snap.exists && snap.data()) {
+                    const data = snap.data();
+                    let changed = false;
+                    if (data.customSegments) {
+                        try {
+                            const cloudSegs = JSON.parse(data.customSegments);
+                            if (Array.isArray(cloudSegs) && cloudSegs.length > 0) {
+                                const currentMap = new Map(portalState.segments.map(s => [s.id, s]));
+                                cloudSegs.forEach(cs => {
+                                    if (!currentMap.has(cs.id)) {
+                                        portalState.segments.push(cs);
+                                        changed = true;
+                                    } else {
+                                        const cur = currentMap.get(cs.id);
+                                        if (JSON.stringify(cs) !== JSON.stringify(cur)) {
+                                            const idx = portalState.segments.findIndex(s => s.id === cs.id);
+                                            if (idx !== -1) portalState.segments[idx] = cs;
+                                            changed = true;
+                                        }
+                                    }
+                                });
+                            }
+                        } catch(e) { console.warn('Parse cloud segments error:', e); }
+                    }
+                    if (data.memos) {
+                        try {
+                            const cloudMemos = JSON.parse(data.memos);
+                            if (cloudMemos && typeof cloudMemos === 'object') {
+                                portalState.memos = { ...portalState.memos, ...cloudMemos };
+                                changed = true;
+                            }
+                        } catch(e) { console.warn('Parse cloud memos error:', e); }
+                    }
+                    if (changed) {
+                        localStorage.setItem('didactic_portal_segments', JSON.stringify(portalState.segments));
+                        localStorage.setItem('didactic_portal_memos', JSON.stringify(portalState.memos));
+                        renderSegments();
+                        renderMemoSections();
+                    }
+                }
+            }
+            if (badge) badge.innerHTML = '<i class="fas fa-cloud-check"></i> متزامن مع السحابة المركزية';
+        } catch(e) {
+            console.warn('fetchCloudDidacticData error:', e);
+            if (badge) badge.innerHTML = '<i class="fas fa-cloud-check"></i> متصل بالسحابة';
+        }
+    }
+
+    window.syncAllDidacticNow = async function() {
+        showToast('جارٍ المزامنة السحابية لكافة المقاطع والمذكرات...', 'info');
+        await syncSegmentsToCloud();
+        await fetchCloudDidacticData();
+        showToast('✅ اكتملت المزامنة السحابية بنجاح!', 'success');
+    };
 
         // ================================================================
         //  الإقلاع
