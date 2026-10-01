@@ -72,12 +72,40 @@ create or replace function wj_delete_user(uid uuid, wipe boolean) returns void l
 begin
   if not wj_is_role(array['inspector']) then raise exception 'غير مصرّح'; end if;
   if uid=auth.uid() then raise exception 'لا يمكن حذف حسابك'; end if;
-  if wipe then delete from portal_data where owner=uid; delete from wajih_activity where user_id=uid; end if;
+  if wipe then delete from wajih_prof where user_id=uid; delete from portal_data where owner=uid; delete from wajih_activity where user_id=uid; end if;
   delete from auth.users where id=uid;
 end $$;
 revoke all on function wj_reset_password(uuid,text) from public;
 revoke all on function wj_delete_user(uuid,boolean) from public;
 grant execute on function wj_reset_password(uuid,text), wj_delete_user(uuid,boolean) to authenticated;
+
+-- بيانات الأساتذة (data-prof): سجل لكل أستاذ، يعدّله صاحبه، ويرى المفتش والمشرف الكل ويعدّل المفتش وحده
+create table if not exists wajih_prof(
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid unique references auth.users(id) on delete set null,
+  data jsonb not null default '{}', insp jsonb not null default '{}', tt jsonb not null default '{}',
+  photo text, updated_by_name text,
+  updated_at timestamptz default now(), created_at timestamptz default now());
+alter table wajih_prof enable row level security;
+drop policy if exists f_sel on wajih_prof;
+create policy f_sel on wajih_prof for select using (user_id=auth.uid() or wj_is_role(array['inspector','supervisor']));
+drop policy if exists f_ins on wajih_prof;
+create policy f_ins on wajih_prof for insert with check ((user_id=auth.uid() and wj_is_role(array['inspector','supervisor','teacher'])) or wj_is_role(array['inspector']));
+drop policy if exists f_upd on wajih_prof;
+create policy f_upd on wajih_prof for update using (user_id=auth.uid() or wj_is_role(array['inspector']));
+drop policy if exists f_del on wajih_prof;
+create policy f_del on wajih_prof for delete using (wj_is_role(array['inspector']));
+
+create or replace function wj_prof_guard() returns trigger language plpgsql security definer set search_path=public as $$
+begin
+  if not wj_is_role(array['inspector']) then
+    if tg_op='INSERT' then new.insp:='{}'::jsonb; else new.insp:=old.insp; new.user_id:=old.user_id; end if;
+  end if;
+  new.updated_at:=now();
+  return new;
+end $$;
+drop trigger if exists wj_prof_guard_t on wajih_prof;
+create trigger wj_prof_guard_t before insert or update on wajih_prof for each row execute function wj_prof_guard();
 
 revoke all on function wj_email_for_username(text) from public;
 grant execute on function wj_email_for_username(text) to anon, authenticated;
