@@ -48,6 +48,16 @@ create policy d_upd on portal_data for update using (wj_is_role(array['inspector
 drop policy if exists d_del on portal_data;
 create policy d_del on portal_data for delete using (wj_is_role(array['inspector']) or (wj_is_role(array['supervisor','teacher']) and owner=auth.uid()));
 
+create table if not exists wajih_activity(
+  id bigserial primary key, user_id uuid, user_name text, user_role text,
+  action text not null check (action in ('create','update','delete')),
+  key text, created_at timestamptz default now());
+alter table wajih_activity enable row level security;
+drop policy if exists a_sel on wajih_activity;
+create policy a_sel on wajih_activity for select using (wj_is_role(array['inspector','supervisor']));
+drop policy if exists a_ins on wajih_activity;
+create policy a_ins on wajih_activity for insert with check (user_id=auth.uid() and wj_is_role(array['inspector','supervisor','teacher']));
+
 revoke all on function wj_email_for_username(text) from public;
 grant execute on function wj_email_for_username(text) to anon, authenticated;
 
