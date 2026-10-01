@@ -3668,78 +3668,84 @@ async function logActivityAction(action, activityTitle, extra) {
         // ================================================================
         //  الشعار وتغييره
         // ================================================================
-        function applyMuqataaLogo(dataUrl) {
-            const img = document.getElementById('footerMuqataaLogo');
-            const placeholder = document.getElementById('footerMuqataaPlaceholder');
-            const heroLogo = document.getElementById('heroMuqataaLogo');
-            if (dataUrl) {
-                if (img) { img.src = dataUrl; img.style.display = 'block'; }
-                if (placeholder) placeholder.style.display = 'none';
-                if (heroLogo) { heroLogo.src = dataUrl; heroLogo.style.display = 'block'; }
-            } else {
-                if (img) { img.src = ''; img.style.display = 'none'; }
-                if (placeholder) placeholder.style.display = 'flex';
-                if (heroLogo) { heroLogo.src = ''; heroLogo.style.display = 'none'; }
-            }
+    function applyMuqataaLogo(dataUrl) {
+        const img = document.getElementById('footerMuqataaLogo');
+        const placeholder = document.getElementById('footerMuqataaPlaceholder');
+        const heroLogo = document.getElementById('heroMuqataaLogo');
+        if (dataUrl) {
+            if (img) { img.src = dataUrl; img.style.display = 'block'; }
+            if (placeholder) placeholder.style.display = 'none';
+            if (heroLogo) { heroLogo.src = dataUrl; heroLogo.style.display = 'block'; }
+        } else {
+            if (img) { img.src = ''; img.style.display = 'none'; }
+            if (placeholder) placeholder.style.display = 'flex';
+            if (heroLogo) { heroLogo.src = ''; heroLogo.style.display = 'none'; }
         }
+    }
 
-        function changeFooterLogo() {
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = 'image/*';
-            fileInput.style.display = 'none';
-            fileInput.onchange = function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    const rawData = evt.target.result;
-                    const tempImg = new Image();
-                    tempImg.onload = function() {
-                        let width = tempImg.width, height = tempImg.height;
-                        const maxDim = 320;
-                        if (width > maxDim || height > maxDim) {
-                            if (width > height) { height = Math.round((height * maxDim) / width); width = maxDim; }
-                            else { width = Math.round((width * maxDim) / height); height = maxDim; }
-                        }
-                        const canvas = document.createElement('canvas');
-                        canvas.width = width; canvas.height = height;
-                        canvas.getContext('2d').drawImage(tempImg, 0, 0, width, height);
-                        const optimized = canvas.toDataURL('image/png', 0.92);
-                        try { localStorage.setItem('footerMuqataaLogo', optimized); } catch(e) {}
-                        applyMuqataaLogo(optimized);
-                        if (typeof fbDb !== 'undefined' && fbDb) {
-                            fbDb.collection('platform_shared').doc('branding').set({ muqataaLogo: optimized, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
-                        }
-                        showToast('✅ تم تحديث شعار المقاطعة سحابياً بنجاح', 'success');
-                    };
-                    tempImg.src = rawData;
+    window.changeFooterLogo = function() {
+        if (AuthSystem.currentProfile && AuthSystem.currentProfile.role !== 'admin') {
+            showToast('⚠️ تغيير الشعار متاح لحساب المفتش فقط', 'warning');
+            return;
+        }
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+        fileInput.onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const rawData = evt.target.result;
+                const tempImg = new Image();
+                tempImg.onload = function() {
+                    let width = tempImg.width, height = tempImg.height;
+                    const maxDim = 320;
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) { height = Math.round((height * maxDim) / width); width = maxDim; }
+                        else { width = Math.round((width * maxDim) / height); height = maxDim; }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width; canvas.height = height;
+                    canvas.getContext('2d').drawImage(tempImg, 0, 0, width, height);
+                    const optimized = canvas.toDataURL('image/png', 0.92);
+                    try { localStorage.setItem('footerMuqataaLogo', optimized); } catch(e) {}
+                    applyMuqataaLogo(optimized);
+                    if (typeof fbDb !== 'undefined' && fbDb) {
+                        fbDb.collection('platform_shared').doc('branding').set({
+                            muqataaLogo: optimized,
+                            updatedAt: new Date().toISOString()
+                        }, { merge: true }).catch(() => {});
+                    }
+                    showToast('✅ تم رفع وتحديث شعار المقاطعة بنجاح', 'success');
                 };
-                reader.readAsDataURL(file);
+                tempImg.src = rawData;
             };
-            document.body.appendChild(fileInput);
-            fileInput.click();
-            setTimeout(() => fileInput.remove(), 1500);
-        }
-        window.changeFooterLogo = changeFooterLogo;
+            reader.readAsDataURL(file);
+        };
+        document.body.appendChild(fileInput);
+        fileInput.click();
+        setTimeout(() => fileInput.remove(), 1500);
+    };
 
-        function loadCustomFooterLogo() {
-            try {
-                const saved = localStorage.getItem('footerMuqataaLogo');
-                if (saved) applyMuqataaLogo(saved);
-                if (typeof fbDb !== 'undefined' && fbDb) {
-                    fbDb.collection('platform_shared').doc('branding').get().then(doc => {
-                        if (doc.exists && doc.data() && doc.data().muqataaLogo) {
-                            const cloudLogo = doc.data().muqataaLogo;
-                            if (cloudLogo !== saved) {
-                                try { localStorage.setItem('footerMuqataaLogo', cloudLogo); } catch(_) {}
-                                applyMuqataaLogo(cloudLogo);
-                            }
+    function loadCustomFooterLogo() {
+        try {
+            const saved = localStorage.getItem('footerMuqataaLogo');
+            if (saved) applyMuqataaLogo(saved);
+            if (typeof fbDb !== 'undefined' && fbDb) {
+                fbDb.collection('platform_shared').doc('branding').get().then(doc => {
+                    if (doc.exists && doc.data() && doc.data().muqataaLogo) {
+                        const cloudLogo = doc.data().muqataaLogo;
+                        if (cloudLogo !== saved) {
+                            try { localStorage.setItem('footerMuqataaLogo', cloudLogo); } catch(_) {}
+                            applyMuqataaLogo(cloudLogo);
                         }
-                    }).catch(() => {});
-                }
-            } catch(e) { console.warn('Logo load warning:', e); }
-        }
+                    }
+                }).catch(() => {});
+            }
+        } catch(e) { console.warn('loadCustomFooterLogo warning:', e); }
+    }
 
         // ================================================================
         //  الإقلاع
