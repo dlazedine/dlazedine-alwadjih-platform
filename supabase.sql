@@ -28,6 +28,7 @@ create or replace function wj_complete_first_login(new_username text) returns vo
 $$ begin update wajih_profiles set username=lower(new_username), must_change=false where id=auth.uid(); end $$;
 
 alter table wajih_profiles enable row level security;
+alter table portal_data add column if not exists touched boolean not null default false;
 alter table portal_data enable row level security;
 
 drop policy if exists p_sel on wajih_profiles;
@@ -57,6 +58,26 @@ drop policy if exists a_sel on wajih_activity;
 create policy a_sel on wajih_activity for select using (wj_is_role(array['inspector','supervisor']));
 drop policy if exists a_ins on wajih_activity;
 create policy a_ins on wajih_activity for insert with check (user_id=auth.uid() and wj_is_role(array['inspector','supervisor','teacher']));
+
+create or replace function wj_reset_password(uid uuid, new_pass text) returns void language plpgsql security definer set search_path=public,auth,extensions as $$
+begin
+  if not wj_is_role(array['inspector']) then raise exception 'غير مصرّح'; end if;
+  if length(new_pass)<10 then raise exception 'كلمة المرور قصيرة'; end if;
+  update auth.users set encrypted_password=crypt(new_pass,gen_salt('bf')), updated_at=now() where id=uid;
+  update wajih_profiles set must_change=true where id=uid;
+  delete from auth.sessions where user_id=uid;
+end $$;
+
+create or replace function wj_delete_user(uid uuid, wipe boolean) returns void language plpgsql security definer set search_path=public,auth,extensions as $$
+begin
+  if not wj_is_role(array['inspector']) then raise exception 'غير مصرّح'; end if;
+  if uid=auth.uid() then raise exception 'لا يمكن حذف حسابك'; end if;
+  if wipe then delete from portal_data where owner=uid; delete from wajih_activity where user_id=uid; end if;
+  delete from auth.users where id=uid;
+end $$;
+revoke all on function wj_reset_password(uuid,text) from public;
+revoke all on function wj_delete_user(uuid,boolean) from public;
+grant execute on function wj_reset_password(uuid,text), wj_delete_user(uuid,boolean) to authenticated;
 
 revoke all on function wj_email_for_username(text) from public;
 grant execute on function wj_email_for_username(text) to anon, authenticated;
