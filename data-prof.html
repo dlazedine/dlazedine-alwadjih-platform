@@ -35,7 +35,7 @@ const FT=[['tr_since','تاريخ بداية التربص','date'],['tr_dec_no',
 const FI=[['num','الرقم','number'],['last_visit','تاريخ آخر زيارة','date'],['mark','العلامة (من 20)','number'],['ent','الاستحقاق (بالسنوات)','number']];
 const L={FAM:['أعزب(عزباء)','متزوج(ة)','مطلق(ة)','أرمل(ة)'],QUAL:['ليسانس','ماستر','مهندس','ماجستير','دكتوراه'],STA:['مرسم(ة)','متربص(ة)','متعاقد(ة)'],FRM:['أ.ت.م','رئيسي(ة)','مكون(ة)']};
 const SL=['08-09','09-10','10-11','11-12','13-14','14-15','15-16','16-17'],DY=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'];
-let c,me,rec,own,view='data',list=[],q='',tm=null;
+let c,me,rec,view='data',list=[],q='',tm=null;
 const staff=()=>['inspector','supervisor'].includes(me.role),insp=()=>me.role==='inspector';
 const ro=()=>!(insp()||rec.user_id===me.id);
 const yr=()=>{const d=new Date(),y=d.getMonth()>=8?d.getFullYear():d.getFullYear()-1;return y+'/'+(y+1)};
@@ -52,15 +52,14 @@ function pick(f){if(!f.files[0])return;const r=new FileReader();r.onload=()=>{co
 function fld(g,[k,t,ty]){const v=(rec[g]||{})[k]??'',d=(g==='insp'?!insp():ro())?'disabled':'';
 if(L[ty])return`<div><label>${t}</label><select ${d} onchange="S('${g}','${k}',this.value)"><option value="">—</option>${L[ty].map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select></div>`;
 return`<div><label>${t}</label><input type="${ty}" ${d} value="${esc(v)}" oninput="S('${g}','${k}',this.value)"></div>`}
-function who(){return staff()&&rec?`<div class="m np" style="margin-bottom:8px">السجل المعروض: <b>${esc((rec.data||{}).name||'—')}</b>${rec===own?' (بياناتي — يمكنك تعديلها)':ro()?' (للعرض فقط)':''}</div>`:''}
 function vData(){const p=rec.photo?`<img class="ph" src="${rec.photo}">`:'<div class="ph">لا توجد صورة</div>';
-return`${who()}<div class="c"><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start"><div>${p}${ro()?'':'<label class="np" style="margin-top:6px">رفع صورة<input type="file" accept="image/*" onchange="pick(this)"></label>'}</div><div class="g" style="flex:1;min-width:260px">${F.map(f=>fld('data',f)).join('')}</div></div></div>
+return`<div class="c"><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start"><div>${p}${ro()?'':'<label class="np" style="margin-top:6px">رفع صورة<input type="file" accept="image/*" onchange="pick(this)"></label>'}</div><div class="g" style="flex:1;min-width:260px">${F.map(f=>fld('data',f)).join('')}</div></div></div>
 <div class="c"><b>بيانات التربص</b> <span class="m">(للأستاذ المتربص، وتُملأ منها آلياً بيانات تقرير الترسيم)</span><div class="g">${FT.map(f=>fld('data',f)).join('')}</div></div>
 <div class="c"><b>بيانات يدخلها المفتش</b><div class="g">${FI.map(f=>fld('insp',f)).join('')}</div></div>
 <div id="sv" class="m"></div>`}
-function vTT(){const W=who();const t=rec.tt=rec.tt||{},d=rec.data||{},g=t.g||{},cl=t.cls||{},x=ro()?'disabled':'';
+function vTT(){const t=rec.tt=rec.tt||{},d=rec.data||{},g=t.g||{},cl=t.cls||{},x=ro()?'disabled':'';
 const I=(k,v,p)=>`<input ${x} value="${esc(v??'')}" oninput="S('tt','${k}',this.value)" placeholder="${p||''}">`;
-return`${W}<div class="c"><h2 style="text-align:center;border:2px solid var(--ink);border-radius:20px;padding:6px;max-width:360px;margin:0 auto 12px">التوقيت الأسبوعي للأستاذ</h2>
+return`<div class="c"><h2 style="text-align:center;border:2px solid var(--ink);border-radius:20px;padding:6px;max-width:360px;margin:0 auto 12px">التوقيت الأسبوعي للأستاذ</h2>
 <div class="g"><div><label>المؤسسة</label>${I('inst',t.inst??d.inst)}</div><div><label>السنة الدراسية</label>${I('year',t.year??yr())}</div><div><label>الأستاذ</label>${I('name',t.name??d.name)}</div><div><label>المادة</label>${I('subject',t.subject??'اللغة العربية')}</div></div>
 <div class="g" style="margin:10px 0"><div><label>الساعات الواجبة</label>${I('due',t.due??22)}</div><div><label>الساعات المعمولة</label>${I('done',t.done)}</div><div><label>الساعات الفائضة</label>${I('surplus',t.surplus)}</div><div><label>الساعات الإضافية</label>${I('extra',t.extra)}</div></div>
 <div class="tb"><table><tr><th>الأقسام</th><th>الساعة</th><th>الحجرات</th><th>عدد التلاميذ</th></tr>${[0,1,2,3].map(r=>`<tr>${[0,1,2,3].map(k=>`<td><input ${x} value="${esc(cl[r+'-'+k]??'')}" oninput="S('tt.cls','${r+'-'+k}',this.value)"></td>`).join('')}</tr>`).join('')}</table></div>
@@ -76,14 +75,14 @@ return`<div class="c"><div class="g"><div><label>بحث</label><input value="${e
 <div class="c tb"><table><tr><th>#</th><th>الاسم واللقب</th><th>المؤسسة</th><th>الصفة / الإطار</th><th>الهاتف</th><th>آخر زيارة</th><th>تجديد الزيارة</th><th>وضعية الآجال</th><th></th></tr>
 ${r.map((x,i)=>{const d=x.data||{},[s,b]=st(x),dd=due(x);return`<tr><td>${i+1}</td><td>${esc(d.name)}</td><td>${esc(d.inst)}</td><td>${esc(d.status)} / ${esc(d.frame)}</td><td>${esc(d.phone)}</td><td>${fd((x.insp||{}).last_visit)}</td><td>${dd?fd(dd.toISOString().slice(0,10)):'—'}</td><td><span class="bd ${b}">${s}</span></td><td><button class="p" onclick="open_('${x.id}')">فتح</button>${insp()?` <button class="d" onclick="delP('${x.id}')">حذف</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="9" class="m">لا توجد سجلات بعد.</td></tr>'}</table></div>`}
 let reps=[];
-async function go(k){if(k==='mine'){rec=own;view='data';render();return}if(k==='list')await loadList();view=k;if(k==='rep')await loadReps();render()}
+async function go(k){view=k;if(k==='rep')await loadReps();render()}
 async function loadReps(){const{data}=await c.from('wajih_reports').select('id,kind,data,published,created_at').eq('prof_id',rec.id).order('created_at',{ascending:false});reps=data||[]}
 async function delR(id){if(!confirm('حذف هذا التقرير نهائياً؟'))return;await c.from('wajih_reports').delete().eq('id',id);await loadReps();render()}
 const RK={peda:['التقرير التربوي','rapport-peda.html'],tarsim:['تقرير الترسيم','rapport-tarsim.html']};
 function vRep(){const u=k=>`${RK[k][1]}?prof=${rec.id}`;
 return`${insp()?`<div class="c np"><button class="p" onclick="location.href='${u('peda')}'">+ تقرير تربوي جديد</button> <button class="p" onclick="location.href='${u('tarsim')}'">+ تقرير ترسيم جديد</button></div>`:''}<div class="c tb"><table><tr><th>النوع</th><th>التاريخ</th><th>تفاصيل</th>${staff()?'<th>الحالة</th>':''}<th></th></tr>${reps.map(r=>{const x=r.data||{},k=RK[r.kind]?r.kind:'peda',t=k==='peda'?`${esc(x.cls)} · العلامة ${esc(x.mark)}`:`${esc(x.dec)} · المجموع ${(+x.s1||0)+(+x.s2||0)}/60`;return`<tr><td>${RK[k][0]}</td><td>${fd(x.date)}</td><td>${t}</td>${staff()?`<td>${r.published?'متاح للأستاذ':'مسودة'}</td>`:''}<td><button class="p" onclick="location.href='${u(k)}&r=${r.id}'">${insp()?'فتح / تحرير':'اطلاع'}</button>${insp()?` <button class="d" onclick="delR('${r.id}')">حذف</button>`:''}</td></tr>`}).join('')||`<tr><td colspan="5" class="m">لا توجد تقارير${staff()?'':' متاحة لك'}.</td></tr>`}</table></div>`}
-function render(keep){const T=staff()?[['list','قائمة الأساتذة'],['mine','بياناتي']]:[];if(rec)T.push(['data','البيانات'],['tt','استعمال الزمن'],['card','بطاقة المعلومات']);if(rec&&rec.id)T.push(['rep','التقارير']);
-const tabs=`<div class="tabs np">${T.map(([k,t])=>`<button class="${(k==='mine'?rec===own&&view!=='list':view===k)?'on':''}" onclick="go('${k}')">${t}</button>`).join('')}</div>`;
+function render(keep){const T=staff()?[['list','قائمة الأساتذة']]:[];if(rec)T.push(['data','البيانات'],['tt','استعمال الزمن'],['card','بطاقة المعلومات']);if(rec&&rec.id)T.push(['rep','التقارير']);
+const tabs=`<div class="tabs np">${T.map(([k,t])=>`<button class="${view===k?'on':''}" onclick="go('${k}')">${t}</button>`).join('')}</div>`;
 document.getElementById('app').innerHTML=tabs+({list:vList,data:vData,tt:vTT,card:vCard,rep:vRep}[view]||vData)();
 if(keep){const e=document.getElementById('qs');if(e){e.focus();e.setSelectionRange(q.length,q.length)}}}
 async function loadList(){const{data}=await c.from('wajih_prof').select('id,user_id,data,insp').order('updated_at',{ascending:false});list=data||[]}
@@ -94,8 +93,7 @@ async function out(){try{await PortalCloud.signOut()}catch(e){}location.href='in
 (async()=>{c=await PortalCloud.ready;const{data:s}=await c.auth.getSession();if(!s.session)return location.replace('index.html');
 const{data:p}=await c.from('wajih_profiles').select('*').eq('id',s.session.user.id).single();if(!p||!p.active)return location.replace('index.html');me=p;
 document.getElementById('who').textContent=(p.full_name||p.username)+' · '+({inspector:'مفتش',supervisor:'مشرف',teacher:'أستاذ'}[p.role]);
-const{data:o}=await c.from('wajih_prof').select('*').eq('user_id',p.id).maybeSingle();own=o||{user_id:p.id,data:{name:p.full_name||''},insp:{},tt:{},photo:null};
-if(staff()){await loadList();view='list';rec=null}else rec=own;
+if(staff()){await loadList();view='list';rec=null}else{const{data}=await c.from('wajih_prof').select('*').eq('user_id',p.id).maybeSingle();rec=data||{user_id:p.id,data:{name:p.full_name||''},insp:{},tt:{},photo:null}}
 render()})();
 </script>
 </body>

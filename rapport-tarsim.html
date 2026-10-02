@@ -6,20 +6,35 @@
 <title>تقرير تفتيش الترسيم — الوجيه في الإشراف التربوي</title>
 <script src="supabase-config.js"></script>
 <script src="portal-cloud.js"></script>
-<script src="export-word.js"></script>
-<link rel="stylesheet" href="report.css">
 <style>
-.ttl{background:#e7e6e6;border:1px solid #999;text-align:center;font-weight:bold;font-size:1.3em;width:78%;margin:6px auto;padding:2px 8px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-table.ls{width:100%;border-collapse:collapse;margin:4px 0}table.ls th,table.ls td{border:1px solid #000;padding:1px 6px}table.ls th{width:15%;font-weight:normal;text-align:right}table.ls td input{width:100%}
+:root{--ink:#1f3864;--gold:#c49b3f}
+*{box-sizing:border-box}body{margin:0;background:#e9e6dc;font-family:"Traditional Arabic",Amiri,Tahoma,serif;color:#111;font-size:13.5px;line-height:1.75}
+.bar{background:var(--ink);color:#fff;padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:4px solid var(--gold);font-family:Tajawal,Tahoma,sans-serif}
+.bar button,.bar a{background:transparent;color:#fff;border:1px solid #ffffff77;border-radius:9px;padding:5px 12px;font:inherit;cursor:pointer;text-decoration:none}.bar span{flex:1;font-size:.9rem}
+.bar label{font-size:.85rem}.ok{color:#9fe3b5}.er{color:#ffb3b3}.m{font-size:.85rem}
+.pg{width:210mm;max-width:100%;margin:12px auto;background:#fff;padding:10mm 12mm;box-shadow:0 2px 10px #0003;position:relative}
+input,textarea,select{font:inherit;color:#111;border:0;border-bottom:1px dotted #888;background:transparent;padding:0 3px;field-sizing:content;min-width:3em;max-width:100%}
+select{field-sizing:content;border:1px solid #bbb;border-radius:4px;padding:0 4px}
+input:focus,textarea:focus,select:focus{outline:0;background:#fff8d9}input:disabled,textarea:disabled,select:disabled{color:#111;-webkit-text-fill-color:#111;opacity:1}
+input.auto{background:#f1efe6}input[type=radio]{min-width:0;width:auto}
+.c{text-align:center}.u{text-decoration:underline}.b{font-weight:bold}.row{display:flex;justify-content:space-between;gap:4px 10px;flex-wrap:wrap}
+.code{text-align:left;font-weight:bold}
+.ttl{background:#e7e6e6;border:1px solid #999;text-align:center;font-weight:bold;font-size:1.25rem;width:78%;margin:6px auto;padding:2px 8px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+table.ls{width:100%;border-collapse:collapse;margin:4px 0}table.ls th,table.ls td{border:1px solid #000;padding:1px 6px}table.ls th{width:15%;font-weight:normal;text-align:right}
+table.ls td input{width:100%}
 .q{display:flex;gap:6px;align-items:flex-start}.q input{flex:1;width:100%}
 table.sc{width:100%;border-collapse:collapse;border:1px solid #000;margin-top:4px}table.sc td{border:1px solid #000;padding:2px 8px}
-.bxs{display:flex;justify-content:space-around;margin:10px 0}.bxs label{border:1px solid #000;padding:2px 14px;font-weight:bold;cursor:pointer}
-table.cm{width:100%;border-collapse:collapse;margin:8px 0}table.cm th,table.cm td{border:1px solid #000;padding:6px;text-align:center;height:38px}table.cm td input{width:100%;text-align:center}
-@media print{.ttl{width:80%}}
+.bxs{display:flex;justify-content:space-around;margin:8px 0}.bxs label{border:1px solid #000;padding:2px 14px;font-weight:bold;cursor:pointer}
+table.cm{width:100%;border-collapse:collapse;margin:6px 0}table.cm th,table.cm td{border:1px solid #000;padding:6px;text-align:center;height:34px}
+table.cm td input{width:100%;text-align:center}
+.pn{text-align:center;border-top:1px solid #000;margin-top:8px;font-weight:bold}
+@page{size:A4;margin:8mm}
+@media print{body{background:#fff}.bar{display:none}.pg{box-shadow:none;margin:0;padding:0;width:auto;break-after:page}.pg:last-child{break-after:auto}input,textarea{border-color:transparent}input.auto{background:transparent}select{border-color:transparent;appearance:none}}
+@media(max-width:700px){.pg{padding:8px}.ttl{width:95%}}
 </style>
 </head>
 <body>
-<div class="bar"><span id="who">جارٍ التحميل...</span><span id="sv" class="m"></span><button id="bs" onclick="save()">حفظ</button><label id="bp"><input type="checkbox" id="pub" onchange="pubT(this.checked)" style="min-width:0"> إتاحته للأستاذ</label><button onclick="expW()">تصدير Word</button><button onclick="print()">طباعة</button><a href="data-prof.html">رجوع</a></div>
+<div class="bar"><span id="who">جارٍ التحميل...</span><span id="sv" class="m"></span><button id="bs" onclick="save()">حفظ</button><label id="bp"><input type="checkbox" id="pub" onchange="pubT(this.checked)" style="min-width:0"> إتاحته للأستاذ</label><button onclick="print()">طباعة</button><a href="data-prof.html">رجوع</a></div>
 <datalist id="tl"></datalist>
 <div id="sheet"></div>
 <script>
@@ -73,7 +88,6 @@ document.getElementById('sheet').innerHTML=`
 <div class="row" style="margin-top:14px"><span>قسنطينة في: ${I('date','date')}</span><span class="b">مفتش التعليم المتوسط<br>${I('insp_name')}</span></div>
 <div style="text-align:left;margin:20px 60px 0 0" class="b">الإمضاء</div><div class="pn" style="margin-top:60px">ص-2</div></div>`;
 if(!insp())document.querySelectorAll('#sheet input,#sheet textarea,#sheet select').forEach(e=>e.disabled=true)}
-function expW(){exportWord(document.getElementById('sheet'),'تقرير_الترسيم_'+((((prof||{}).data)||{}).name||''))}
 function msg(t,e){const x=document.getElementById('sv');x.textContent=t;x.className='m '+(e?'er':'ok')}
 function S(e){const k=e.dataset.k;rep[k]=e.value;document.querySelectorAll(`[data-k="${k}"]`).forEach(o=>{if(o!==e&&o.value!==e.value)o.value=e.value});
 if(k==='dec')document.querySelectorAll('[name=dec]').forEach(r=>r.checked=r.value===rep.dec);if(k==='s1'||k==='s2')document.getElementById('tot').textContent=tot();

@@ -6,22 +6,33 @@
 <title>التقرير التربوي — الوجيه في الإشراف التربوي</title>
 <script src="supabase-config.js"></script>
 <script src="portal-cloud.js"></script>
-<script src="export-word.js"></script>
-<link rel="stylesheet" href="report.css">
 <style>
-.ttl{background:#5b9bd5;color:#fff;font-weight:bold;font-size:1.35em;text-align:center;border:2px solid #fff;outline:1px solid #5b9bd5;width:55%;margin:8px auto;padding:2px 8px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.ttl input{color:#fff;border:0;text-align:center;width:100%;font-weight:bold}.ttl input:disabled{color:#fff;-webkit-text-fill-color:#fff}
+:root{--ink:#1f3864;--gold:#c49b3f}
+*{box-sizing:border-box}body{margin:0;background:#e9e6dc;font-family:"Traditional Arabic",Amiri,Tahoma,serif;color:#111;font-size:14px;line-height:1.9}
+.bar{background:var(--ink);color:#fff;padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:4px solid var(--gold);font-family:Tajawal,Tahoma,sans-serif}
+.bar button,.bar a{background:transparent;color:#fff;border:1px solid #ffffff77;border-radius:9px;padding:5px 12px;font:inherit;cursor:pointer;text-decoration:none}.bar span{flex:1;font-size:.9rem}
+#sheet{width:210mm;max-width:100%;margin:12px auto;background:#fff;padding:12mm;box-shadow:0 2px 10px #0003}
+input,textarea{font:inherit;color:#111;border:0;border-bottom:1px dotted #888;background:transparent;padding:0 3px;field-sizing:content;min-width:3em;max-width:100%}
+input.auto{background:#f1efe6}input:focus,textarea:focus{outline:0;background:#fff8d9}input:disabled,textarea:disabled{color:#111;-webkit-text-fill-color:#111}
+.c{text-align:center}.u{text-decoration:underline}.b{font-weight:bold}
 .hd{display:flex;justify-content:space-between;gap:10px;margin-top:6px}.hd>div{flex:1}.hd .l{text-align:left}
-table.two{width:100%;height:100%;border-collapse:collapse;border-top:2px solid #000;border-bottom:2px solid #000}
+.code{text-align:left;font-weight:bold}
+.ttl{background:#5b9bd5;color:#fff;font-weight:bold;font-size:1.3rem;text-align:center;border:2px solid #fff;outline:1px solid #5b9bd5;width:55%;margin:8px auto;padding:2px 8px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ttl input{color:#fff;border:0;text-align:center;width:100%;font-weight:bold}.ttl input:disabled{color:#fff;-webkit-text-fill-color:#fff}
+.row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+table.two{width:100%;border-collapse:collapse;border-top:2px solid #000;border-bottom:2px solid #000;margin-top:8px}
 table.two td{width:50%;vertical-align:top;padding:4px 8px}table.two td:first-child{border-left:2px solid #000}
-.sh{font-weight:bold;text-decoration:underline;margin-top:6px}.ln{display:flex;flex-wrap:wrap;gap:2px 14px}
-textarea{width:100%;min-height:10em;border:1px solid #bbb;line-height:2;field-sizing:content}
-.sig{display:flex;justify-content:space-around;margin-top:28px;font-weight:bold}
-@media print{.ttl{width:60%}textarea{border:0}}
+.sh{font-weight:bold;text-decoration:underline;margin-top:6px}.ln{display:flex;flex-wrap:wrap;gap:4px 14px}
+textarea{width:100%;min-height:9em;border:1px solid #bbb;line-height:2;field-sizing:content}
+.pg2{break-before:page;margin-top:14px}.sig{display:flex;justify-content:space-around;margin-top:24px;font-weight:bold}
+.m{font-size:.85rem}.ok{color:#9fe3b5}.er{color:#ffb3b3}
+@page{size:A4;margin:10mm}
+@media print{input.auto{background:transparent}body{background:#fff}.bar{display:none}#sheet{box-shadow:none;margin:0;padding:0;width:auto}input,textarea{border-color:transparent}textarea{border:0}}
+@media(max-width:700px){#sheet{padding:8px}.ttl{width:90%}}
 </style>
 </head>
 <body>
-<div class="bar"><span id="who">جارٍ التحميل...</span><span id="sv" class="m"></span><button id="bs" onclick="save()">حفظ</button><label id="bp" class="m"><input type="checkbox" id="pub" onchange="pubT(this.checked)" style="min-width:0"> إتاحته للأستاذ</label><button id="ba" onclick="adopt()">اعتماد التاريخ والعلامة في ملف الأستاذ</button><button onclick="expW()">تصدير Word</button><button onclick="print()">طباعة</button><a id="bk" href="data-prof.html">رجوع</a></div>
+<div class="bar"><span id="who">جارٍ التحميل...</span><span id="sv" class="m"></span><button id="bs" onclick="save()">حفظ</button><label id="bp" class="m"><input type="checkbox" id="pub" onchange="pubT(this.checked)" style="min-width:0"> إتاحته للأستاذ</label><button id="ba" onclick="adopt()">اعتماد التاريخ والعلامة في ملف الأستاذ</button><button onclick="print()">طباعة</button><a id="bk" href="data-prof.html">رجوع</a></div>
 <datalist id="yn"><option>نعم</option><option>لا</option><option>/</option><option>نسبيا</option><option>مقبول</option><option>حسنة</option><option>ضعيفة</option><option>صحيحة</option><option>بنسبة مرضية</option></datalist>
 <div id="sheet"></div>
 <script>
@@ -46,7 +57,7 @@ const seg=s=>`<span>${esc(s[0])} ${s[1]?I(s[1],s[2]):''}</span>`;
 const col=a=>a.map(([h,ls])=>`<div class="sh">${h}</div>${ls.map(l=>`<div class="ln">${l.map(seg).join('')}</div>`).join('')}`).join('');
 const info=(a,k,w)=>`<span>${a} ${I(k,'text',w)}</span>`;
 function build(){document.getElementById('sheet').innerHTML=`
-<div class="pg"><div class="c b">الجمهوريّة الجزائريّة الديمقراطيّة الشعبيّة</div><div class="c b u">وزارة التربيّة الوطنيّة</div><div class="code">ت.إ.06</div>
+<div class="c b">الجمهوريّة الجزائريّة الديمقراطيّة الشعبيّة</div><div class="c b u">وزارة التربيّة الوطنيّة</div><div class="code">ت.إ.06</div>
 <div class="hd"><div>مديرية التربية لولاية قسنطينة<br>مفتشية التربية والتعليم المتوسط<br>مفتش المادة ${I('insp_name','x')}<br>المقاطعة الثانية</div><div class="l">المتوسطة: ${I('inst','x')}<br>${I('commune','x')}</div></div>
 <div class="ttl"><input data-k="title" value="${esc(rep.title)}" oninput="S(this)"></div>
 <div class="row"><span>المـادّة: ${I('subject','x')}</span><span>السّنة الدّراسيّة: ${I('year','x')}</span></div>
@@ -54,15 +65,14 @@ function build(){document.getElementById('sheet').innerHTML=`
 <div class="row">${info('تاريخ الميلاد ومكانه:','birth')}${info('تاريخ أوّل تعيين:','hire')}${info('الإطـــــار:','frame')}</div>
 <div class="row">${info('السلّم:','scale')}${info('الدرجة:','degree')}${info('تاريخ الدَّرجـة :','degree_date')}</div>
 <div class="row">${info('المؤهّل العلمي:','qual')}${info('تاريخ آخر تفتيش:','last')}${info('العلامة:','pmark')}</div>
-<div class="grow"><table class="two"><tr><td>${col(R)}</td><td>${col(Lf)}</td></tr></table></div></div>
-<div class="pg"><div class="c b u" style="font-size:1.2rem">الإرشادات التّربويّـــة</div><textarea data-k="guid" oninput="S(this)">${esc(rep.guid)}</textarea>
+<table class="two"><tr><td>${col(R)}</td><td>${col(Lf)}</td></tr></table>
+<div class="pg2"><div class="c b u" style="font-size:1.2rem">الإرشادات التّربويّـــة</div><textarea data-k="guid" oninput="S(this)">${esc(rep.guid)}</textarea>
 <p class="b">التقدير العام بعد حضور الدرس، والاطلاع على الملف الإداري ومناقشة الأستاذ(ة) ${I('name','x')}:</p>
 <div class="row"><span>العلامة بالحروف: ${I('mark_l','x')}</span><span>تقرير حرّره مفتش المادة: ${I('insp_name','x')}</span></div>
 <div class="row"><span>العلامة بالأرقـــــام: ${I('mark','x')}</span></div>
 <div class="row"><span>اطلع عليه المعني في: ${I('seen','x')}</span><span>السيد(ة): ${I('who','x')}</span><span>في قسنطينة بتاريخ: ${I('rdate','x')}</span></div>
 <div class="sig"><span>الإمضاء</span><span>الإمضاء</span></div></div>`;
 if(!insp())document.querySelectorAll('#sheet input,#sheet textarea').forEach(e=>e.disabled=true)}
-function expW(){exportWord(document.getElementById('sheet'),'التقرير_التربوي_'+((((prof||{}).data)||{}).name||''))}
 function msg(t,e){const x=document.getElementById('sv');x.textContent=t;x.className='m '+(e?'er':'ok')}
 function S(e){rep[e.dataset.k]=e.value;if(e.dataset.k==='date')document.querySelectorAll('[data-k="year"]').forEach(o=>o.value=yrOf(rep.date));document.querySelectorAll(`[data-k="${e.dataset.k}"]`).forEach(o=>{if(o!==e)o.value=e.value});if(insp()){msg('جارٍ الحفظ...');clearTimeout(tm);tm=setTimeout(save,1000)}}
 async function save(){if(!insp())return;const now=new Date().toISOString();
