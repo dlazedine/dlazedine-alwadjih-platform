@@ -4,12 +4,113 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>التقرير التربوي — الوجيه في الإشراف التربوي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <script src="supabase-config.js"></script>
 <script src="portal-cloud.js"></script>
 <script src="datefmt.js"></script>
 <script src="export-word.js"></script>
 <link rel="stylesheet" href="report.css">
 <style>
+/* ===== خلفية إسلامية عربية فاخرة وأزرار ملكية مذهبة ===== */
+body{
+  margin:0;
+  font-family:'Tajawal',Tahoma,sans-serif;
+  color:#152238;
+  background-color: #faf7ef;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(196,155,63,0.12) 0%, transparent 60%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><defs><pattern id='islamic-rep' width='80' height='80' patternUnits='userSpaceOnUse'><g fill='none' stroke='%23c49b3f' stroke-width='0.6' opacity='0.20'><path d='M40 16 L47 27 L60 20 L57 34 L71 39 L60 48 L68 60 L54 61 L51 75 L40 66 L29 75 L26 61 L12 60 L20 48 L9 39 L23 34 L20 20 L33 27 Z'/><rect x='28' y='28' width='24' height='24' rx='2'/><rect x='28' y='28' width='24' height='24' rx='2' transform='rotate(45 40 40)'/><circle cx='40' cy='40' r='6' fill='%23c49b3f' fill-opacity='0.08'/></g></pattern></defs><rect width='80' height='80' fill='url(%23islamic-rep)'/></svg>");
+  background-attachment: fixed;
+}
+
+.bar{
+  background: linear-gradient(135deg, #091c33 0%, #0e2744 50%, #153861 100%);
+  color:#fff;
+  padding:12px 20px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  border-bottom:3.5px solid #c49b3f;
+  box-shadow:0 4px 20px rgba(9,28,51,0.35);
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+.bar span#who{
+  font-weight:800;
+  font-size:0.95rem;
+  color:#fce8bd;
+  margin-left:auto;
+}
+.bar .m{
+  font-size:0.85rem;
+  color:#e0eaf5;
+}
+
+/* الأزرار الإسلامية الفاخرة بحجم متناسق */
+.bar button, .bar a{
+  background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%);
+  color: #0c2540;
+  border: 1.5px solid #fff2cc;
+  border-radius: 7px;
+  padding: 4px 11px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.bar button:hover, .bar a:hover{
+  background: linear-gradient(135deg, #ffffff 0%, #f7e7c4 100%);
+  color: #0e2744;
+  border-color: #d4af37;
+  box-shadow: 0 4px 14px rgba(212,175,55,0.55);
+  transform: translateY(-2px);
+}
+.bar button:active, .bar a:active{
+  transform: translateY(0);
+}
+
+.bar #bs{
+  background: linear-gradient(135deg, #1b7a43 0%, #11532c 100%);
+  color: #ffffff;
+  border-color: #72cf97;
+}
+.bar #bs:hover{
+  background: linear-gradient(135deg, #239c56 0%, #176f3c 100%);
+  color: #ffffff;
+  border-color: #aff0c8;
+}
+
+.bar #ba{
+  background: linear-gradient(135deg, #0e2744 0%, #1f426e 100%);
+  color: #fce8bd;
+  border-color: #c49b3f;
+}
+.bar #ba:hover{
+  background: linear-gradient(135deg, #d4af37 0%, #a67c1e 100%);
+  color: #0e2744;
+  border-color: #fff;
+}
+
+.bar label{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+  color:#fff;
+  font-size:0.85rem;
+  font-weight:700;
+}
+
 .ttl{background:#5b9bd5;color:#fff;font-weight:bold;font-size:1.35em;text-align:center;border:2px solid #fff;outline:1px solid #5b9bd5;width:55%;margin:8px auto;padding:2px 8px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .ttl input{color:#fff;border:0;text-align:center;width:100%;font-weight:bold}.ttl input:disabled{color:#fff;-webkit-text-fill-color:#fff}
 .hd{display:flex;justify-content:space-between;gap:10px;margin-top:6px}.hd>div{flex:1}.hd .l{text-align:left}
@@ -18,7 +119,7 @@ table.two td{width:50%;vertical-align:top;padding:4px 8px}table.two td:first-chi
 .sh{font-weight:bold;text-decoration:underline;margin-top:6px}.ln{display:flex;flex-wrap:wrap;gap:2px 14px}
 textarea{width:100%;min-height:10em;border:1px solid #bbb;line-height:2;field-sizing:content}
 .sig{display:flex;justify-content:space-around;margin-top:28px;font-weight:bold}
-@media print{.ttl{width:60%}textarea{border:0}}
+@media print{.ttl{width:60%}textarea{border:0}body{background:#fff!important;background-image:none!important}}
 </style>
 </head>
 <body>
