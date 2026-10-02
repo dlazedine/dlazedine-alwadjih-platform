@@ -6,6 +6,7 @@
 <title>التقرير التربوي — الوجيه في الإشراف التربوي</title>
 <script src="supabase-config.js"></script>
 <script src="portal-cloud.js"></script>
+<script src="datefmt.js"></script>
 <script src="export-word.js"></script>
 <link rel="stylesheet" href="report.css">
 <style>
@@ -41,7 +42,7 @@ const Lf=[['إنجاز الدرس :',[[['المعلومات : قيمتها:','in
 ['مراقبة أعمال التلاميذ :',[[['دفاتر التلاميذ : هل هي مراقبة ؟','nb']],[['هل يعتني بها التلاميذ ؟','care']],[['الفروض المنزلية :','hw']],[['هل هي كافية ؟','hw_en']],[['هل هي مصحّحة ومناسبة ؟','hw_c']],[['هل يحتفظ بها التلاميذ ؟','keep']]]]];
 let c,me,prof,rep={},repId=null,tm=null,published=false;
 const insp=()=>me.role==='inspector';
-const I=(k,t,w)=>{const a=AUTO.includes(k);return`<input data-k="${k}" type="${t||'text'}" ${(!t||t==='text')&&!a?'list="yn"':''} value="${esc(a?(B()[k]??rep[k]):rep[k])}" ${a?'disabled class="auto"':''} ${w?`style="width:${w}"`:''} oninput="S(this)">`};
+const I=(k,t,w)=>{const a=AUTO.includes(k);if(t==='date'||t==='time'){const d=t==='date';return`<input data-k="${k}" data-f="${t}" type="text" inputmode="numeric" placeholder="${d?'jj/mm/aaaa':'hh:mm'}" maxlength="${d?10:5}" value="${esc(d?DF.show(rep[k]):rep[k])}" style="width:${d?'7.5em':'4.5em'}" oninput="S(this)">`}return`<input data-k="${k}" type="${t||'text'}" ${(!t||t==='text')&&!a?'list="yn"':''} value="${esc(a?(B()[k]??rep[k]):rep[k])}" ${a?'disabled class="auto"':''} ${w?`style="width:${w}"`:''} oninput="S(this)">`};
 const seg=s=>`<span>${esc(s[0])} ${s[1]?I(s[1],s[2]):''}</span>`;
 const col=a=>a.map(([h,ls])=>`<div class="sh">${h}</div>${ls.map(l=>`<div class="ln">${l.map(seg).join('')}</div>`).join('')}`).join('');
 const info=(a,k,w)=>`<span>${a} ${I(k,'text',w)}</span>`;
@@ -65,7 +66,7 @@ if(!insp())document.querySelectorAll('#sheet input,#sheet textarea').forEach(e=>
 function expW(){exportWord(document.getElementById('sheet'),'التقرير_التربوي_'+((((prof||{}).data)||{}).name||''))}
 const errT=m=>/wajih_reports|schema cache/i.test(m)?'جدول التقارير غير موجود في Supabase: شغّل ملف supabase.sql ثم أعد المحاولة':m;
 function msg(t,e){const x=document.getElementById('sv');x.textContent=t;x.className='m '+(e?'er':'ok')}
-function S(e){rep[e.dataset.k]=e.value;if(e.dataset.k==='date')document.querySelectorAll('[data-k="year"]').forEach(o=>o.value=yrOf(rep.date));document.querySelectorAll(`[data-k="${e.dataset.k}"]`).forEach(o=>{if(o!==e)o.value=e.value});if(insp()){msg('جارٍ الحفظ...');clearTimeout(tm);tm=setTimeout(save,1000)}}
+function S(e){const f=e.dataset.f;let v=e.value;if(f){v=f==='date'?DF.iso(e):DF.time(e);if(v===undefined)return}rep[e.dataset.k]=v;if(e.dataset.k==='date')document.querySelectorAll('[data-k="year"]').forEach(o=>o.value=yrOf(rep.date));document.querySelectorAll(`[data-k="${e.dataset.k}"]`).forEach(o=>{if(o!==e)o.value=e.value});if(insp()){msg('جارٍ الحفظ...');clearTimeout(tm);tm=setTimeout(save,1000)}}
 async function save(){if(!insp())return;const now=new Date().toISOString();
 const r=repId?await c.from('wajih_reports').update({data:rep,published,updated_at:now}).eq('id',repId).select('id').single():await c.from('wajih_reports').insert({prof_id:prof.id,kind:'peda',data:rep,published,created_by:me.id,created_by_name:me.full_name||me.username}).select('id').single();
 if(r.error)return msg('تعذّر الحفظ: '+errT(r.error.message),1);repId=r.data.id;history.replaceState(null,'','?prof='+prof.id+'&r='+repId);msg('تم الحفظ ✓')}

@@ -6,6 +6,7 @@
 <title>تقرير تفتيش الترسيم — الوجيه في الإشراف التربوي</title>
 <script src="supabase-config.js"></script>
 <script src="portal-cloud.js"></script>
+<script src="datefmt.js"></script>
 <script src="export-word.js"></script>
 <link rel="stylesheet" href="report.css">
 <style>
@@ -30,7 +31,7 @@ const AUTO=['name','maiden','school','bdate','bplace','since','decno','decdate',
 const B=()=>{const d=prof.data||{};return{name:d.name,maiden:d.maiden,school:d.inst,bdate:fd(d.birth_date),bplace:d.birth_place,since:fd(d.tr_since),decno:d.tr_dec_no,decdate:fd(d.tr_dec_date),visa:d.visa_no,visadate:fd(d.visa_date),qual:d.qual,certno:d.cert_no,certplace:d.cert_place,contest:d.contest,contestdate:fd(d.contest_date)}};
 let c,me,prof,rep={},repId=null,tm=null,published=false,tl=[];
 const insp=()=>me.role==='inspector';
-const I=(k,t,w)=>{const a=AUTO.includes(k);return`<input data-k="${k}" type="${t||'text'}" value="${esc(a?(B()[k]??rep[k]):rep[k])}" ${a?'disabled class="auto"':''} ${w?`style="width:${w}"`:''} oninput="S(this)">`};
+const I=(k,t,w)=>{const a=AUTO.includes(k);if(t==='date'||t==='time'){const d=t==='date';return`<input data-k="${k}" data-f="${t}" type="text" inputmode="numeric" placeholder="${d?'jj/mm/aaaa':'hh:mm'}" maxlength="${d?10:5}" value="${esc(d?DF.show(rep[k]):rep[k])}" style="width:${d?'7.5em':'4.5em'}" oninput="S(this)">`}return`<input data-k="${k}" type="${t||'text'}" value="${esc(a?(B()[k]??rep[k]):rep[k])}" ${a?'disabled class="auto"':''} ${w?`style="width:${w}"`:''} oninput="S(this)">`};
 const SEL=(k,o)=>`<select data-k="${k}" onchange="S(this)"><option value=""></option>${o.map(x=>`<option ${rep[k]===x?'selected':''}>${x}</option>`).join('')}</select>`;
 const J=(a,k,w,t)=>`<span>${a} ${I(k,t||'text',w)}</span>`;
 const LR=[['المادة','mat'],['المقطع التعلمي','seg'],['الميدان','dom'],['النشاط','act'],['المحتوى المعرفي','cnt']];
@@ -76,7 +77,7 @@ if(!insp())document.querySelectorAll('#sheet input,#sheet textarea,#sheet select
 function expW(){exportWord(document.getElementById('sheet'),'تقرير_الترسيم_'+((((prof||{}).data)||{}).name||''))}
 const errT=m=>/wajih_reports|schema cache/i.test(m)?'جدول التقارير غير موجود في Supabase: شغّل ملف supabase.sql ثم أعد المحاولة':m;
 function msg(t,e){const x=document.getElementById('sv');x.textContent=t;x.className='m '+(e?'er':'ok')}
-function S(e){const k=e.dataset.k;rep[k]=e.value;document.querySelectorAll(`[data-k="${k}"]`).forEach(o=>{if(o!==e&&o.value!==e.value)o.value=e.value});
+function S(e){const k=e.dataset.k,f=e.dataset.f;let v=e.value;if(f){v=f==='date'?DF.iso(e):DF.time(e);if(v===undefined)return}rep[k]=v;document.querySelectorAll(`[data-k="${k}"]`).forEach(o=>{const s=f==='date'?DF.show(v):v;if(o!==e&&o.value!==s)o.value=s});
 if(k==='dec')document.querySelectorAll('[name=dec]').forEach(r=>r.checked=r.value===rep.dec);if(k==='s1'||k==='s2')document.getElementById('tot').textContent=tot();
 if(insp()){msg('جارٍ الحفظ...');clearTimeout(tm);tm=setTimeout(save,1000)}}
 function mem(e,i){S(e);const t=tl.find(x=>(x.data||{}).name===e.value);if(t&&(t.data||{}).inst){const o=document.querySelector(`[data-k="m${i}i"]`);o.value=t.data.inst;rep['m'+i+'i']=t.data.inst}}

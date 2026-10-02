@@ -77,6 +77,3 @@ function buildDocx(root){const body=dFlow(wordNorm(root),{},{n:0,pb:0}),NS='xmln
     'word/styles.xml':H+`<w:styles ${NS}><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Tahoma" w:hAnsi="Tahoma" w:cs="Tahoma"/><w:sz w:val="${SZ}"/><w:szCs w:val="${SZ}"/><w:lang w:val="ar-DZ" w:bidi="ar-DZ"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:bidi/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style></w:styles>`,
     'word/document.xml':H+`<w:document ${NS}><w:body>${body}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="850" w:right="850" w:bottom="850" w:left="850" w:header="400" w:footer="400" w:gutter="0"/><w:bidi/></w:sectPr></w:body></w:document>`})}
 function exportWord(root,name){const a=document.createElement('a');a.href=URL.createObjectURL(buildDocx(root));a.download=name+'.docx';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}
-/* الطباعة: إخفاء حقول التاريخ والوقت الفارغة بدل ظهور «-- : --» */
-addEventListener('beforeprint',()=>document.querySelectorAll('input[type=date],input[type=time]').forEach(i=>{if(!i.value)i.classList.add('blank')}));
-addEventListener('afterprint',()=>document.querySelectorAll('input.blank').forEach(i=>i.classList.remove('blank')));

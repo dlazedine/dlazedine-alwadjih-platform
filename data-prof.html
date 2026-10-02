@@ -6,6 +6,7 @@
 <title>بيانات الأساتذة — الوجيه في الإشراف التربوي</title>
 <script src="supabase-config.js"></script>
 <script src="portal-cloud.js"></script>
+<script src="datefmt.js"></script>
 <style>
 :root{--ink:#1f3864;--gold:#c49b3f;--bg:#f3f1ea;--cd:#fff;--ln:#ddd5bd;--tx:#1f2a44;--mu:#6b7280}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:Tajawal,Tahoma,sans-serif;line-height:1.7}
@@ -51,7 +52,9 @@ function S(g,k,v){const o=g.split('.').reduce((a,x)=>a[x]=a[x]||{},rec);o[k]=v;s
 function pick(f){if(!f.files[0])return;const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const s=Math.min(1,320/Math.max(i.width,i.height)),k=document.createElement('canvas');k.width=i.width*s;k.height=i.height*s;k.getContext('2d').drawImage(i,0,0,k.width,k.height);rec.photo=k.toDataURL('image/jpeg',.82);sv();render()};i.src=r.result};r.readAsDataURL(f.files[0])}
 function fld(g,[k,t,ty]){const v=(rec[g]||{})[k]??'',d=(g==='insp'?!insp():ro())?'disabled':'';
 if(L[ty])return`<div><label>${t}</label><select ${d} onchange="S('${g}','${k}',this.value)"><option value="">—</option>${L[ty].map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select></div>`;
+if(ty==='date')return`<div><label>${t}</label><input type="text" inputmode="numeric" placeholder="jj/mm/aaaa" maxlength="10" ${d} value="${esc(DF.show(v))}" oninput="Sd('${g}','${k}',this)"></div>`;
 return`<div><label>${t}</label><input type="${ty}" ${d} value="${esc(v)}" oninput="S('${g}','${k}',this.value)"></div>`}
+function Sd(g,k,e){const r=DF.iso(e);if(r===undefined)return;S(g,k,r)}
 function who(){return staff()&&rec?`<div class="m np" style="margin-bottom:8px">السجل المعروض: <b>${esc((rec.data||{}).name||'—')}</b>${rec===own?' (بياناتي — يمكنك تعديلها)':ro()?' (للعرض فقط)':''}</div>`:''}
 function vData(){const p=rec.photo?`<img class="ph" src="${rec.photo}">`:'<div class="ph">لا توجد صورة</div>';
 return`${who()}<div class="c"><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start"><div>${p}${ro()?'':'<label class="np" style="margin-top:6px">رفع صورة<input type="file" accept="image/*" onchange="pick(this)"></label>'}</div><div class="g" style="flex:1;min-width:260px">${F.map(f=>fld('data',f)).join('')}</div></div></div>

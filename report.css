@@ -25,4 +25,3 @@ input.auto{background:#f1efe6}input[type=radio]{min-width:0;width:auto}
  input,textarea{border-color:transparent}input.auto{background:transparent}select{border-color:transparent;appearance:none}
 }
 @media(max-width:700px){.pg{padding:8px}}
-@media print{input.blank::-webkit-datetime-edit,input.blank::-webkit-calendar-picker-indicator{visibility:hidden}}
