@@ -9,7 +9,7 @@
 <title>لوحة التحكم - حسابات الأساتذة ومراقبة النشاطات والمعالجة البيداغوجية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -47,98 +47,126 @@
 
 <style>
     :root {
-        --primary: #1a3d6e; --primary-light: #eef3f9; --navy-deep: #0f2340;
-        --gold: #c49b3f; --gold-deep: #a6802f; --gold-light: #f5e6c8;
-        --danger: #b22234; --success: #1e7e34; --warning: #b38b2b; --info: #17a2b8; --teal: #167c80;
-        --text-dark: #17324d; --text-muted: #5d7182; --bg-body: #f0f4f8; --bg-card: #ffffff;
-        --border-color: #d8e4df; --radius: 14px; --shadow: 0 8px 30px rgba(0,0,0,0.08); --transition: all 0.25s ease;
+        --primary: #0e2744; --primary-light: #eef3f9; --navy-deep: #091c33;
+        --gold: #c49b3f; --gold-deep: #a6802f; --gold-light: #fce8bd;
+        --danger: #8b1827; --success: #1b7a43; --warning: #b38b2b; --info: #17728b; --teal: #167c80;
+        --text-dark: #152238; --text-muted: #5d6b7b; --bg-body: #faf7ef; --bg-card: #ffffff;
+        --border-color: #d9ceb4; --radius: 12px; --shadow: 0 4px 18px rgba(14,39,68,0.06); --transition: all 0.22s ease;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif; background: var(--bg-body); color: var(--text-dark); line-height: 1.8; }
 
-    #reauthScreen { min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(150deg,#0f2340,#1a3d6e); padding:20px; }
-    .reauth-box { background:#fff; width:100%; max-width:380px; border-radius:16px; padding:34px 30px; box-shadow:0 20px 60px rgba(0,0,0,0.35); text-align:center; }
-    .reauth-box .icon { width:56px; height:56px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 16px; }
-    .reauth-box h1 { font-size:18px; color:var(--text-dark); margin-bottom:6px; }
-    .reauth-box p { font-size:12.5px; color:var(--text-muted); margin-bottom:20px; }
-    .reauth-box input { width:100%; padding:12px 14px; border:1px solid var(--border-color); border-radius:8px; font-family:inherit; font-size:14px; margin-bottom:14px; }
-    .reauth-box button { width:100%; padding:13px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-family:inherit; font-size:14.5px; font-weight:700; cursor:pointer; }
-    .reauth-msg { display:none; text-align:right; font-size:12.5px; padding:10px 14px; border-radius:8px; margin-bottom:14px; background:#fbeceb; color:var(--danger); }
-    .reauth-box a { display:inline-block; margin-top:16px; font-size:12px; color:var(--text-muted); }
+    /* ===== خلفية عربية إسلامية فاخرة ===== */
+    body {
+        font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
+        color: var(--text-dark);
+        line-height: 1.8;
+        background-color: var(--bg-body);
+        background-image: 
+            radial-gradient(circle at 50% 0%, rgba(196,155,63,0.12) 0%, transparent 60%),
+            radial-gradient(circle at 100% 100%, rgba(14,39,68,0.06) 0%, transparent 50%),
+            url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><defs><pattern id='islamic-dash' width='80' height='80' patternUnits='userSpaceOnUse'><g fill='none' stroke='%23c49b3f' stroke-width='0.6' opacity='0.22'><path d='M40 16 L47 27 L60 20 L57 34 L71 39 L60 48 L68 60 L54 61 L51 75 L40 66 L29 75 L26 61 L12 60 L20 48 L9 39 L23 34 L20 20 L33 27 Z'/><rect x='28' y='28' width='24' height='24' rx='2'/><rect x='28' y='28' width='24' height='24' rx='2' transform='rotate(45 40 40)'/><circle cx='0' cy='0' r='14'/><circle cx='80' cy='0' r='14'/><circle cx='0' cy='80' r='14'/><circle cx='80' cy='80' r='14'/><circle cx='40' cy='40' r='6' fill='%23c49b3f' fill-opacity='0.08'/></g></pattern></defs><rect width='80' height='80' fill='url(%23islamic-dash)'/></svg>");
+        background-attachment: fixed;
+    }
+
+    #reauthScreen { min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(150deg,#091c33,#0e2744); padding:20px; }
+    .reauth-box { background:#fff; width:100%; max-width:380px; border-radius:16px; padding:32px 28px; box-shadow:0 12px 40px rgba(0,0,0,0.3); text-align:center; border-top:3.5px solid var(--gold); }
+    .reauth-box .icon { width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,#faf7ef,#f4eedd); color:var(--gold-deep); display:flex; align-items:center; justify-content:center; font-size:20px; margin:0 auto 14px; border:1px solid var(--gold); }
+    .reauth-box h1 { font-family:'Amiri',serif; font-size:19px; color:var(--text-dark); margin-bottom:6px; font-weight:700; }
+    .reauth-box p { font-size:12px; color:var(--text-muted); margin-bottom:18px; }
+    .reauth-box input { width:100%; padding:9px 12px; border:1.5px solid var(--border-color); border-radius:8px; font-family:inherit; font-size:13px; margin-bottom:12px; }
+    .reauth-box input:focus { outline:none; border-color:var(--gold); }
+    .reauth-box button { width:100%; padding:9px 14px; border:1.5px solid #fff2cc; border-radius:8px; background:linear-gradient(135deg,var(--gold),#aa7c11); color:#0c2540; font-family:inherit; font-size:13.5px; font-weight:800; cursor:pointer; box-shadow:0 2px 7px rgba(0,0,0,0.2); transition:var(--transition); }
+    .reauth-box button:hover { background:linear-gradient(135deg,#ffffff,#f7e7c4); transform:translateY(-1.5px); }
+    .reauth-msg { display:none; text-align:right; font-size:12px; padding:8px 12px; border-radius:8px; margin-bottom:12px; background:#fbeceb; color:var(--danger); }
+    .reauth-box a { display:inline-block; margin-top:14px; font-size:11.5px; color:var(--text-muted); text-decoration:none; }
+    .reauth-box a:hover { color:var(--gold); }
 
     #ssoLoadingScreen { min-height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; }
-    .spin { width:38px; height:38px; border:3px solid var(--border-color); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; }
+    .spin { width:36px; height:36px; border:3px solid #d9ceb4; border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     #appScreen { display:none; }
 
-    .user-bar { background: var(--navy-deep); color:#eaf1f8; padding:10px 24px; display:flex; align-items:center; justify-content:space-between; font-size:13px; flex-wrap:wrap; gap:8px; }
-    .user-bar a, .user-bar button { color:#dbe6f0; text-decoration:none; background:none; border:1px solid rgba(255,255,255,0.25); font-family:inherit; font-size:12.5px; padding:6px 14px; border-radius:20px; cursor:pointer; }
-    .user-bar .right { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .user-bar { background: linear-gradient(135deg, #091c33 0%, #0e2744 50%, #153861 100%); color:#f7e7c4; padding:8px 20px; display:flex; align-items:center; justify-content:space-between; font-size:12px; flex-wrap:wrap; gap:8px; border-bottom:3px solid var(--gold); box-shadow:0 3px 15px rgba(9,28,51,0.3); }
+    .user-bar a, .user-bar button { color:#faeccf; text-decoration:none; background:linear-gradient(135deg, rgba(196,155,63,0.18) 0%, rgba(14,39,68,0.7) 100%); border:1.5px solid var(--gold); font-family:inherit; font-size:11.5px; font-weight:700; padding:4px 11px; border-radius:7px; cursor:pointer; transition:var(--transition); box-shadow:0 2px 5px rgba(0,0,0,0.2); display:inline-flex; align-items:center; gap:4px; }
+    .user-bar a:hover, .user-bar button:hover { background:linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); color:#0c2540; border-color:#fff2cc; transform:translateY(-1.5px); }
+    .user-bar .right { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
 
-    .hero { background: linear-gradient(150deg, var(--navy-deep) 0%, var(--primary) 100%); color:#fff; padding:30px 24px; text-align:center; }
-    .hero h1 { font-size: clamp(20px, 3.5vw, 27px); margin-bottom:6px; }
-    .hero p { color:#cfdcea; font-size:13px; }
+    .hero { background: linear-gradient(150deg, #091c33 0%, #0e2744 50%, #153861 100%); color:#fff; padding:22px 20px; text-align:center; border-bottom:1px solid rgba(196,155,63,0.3); }
+    .hero h1 { font-family:'Amiri',serif; font-size: clamp(18px, 3.2vw, 24px); margin-bottom:4px; font-weight:700; color:#fff; }
+    .hero p { color:#fce8bd; font-size:12px; opacity:0.9; }
 
-    .main-tabs { display:flex; justify-content:center; gap:6px; background: var(--bg-card); border-bottom:1px solid var(--border-color); padding:0 20px; position:sticky; top:0; z-index:20; overflow-x:auto; }
-    .main-tab { padding:16px 22px; cursor:pointer; font-size:14px; font-weight:700; color: var(--text-muted); border-bottom:3px solid transparent; display:flex; align-items:center; gap:8px; white-space:nowrap; }
+    .main-tabs { display:flex; justify-content:center; gap:6px; background:#fff; border-bottom:2px solid var(--border-color); padding:0 16px; position:sticky; top:0; z-index:20; overflow-x:auto; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+    .main-tab { padding:11px 16px; cursor:pointer; font-size:12.5px; font-weight:700; color: var(--text-muted); border-bottom:3px solid transparent; display:flex; align-items:center; gap:6px; white-space:nowrap; transition:var(--transition); }
+    .main-tab:hover { color: var(--primary); }
     .main-tab.active { color: var(--primary); border-bottom-color: var(--gold); }
 
-    .tab-panel { display:none; max-width:1100px; margin:0 auto; padding:24px 20px 60px; }
+    .tab-panel { display:none; max-width:1100px; margin:0 auto; padding:18px 16px 50px; }
     .tab-panel.active { display:block; }
 
-    .btn { display:inline-flex; align-items:center; gap:7px; padding:10px 18px; border-radius:10px; border:none; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer; transition:var(--transition); }
-    .btn:hover { opacity:0.92; transform:translateY(-1px); }
-    .btn-success { background: var(--success); color:#fff; }
-    .btn-info { background: var(--info); color:#fff; }
-    .btn-gold { background: var(--gold); color:#0f2340; }
-    .btn-warning { background: var(--warning); color:#fff; }
-    .btn-danger { background: var(--danger); color:#fff; }
+    /* ===== الأزرار الإسلامية الفاخرة بحجم متناسق ومصغر دون مبالغة ===== */
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; padding:5px 12px; border-radius:8px; border:1.5px solid transparent; font-family:inherit; font-size:12px; font-weight:800; cursor:pointer; transition:var(--transition); box-shadow:0 2px 6px rgba(0,0,0,0.12); }
+    .btn:hover { transform:translateY(-1.5px); opacity:0.96; }
+    .btn:active { transform:translateY(0); }
+    .btn-success { background: linear-gradient(135deg, #1b7a43 0%, #11532c 100%); color:#fff; border-color:#72cf97; }
+    .btn-info { background: linear-gradient(135deg, #0e2744 0%, #1a3d6e 100%); color:#fcf6e8; border-color:var(--gold); }
+    .btn-gold { background: linear-gradient(135deg, #d4af37 0%, #a67c1e 100%); color:#0c2540; border-color:#fff3cc; }
+    .btn-warning { background: linear-gradient(135deg, #b38b2b 0%, #8c6a1e 100%); color:#fff; border-color:#fce8bd; }
+    .btn-danger { background: linear-gradient(135deg, #8b1827 0%, #630e19 100%); color:#fff; border-color:#bd3547; }
     .btn-outline { background:#fff; border:1.5px solid var(--border-color); color:var(--text-dark); }
-    .btn-sm { padding:6px 12px; font-size:12px; }
+    .btn-outline:hover { border-color:var(--gold); color:var(--primary); }
+    .btn-sm { padding:4px 9px; font-size:11px; border-radius:6px; }
 
-    .card-box { background: var(--bg-card); border:1px solid var(--border-color); border-radius: var(--radius); padding:20px; box-shadow: var(--shadow); margin-bottom:20px; }
-    .card-box h3 { font-size:15.5px; color: var(--primary); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+    .card-box { background: var(--bg-card); border:1px solid var(--border-color); border-top:3px solid var(--gold); border-radius: var(--radius); padding:16px; box-shadow: var(--shadow); margin-bottom:16px; }
+    .card-box h3 { font-size:14.5px; color: var(--primary); margin-bottom:12px; display:flex; align-items:center; gap:7px; font-weight:700; }
 
-    .user-card { display:flex; align-items:center; gap:14px; padding:14px; border:1px solid var(--border-color); border-radius:12px; margin-bottom:10px; flex-wrap:wrap; }
-    .user-card-avatar { width:42px; height:42px; border-radius:50%; background: var(--primary-light); color: var(--primary); display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; }
+    .user-card { display:flex; align-items:center; gap:12px; padding:11px 13px; border:1px solid var(--border-color); border-radius:10px; margin-bottom:8px; flex-wrap:wrap; background:#fff; transition:var(--transition); }
+    .user-card:hover { border-color:var(--gold); box-shadow:0 3px 10px rgba(196,155,63,0.15); }
+    .user-card-avatar { width:38px; height:38px; border-radius:50%; background: linear-gradient(135deg,#faf7ef,#f4eedd); color: var(--primary); border:1.5px solid var(--gold); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0; }
     .user-card-info { flex:1; min-width:180px; }
-    .user-card-info h4 { font-size:14px; }
-    .user-card-info p { font-size:12px; color: var(--text-muted); }
-    .user-card-role { font-size:11.5px; font-weight:700; padding:4px 12px; border-radius:16px; }
-    .user-card-role.inspector { background:#f5e6c8; color:#8c6423; }
-    .user-card-role.teacher { background:#eef3f9; color:var(--primary); }
-    .user-card-role.supervisor { background:#e3f4f5; color:var(--teal); }
+    .user-card-info h4 { font-size:13px; font-weight:700; }
+    .user-card-info p { font-size:11.5px; color: var(--text-muted); }
+    .user-card-role { font-size:11px; font-weight:700; padding:3px 10px; border-radius:14px; }
+    .user-card-role.inspector { background:#f5e6c8; color:#8c6423; border:1px solid var(--gold); }
+    .user-card-role.teacher { background:#eef3f9; color:var(--primary); border:1px solid #d0deee; }
+    .user-card-role.supervisor { background:#e3f4f5; color:var(--teal); border:1px solid #c2e5e7; }
 
-    .field-group { margin-bottom:14px; }
-    .field-group label { display:block; font-size:12.5px; font-weight:700; color: var(--primary); margin-bottom:6px; }
-    .field-group input, .field-group select { width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:8px; font-family:inherit; font-size:13px; }
+    .field-group { margin-bottom:11px; }
+    .field-group label { display:block; font-size:12px; font-weight:700; color: var(--primary); margin-bottom:4px; }
+    .field-group input, .field-group select { width:100%; padding:7px 11px; border:1.5px solid var(--border-color); border-radius:7px; font-family:inherit; font-size:12.5px; }
+    .field-group input:focus, .field-group select:focus { outline:none; border-color:var(--gold); }
 
-    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(15,35,64,0.55); z-index:100; align-items:center; justify-content:center; padding:16px; }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(9,28,51,0.6); z-index:100; align-items:center; justify-content:center; padding:16px; }
     .modal-overlay.active { display:flex; }
-    .modal-box { background:#fff; border-radius: var(--radius); width:100%; max-width:520px; padding:24px; max-height:85vh; overflow-y:auto; position:relative; }
-    .modal-close { position:absolute; top:16px; left:16px; background:none; border:none; font-size:20px; color:var(--text-muted); cursor:pointer; }
+    .modal-box { background:#fff; border-radius: var(--radius); width:100%; max-width:500px; padding:20px; max-height:85vh; overflow-y:auto; position:relative; border-top:3.5px solid var(--gold); box-shadow:0 12px 35px rgba(0,0,0,0.3); }
+    .modal-close { position:absolute; top:14px; left:14px; background:none; border:none; font-size:20px; color:var(--text-muted); cursor:pointer; }
 
-    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; margin-bottom:20px; }
-    .stat-card { background: var(--bg-card); border:1px solid var(--border-color); border-radius: var(--radius); padding:18px; text-align:center; }
-    .stat-card .number { font-size:26px; font-weight:900; color: var(--primary); }
-    .stat-card .label { font-size:12px; color: var(--text-muted); margin-top:4px; }
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:11px; margin-bottom:16px; }
+    .stat-card { background: var(--bg-card); border:1px solid var(--border-color); border-top:3px solid var(--gold); border-radius: var(--radius); padding:13px; text-align:center; box-shadow:var(--shadow); }
+    .stat-card .number { font-size:22px; font-weight:900; color: var(--primary); }
+    .stat-card .label { font-size:11.5px; color: var(--text-muted); margin-top:3px; }
 
-    table.teacher-table { width:100%; border-collapse:collapse; font-size:13px; }
-    table.teacher-table th { background: var(--bg-body); padding:10px; text-align:right; color: var(--text-muted); font-size:12px; }
-    table.teacher-table td { padding:10px; border-top:1px solid var(--border-color); }
+    table.teacher-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+    table.teacher-table th { background: linear-gradient(180deg, #f2ecdd 0%, #e6ddc5 100%); padding:8px 9px; text-align:right; color: var(--primary); font-size:11.5px; font-weight:700; border:1px solid var(--border-color); }
+    table.teacher-table td { padding:8px 9px; border:1px solid var(--border-color); }
 
-    .log-feed { max-height:420px; overflow-y:auto; }
-    .log-row { display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid var(--border-color); font-size:12.5px; }
-    .log-action-icon { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; color:#fff; flex-shrink:0; }
+    .log-feed { max-height:400px; overflow-y:auto; }
+    .log-row { display:flex; align-items:center; gap:9px; padding:8px; border-bottom:1px solid var(--border-color); font-size:12px; }
+    .log-action-icon { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; color:#fff; flex-shrink:0; }
     .log-action-icon.create { background: var(--success); }
     .log-action-icon.update { background: var(--info); }
     .log-action-icon.delete { background: var(--danger); }
     .log-teacher { font-weight:700; color: var(--primary); }
-    .log-time { margin-inline-start:auto; color: var(--text-muted); font-size:11px; white-space:nowrap; }
-    .status-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-inline-end:5px; }
+    .log-time { margin-inline-start:auto; color: var(--text-muted); font-size:10.5px; white-space:nowrap; }
+    .status-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-inline-end:5px; }
     .status-dot.active { background: var(--success); }
     .status-dot.inactive { background: var(--danger); }
+
+    @media print {
+        .user-bar, .main-tabs, .btn, .modal-overlay, #reauthScreen { display:none!important; }
+        body { background:#fff!important; background-image:none!important; }
+        .card-box { border:none; box-shadow:none; padding:0; }
+    }
 </style>
 </head>
 <body>
@@ -178,24 +206,24 @@
     <div class="hero">
         <div style="display:flex; justify-content:space-between; align-items:center; max-width:1100px; margin:0 auto; flex-wrap:wrap; gap:16px;">
             <div style="display:flex; align-items:center; gap:14px; text-align:right;">
-                <div style="width:52px; height:52px; border-radius:12px; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; font-size:24px; color:var(--gold-light);">
+                <div style="width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--gold-light); border:1px solid rgba(196,155,63,0.35);">
                     <i class="fas fa-landmark"></i>
                 </div>
                 <div>
-                    <h1 style="margin:0; font-size:clamp(18px, 3vw, 24px);"><i class="fas fa-user-shield"></i> لوحة التحكم</h1>
-                    <p style="margin:0; color:#cfdcea; font-size:12.5px;">إدارة حسابات الأساتذة ومراقبة النشاطات وسجلات المعالجة البيداغوجية</p>
+                    <h1 style="margin:0; font-size:clamp(17px, 3vw, 22px);"><i class="fas fa-user-shield"></i> لوحة التحكم</h1>
+                    <p style="margin:0; color:#fce8bd; font-size:12px;">إدارة حسابات الأساتذة ومراقبة النشاطات وسجلات المعالجة البيداغوجية</p>
                 </div>
             </div>
 
             <!-- بطاقة شعار المقاطعة في الترويسة -->
-            <div class="muqataa-logo-box" onclick="changeFooterLogo()" title="انقر لتغيير أو رفع شعار المقاطعة" style="cursor:pointer; display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.1); padding:8px 16px; border-radius:12px; border:1px dashed rgba(255,255,255,0.35); transition:var(--transition);">
-                <img id="heroMuqataaLogo" class="muqataa-logo-img" alt="شعار المقاطعة" style="display:none; max-width:48px; max-height:48px; object-fit:contain; border-radius:6px; background:#fff; padding:2px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
-                <div id="heroMuqataaPlaceholder" class="muqataa-logo-placeholder" style="width:44px; height:44px; border-radius:8px; background:rgba(196,155,63,0.3); display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--gold-light); font-size:16px;">
+            <div class="muqataa-logo-box" onclick="changeFooterLogo()" title="انقر لتغيير أو رفع شعار المقاطعة" style="cursor:pointer; display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.1); padding:6px 14px; border-radius:10px; border:1px dashed rgba(255,255,255,0.35); transition:var(--transition);">
+                <img id="heroMuqataaLogo" class="muqataa-logo-img" alt="شعار المقاطعة" style="display:none; max-width:44px; max-height:44px; object-fit:contain; border-radius:6px; background:#fff; padding:2px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+                <div id="heroMuqataaPlaceholder" class="muqataa-logo-placeholder" style="width:40px; height:40px; border-radius:8px; background:rgba(196,155,63,0.3); display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--gold-light); font-size:15px;">
                     <i class="fas fa-shield-alt"></i>
                 </div>
                 <div style="text-align:right;">
-                    <div style="font-size:12.5px; font-weight:700; color:#fff;" id="heroMuqataaLabel">المقاطعة الثانية - قسنطينة</div>
-                    <div style="font-size:10.5px; color:var(--gold-light);"><i class="fas fa-camera"></i> تغيير شعار المقاطعة</div>
+                    <div style="font-size:12px; font-weight:700; color:#fff;" id="heroMuqataaLabel">المقاطعة الثانية - قسنطينة</div>
+                    <div style="font-size:10px; color:var(--gold-light);"><i class="fas fa-camera"></i> تغيير شعار المقاطعة</div>
                 </div>
             </div>
         </div>
@@ -212,10 +240,10 @@
     <div class="tab-panel active" id="panel-users">
         <div class="card-box">
             <h3><i class="fas fa-users-cog"></i> إدارة المستخدمين</h3>
-            <p style="color:var(--text-muted); margin-bottom:16px; font-size:13px;">
+            <p style="color:var(--text-muted); margin-bottom:14px; font-size:12.5px;">
                 يشمل هذا القسم كل حسابات الأساتذة والمفتشين المستخدمة في جميع أدوات المنظومة. عدد المستخدمين الحالي: <strong id="totalUsersCount">0</strong>
             </p>
-            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
                 <button class="btn btn-success" onclick="openAddUserModal()"><i class="fas fa-user-plus"></i> إضافة أستاذ</button>
                 <button class="btn btn-info" onclick="document.getElementById('csvInput').click()"><i class="fas fa-file-csv"></i> استيراد من CSV</button>
                 <input type="file" id="csvInput" accept=".csv" style="display:none;" onchange="importUsersFromCSV(event)">
@@ -235,7 +263,7 @@
         </div>
 
         <div class="card-box">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
                 <h3 style="margin-bottom:0;"><i class="fas fa-chart-bar"></i> إحصائيات مفصّلة لكل أستاذ</h3>
                 <button class="btn btn-sm btn-info" onclick="renderTeacherStats()"><i class="fas fa-sync"></i> تحديث</button>
             </div>
@@ -250,8 +278,8 @@
         <div class="card-box">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
                 <h3 style="margin-bottom:0;"><i class="fas fa-stream"></i> سجلّ العمليات الحيّ</h3>
-                <div style="display:flex; gap:8px;">
-                    <select id="monitorFilterTeacher" onchange="renderLog()" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border-color); font-family:inherit;">
+                <div style="display:flex; gap:6px;">
+                    <select id="monitorFilterTeacher" onchange="renderLog()" style="padding:5px 10px; border-radius:7px; border:1.5px solid var(--border-color); font-family:inherit; font-size:12px;">
                         <option value="">كل الأساتذة</option>
                     </select>
                     <button class="btn btn-sm btn-info" onclick="refreshLog()"><i class="fas fa-sync"></i> تحديث</button>
@@ -271,13 +299,13 @@
         </div>
 
         <div class="card-box">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
                 <h3 style="margin-bottom:0;"><i class="fas fa-list-alt"></i> كل السجلات المُضافة من الأساتذة</h3>
-                <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <select id="pedFilterTeacher" onchange="renderPedagogicalTable()" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border-color); font-family:inherit;">
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <select id="pedFilterTeacher" onchange="renderPedagogicalTable()" style="padding:5px 10px; border-radius:7px; border:1.5px solid var(--border-color); font-family:inherit; font-size:12px;">
                         <option value="">كل الأساتذة</option>
                     </select>
-                    <select id="pedFilterType" onchange="renderPedagogicalTable()" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border-color); font-family:inherit;">
+                    <select id="pedFilterType" onchange="renderPedagogicalTable()" style="padding:5px 10px; border-radius:7px; border:1.5px solid var(--border-color); font-family:inherit; font-size:12px;">
                         <option value="">كل الأنواع</option>
                         <option value="with_plan">يحتوي خطة معالجة</option>
                         <option value="with_students">يحتوي متعلمين</option>
@@ -312,28 +340,28 @@
     </div>
 
     <!-- تذييل لوحة التحكم -->
-    <div style="max-width:1100px; margin:25px auto 40px; padding:0 20px;">
-        <div class="card-box" style="text-align:center; padding:22px 20px; border-top:4px solid var(--gold);">
-            <div style="display:flex; justify-content:center; align-items:center; gap:36px; flex-wrap:wrap; margin-bottom:12px;">
-                <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
-                    <div style="width:48px; height:48px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:20px;">
+    <div style="max-width:1100px; margin:20px auto 40px; padding:0 16px;">
+        <div class="card-box" style="text-align:center; padding:18px; border-top:3.5px solid var(--gold);">
+            <div style="display:flex; justify-content:center; align-items:center; gap:28px; flex-wrap:wrap; margin-bottom:12px;">
+                <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+                    <div style="width:42px; height:42px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:18px; border:1px solid var(--border-color);">
                         <i class="fas fa-landmark"></i>
                     </div>
-                    <span style="font-size:11.5px; color:var(--text-muted); font-weight:700;">وزارة التربية الوطنية</span>
+                    <span style="font-size:11px; color:var(--text-muted); font-weight:700;">وزارة التربية الوطنية</span>
                 </div>
 
-                <div class="footer-logo-editable" onclick="changeFooterLogo()" title="انقر لتغيير أو رفع شعار المقاطعة" style="cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 16px; border-radius:12px; border:2px dashed var(--border-color); transition:var(--transition); background:var(--bg-body);">
-                    <img id="footerMuqataaLogo" class="muqataa-logo-img" alt="شعار المقاطعة" style="display:none; max-width:64px; max-height:64px; object-fit:contain; border-radius:6px; filter:drop-shadow(0 2px 5px rgba(0,0,0,0.1));">
-                    <div id="footerMuqataaPlaceholder" class="muqataa-logo-placeholder" style="width:52px; height:52px; border-radius:10px; background:#fff; border:1.5px dashed var(--gold); display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--gold-deep); font-size:18px;">
+                <div class="footer-logo-editable" onclick="changeFooterLogo()" title="انقر لتغيير أو رفع شعار المقاطعة" style="cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 14px; border-radius:10px; border:1.5px dashed var(--gold); transition:var(--transition); background:var(--bg-body);">
+                    <img id="footerMuqataaLogo" class="muqataa-logo-img" alt="شعار المقاطعة" style="display:none; max-width:56px; max-height:56px; object-fit:contain; border-radius:6px; filter:drop-shadow(0 2px 5px rgba(0,0,0,0.1));">
+                    <div id="footerMuqataaPlaceholder" class="muqataa-logo-placeholder" style="width:44px; height:44px; border-radius:8px; background:#fff; border:1.5px dashed var(--gold); display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--gold-deep); font-size:16px;">
                         <i class="fas fa-shield-alt"></i>
-                        <span style="font-size:8.5px; font-weight:700; margin-top:1px;">رفع الشعار</span>
+                        <span style="font-size:8px; font-weight:700; margin-top:1px;">رفع الشعار</span>
                     </div>
-                    <span id="footerMuqataaLabel" style="font-size:12px; font-weight:700; color:var(--primary);">المقاطعة الثانية - قسنطينة</span>
-                    <span style="font-size:10px; color:var(--text-muted);"><i class="fas fa-sync-alt"></i> انقر لتعديل الشعار</span>
+                    <span id="footerMuqataaLabel" style="font-size:11.5px; font-weight:700; color:var(--primary);">المقاطعة الثانية - قسنطينة</span>
+                    <span style="font-size:9.5px; color:var(--text-muted);"><i class="fas fa-sync-alt"></i> انقر لتعديل الشعار</span>
                 </div>
             </div>
 
-            <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+            <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
                 <a href="index.html" class="btn btn-sm btn-gold" style="text-decoration:none;"><i class="fas fa-home"></i> العودة إلى البوابة الرئيسية</a>
                 <a href="moualaja.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-stethoscope"></i> سجلات المعالجة البيداغوجية</a>
                 <a href="arabic.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-book-open-reader"></i> تعليمية العربية ومصمم المذكرات</a>
@@ -341,7 +369,7 @@
                 <a href="niqash.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-comments"></i> ركن النقاش</a>
             </div>
 
-            <div style="font-size:12px; color:var(--text-muted); border-top:1px solid var(--border-color); padding-top:10px; margin-top:6px;">
+            <div style="font-size:11.5px; color:var(--text-muted); border-top:1px solid var(--border-color); padding-top:8px; margin-top:4px;">
                 مفتشية التعليم المتوسط لمادة اللغة العربية والتربية الإسلامية — المفتش: <strong>درويش الهلالي</strong> · هاتف: 0659681227
             </div>
         </div>
@@ -352,7 +380,7 @@
 <div class="modal-overlay" id="userModal">
     <div class="modal-box">
         <button class="modal-close" onclick="closeUserModal()">&times;</button>
-        <h3 id="userModalTitle" style="color:var(--primary); margin-bottom:16px;">إضافة مستخدم جديد</h3>
+        <h3 id="userModalTitle" style="color:var(--primary); margin-bottom:14px; font-size:14px;">إضافة مستخدم جديد</h3>
         <input type="hidden" id="editUserId" value="">
         <div class="field-group"><label>الاسم الكامل</label><input type="text" id="userFullName" maxlength="100"></div>
         <div class="field-group"><label>اسم المستخدم</label><input type="text" id="userUsername" maxlength="50"></div>
@@ -366,7 +394,7 @@
             </select>
         </div>
         <div class="field-group"><label>كلمة المرور</label><input type="text" id="userPassword" placeholder="اتركها فارغة لتوليدها تلقائياً"></div>
-        <div style="display:flex; gap:12px; margin-top:10px;">
+        <div style="display:flex; gap:8px; margin-top:10px;">
             <button class="btn btn-success" onclick="saveUser()"><i class="fas fa-save"></i> حفظ</button>
             <button class="btn btn-outline" onclick="closeUserModal()">إلغاء</button>
         </div>
@@ -429,11 +457,6 @@ function ensureSupabaseSession() {
     return Promise.race([attempt, timeout]);
 }
 
-// ============================================================
-//  مستندات Firestore المنفصلة:
-//  - platform_shared/users        → بيانات عامة (بدون passwordHash)
-//  - platform_shared/credentials  → {"userId": "passwordHash", ...}
-// ============================================================
 function getUsersDocRef() {
     if (!fbDb) return null;
     try { return fbDb.collection('platform_shared').doc('users'); }
@@ -487,9 +510,7 @@ function listenToCloudData() {
 function getUsers() { return cachedUsers; }
 function getCredentials() { return cachedCredentials; }
 
-// حفظ قائمة المستخدمين (بدون كلمات مرور) في users
 async function saveUsers(users) {
-    // تأكد من إزالة أي passwordHash قبل الحفظ (تنظيف دفاعي)
     const sanitized = users.map(u => {
         const copy = { ...u };
         delete copy.passwordHash;
@@ -508,7 +529,6 @@ async function saveUsers(users) {
     }
 }
 
-// حفظ hash كلمة المرور في credentials
 async function saveCredentialHash(userId, passwordHash) {
     const creds = { ...cachedCredentials };
     if (passwordHash === null) {
@@ -529,59 +549,6 @@ async function saveCredentialHash(userId, passwordHash) {
     }
 }
 
-// ============================================================
-//  هجرة تلقائية: نقل passwordHash من users القديم إلى credentials
-// ============================================================
-async function migrateLegacyUsers() {
-    try {
-        const usersRef = getUsersDocRef();
-        const credsRef = getCredentialsDocRef();
-        if (!usersRef || !credsRef) return;
-        const snap = await usersRef.get();
-        if (!snap.exists) return;
-        const data = snap.data();
-        if (!data || !Array.isArray(data.list)) return;
-
-        const legacyWithHash = data.list.filter(u => u.passwordHash);
-        if (legacyWithHash.length === 0) return;
-
-        const credsSnap = await credsRef.get();
-        const existingCreds = (credsSnap.exists && credsSnap.data().hashes) ? credsSnap.data().hashes : {};
-
-        let migrated = 0;
-        legacyWithHash.forEach(u => {
-            if (!existingCreds[u.id] && u.passwordHash) {
-                existingCreds[u.id] = u.passwordHash;
-                migrated++;
-            }
-        });
-
-        // 1) نقل الـ hashes إلى credentials
-        await credsRef.set({ hashes: existingCreds, updatedAt: new Date().toISOString() }, { merge: true });
-
-        // 2) إزالة passwordHash من users
-        const sanitized = data.list.map(u => {
-            const copy = { ...u };
-            delete copy.passwordHash;
-            return copy;
-        });
-        await usersRef.set({ list: sanitized, updatedAt: new Date().toISOString() });
-
-        cachedUsers = sanitized;
-        cachedCredentials = existingCreds;
-
-        if (migrated > 0) {
-            console.log('✅ تم ترحيل ' + migrated + ' كلمة مرور إلى credentials');
-            showToast('✅ تم ترحيل بيانات الدخول بنجاح إلى المستند الآمن', 'success', 4000);
-        }
-    } catch (e) {
-        console.warn('Migration warning:', e);
-    }
-}
-
-// ============================================================
-//  إعادة تأكيد الهوية
-// ============================================================
 async function handleReauth(event) {
     event.preventDefault();
     const btn = document.getElementById('reauthBtn');
@@ -591,7 +558,6 @@ async function handleReauth(event) {
     btn.disabled = true; btn.textContent = 'جارٍ التحقق...';
     msg.style.display = 'none';
     try {
-        // التحقق عبر Supabase (مصدر الحقيقة الوحيد للحسابات)
         const c = await PortalCloud.ready;
         const { data: u } = await c.auth.getUser();
         if (!u || !u.user) {
@@ -641,9 +607,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCustomFooterLogo();
 });
 
-// ============================================================
-//  إدارة شعار المقاطعة
-// ============================================================
 function applyMuqataaLogo(dataUrl) {
     const logoImgs = document.querySelectorAll('.muqataa-logo-img, #footerMuqataaLogo, #heroMuqataaLogo');
     const placeholders = document.querySelectorAll('.muqataa-logo-placeholder, #footerMuqataaPlaceholder, #heroMuqataaPlaceholder');
@@ -738,9 +701,6 @@ function loadCustomFooterLogo() {
     } catch(e) { console.warn('loadCustomFooterLogo warning:', e); }
 }
 
-// ============================================================
-//  أدوات مساعدة
-// ============================================================
 function generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
 function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 function formatDateGeorgian() { return new Date().toISOString().split('T')[0]; }
@@ -757,7 +717,7 @@ function generateRandomPassword(length = 10) {
 function showToast(message, type = 'info', duration = 3500) {
     const colors = { info: 'var(--info)', success: 'var(--success)', error: 'var(--danger)', warning: 'var(--warning)' };
     const toast = document.createElement('div');
-    toast.style.cssText = `background:${colors[type] || colors.info}; color:#fff; padding:12px 20px; border-radius:10px; font-weight:600; font-size:13px; box-shadow:0 8px 25px rgba(0,0,0,0.15);`;
+    toast.style.cssText = `background:${colors[type] || colors.info}; color:#fff; padding:9px 16px; border-radius:8px; font-weight:700; font-size:12px; box-shadow:0 4px 15px rgba(0,0,0,0.18);`;
     toast.textContent = message;
     document.getElementById('toastContainer').appendChild(toast);
     setTimeout(() => toast.remove(), duration);
@@ -782,9 +742,6 @@ function setupMainTabs() {
     });
 }
 
-// ============================================================
-//  إدارة المستخدمين
-// ============================================================
 function renderUsersList() {
     const container = document.getElementById('usersListContainer');
     if (!container) return;
@@ -817,10 +774,10 @@ function renderUsersList() {
                         ${user.email ? ' · <i class="fas fa-envelope"></i> ' + escapeHtml(user.email) : ''}
                         ${user.school ? ' · <i class="fas fa-school"></i> ' + escapeHtml(user.school) : ''}
                     </p>
-                    <p style="font-size:11.5px; margin-top:4px;">آخر دخول: ${user.lastLogin ? formatDateTimeAr(user.lastLogin) : 'لم يسجل بعد'}</p>
+                    <p style="font-size:11px; margin-top:3px;">آخر دخول: ${user.lastLogin ? formatDateTimeAr(user.lastLogin) : 'لم يسجل بعد'}</p>
                 </div>
                 <span class="user-card-role ${role.class}">${role.label}</span>
-                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <div style="display:flex; gap:5px; flex-wrap:wrap;">
                     <button class="btn btn-sm btn-info" onclick="editUser('${user.id}')" title="تعديل"><i class="fas fa-edit"></i></button>
                     <button class="btn btn-sm btn-warning" onclick="resetUserPassword('${user.id}')" title="إعادة تعيين كلمة المرور"><i class="fas fa-key"></i></button>
                     ${!isCurrentUser ? `
@@ -869,7 +826,6 @@ async function saveUser() {
             users[idx].email = email;
             users[idx].school = school;
             users[idx].role = role;
-            // لا passwordHash في users — يُحفظ في credentials
             const saved = await saveUsers(users);
             if (password) {
                 const hash = await hashPassword(password);
@@ -992,7 +948,6 @@ async function importUsersFromCSV(event) {
                 imported++;
             }
             await saveUsers(users);
-            // حفظ كل credentials دفعة واحدة
             cachedCredentials = creds;
             try {
                 const credsRef = getCredentialsDocRef();
@@ -1048,9 +1003,6 @@ function downloadCSVTemplate() {
     showToast('📄 تم تحميل النموذج', 'success');
 }
 
-// ============================================================
-//  مراقبة النشاطات
-// ============================================================
 let _logCache = [];
 let _realtimeChannel = null;
 
@@ -1139,7 +1091,7 @@ async function renderTeacherStats() {
         stats.sort((a, b) => b.count - a.count);
 
         tbody.innerHTML = stats.map((s, idx) => {
-            let countColor = '#6c7a8d', countBg = '#f1f4f9';
+            let countColor = '#5d6b7b', countBg = '#f1f4f9';
             if (s.count >= 5) { countColor = '#155724'; countBg = '#d4edda'; }
             else if (s.count >= 2) { countColor = '#856404'; countBg = '#fff3cd'; }
             else if (s.count === 0) { countColor = '#721c24'; countBg = '#f8d7da'; }
@@ -1148,10 +1100,10 @@ async function renderTeacherStats() {
                 <tr>
                     <td>${idx + 1}</td>
                     <td><strong>${escapeHtml(s.fullName || '—')}</strong></td>
-                    <td style="font-size:12px; color:var(--text-muted);">${escapeHtml(s.email || '—')}</td>
-                    <td><span style="background:${countBg}; color:${countColor}; padding:4px 14px; border-radius:20px; font-weight:700; font-size:14px;">${s.count}</span></td>
-                    <td style="font-size:13px;">${s.lastTitle ? escapeHtml(s.lastTitle) : '—'}</td>
-                    <td style="font-size:12px; color:var(--text-muted);">${lastDateStr}</td>
+                    <td style="font-size:11.5px; color:var(--text-muted);">${escapeHtml(s.email || '—')}</td>
+                    <td><span style="background:${countBg}; color:${countColor}; padding:3px 10px; border-radius:14px; font-weight:700; font-size:12px;">${s.count}</span></td>
+                    <td style="font-size:12px;">${s.lastTitle ? escapeHtml(s.lastTitle) : '—'}</td>
+                    <td style="font-size:11.5px; color:var(--text-muted);">${lastDateStr}</td>
                     <td><span class="status-dot ${s.active ? 'active' : 'inactive'}"></span>${s.active ? 'نشط' : 'معطّل'}</td>
                 </tr>`;
         }).join('');
@@ -1178,9 +1130,6 @@ function subscribeRealtime() {
         .subscribe();
 }
 
-// ============================================================
-//  المعالجة البيداغوجية
-// ============================================================
 let _pedRecords = [];
 
 async function loadPedagogicalRecords() {
@@ -1301,10 +1250,10 @@ function renderPedagogicalTable() {
                 <td><strong>${escapeHtml(r.created_by_name || r.enseignant || '—')}</strong></td>
                 <td>${escapeHtml(r.classes || '—')}</td>
                 <td>${r.nb_eleves || 0}</td>
-                <td><span style="background:#eef3f9; color:#1a3d6e; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:700;">${criteriaCount}</span></td>
-                <td><span style="background:#e5f4ed; color:#155724; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:700;">${studentsCount}</span></td>
+                <td><span style="background:#eef3f9; color:#0e2744; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700;">${criteriaCount}</span></td>
+                <td><span style="background:#e5f4ed; color:#155724; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700;">${studentsCount}</span></td>
                 <td>${hasPlan ? '<i class="fas fa-check-circle" style="color:var(--success);"></i>' : '<i class="fas fa-times-circle" style="color:var(--text-muted);"></i>'}</td>
-                <td style="font-size:12px; color:var(--text-muted); white-space:nowrap;">${r.created_at ? new Date(r.created_at).toLocaleString('ar-DZ') : '—'}</td>
+                <td style="font-size:11.5px; color:var(--text-muted); white-space:nowrap;">${r.created_at ? new Date(r.created_at).toLocaleString('ar-DZ') : '—'}</td>
                 <td style="white-space:nowrap;">
                     <button class="btn btn-sm btn-info" onclick="viewPedRecord('${r.id}')" title="عرض تفاصيل"><i class="fas fa-eye"></i></button>
                     <button class="btn btn-sm btn-gold" onclick="exportPedRecordWord('${r.id}')" title="تصدير Word"><i class="fas fa-file-word"></i></button>
@@ -1355,23 +1304,23 @@ async function deletePedRecord(id) {
 function openAddPedModal() {
     const overlay = document.createElement('div');
     overlay.id = 'addPedModalOverlay';
-    overlay.style.cssText = 'position:fixed; inset:0; background:rgba(15,35,64,0.65); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px;';
+    overlay.style.cssText = 'position:fixed; inset:0; background:rgba(9,28,51,0.65); z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px;';
     overlay.innerHTML = `
-        <div style="background:#fff; border-radius:14px; padding:26px; max-width:600px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.3); direction:rtl; text-align:right;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:2px solid var(--gold); padding-bottom:10px;">
-                <h3 style="margin:0; color:var(--primary); font-size:16px;"><i class="fas fa-plus-circle"></i> إضافة سجل معالجة بيداغوجية</h3>
-                <button onclick="document.getElementById('addPedModalOverlay').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-muted);">&times;</button>
+        <div style="background:#fff; border-radius:12px; padding:22px; max-width:560px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.3); direction:rtl; text-align:right; border-top:3.5px solid var(--gold);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:2px solid var(--gold); padding-bottom:8px;">
+                <h3 style="margin:0; color:var(--primary); font-size:15px; font-weight:700;"><i class="fas fa-plus-circle"></i> إضافة سجل معالجة بيداغوجية</h3>
+                <button onclick="document.getElementById('addPedModalOverlay').remove()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-muted);">&times;</button>
             </div>
-            <div class="field-group" style="margin-bottom:12px;"><label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px;">المؤسسة / المتوسطة</label><input type="text" id="newPedSchool" placeholder="مثال: متوسطة كاتب ياسين" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-family:inherit;"></div>
-            <div class="field-group" style="margin-bottom:12px;"><label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px;">اسم الأستاذ(ة)</label><input type="text" id="newPedTeacher" placeholder="مثال: بن عيسى رفيق" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-family:inherit;"></div>
-            <div class="field-group" style="margin-bottom:12px;"><label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px;">الأقسام المعنية</label><input type="text" id="newPedClasses" placeholder="مثال: 2م1 - 2م2" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-family:inherit;"></div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
-                <div><label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px;">تعداد التلاميذ</label><input type="number" id="newPedStudents" value="35" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-family:inherit;"></div>
-                <div><label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px;">المتعلمون في المعالجة</label><input type="number" id="newPedRemediationCount" value="6" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-family:inherit;"></div>
+            <div class="field-group"><label>المؤسسة / المتوسطة</label><input type="text" id="newPedSchool" placeholder="مثال: متوسطة كاتب ياسين"></div>
+            <div class="field-group"><label>اسم الأستاذ(ة)</label><input type="text" id="newPedTeacher" placeholder="مثال: بن عيسى رفيق"></div>
+            <div class="field-group"><label>الأقسام المعنية</label><input type="text" id="newPedClasses" placeholder="مثال: 2م1 - 2م2"></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:11px;">
+                <div><label style="font-weight:700; font-size:12px; display:block; margin-bottom:4px;">تعداد التلاميذ</label><input type="number" id="newPedStudents" value="35" style="width:100%;padding:7px 11px;border:1.5px solid var(--border-color);border-radius:7px;font-family:inherit;"></div>
+                <div><label style="font-weight:700; font-size:12px; display:block; margin-bottom:4px;">المتعلمون في المعالجة</label><input type="number" id="newPedRemediationCount" value="6" style="width:100%;padding:7px 11px;border:1.5px solid var(--border-color);border-radius:7px;font-family:inherit;"></div>
             </div>
-            <div class="field-group" style="margin-bottom:12px;"><label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px;">طبيعة الصعوبة المستهدفة</label><input type="text" id="newPedDifficulty" placeholder="مثال: صعوبات لغوية وإملائية في رسم الهمزات" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-family:inherit;"></div>
-            <div class="field-group" style="margin-bottom:16px;"><label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px;">الأنشطة المقترحة للخطة</label><textarea id="newPedPlanActivity" placeholder="ورشات علاجية مكيفة وسياقية فردية وجماعية" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;height:70px;font-family:inherit;"></textarea></div>
-            <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <div class="field-group"><label>طبيعة الصعوبة المستهدفة</label><input type="text" id="newPedDifficulty" placeholder="مثال: صعوبات لغوية وإملائية في رسم الهمزات"></div>
+            <div class="field-group"><label>الأنشطة المقترحة للخطة</label><textarea id="newPedPlanActivity" placeholder="ورشات علاجية مكيفة وسياقية فردية وجماعية" style="width:100%;padding:7px 11px;border:1.5px solid var(--border-color);border-radius:7px;height:65px;font-family:inherit;font-size:12.5px;"></textarea></div>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
                 <button class="btn btn-outline" onclick="document.getElementById('addPedModalOverlay').remove()">إلغاء</button>
                 <button class="btn btn-success" onclick="saveNewPedRecord()"><i class="fas fa-save"></i> حفظ ومزامنة سحابية</button>
             </div>
@@ -1465,15 +1414,15 @@ function viewPedRecord(id) {
         'نمط التقييم': plan.evaluationMode,
         'تسيير الأنشطة': plan.managementMode,
         'ملاحظات': plan.additionalNotes
-    }).filter(([_, v]) => v).map(([k, v]) => `<tr><td style="padding:6px;border:1px solid #ddd;background:#f8fbfd;width:35%;"><strong>${k}</strong></td><td style="padding:6px;border:1px solid #ddd;">${escapeHtml(v)}</td></tr>`).join('');
+    }).filter(([_, v]) => v).map(([k, v]) => `<tr><td style="padding:5px 8px;border:1px solid #ddd;background:#f8fbfd;width:35%;"><strong>${k}</strong></td><td style="padding:5px 8px;border:1px solid #ddd;">${escapeHtml(v)}</td></tr>`).join('');
 
     let criteriaHtml = criteria.map((c, i) => `
         <tr>
-            <td style="padding:6px;border:1px solid #ddd;text-align:center;">${i+1}</td>
-            <td style="padding:6px;border:1px solid #ddd;">${escapeHtml(c.competence || '')}</td>
-            <td style="padding:6px;border:1px solid #ddd;">${escapeHtml(c.critere || '')}</td>
-            <td style="padding:6px;border:1px solid #ddd;text-align:center;">${escapeHtml(c.level || '—')}</td>
-            <td style="padding:6px;border:1px solid #ddd;text-align:center;">${escapeHtml(c.category || '—')}</td>
+            <td style="padding:5px 8px;border:1px solid #ddd;text-align:center;">${i+1}</td>
+            <td style="padding:5px 8px;border:1px solid #ddd;">${escapeHtml(c.competence || '')}</td>
+            <td style="padding:5px 8px;border:1px solid #ddd;">${escapeHtml(c.critere || '')}</td>
+            <td style="padding:5px 8px;border:1px solid #ddd;text-align:center;">${escapeHtml(c.level || '—')}</td>
+            <td style="padding:5px 8px;border:1px solid #ddd;text-align:center;">${escapeHtml(c.category || '—')}</td>
         </tr>
     `).join('');
 
@@ -1481,14 +1430,14 @@ function viewPedRecord(id) {
         const list = c.students || [];
         if (!list.length) return '';
         return `
-            <div style="margin:10px 0; padding:10px; background:#f0f4f8; border-radius:8px;">
-                <strong style="color:var(--primary);">${escapeHtml(c.competence || '')} › ${escapeHtml(c.critere || '')}</strong>
-                <span style="background:#e5f4ed; color:#155724; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:700; margin-right:8px;">${list.length} متعلم</span>
-                <ul style="margin:8px 20px;">
+            <div style="margin:8px 0; padding:9px; background:#faf7ef; border-radius:8px; border:1px solid #e8deb8;">
+                <strong style="color:var(--primary); font-size:12.5px;">${escapeHtml(c.competence || '')} › ${escapeHtml(c.critere || '')}</strong>
+                <span style="background:#e5f4ed; color:#155724; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; margin-right:8px;">${list.length} متعلم</span>
+                <ul style="margin:6px 18px; font-size:12px;">
                     ${list.map(s => {
                         const name = typeof s === 'object' ? (s.name || '') : s;
                         const treatment = typeof s === 'object' ? (s.treatmentType || '') : '';
-                        return `<li>${escapeHtml(name)} ${treatment ? `<span style="color:var(--text-muted); font-size:12px;">(${escapeHtml(treatment)})</span>` : ''}</li>`;
+                        return `<li>${escapeHtml(name)} ${treatment ? `<span style="color:var(--text-muted); font-size:11px;">(${escapeHtml(treatment)})</span>` : ''}</li>`;
                     }).join('')}
                 </ul>
             </div>
@@ -1496,22 +1445,22 @@ function viewPedRecord(id) {
     }).join('');
 
     const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed; inset:0; background:rgba(15,35,64,0.65); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px;';
+    overlay.style.cssText = 'position:fixed; inset:0; background:rgba(9,28,51,0.65); z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px;';
     const modal = document.createElement('div');
-    modal.style.cssText = 'background:#fff; border-radius:14px; padding:24px; max-width:900px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.3);';
+    modal.style.cssText = 'background:#fff; border-radius:12px; padding:20px; max-width:850px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.3); border-top:3.5px solid var(--gold);';
     modal.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:2px solid var(--gold); padding-bottom:10px;">
-            <h3 style="margin:0; color:var(--primary);"><i class="fas fa-file-alt"></i> تفاصيل سجل المعالجة البيداغوجية</h3>
-            <button onclick="this.closest('div').parentElement.parentElement.remove()" style="background:none;border:none;font-size:26px;cursor:pointer;color:var(--text-muted);">&times;</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:2px solid var(--gold); padding-bottom:8px;">
+            <h3 style="margin:0; color:var(--primary); font-size:15px; font-weight:700;"><i class="fas fa-file-alt"></i> تفاصيل سجل المعالجة البيداغوجية</h3>
+            <button onclick="this.closest('div').parentElement.parentElement.remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-muted);">&times;</button>
         </div>
-        <p><strong>المؤسسة:</strong> ${escapeHtml(r.etablissement || '—')}</p>
-        <p><strong>الأستاذ:</strong> ${escapeHtml(r.created_by_name || r.enseignant || '—')} | <strong>الأقسام:</strong> ${escapeHtml(r.classes || '—')} | <strong>عدد التلاميذ:</strong> ${r.nb_eleves || 0}</p>
-        <h4 style="color:var(--primary); margin-top:18px;">📚 المعايير المستهدفة</h4>
-        <table style="width:100%; border-collapse:collapse; margin-top:6px;">${criteriaHtml || '<tr><td style="padding:10px;">لا توجد معايير</td></tr>'}</table>
-        <h4 style="color:var(--primary); margin-top:18px;">🎯 خطة المعالجة المقررة</h4>
-        <table style="width:100%; border-collapse:collapse; margin-top:6px;">${planHtml || '<tr><td style="padding:10px;">لم يتم إعداد خطة بعد</td></tr>'}</table>
-        <h4 style="color:var(--primary); margin-top:18px;">👥 قائمة المتعلمين المعنيين</h4>
-        ${studentsHtml || '<p style="color:var(--text-muted); padding:8px 0;">لا يوجد متعلمون مسجلون في هذا السجل</p>'}
+        <p style="font-size:12.5px; margin-bottom:4px;"><strong>المؤسسة:</strong> ${escapeHtml(r.etablissement || '—')}</p>
+        <p style="font-size:12.5px; margin-bottom:12px;"><strong>الأستاذ:</strong> ${escapeHtml(r.created_by_name || r.enseignant || '—')} | <strong>الأقسام:</strong> ${escapeHtml(r.classes || '—')} | <strong>عدد التلاميذ:</strong> ${r.nb_eleves || 0}</p>
+        <h4 style="color:var(--primary); margin-top:14px; font-size:13px;">📚 المعايير المستهدفة</h4>
+        <table style="width:100%; border-collapse:collapse; margin-top:4px; font-size:12px;">${criteriaHtml || '<tr><td style="padding:8px;">لا توجد معايير</td></tr>'}</table>
+        <h4 style="color:var(--primary); margin-top:14px; font-size:13px;">🎯 خطة المعالجة المقررة</h4>
+        <table style="width:100%; border-collapse:collapse; margin-top:4px; font-size:12px;">${planHtml || '<tr><td style="padding:8px;">لم يتم إعداد خطة بعد</td></tr>'}</table>
+        <h4 style="color:var(--primary); margin-top:14px; font-size:13px;">👥 قائمة المتعلمين المعنيين</h4>
+        ${studentsHtml || '<p style="color:var(--text-muted); padding:6px 0; font-size:12px;">لا يوجد متعلمون مسجلون في هذا السجل</p>'}
     `;
     overlay.appendChild(modal);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
@@ -1528,11 +1477,11 @@ function exportPedRecordWord(id) {
 
     let criteriaRows = criteria.map((c, i) => `
         <tr>
-            <td style="border:1px solid #333;padding:6px;text-align:center;">${i+1}</td>
-            <td style="border:1px solid #333;padding:6px;">${escapeHtml(c.competence || '')}</td>
-            <td style="border:1px solid #333;padding:6px;">${escapeHtml(c.critere || '')}</td>
-            <td style="border:1px solid #333;padding:6px;text-align:center;">${escapeHtml(c.level || '—')}</td>
-            <td style="border:1px solid #333;padding:6px;text-align:center;">${escapeHtml(c.category || '—')}</td>
+            <td style="border:1px solid #333;padding:5px;text-align:center;">${i+1}</td>
+            <td style="border:1px solid #333;padding:5px;">${escapeHtml(c.competence || '')}</td>
+            <td style="border:1px solid #333;padding:5px;">${escapeHtml(c.critere || '')}</td>
+            <td style="border:1px solid #333;padding:5px;text-align:center;">${escapeHtml(c.level || '—')}</td>
+            <td style="border:1px solid #333;padding:5px;text-align:center;">${escapeHtml(c.category || '—')}</td>
         </tr>
     `).join('');
 
@@ -1550,50 +1499,50 @@ function exportPedRecordWord(id) {
         'نمط التقييم': plan.evaluationMode,
         'تسيير الأنشطة': plan.managementMode,
         'الأنشطة المقترحة': plan.additionalNotes
-    }).filter(([_, v]) => v).map(([k, v]) => `<tr><td style="border:1px solid #333;padding:6px;width:35%;background:#f0f4f8;"><strong>${k}</strong></td><td style="border:1px solid #333;padding:6px;">${escapeHtml(v)}</td></tr>`).join('');
+    }).filter(([_, v]) => v).map(([k, v]) => `<tr><td style="border:1px solid #333;padding:5px;width:35%;background:#f0f4f8;"><strong>${k}</strong></td><td style="border:1px solid #333;padding:5px;">${escapeHtml(v)}</td></tr>`).join('');
 
     let studentsRows = students.map(c => {
         const list = c.students || [];
         if (!list.length) return '';
         const names = list.map(s => typeof s === 'object' ? `${s.name || ''} (${s.treatmentType || 'عامة'})` : s).join('، ');
-        return `<tr><td style="border:1px solid #333;padding:6px;background:#f0f4f8;"><strong>${escapeHtml(c.critere || '')}</strong></td><td style="border:1px solid #333;padding:6px;">${escapeHtml(names)}</td></tr>`;
+        return `<tr><td style="border:1px solid #333;padding:5px;background:#f0f4f8;"><strong>${escapeHtml(c.critere || '')}</strong></td><td style="border:1px solid #333;padding:5px;">${escapeHtml(names)}</td></tr>`;
     }).join('');
 
     let html = `
-        <div style="text-align:center;border-bottom:2px solid #1a3d6e;padding-bottom:10px;margin-bottom:15px;">
+        <div style="text-align:center;border-bottom:2px solid #0e2744;padding-bottom:10px;margin-bottom:15px;">
             <h3>الجمهورية الجزائرية الديمقراطية الشعبية</h3>
             <h4>وزارة التربية الوطنية</h4>
-            <h3 style="color:#1a3d6e;">تقرير المعالجة البيداغوجية</h3>
+            <h3 style="color:#0e2744;">تقرير المعالجة البيداغوجية</h3>
         </div>
         <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">
-            <tr><td style="border:1px solid #333;padding:6px;width:30%;"><strong>المؤسسة</strong></td><td style="border:1px solid #333;padding:6px;">${escapeHtml(r.etablissement || '')}</td></tr>
-            <tr><td style="border:1px solid #333;padding:6px;"><strong>الأستاذ</strong></td><td style="border:1px solid #333;padding:6px;">${escapeHtml(r.created_by_name || r.enseignant || '')}</td></tr>
-            <tr><td style="border:1px solid #333;padding:6px;"><strong>الأقسام</strong></td><td style="border:1px solid #333;padding:6px;">${escapeHtml(r.classes || '')}</td></tr>
-            <tr><td style="border:1px solid #333;padding:6px;"><strong>عدد التلاميذ</strong></td><td style="border:1px solid #333;padding:6px;">${r.nb_eleves || 0}</td></tr>
-            <tr><td style="border:1px solid #333;padding:6px;"><strong>المعيدون</strong></td><td style="border:1px solid #333;padding:6px;">${r.nb_redoublants || 0}</td></tr>
+            <tr><td style="border:1px solid #333;padding:5px;width:30%;"><strong>المؤسسة</strong></td><td style="border:1px solid #333;padding:5px;">${escapeHtml(r.etablissement || '')}</td></tr>
+            <tr><td style="border:1px solid #333;padding:5px;"><strong>الأستاذ</strong></td><td style="border:1px solid #333;padding:5px;">${escapeHtml(r.created_by_name || r.enseignant || '')}</td></tr>
+            <tr><td style="border:1px solid #333;padding:5px;"><strong>الأقسام</strong></td><td style="border:1px solid #333;padding:5px;">${escapeHtml(r.classes || '')}</td></tr>
+            <tr><td style="border:1px solid #333;padding:5px;"><strong>عدد التلاميذ</strong></td><td style="border:1px solid #333;padding:5px;">${r.nb_eleves || 0}</td></tr>
+            <tr><td style="border:1px solid #333;padding:5px;"><strong>المعيدون</strong></td><td style="border:1px solid #333;padding:5px;">${r.nb_redoublants || 0}</td></tr>
         </table>
-        <h4 style="color:#1a3d6e; margin-top:15px;">📚 المعايير المستهدفة</h4>
+        <h4 style="color:#0e2744; margin-top:14px;">📚 المعايير المستهدفة</h4>
         <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">
             <thead><tr style="background:#eef3f9;">
-                <th style="border:1px solid #333;padding:6px;">#</th>
-                <th style="border:1px solid #333;padding:6px;">الكفاءة</th>
-                <th style="border:1px solid #333;padding:6px;">المعيار</th>
-                <th style="border:1px solid #333;padding:6px;">مستوى التملك</th>
-                <th style="border:1px solid #333;padding:6px;">الفئة</th>
+                <th style="border:1px solid #333;padding:5px;">#</th>
+                <th style="border:1px solid #333;padding:5px;">الكفاءة</th>
+                <th style="border:1px solid #333;padding:5px;">المعيار</th>
+                <th style="border:1px solid #333;padding:5px;">مستوى التملك</th>
+                <th style="border:1px solid #333;padding:5px;">الفئة</th>
             </tr></thead>
-            <tbody>${criteriaRows || '<tr><td colspan="5" style="border:1px solid #333;padding:6px;text-align:center;">لا توجد معايير</td></tr>'}</tbody>
+            <tbody>${criteriaRows || '<tr><td colspan="5" style="border:1px solid #333;padding:5px;text-align:center;">لا توجد معايير</td></tr>'}</tbody>
         </table>
-        <h4 style="color:#1a3d6e; margin-top:15px;">🎯 خطة المعالجة</h4>
-        <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">${planRows || '<tr><td style="border:1px solid #333;padding:6px;text-align:center;">لم تعد الخطة بعد</td></tr>'}</table>
-        <h4 style="color:#1a3d6e; margin-top:15px;">👥 المتعلمون المعنيون</h4>
-        <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">${studentsRows || '<tr><td style="border:1px solid #333;padding:6px;text-align:center;">لا يوجد متعلمون مسجلون</td></tr>'}</table>
-        <div style="margin-top:25px;display:flex;justify-content:space-between;">
+        <h4 style="color:#0e2744; margin-top:14px;">🎯 خطة المعالجة</h4>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">${planRows || '<tr><td style="border:1px solid #333;padding:5px;text-align:center;">لم تعد الخطة بعد</td></tr>'}</table>
+        <h4 style="color:#0e2744; margin-top:14px;">👥 المتعلمون المعنيون</h4>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">${studentsRows || '<tr><td style="border:1px solid #333;padding:5px;text-align:center;">لا يوجد متعلمون مسجلون</td></tr>'}</table>
+        <div style="margin-top:22px;display:flex;justify-content:space-between;">
             <div><strong>توقيع الأستاذ(ة):</strong> .....................</div>
             <div><strong>المفتش:</strong> ${inspectorName} — ${formatDateGeorgian()}</div>
         </div>
     `;
 
-    const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>body{font-family:'Tajawal',Arial;direction:rtl;padding:30px;font-size:13.5px;line-height:1.7;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #333;padding:6px;}</style></head><body>${html}</body></html>`;
+    const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>body{font-family:'Tajawal',Arial;direction:rtl;padding:30px;font-size:13px;line-height:1.7;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #333;padding:5px;}</style></head><body>${html}</body></html>`;
     const blob = new Blob(['\ufeff', fullHtml], { type: 'application/msword;charset=utf-8' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
