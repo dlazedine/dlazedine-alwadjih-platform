@@ -129,6 +129,9 @@ create policy r_del on wajih_reports for delete using (wj_is_role(array['inspect
 revoke all on function wj_email_for_username(text) from public;
 grant execute on function wj_email_for_username(text) to anon, authenticated;
 
+-- تحديث ذاكرة واجهة Supabase حتى تُعرَف الجداول الجديدة فوراً
+notify pgrst, 'reload schema';
+
 -- ---------------------------------------------------------
 -- الخطوة اليدوية: أنشئ أول مفتش
 -- 1) Authentication ← Users ← Add user (بريد: أي@wajih-portal.dz + كلمة مرور مؤقتة يختارها المفتش)

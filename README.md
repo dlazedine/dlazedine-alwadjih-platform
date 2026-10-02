@@ -47,6 +47,8 @@
 ```
 index.html · data-prof.html · rapport-peda.html · rapport-tarsim.html · arabic.html · moualaja.html · amal.html · niqash.html · cv.html · taqyim.html · dashboard.html
 auth.js · app.js · niqash.js · style.css · niqash.css
+report.css           ← أنماط الطباعة المشتركة للتقريرين (خط Tahoma واضح، وصفحتان A4)
+export-word.js       ← تصدير التقرير كملف Word حقيقي (.docx) بقيمه المدخلة، دون مكتبات خارجية
 supabase-config.js   ← عنوان Supabase والمفتاح العام والمفاتيح المشتركة
 portal-cloud.js      ← الدخول والمزامنة (يُحمَّل في كل صفحة)
 admin-panel.js       ← قسما «النشاطات المتزامنة» و«الحسابات» داخل التبويبين
@@ -54,6 +56,12 @@ dashboard-supabase.js ← يربط تبويبي المستخدمين والمر�
 supabase.sql         ← الجداول (wajih_profiles وportal_data وwajih_activity) وسياسات الأمان
 firebase.json        ← نشر اختياري على Firebase Hosting
 ```
+
+## 💾 حفظ التقارير وإتاحتها للأستاذ
+
+- يُحفظ كل تقرير يحرره المفتش في جدول `wajih_reports` على Supabase تلقائياً بعد ثانية من الكتابة، فلا يضيع بتغيير الجهاز.
+- يبقى التقرير **مسودة** لا يراها غير المفتش والمشرف، حتى تفعّل «إتاحته للأستاذ»، فيظهر في تبويب «التقارير» داخل ملف الأستاذ للاطلاع فقط.
+- إن ظهرت رسالة «جدول التقارير غير موجود» فشغّل `supabase.sql` كاملاً في Supabase ثم حدّث الصفحة.
 
 ## ⚠️ ملاحظات أمان
 

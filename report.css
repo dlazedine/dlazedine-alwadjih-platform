@@ -1,5 +1,5 @@
 /* أنماط مشتركة للتقريرين (الترسيم والتربوي): خط واضح وموحّد */
-:root{--ink:#1f3864;--gold:#c49b3f;--fs:15.5px;--lh:1.75}
+:root{--ink:#1f3864;--gold:#c49b3f;--fs:14.5px;--lh:1.75}
 *{box-sizing:border-box}
 body{margin:0;background:#e9e6dc;font-family:Tahoma,"Segoe UI",Arial,"Noto Sans Arabic",sans-serif;color:#000;font-size:var(--fs);line-height:var(--lh)}
 .bar{background:var(--ink);color:#fff;padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:4px solid var(--gold)}
@@ -18,7 +18,7 @@ input.auto{background:#f1efe6}input[type=radio]{min-width:0;width:auto}
 .pn{text-align:center;border-top:1px solid #000;margin-top:auto;padding-top:2px;font-weight:bold}
 @page{size:A4;margin:8mm}
 @media print{
- :root{--fs:14px;--lh:1.6}
+ :root{--fs:13.5px;--lh:1.6}
  body{background:#fff}.bar{display:none}
  .pg{box-shadow:none;margin:0 auto;padding:0;width:100%;min-height:279mm;break-after:page}
  .pg:last-child{break-after:auto}

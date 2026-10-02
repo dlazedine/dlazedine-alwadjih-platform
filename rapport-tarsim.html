@@ -74,6 +74,7 @@ document.getElementById('sheet').innerHTML=`
 <div style="text-align:left;margin:20px 60px 0 0" class="b">الإمضاء</div><div class="pn" style="margin-top:60px">ص-2</div></div>`;
 if(!insp())document.querySelectorAll('#sheet input,#sheet textarea,#sheet select').forEach(e=>e.disabled=true)}
 function expW(){exportWord(document.getElementById('sheet'),'تقرير_الترسيم_'+((((prof||{}).data)||{}).name||''))}
+const errT=m=>/wajih_reports|schema cache/i.test(m)?'جدول التقارير غير موجود في Supabase: شغّل ملف supabase.sql ثم أعد المحاولة':m;
 function msg(t,e){const x=document.getElementById('sv');x.textContent=t;x.className='m '+(e?'er':'ok')}
 function S(e){const k=e.dataset.k;rep[k]=e.value;document.querySelectorAll(`[data-k="${k}"]`).forEach(o=>{if(o!==e&&o.value!==e.value)o.value=e.value});
 if(k==='dec')document.querySelectorAll('[name=dec]').forEach(r=>r.checked=r.value===rep.dec);if(k==='s1'||k==='s2')document.getElementById('tot').textContent=tot();
@@ -81,8 +82,8 @@ if(insp()){msg('جارٍ الحفظ...');clearTimeout(tm);tm=setTimeout(save,100
 function mem(e,i){S(e);const t=tl.find(x=>(x.data||{}).name===e.value);if(t&&(t.data||{}).inst){const o=document.querySelector(`[data-k="m${i}i"]`);o.value=t.data.inst;rep['m'+i+'i']=t.data.inst}}
 async function save(){if(!insp())return;const now=new Date().toISOString();
 const r=repId?await c.from('wajih_reports').update({data:rep,published,updated_at:now}).eq('id',repId).select('id').single():await c.from('wajih_reports').insert({prof_id:prof.id,kind:'tarsim',data:rep,published,created_by:me.id,created_by_name:me.full_name||me.username}).select('id').single();
-if(r.error)return msg('تعذّر الحفظ: '+r.error.message,1);repId=r.data.id;history.replaceState(null,'','?prof='+prof.id+'&r='+repId);msg('تم الحفظ ✓')}
-async function pubT(v){published=v;await save()}
+if(r.error)return msg('تعذّر الحفظ: '+errT(r.error.message),1);repId=r.data.id;history.replaceState(null,'','?prof='+prof.id+'&r='+repId);msg('تم الحفظ ✓')}
+async function pubT(v){published=v;await save();if(!/تعذّر/.test(document.getElementById('sv').textContent))msg(v?'تم الحفظ — التقرير متاح للأستاذ ✓':'تم الحفظ — التقرير غير ظاهر للأستاذ')}
 (async()=>{c=await PortalCloud.ready;const{data:s}=await c.auth.getSession();if(!s.session)return location.replace('index.html');
 const{data:p}=await c.from('wajih_profiles').select('*').eq('id',s.session.user.id).single();if(!p||!p.active)return location.replace('index.html');me=p;
 const q=new URLSearchParams(location.search),pid=q.get('prof'),rid=q.get('r');
