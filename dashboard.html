@@ -3,9 +3,16 @@
 <head>
 <script src="supabase-config.js"></script>
 <script src="portal-cloud.js"></script>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- ===== PWA: Manifest & Meta ===== -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0e2744">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="الوجيه">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180x180.png">
+<meta name="mobile-web-app-capable" content="yes">
 <title>لوحة التحكم - حسابات الأساتذة ومراقبة النشاطات والمعالجة البيداغوجية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -193,11 +200,11 @@
 <div id="appScreen">
     <div class="user-bar">
         <div class="right">
-            <a href="index.html"><i class="fas fa-arrow-right"></i> البوابة</a>
-            <a href="moualaja.html"><i class="fas fa-hand-holding-heart"></i> منصة المعالجة</a>
-            <a href="arabic.html" style="background:rgba(196,155,63,0.25); border-color:var(--gold); color:#f5e6c8;"><i class="fas fa-book-open-reader"></i> تعليمية العربية ومصمم المذكرات</a>
-            <a href="amal.html"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
-            <a href="niqash.html"><i class="fas fa-comments"></i> ركن النقاش</a>
+            <a href="index.html"><i class="fas fa-arrow-right"></i> البوابة الرئيسية</a>
+            <a href="moualaja.html"><i class="fas fa-hand-holding-heart"></i> منصة المعالجة البداغوجية</a>
+            <a href="arabic.html" style="background:rgba(196,155,63,0.25); border-color:var(--gold); color:#f5e6c8;"><i class="fas fa-book-open-reader"></i> منصة تعليمية اللغة العربية </a>
+            <a href="amal.html"><i class="fas fa-chalkboard-teacher"></i> منصة الأعمال الموجهة</a>
+            <a href="niqash.html"><i class="fas fa-comments"></i> ركن المحادثة</a>
             <span>مرحباً، <b id="userNameLabel" style="color:var(--gold-light)"></b></span>
         </div>
         <button onclick="handleLogout()"><i class="fas fa-arrow-right-from-bracket"></i> تسجيل الخروج</button>
@@ -264,7 +271,7 @@
 
         <div class="card-box">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
-                <h3 style="margin-bottom:0;"><i class="fas fa-chart-bar"></i> إحصائيات مفصّلة لكل أستاذ</h3>
+                <h3 style="margin-bottom:0;"><i class="fas fa-chart-bar"></i> إحصائيات مفصّلة لكل أستاذ(ة)</h3>
                 <button class="btn btn-sm btn-info" onclick="renderTeacherStats()"><i class="fas fa-sync"></i> تحديث</button>
             </div>
             <div style="overflow-x:auto;">
@@ -362,15 +369,15 @@
             </div>
 
             <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-                <a href="index.html" class="btn btn-sm btn-gold" style="text-decoration:none;"><i class="fas fa-home"></i> العودة إلى البوابة الرئيسية</a>
-                <a href="moualaja.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-stethoscope"></i> سجلات المعالجة البيداغوجية</a>
-                <a href="arabic.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-book-open-reader"></i> تعليمية العربية ومصمم المذكرات</a>
-                <a href="amal.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
-                <a href="niqash.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-comments"></i> ركن النقاش</a>
+                <a href="index.html" class="btn btn-sm btn-gold" style="text-decoration:none;"><i class="fas fa-home"></i>  البوابة الرئيسية</a>
+                <a href="moualaja.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-stethoscope"></i> منصة المعالجة  البيداغوجية</a>
+                <a href="arabic.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-book-open-reader"></i>منصة تعليمية اللغة العربية</a>
+                <a href="amal.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-chalkboard-teacher"></i> منصة الأعمال  الموجهة</a>
+                <a href="niqash.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-comments"></i> ركن المحادثة</a>
             </div>
 
             <div style="font-size:11.5px; color:var(--text-muted); border-top:1px solid var(--border-color); padding-top:8px; margin-top:4px;">
-                مفتشية التعليم المتوسط لمادة اللغة العربية والتربية الإسلامية — المفتش: <strong>درويش الهلالي</strong> · هاتف: 0659681227
+                مفتشية التعليم المتوسط لمادة اللغة العربية والتربية الإسلامية — المفتش(ة): <strong>درويش الهلالي</strong> · هاتف: 0659681227
             </div>
         </div>
     </div>
@@ -380,17 +387,17 @@
 <div class="modal-overlay" id="userModal">
     <div class="modal-box">
         <button class="modal-close" onclick="closeUserModal()">&times;</button>
-        <h3 id="userModalTitle" style="color:var(--primary); margin-bottom:14px; font-size:14px;">إضافة مستخدم جديد</h3>
+        <h3 id="userModalTitle" style="color:var(--primary); margin-bottom:14px; font-size:14px;">إضافة مستخدم (ة)جديد(ة)</h3>
         <input type="hidden" id="editUserId" value="">
         <div class="field-group"><label>الاسم الكامل</label><input type="text" id="userFullName" maxlength="100"></div>
-        <div class="field-group"><label>اسم المستخدم</label><input type="text" id="userUsername" maxlength="50"></div>
+        <div class="field-group"><label>اسم المستخدم(ة)</label><input type="text" id="userUsername" maxlength="50"></div>
         <div class="field-group"><label>البريد الإلكتروني</label><input type="email" id="userEmail"></div>
         <div class="field-group"><label>المؤسسة</label><input type="text" id="userSchool"></div>
         <div class="field-group"><label>الدور</label>
             <select id="userRole">
-                <option value="teacher">👨‍🏫 أستاذ</option>
-                <option value="supervisor">🔵 مشرف</option>
-                <option value="inspector">👑 مفتش</option>
+                <option value="teacher">👨‍🏫 أستاذ(ة)</option>
+                <option value="supervisor">🔵 مشرف(ة)</option>
+                <option value="inspector">👑 مفتش(ة)</option>
             </select>
         </div>
         <div class="field-group"><label>كلمة المرور</label><input type="text" id="userPassword" placeholder="اتركها فارغة لتوليدها تلقائياً"></div>
@@ -752,9 +759,9 @@ function renderUsersList() {
         return;
     }
     const roleLabels = {
-        inspector: { label: '👑 مفتش', class: 'inspector' },
-        teacher: { label: '👨‍🏫 أستاذ', class: 'teacher' },
-        supervisor: { label: '🔵 مشرف', class: 'supervisor' }
+        inspector: { label: '👑 مفتش(ة)', class: 'inspector' },
+        teacher: { label: '👨‍🏫 أستاذ(ة)', class: 'teacher' },
+        supervisor: { label: '🔵 مشرف(ة)', class: 'supervisor' }
     };
     const sorted = [...users].sort((a, b) => {
         const order = { inspector: 0, supervisor: 1, teacher: 2 };
@@ -790,7 +797,7 @@ function renderUsersList() {
 }
 
 function openAddUserModal() {
-    document.getElementById('userModalTitle').textContent = 'إضافة مستخدم جديد';
+    document.getElementById('userModalTitle').textContent = 'إضافة مستخدم(ة) جديد(ة)';
     document.getElementById('editUserId').value = '';
     document.getElementById('userFullName').value = '';
     document.getElementById('userUsername').value = '';
@@ -811,12 +818,12 @@ async function saveUser() {
     const password = document.getElementById('userPassword').value;
     const editId = document.getElementById('editUserId').value;
 
-    if (!fullName || !username) { showToast('يرجى إدخال الاسم الكامل واسم المستخدم', 'error'); return; }
+    if (!fullName || !username) { showToast('يرجى إدخال الاسم الكامل واسم المستخدم(ة)', 'error'); return; }
     if (!/^[a-zA-Z0-9._-]{3,50}$/.test(username)) { showToast('اسم المستخدم يجب أن يكون 3-50 حرفاً (بدون مسافات أو رموز خاصة)', 'error'); return; }
 
     const users = getUsers();
     const existingUser = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.id !== editId);
-    if (existingUser) { showToast('اسم المستخدم موجود مسبقاً', 'error'); return; }
+    if (existingUser) { showToast('اسم المستخدم (ة)موجود مسبقاً', 'error'); return; }
 
     if (editId) {
         const idx = users.findIndex(u => u.id === editId);
@@ -831,7 +838,7 @@ async function saveUser() {
                 const hash = await hashPassword(password);
                 await saveCredentialHash(editId, hash);
             }
-            if (saved) { showToast('✅ تم تحديث بيانات المستخدم على الخادم', 'success'); closeUserModal(); }
+            if (saved) { showToast('✅ تم تحديث بيانات المستخدم(ة) على الخادم', 'success'); closeUserModal(); }
             else showToast('❌ لم يتم حفظ التغييرات على الخادم', 'error');
             renderUsersList();
         }
@@ -848,7 +855,7 @@ async function saveUser() {
         const hash = await hashPassword(newPassword);
         await saveCredentialHash(newId, hash);
         if (!password) {
-            alert(`🔑 تم إنشاء المستخدم بنجاح!\n\nاسم المستخدم: ${username}\nكلمة المرور: ${newPassword}\n\n⚠️ احفظ كلمة المرور وأرسلها للأستاذ`);
+            alert(`🔑 تم إنشاء المستخدم(ة) بنجاح!\n\nاسم المستخدم(ة): ${username}\nكلمة المرور: ${newPassword}\n\n⚠️ احفظ كلمة المرور وأرسلها للأستاذ(ة)`);
         }
         showToast('✅ تم إضافة المستخدم وحفظه على الخادم بنجاح', 'success');
         closeUserModal();
@@ -859,7 +866,7 @@ async function saveUser() {
 function editUser(userId) {
     const user = getUsers().find(u => u.id === userId);
     if (!user) return;
-    document.getElementById('userModalTitle').textContent = 'تعديل بيانات المستخدم';
+    document.getElementById('userModalTitle').textContent = 'تعديل بيانات المستخدم(ة)';
     document.getElementById('editUserId').value = user.id;
     document.getElementById('userFullName').value = user.fullName;
     document.getElementById('userUsername').value = user.username;
@@ -883,7 +890,7 @@ async function resetUserPassword(userId) {
         users[idx].mustChangePassword = true;
         await saveUsers(users);
     }
-    alert(`🔑 تم إعادة تعيين كلمة المرور!\n\nاسم المستخدم: ${user.username}\nكلمة المرور الجديدة: ${newPassword}\n\n⚠️ احفظ كلمة المرور وأرسلها للأستاذ`);
+    alert(`🔑 تم إعادة تعيين كلمة المرور!\n\nاسم المستخدم(ة): ${user.username}\nكلمة المرور الجديدة: ${newPassword}\n\n⚠️ احفظ كلمة المرور وأرسلها للأستاذ(ة)`);
     showToast('✅ تم إعادة تعيين كلمة المرور', 'success');
 }
 
@@ -906,11 +913,11 @@ async function deleteUser(userId) {
     const user = getUsers().find(u => u.id === userId);
     if (!user) return;
     if (!confirm(`⚠️ هل تريد حذف المستخدم "${user.fullName}" نهائياً؟\n\nلا يمكن التراجع عن هذه العملية!`)) return;
-    if (!confirm(`تأكيد أخير: سيتم حذف جميع بيانات هذا المستخدم. متابعة؟`)) return;
+    if (!confirm(`تأكيد أخير: سيتم حذف جميع بيانات هذا المستخدم(ة). متابعة؟`)) return;
     const users = getUsers().filter(u => u.id !== userId);
     await saveUsers(users);
     await saveCredentialHash(userId, null);
-    showToast('✅ تم حذف المستخدم', 'success');
+    showToast('✅ تم حذف المستخدم(ة)', 'success');
     renderUsersList();
 }
 
@@ -954,10 +961,10 @@ async function importUsersFromCSV(event) {
                 if (credsRef) await credsRef.set({ hashes: creds, updatedAt: new Date().toISOString() });
             } catch(_) {}
             renderUsersList();
-            showToast(`✅ تم استيراد ${imported} مستخدم (تم تخطي ${skipped})`, 'success');
+            showToast(`✅ تم استيراد ${imported} مستخدم(ة) (تم تخطي ${skipped})`, 'success');
             if (credentials.length > 0) {
                 let msg = `📋 بيانات الدخول للمستخدمين الجدد:\n\n`;
-                credentials.forEach(c => { msg += `${c.fullName}\n  المستخدم: ${c.username}\n  كلمة المرور: ${c.password}\n\n`; });
+                credentials.forEach(c => { msg += `${c.fullName}\n  المستخدم(ة): ${c.username}\n  كلمة المرور: ${c.password}\n\n`; });
                 msg += `⚠️ احفظ هذه البيانات وأرسلها للأساتذة`;
                 navigator.clipboard.writeText(msg).then(() => alert(msg + '\n\n✅ تم نسخ البيانات إلى الحافظة')).catch(() => alert(msg));
             }
@@ -974,9 +981,9 @@ function exportUsersCSV() {
     const users = getUsers();
     if (users.length === 0) { showToast('لا يوجد مستخدمون للتصدير', 'warning'); return; }
     let csv = '\uFEFF';
-    csv += 'الاسم الكامل,اسم المستخدم,البريد الإلكتروني,المؤسسة,الدور,آخر دخول,الحالة\n';
+    csv += 'الاسم الكامل,اسم المستخدم(ة),البريد الإلكتروني,المؤسسة,الدور,آخر دخول,الحالة\n';
     users.forEach(u => {
-        const roleAr = { inspector: 'مفتش', teacher: 'أستاذ', supervisor: 'مشرف' }[u.role] || u.role;
+        const roleAr = { inspector: 'مفتش(ة)', teacher: 'أستاذ(ة)', supervisor: 'مشرف(ة)' }[u.role] || u.role;
         const status = u.active ? 'نشط' : 'معطّل';
         const lastLogin = u.lastLogin ? formatDateTimeAr(u.lastLogin) : 'لم يسجل';
         csv += `"${u.fullName}","${u.username}","${u.email || ''}","${u.school || ''}","${roleAr}","${lastLogin}","${status}"\n`;
@@ -991,7 +998,7 @@ function exportUsersCSV() {
 
 function downloadCSVTemplate() {
     let csv = '\uFEFF';
-    csv += 'الاسم الكامل,اسم المستخدم,البريد الإلكتروني,المؤسسة,الدور\n';
+    csv += 'الاسم الكامل,اسم المستخدم(ة),البريد الإلكتروني,المؤسسة,الدور\n';
     csv += 'محمد بن علي,mohamed.benali,mohamed@example.com,متوسطة النصر,teacher\n';
     csv += 'فاطمة الزهراء,fatima.zahra,fatima@example.com,متوسطة الأمل,teacher\n';
     csv += 'عبد القادر أمين,abdelkader.amine,,متوسطة الوئام,supervisor\n';
@@ -1285,7 +1292,7 @@ async function deletePedRecord(id) {
         try {
             await sbMain.from('activity_log').insert({
                 teacher_id: currentUser ? currentUser.id : 'inspector',
-                teacher_name: currentUser ? (currentUser.fullName || 'المفتش') : 'المفتش',
+                teacher_name: currentUser ? (currentUser.fullName || 'المفتش(ة)') : 'المفتش(ة)',
                 action: 'delete',
                 activity_title: 'حذف سجل معالجة بيداغوجية',
                 created_at: new Date().toISOString()
@@ -1538,7 +1545,7 @@ function exportPedRecordWord(id) {
         <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">${studentsRows || '<tr><td style="border:1px solid #333;padding:5px;text-align:center;">لا يوجد متعلمون مسجلون</td></tr>'}</table>
         <div style="margin-top:22px;display:flex;justify-content:space-between;">
             <div><strong>توقيع الأستاذ(ة):</strong> .....................</div>
-            <div><strong>المفتش:</strong> ${inspectorName} — ${formatDateGeorgian()}</div>
+            <div><strong>المفتش(ة):</strong> ${inspectorName} — ${formatDateGeorgian()}</div>
         </div>
     `;
 
@@ -1578,5 +1585,6 @@ function exportPedagogicalCSV() {
 
 <script src="dashboard-supabase.js"></script>
 <script src="admin-panel.js"></script>
+<script src="pwa-register.js" defer></script>
 </body>
 </html>

@@ -3,9 +3,16 @@
 <head>
 <script src="supabase-config.js"></script>
 <script src="portal-cloud.js"></script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- ===== PWA: Manifest & Meta ===== -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0e2744">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="الوجيه">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180x180.png">
+<meta name="mobile-web-app-capable" content="yes">
     <title>السيرة الذاتية المهنية - المقاطعة الثانية قسنطينة | المفتش درويش الهلالي</title>
     <meta name="description" content="السيرة الذاتية المهنية للأستاذ المكوّن ومفتش التعليم المتوسط درويش الهلالي — المقاطعة الثانية قسنطينة، وزارة التربية الوطنية الجزائرية">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1101,5 +1108,6 @@
         AuthSystem.init();
     })();
     </script>
+<script src="pwa-register.js" defer></script>
 </body>
 </html>

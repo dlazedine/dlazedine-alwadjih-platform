@@ -118,7 +118,10 @@ create table if not exists wajih_reports(
   created_at timestamptz default now(), updated_at timestamptz default now());
 alter table wajih_reports enable row level security;
 drop policy if exists r_sel on wajih_reports;
-create policy r_sel on wajih_reports for select using (wj_is_role(array['inspector','supervisor']) or (published and exists(select 1 from wajih_prof p where p.id=prof_id and p.user_id=auth.uid())));
+create policy r_sel on wajih_reports for select using (
+  wj_is_role(array['inspector'])
+  or exists(select 1 from wajih_prof p where p.id=wajih_reports.prof_id and p.user_id=auth.uid() and wajih_reports.published)
+  or (wj_is_role(array['supervisor']) and not exists(select 1 from wajih_prof p where p.id=wajih_reports.prof_id and p.user_id=auth.uid())));
 drop policy if exists r_ins on wajih_reports;
 create policy r_ins on wajih_reports for insert with check (wj_is_role(array['inspector']));
 drop policy if exists r_upd on wajih_reports;

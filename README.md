@@ -47,6 +47,7 @@
 ```
 index.html · data-prof.html · rapport-peda.html · rapport-tarsim.html · arabic.html · moualaja.html · amal.html · niqash.html · cv.html · taqyim.html · dashboard.html
 auth.js · app.js · niqash.js · style.css · niqash.css
+datefmt.js           ← التاريخ ميلادي بأرقام لاتينية (jj/mm/aaaa) والوقت 24 ساعة في كل الصفحات
 report.css           ← أنماط الطباعة المشتركة للتقريرين (خط Tahoma واضح، وصفحتان A4)
 export-word.js       ← تصدير التقرير كملف Word حقيقي (.docx) بقيمه المدخلة، دون مكتبات خارجية
 supabase-config.js   ← عنوان Supabase والمفتاح العام والمفاتيح المشتركة

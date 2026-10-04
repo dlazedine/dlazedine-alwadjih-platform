@@ -1,0 +1,75 @@
+{
+  "id": "/",
+  "name": "الوجيه في الإشراف التربوي",
+  "short_name": "الوجيه",
+  "description": "منظومة رقمية موحّدة للتعليم المتوسط: تعليمية اللغة العربية، المعالجة البيداغوجية، الأعمال الموجهة، ركن النقاش، التقييم، ولوحة التحكم — المقاطعة الثانية قسنطينة.",
+  "lang": "ar",
+  "dir": "rtl",
+  "scope": "/",
+  "start_url": "/index.html?source=pwa",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#faf7ef",
+  "theme_color": "#0e2744",
+  "categories": ["education", "productivity", "utilities"],
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "icons/icon-72x72.png",   "sizes": "72x72",   "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-96x96.png",   "sizes": "96x96",   "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-128x128.png", "sizes": "128x128", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-144x144.png", "sizes": "144x144", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-152x152.png", "sizes": "152x152", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-384x384.png", "sizes": "384x384", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-maskable-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    {
+      "src": "icons/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "لوحة القيادة"
+    },
+    {
+      "src": "icons/screenshot-narrow.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "واجهة الجوال"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "الأعمال الموجهة",
+      "short_name": "الأعمال",
+      "description": "لوحة قيادة الأنشطة الفارقية",
+      "url": "/amal.html?source=shortcut",
+      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "المعالجة البيداغوجية",
+      "short_name": "المعالجة",
+      "description": "سجلات المعالجة والخطط العلاجية",
+      "url": "/moualaja.html?source=shortcut",
+      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "تعليمية اللغة العربية",
+      "short_name": "العربية",
+      "description": "هندسة المقاطع والمذكرات",
+      "url": "/arabic.html?source=shortcut",
+      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "ركن النقاش",
+      "short_name": "النقاش",
+      "description": "المحادثة التربوية",
+      "url": "/niqash.html?source=shortcut",
+      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ]
+}

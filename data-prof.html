@@ -3,6 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- ===== PWA: Manifest & Meta ===== -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0e2744">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="الوجيه">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180x180.png">
+<meta name="mobile-web-app-capable" content="yes">
 <title>بيانات الأساتذة — الوجيه في الإشراف التربوي</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -338,5 +346,6 @@ const{data:o}=await c.from('wajih_prof').select('*').eq('user_id',p.id).maybeSin
 if(staff()){await loadList();view='list';rec=null}else rec=own;
 render()})();
 </script>
+<script src="pwa-register.js" defer></script>
 </body>
 </html>
