@@ -3,7 +3,7 @@
    • يوضع في جذر الموقع بجانب index.html (نطاقه هو المجلد الذي يوجد فيه)
    • ارفع رقم VERSION كلما أضفتَ ملفاً جديداً أو غيّرتَ قائمة LOCAL
    ====================================================================== */
-const VERSION = 'v1.0.2';
+const VERSION = 'v1.0.3';
 const PRE = 'wajih-pre-' + VERSION;   // ملفات المنظومة (قشرة التطبيق)
 const RUN = 'wajih-run-' + VERSION;   // مكتبات CDN والخطوط
 const MAX_RUN = 90;                   // أقصى عدد عناصر في ذاكرة CDN
@@ -102,29 +102,33 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(swr(e, r));
 });
 
-/* الصفحات: الشبكة أولاً (لتصل التحديثات وتعمل حراسة الدخول)، ثم النسخة المحفوظة، ثم صفحة offline.html */
+/* الصفحات: الشبكة أولاً (لتصل التحديثات وتعمل حراسة الدخول).
+   المهلة (6 ثوانٍ) تُطبَّق فقط إن وُجدت نسخة محفوظة نرجع إليها؛ أما الصفحة التي لم تُحفظ بعد فننتظر الشبكة
+   مهما بطُؤت، ولا نعرض offline.html إلا إذا انقطع الاتصال فعلاً. */
 async function navigate(e) {
   const r = e.request, u = new URL(r.url), key = new Request(u.origin + u.pathname);   // المفتاح بلا ?query
+  const cached = await caches.match(key);
   try {
     const pre = await e.preloadResponse;
-    const res = pre || await withTimeout(fetch(r), 6000);
+    const res = pre || await (cached ? withTimeout(fetch(r), 6000) : fetch(r));
     if (res && res.ok && res.type === 'basic' && !res.redirected) (await caches.open(PRE)).put(key, res.clone());
     return res;
   } catch (_) {
-    return (await caches.match(key)) || (await caches.match(new Request(u.origin + u.pathname.replace(/\/?$/, '/') + 'index.html'))) || (await caches.match('offline.html'));
+    return cached || (await caches.match('offline.html')) || Response.error();
   }
 }
 
 /* ملفات المنظومة (JS/CSS): الشبكة أولاً لتفادي تعارض الإصدارات، والأيقونات والخطوط: الذاكرة أولاً */
 async function local(r, u) {
   const c = await caches.open(PRE);
-  if (/\.(png|jpe?g|webp|gif|svg|ico|woff2?)$/i.test(u.pathname)) { const hit = await c.match(r); if (hit) return hit; }
+  const hit = await c.match(r, { ignoreSearch: true });
+  if (hit && /\.(png|jpe?g|webp|gif|svg|ico|woff2?)$/i.test(u.pathname)) return hit;
   try {
-    const res = await withTimeout(fetch(r), 5000);
+    const res = await (hit ? withTimeout(fetch(r), 5000) : fetch(r));   // بلا مهلة إن لم توجد نسخة محفوظة
     if (res.ok && res.type === 'basic') c.put(r, res.clone());
     return res;
   } catch (_) {
-    return (await c.match(r, { ignoreSearch: true })) || Response.error();
+    return hit || Response.error();
   }
 }
 
