@@ -1,0 +1,158 @@
+{
+  "id": "/dlazedine-alwadjih-platform/",
+  "name": "الوجيه في الإشراف التربوي",
+  "short_name": "الوجيه",
+  "description": "منظومة رقمية للتعليم المتوسط: بيانات الأساتذة واستعمال الزمن، التقرير التربوي وتقرير الترسيم، المعالجة البيداغوجية، الأعمال الموجهة وركن النقاش.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
+  "orientation": "any",
+  "theme_color": "#1f3864",
+  "background_color": "#f3f1ea",
+  "categories": [
+    "education",
+    "productivity"
+  ],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": [
+      "navigate-existing",
+      "auto"
+    ]
+  },
+  "icons": [
+    {
+      "src": "icons/icon-48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "قائمة الأساتذة ووضعية آجال الزيارة"
+    },
+    {
+      "src": "screenshots/narrow.png",
+      "sizes": "540x960",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "قائمة الأساتذة على الهاتف"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "بيانات الأساتذة",
+      "short_name": "البيانات",
+      "url": "./data-prof.html",
+      "icons": [
+        {
+          "src": "icons/icon-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "ركن النقاش",
+      "short_name": "النقاش",
+      "url": "./niqash.html",
+      "icons": [
+        {
+          "src": "icons/icon-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "المعالجة البيداغوجية",
+      "short_name": "المعالجة",
+      "url": "./moualaja.html",
+      "icons": [
+        {
+          "src": "icons/icon-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
