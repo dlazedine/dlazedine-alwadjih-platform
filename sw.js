@@ -3,7 +3,7 @@
    • يوضع في جذر الموقع بجانب index.html (نطاقه هو المجلد الذي يوجد فيه)
    • ارفع رقم VERSION كلما أضفتَ ملفاً جديداً أو غيّرتَ قائمة LOCAL
    ====================================================================== */
-const VERSION = 'v1.0.0';
+const VERSION = 'v1.0.2';
 const PRE = 'wajih-pre-' + VERSION;   // ملفات المنظومة (قشرة التطبيق)
 const RUN = 'wajih-run-' + VERSION;   // مكتبات CDN والخطوط
 const MAX_RUN = 90;                   // أقصى عدد عناصر في ذاكرة CDN
@@ -14,6 +14,7 @@ const LOCAL = [
   "admin-panel.js",
   "amal.html",
   "app.js",
+  "bulk-users.js",
   "arabic.html",
   "auth.js",
   "cv.html",
@@ -23,6 +24,7 @@ const LOCAL = [
   "datefmt.js",
   "export-word.js",
   "index.html",
+  "install.html",
   "manifest.webmanifest",
   "moualaja.html",
   "niqash.css",

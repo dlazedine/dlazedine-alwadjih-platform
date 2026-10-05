@@ -9,7 +9,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="الوجيه">
 <script src="pwa.js" defer></script>
-
 <script src="supabase-config.js"></script>
 <script src="portal-cloud.js"></script>
 
@@ -1261,6 +1260,219 @@
             .nav-tabs, .app-footer, .mode-switcher { display: none !important; }
             .main-content { display: block !important; }
         }
+        :root {
+            --primary: #0e2744;
+            --primary-light: #1a3d6e;
+            --primary-deep: #091c33;
+            --gold: #c49b3f;
+            --gold-light: #fce8bd;
+            --danger: #8b1827;
+            --success: #1b7a43;
+            --warning: #b38b2b;
+            --info: #17728b;
+            --radius: 12px;
+            --shadow: 0 4px 18px rgba(14,39,68,0.06);
+            --transition: all 0.22s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ===== خلفية عربية إسلامية فاخرة ===== */
+        body {
+            font-family: 'Tajawal', Tahoma, sans-serif;
+            background-color: #faf7ef;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(196,155,63,0.12) 0%, transparent 60%),
+                radial-gradient(circle at 100% 100%, rgba(14,39,68,0.06) 0%, transparent 50%),
+                url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><defs><pattern id='islamic-moualaja' width='80' height='80' patternUnits='userSpaceOnUse'><g fill='none' stroke='%23c49b3f' stroke-width='0.6' opacity='0.22'><path d='M40 16 L47 27 L60 20 L57 34 L71 39 L60 48 L68 60 L54 61 L51 75 L40 66 L29 75 L26 61 L12 60 L20 48 L9 39 L23 34 L20 20 L33 27 Z'/><rect x='28' y='28' width='24' height='24' rx='2'/><rect x='28' y='28' width='24' height='24' rx='2' transform='rotate(45 40 40)'/><circle cx='14' cy='14' r='4'/><circle cx='40' cy='40' r='6' fill='%23c49b3f' fill-opacity='0.08'/></g></pattern></defs><rect width='80' height='80' fill='url(%23islamic-moualaja)'/></svg>");
+            background-attachment: fixed;
+            padding: 16px;
+            direction: rtl;
+            font-size: 14.5px;
+            line-height: 1.7;
+            min-height: 100vh;
+            color: #152238;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: auto;
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid #d9ceb4;
+            border-top: 3.5px solid var(--gold);
+            box-shadow: var(--shadow);
+            padding: 20px 24px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .main-content { display: none; }
+        .main-content.visible { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--gold);
+            padding: 12px 18px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            background: linear-gradient(145deg, #fbf8f0, #fff);
+            border-radius: var(--radius);
+            gap: 12px;
+        }
+        .header h1 { font-family: 'Amiri', serif; font-size: 21px; color: var(--primary); font-weight: 700; }
+        .header h1 i { color: var(--gold); margin-left: 10px; }
+        .header .subtitle { color: #5d6b7b; font-size: 12.5px; }
+        .header .badge {
+            background: linear-gradient(135deg, #0e2744 0%, #1a3d6e 100%);
+            border: 1.5px solid var(--gold);
+            color: #fce8bd;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* ===== الأزرار الإسلامية الفاخرة بحجم مصغر ورشيق ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 5px 13px;
+            border-radius: 8px;
+            border: 1.5px solid var(--gold);
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: var(--transition);
+            color: #fcf6e8;
+            background: linear-gradient(135deg, #0e2744 0%, #1a3d6e 100%);
+            text-decoration: none;
+            font-family: inherit;
+            box-shadow: 0 2px 6px rgba(14,39,68,0.2);
+        }
+        .btn:hover { transform: translateY(-1.5px); box-shadow: 0 4px 14px rgba(212,175,55,0.45); }
+        .btn-success { background: linear-gradient(135deg, #1b7a43 0%, #11532c 100%); border-color: #72cf97; }
+        .btn-danger { background: linear-gradient(135deg, #8b1827 0%, #630e19 100%); border-color: #bd3547; }
+        .btn-warning { background: linear-gradient(135deg, #b38b2b 0%, #8c6a1e 100%); color: #fff; border-color: #fce8bd; }
+        .btn-info { background: linear-gradient(135deg, #0e2744 0%, #1a3d6e 100%); border-color: var(--gold); }
+        .btn-word { background: linear-gradient(135deg, #2b579a 0%, #1a3765 100%); border-color: #7aa5e2; }
+        .btn-excel { background: linear-gradient(135deg, #217346 0%, #134e2c 100%); border-color: #6ece96; }
+        .btn-sm { padding: 4px 9px; font-size: 11px; border-radius: 6px; }
+        .btn-outline { background: #fff; border: 1.5px solid var(--gold); color: #0e2744; }
+
+        .nav-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #e8deb8;
+            padding-bottom: 10px;
+        }
+        .nav-tab {
+            padding: 6px 14px;
+            border-radius: 8px;
+            background: #fbf8f0;
+            color: #3d4a5c;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 12.5px;
+            border: 1.5px solid #d9ceb4;
+        }
+        .nav-tab.active {
+            background: linear-gradient(135deg, #091c33 0%, #153861 100%);
+            color: var(--gold-light);
+            border-color: var(--gold);
+            box-shadow: 0 2px 8px rgba(9,28,51,0.25);
+        }
+        .nav-tab:hover:not(.active) { border-color: var(--gold); color: var(--primary); background: #fffdf8; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.25s; }
+
+        .stats-grid, .platform-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .stat-card {
+            background: #faf8f2;
+            padding: 12px 14px;
+            border-radius: var(--radius);
+            border-top: 3px solid var(--gold);
+            border-right: 1px solid #e8deb8;
+            border-left: 1px solid #e8deb8;
+            border-bottom: 1px solid #e8deb8;
+            text-align: center;
+        }
+        .stat-card .number { font-size: 22px; font-weight: 800; color: var(--primary); }
+        .stat-card .label { font-size: 11.5px; color: #5d6b7b; }
+        .stat-card .icon { font-size: 20px; color: var(--gold); margin-bottom: 3px; display: block; }
+
+        .table-responsive { overflow-x: auto; border-radius: 10px; border: 1px solid #e8deb8; background: #fff; }
+        table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+        th { background: linear-gradient(180deg, #f2ecdd 0%, #e6ddc5 100%); color: var(--primary); padding: 8px 10px; text-align: right; border-bottom: 2px solid var(--gold); font-weight: 700; white-space: nowrap; }
+        td { padding: 8px 10px; border-bottom: 1px solid #f0e8d5; vertical-align: middle; }
+        tr:hover td { background: #fdfaf3; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(9,28,51,0.65);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            overflow-y: auto;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: #fff;
+            border-radius: var(--radius);
+            border-top: 3.5px solid var(--gold);
+            padding: 22px;
+            max-width: 800px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .modal-box h3 { color: var(--primary); margin-bottom: 14px; border-bottom: 2px solid var(--gold); padding-bottom: 8px; font-size: 16px; }
+        .modal-close { position: absolute; top: 12px; left: 16px; font-size: 22px; cursor: pointer; color: #888; background: none; border: none; }
+
+        .field-group { margin-bottom: 11px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+        .field-group label { width: 140px; font-weight: 700; color: var(--primary); font-size: 13px; }
+        .field-group input, .field-group textarea, .field-group select {
+            flex: 1;
+            min-width: 180px;
+            padding: 6px 10px;
+            border: 1.5px solid #d9ceb4;
+            border-radius: 7px;
+            font-size: 13px;
+            background: #fff;
+            font-family: inherit;
+        }
+        .field-group input:focus, .field-group textarea:focus, .field-group select:focus { outline: none; border-color: var(--gold); }
+        .field-group textarea { min-height: 50px; resize: vertical; }
+
+        .app-footer {
+            margin-top: 30px;
+            padding: 18px 22px;
+            background: linear-gradient(145deg, #fbf8f0, #f2ecdd);
+            border-top: 3.5px solid var(--gold);
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
     </style>
 </head>
 <body>
@@ -1280,30 +1492,20 @@
         <!-- الشريط العلوي -->
         <div class="top-bar" style="display:flex; justify-content:space-between; align-items:center; gap:12px; background:var(--primary); color:#fff; padding:12px 22px; border-radius:var(--radius); margin-bottom:20px; flex-wrap:wrap;">
             <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-                <a href="index.html" style="background:var(--gold); color:var(--primary); padding:6px 16px; border-radius:20px; font-size:13px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                    <i class="fas fa-arrow-right"></i> البوابة الرئيسية
-                </a>
-                <a href="amal.html" style="color:#fff; text-decoration:none; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
-                    <i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة
-                </a>
-                <a href="arabic.html" style="color:#fff; text-decoration:none; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
-                    <i class="fas fa-book-open-reader"></i> تعليمية العربية
-                </a>
-                <a href="niqash.html" style="color:#fff; text-decoration:none; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
-                    <i class="fas fa-comments"></i> ركن النقاش
-                </a>
-                <a href="dashboard.html" id="dashboardLink" style="display:none; color:#fff; text-decoration:none; background:rgba(196,155,63,0.3); border:1px solid var(--gold); padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700; align-items:center; gap:6px;">
-                    <i class="fas fa-user-shield"></i> لوحة التحكم
-                </a>
+<a href="index.html" class="btn btn-sm btn-gold"><i class="fas fa-arrow-right"></i> البوابة الرئيسية</a>
+<a href="amal.html" class="btn btn-sm btn-info"><i class="fas fa-chalkboard-teacher"></i> منصة الأعمال الموجهة</a>   
+<a href="arabic.html" class="btn btn-sm btn-info"><i class="fas fa-book-open-reader"></i> منصة تعليمية اللغة العربية</a>
+<a href="niqash.html" class="btn btn-sm btn-info"><i class="fas fa-comments"></i> ركن المحادثة</a>
+<a href="dashboard.html" id="dashboardLink" class="btn btn-sm btn-gold" style="display:none;"><i class="fas fa-user-shield"></i> لوحة التّحكم</a>
             </div>
-            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <span id="userBadge" style="display:none; background:rgba(255,255,255,0.15); color:#fff; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:600; align-items:center; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span id="userBadge" style="display:none; align-items:center; gap:6px; background:#faf8f2; border:1px solid var(--gold); padding:3px 10px; border-radius:16px; font-size:11.5px; font-weight:700; color:var(--primary);">
                     <i class="fas fa-user-circle"></i>
                     <span id="userBadgeName">—</span>
-                    <span id="userBadgeRole" style="background:var(--gold); color:var(--primary); padding:2px 9px; border-radius:20px; font-size:10.5px; font-weight:700;">—</span>
+                    <span id="userBadgeRole" style="background:var(--gold); color:#0c2540; padding:1px 6px; border-radius:10px; font-size:10px;">—</span>
                 </span>
-                <button onclick="AuthSystem.logout()" style="background:var(--danger); color:#fff; border:none; padding:6px 14px; border-radius:20px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit;">
-                    <i class="fas fa-sign-out-alt"></i> خروج
+                </span>
+<button class="btn btn-sm btn-danger" onclick="AuthSystem.logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
                 </button>
             </div>
         </div>

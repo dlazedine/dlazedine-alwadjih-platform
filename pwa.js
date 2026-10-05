@@ -43,16 +43,21 @@
     } catch (err) { console.warn('SW registration failed:', err); }
   });
 
-  /* ---- 2) زر تثبيت التطبيق ---- */
+  /* ---- 2) تثبيت التطبيق ---- */
   let deferred = null;
+  const own = () => document.documentElement.hasAttribute('data-pwa-own-ui');   // صفحة install.html لها زرها الخاص
+  window.PWA = {
+    canInstall: () => !!deferred,
+    installed: () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true,
+    install: async () => { if (!deferred) return false; deferred.prompt(); const c = await deferred.userChoice.catch(() => ({})); deferred = null; return c.outcome === 'accepted'; }
+  };
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault(); deferred = e;
-    if (localStorage.getItem('pwa_install_dismissed')) return;
-    bar('pwa-install', 'ثبّت «الوجيه» على جهازك لفتحه كتطبيق.', 'تثبيت', async () => {
-      deferred.prompt(); await deferred.userChoice.catch(() => {}); deferred = null;
-    });
+    window.dispatchEvent(new Event('pwa:installable'));
+    if (own() || window.PWA.installed() || localStorage.getItem('pwa_install_dismissed')) return;
+    bar('pwa-install', 'ثبّت «الوجيه» على جهازك لفتحه كتطبيق.', 'تثبيت', () => window.PWA.install());
     const later = document.querySelector('#pwa-install button:last-child');
     if (later) later.addEventListener('click', () => { try { localStorage.setItem('pwa_install_dismissed', '1'); } catch (e) {} });
   });
-  window.addEventListener('appinstalled', () => { const b = document.getElementById('pwa-install'); if (b) b.remove(); });
+  window.addEventListener('appinstalled', () => { const b = document.getElementById('pwa-install'); if (b) b.remove(); window.dispatchEvent(new Event('pwa:installed')); });
 })();

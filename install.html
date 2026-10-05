@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-pwa-own-ui>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تثبيت تطبيق الوجيه</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1f3864">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"><link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="الوجيه">
+<script src="pwa.js" defer></script>
+<style>
+        body {
+            font-family: var(--font-ar);
+            padding: 16px;
+            direction: rtl;
+            font-size: 14.5px;
+            line-height: 1.7;
+            min-height: 100vh;
+            color: #152238;
+            transition: background 0.3s;
+            background-color: #faf7ef;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(196,155,63,0.12) 0%, transparent 60%),
+                radial-gradient(circle at 100% 100%, rgba(14,39,68,0.06) 0%, transparent 50%),
+                url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><defs><pattern id='islamic-amal' width='80' height='80' patternUnits='userSpaceOnUse'><g fill='none' stroke='%23c49b3f' stroke-width='0.6' opacity='0.22'><path d='M40 16 L47 27 L60 20 L57 34 L71 39 L60 48 L68 60 L54 61 L51 75 L40 66 L29 75 L26 61 L12 60 L20 48 L9 39 L23 34 L20 20 L33 27 Z'/><rect x='28' y='28' width='24' height='24' rx='2'/><rect x='28' y='28' width='24' height='24' rx='2' transform='rotate(45 40 40)'/><circle cx='14' cy='14' r='4'/><circle cx='40' cy='40' r='6' fill='%23c49b3f' fill-opacity='0.08'/></g></pattern></defs><rect width='80' height='80' fill='url(%23islamic-amal)'/></svg>");
+            background-attachment: fixed;
+*{box-sizing:border-box}body{margin:0;background:#f3f1ea;color:#1f2a44;font:15px/1.9 Tahoma,Arial,sans-serif}
+header{background:#1f3864;color:#fff;text-align:center;padding:18px 12px;border-bottom:4px solid #c49b3f}header img{width:72px;height:72px;border-radius:18px}header h1{margin:6px 0 0;font-size:1.25rem}
+main{max-width:640px;margin:auto;padding:14px}.c{background:#fff;border:1px solid #ddd5bd;border-radius:14px;padding:14px 16px;margin-bottom:12px}.c.on{border:2px solid #c49b3f}
+h2{margin:0 0 4px;color:#1f3864;font-size:1.05rem}ol{margin:6px 0 0;padding-inline-start:22px}
+button,a.b{display:inline-block;background:#1f3864;color:#fff;border:0;border-radius:10px;padding:9px 20px;font:inherit;cursor:pointer;text-decoration:none}
+button:disabled{opacity:.45;cursor:not-allowed}.s{background:transparent;color:#1f3864;border:1px solid #1f3864}.m{font-size:.85rem;color:#6b7280}.ok{color:#1d7a46;font-weight:bold}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.qr{text-align:center}.qr img{width:200px;height:200px;border:1px solid #ddd5bd;border-radius:10px;background:#fff}
+</style></head>
+<body>
+<header><img src="icons/icon-192.png" alt=""><h1>تطبيق «الوجيه في الإشراف التربوي»</h1><div class="m" style="color:#e8dfc3">المقاطعة الثانية — قسنطينة</div></header>
+<main>
+<div class="c" id="top"><h2>التثبيت في ثوانٍ</h2><p style="margin:0">يعمل كأي تطبيق على هاتفك، ويتحدّث تلقائياً دون متجر.</p>
+<div class="row"><button id="go" disabled>تثبيت التطبيق الآن</button><a class="b s" href="index.html">فتح المنظومة دون تثبيت</a></div>
+<p class="m" id="st" style="margin:8px 0 0">إن لم يفعَّل الزر فاتبع الخطوات التي تناسب جهازك أدناه.</p></div>
+
+<div class="c" id="android"><h2>📱 هاتف أندرويد (Chrome)</h2><ol><li>افتح هذا الرابط في <b>Chrome</b>.</li><li>اضغط القائمة <b>⋮</b> أعلى الشاشة.</li><li>اختر <b>«تثبيت التطبيق»</b> أو <b>«إضافة إلى الشاشة الرئيسية»</b>.</li></ol></div>
+<div class="c" id="ios"><h2>🍎 آيفون وآيباد (Safari فقط)</h2><ol><li>افتح الرابط في <b>Safari</b> (لا يعمل من متصفح آخر).</li><li>اضغط زر <b>المشاركة</b> (المربع والسهم).</li><li>اختر <b>«إضافة إلى الشاشة الرئيسية»</b> ثم <b>«إضافة»</b>.</li></ol></div>
+<div class="c" id="pc"><h2>💻 حاسوب (Chrome أو Edge)</h2><ol><li>افتح الرابط.</li><li>اضغط أيقونة <b>التثبيت</b> في طرف شريط العنوان، أو القائمة ← <b>«تثبيت الوجيه»</b>.</li></ol></div>
+
+<div class="c"><h2>🔐 الدخول</h2><p style="margin:0">ينشئ المفتش حسابك ويسلّمك اسم المستخدم وكلمة مرور مؤقتة. عند أول دخول تختار كلمة مرور جديدة. <b>لا تشارك كلمة مرورك مع أحد، ولا تكتبها في مجموعات المراسلة.</b></p></div>
+
+<div class="c qr"><h2>شارك الرابط مع زملائك</h2><img id="qr" alt="رمز QR لرابط التطبيق" width="200" height="200"><div class="m" id="u" style="word-break:break-all;margin:6px 0"></div>
+<div class="row" style="justify-content:center"><button id="cp" class="s">نسخ الرابط</button><a class="b" id="wa" target="_blank" rel="noopener">إرسال عبر واتساب</a></div></div>
+</main>
+<script>
+const url=new URL('./',location.href).href+'install.html';
+document.getElementById('u').textContent=url;
+document.getElementById('qr').src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data='+encodeURIComponent(url);
+document.getElementById('wa').href='https://wa.me/?text='+encodeURIComponent('السلام عليكم، لتثبيت تطبيق «الوجيه» على هاتفك افتح هذا الرابط واتبع الخطوات:\n'+url);
+document.getElementById('cp').onclick=async e=>{try{await navigator.clipboard.writeText(url);e.target.textContent='تم النسخ ✓'}catch(x){prompt('انسخ الرابط:',url)}};
+const ua=navigator.userAgent,id=/iPhone|iPad|iPod/.test(ua)?'ios':/Android/.test(ua)?'android':'pc';document.getElementById(id).classList.add('on');
+const go=document.getElementById('go'),st=document.getElementById('st');
+function refresh(){if(PWA.installed()){go.disabled=true;go.textContent='التطبيق مثبّت ✓';st.innerHTML='<span class="ok">أنت تستعمل التطبيق المثبّت.</span>';return}
+ if(PWA.canInstall()){go.disabled=false;st.textContent='اضغط الزر ثم «تثبيت» في النافذة التي تظهر.'}}
+addEventListener('load',()=>setTimeout(()=>window.PWA&&refresh(),300));addEventListener('pwa:installable',refresh);addEventListener('pwa:installed',()=>{go.disabled=true;go.textContent='تم التثبيت ✓'});
+go.onclick=()=>PWA.install();
+</script></body></html>

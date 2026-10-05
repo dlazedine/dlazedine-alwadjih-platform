@@ -77,14 +77,24 @@
             box-sizing: border-box;
         }
 
+         /* ===== خلفية عربية إسلامية فاخرة ===== */
         body {
-            font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
-            background: #fafbfc;
+            font-family: var(--font-ar);
+            padding: 16px;
+            direction: rtl;
+            font-size: 14.5px;
+            line-height: 1.7;
             min-height: 100vh;
-            padding: 20px;
-            padding-top: 70px;
-            color: var(--text-dark);
+            color: #152238;
+            transition: background 0.3s;
+            background-color: #faf7ef;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(196,155,63,0.12) 0%, transparent 60%),
+                radial-gradient(circle at 100% 100%, rgba(14,39,68,0.06) 0%, transparent 50%),
+                url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><defs><pattern id='islamic-amal' width='80' height='80' patternUnits='userSpaceOnUse'><g fill='none' stroke='%23c49b3f' stroke-width='0.6' opacity='0.22'><path d='M40 16 L47 27 L60 20 L57 34 L71 39 L60 48 L68 60 L54 61 L51 75 L40 66 L29 75 L26 61 L12 60 L20 48 L9 39 L23 34 L20 20 L33 27 Z'/><rect x='28' y='28' width='24' height='24' rx='2'/><rect x='28' y='28' width='24' height='24' rx='2' transform='rotate(45 40 40)'/><circle cx='14' cy='14' r='4'/><circle cx='40' cy='40' r='6' fill='%23c49b3f' fill-opacity='0.08'/></g></pattern></defs><rect width='80' height='80' fill='url(%23islamic-amal)'/></svg>");
+            background-attachment: fixed;
         }
+
 
         /* ============================================================
            الشريط العلوي الموحّد
