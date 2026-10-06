@@ -8,21 +8,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="الوجيه">
 <script src="pwa.js" defer></script>
 <style>
-        body {
-            font-family: var(--font-ar);
-            padding: 16px;
-            direction: rtl;
-            font-size: 14.5px;
-            line-height: 1.7;
-            min-height: 100vh;
-            color: #152238;
-            transition: background 0.3s;
-            background-color: #faf7ef;
-            background-image: 
-                radial-gradient(circle at 50% 0%, rgba(196,155,63,0.12) 0%, transparent 60%),
-                radial-gradient(circle at 100% 100%, rgba(14,39,68,0.06) 0%, transparent 50%),
-                url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><defs><pattern id='islamic-amal' width='80' height='80' patternUnits='userSpaceOnUse'><g fill='none' stroke='%23c49b3f' stroke-width='0.6' opacity='0.22'><path d='M40 16 L47 27 L60 20 L57 34 L71 39 L60 48 L68 60 L54 61 L51 75 L40 66 L29 75 L26 61 L12 60 L20 48 L9 39 L23 34 L20 20 L33 27 Z'/><rect x='28' y='28' width='24' height='24' rx='2'/><rect x='28' y='28' width='24' height='24' rx='2' transform='rotate(45 40 40)'/><circle cx='14' cy='14' r='4'/><circle cx='40' cy='40' r='6' fill='%23c49b3f' fill-opacity='0.08'/></g></pattern></defs><rect width='80' height='80' fill='url(%23islamic-amal)'/></svg>");
-            background-attachment: fixed;
 *{box-sizing:border-box}body{margin:0;background:#f3f1ea;color:#1f2a44;font:15px/1.9 Tahoma,Arial,sans-serif}
 header{background:#1f3864;color:#fff;text-align:center;padding:18px 12px;border-bottom:4px solid #c49b3f}header img{width:72px;height:72px;border-radius:18px}header h1{margin:6px 0 0;font-size:1.25rem}
 main{max-width:640px;margin:auto;padding:14px}.c{background:#fff;border:1px solid #ddd5bd;border-radius:14px;padding:14px 16px;margin-bottom:12px}.c.on{border:2px solid #c49b3f}
@@ -36,6 +21,7 @@ button:disabled{opacity:.45;cursor:not-allowed}.s{background:transparent;color:#
 <main>
 <div class="c" id="top"><h2>التثبيت في ثوانٍ</h2><p style="margin:0">يعمل كأي تطبيق على هاتفك، ويتحدّث تلقائياً دون متجر.</p>
 <div class="row"><button id="go" disabled>تثبيت التطبيق الآن</button><a class="b s" href="index.html">فتح المنظومة دون تثبيت</a></div>
+<p class="m" id="loc" style="display:none;margin:8px 0 0;color:#8a6200">ملاحظة: هذه نسخة محلية على جهازك. الرابط ورمز QR أدناه يشيران إلى الموقع المنشور، ولا يعمل زر التثبيت إلا من الرابط الحقيقي (https).</p>
 <p class="m" id="st" style="margin:8px 0 0">إن لم يفعَّل الزر فاتبع الخطوات التي تناسب جهازك أدناه.</p></div>
 
 <div class="c" id="android"><h2>📱 هاتف أندرويد (Chrome)</h2><ol><li>افتح هذا الرابط في <b>Chrome</b>.</li><li>اضغط القائمة <b>⋮</b> أعلى الشاشة.</li><li>اختر <b>«تثبيت التطبيق»</b> أو <b>«إضافة إلى الشاشة الرئيسية»</b>.</li></ol></div>
@@ -48,7 +34,12 @@ button:disabled{opacity:.45;cursor:not-allowed}.s{background:transparent;color:#
 <div class="row" style="justify-content:center"><button id="cp" class="s">نسخ الرابط</button><a class="b" id="wa" target="_blank" rel="noopener">إرسال عبر واتساب</a></div></div>
 </main>
 <script>
-const url=new URL('./',location.href).href+'install.html';
+/* رابط الموقع المنشور: يُستعمل في QR والمشاركة عند فتح الصفحة من ملف محلي (file://) أو من localhost.
+   غيّره إن انتقلتَ إلى نطاق خاص. */
+const SITE='https://dlazedine.github.io/dlazedine-alwadjih-platform/';
+const local=!/^https?:$/.test(location.protocol)||/^(localhost|127\.|192\.168\.)/.test(location.hostname);
+const url=(local?SITE:new URL('./',location.href).href)+'install.html';
+if(local)document.getElementById('loc').style.display='block';
 document.getElementById('u').textContent=url;
 document.getElementById('qr').src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data='+encodeURIComponent(url);
 document.getElementById('wa').href='https://wa.me/?text='+encodeURIComponent('السلام عليكم، لتثبيت تطبيق «الوجيه» على هاتفك افتح هذا الرابط واتبع الخطوات:\n'+url);
