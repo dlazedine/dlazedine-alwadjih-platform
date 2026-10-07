@@ -93,6 +93,7 @@ self.addEventListener('message', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
+    if (e.request.url.includes('supabase.co') || e.request.url.includes('fahs-ikhtibar.html')) return;
   const r = e.request;
   if (r.method !== 'GET' || r.headers.has('range')) return;          // POST وطلبات Range: مباشرة من الشبكة
   const u = new URL(r.url);
