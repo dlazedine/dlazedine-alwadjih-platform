@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f3864">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="الوجيه">
+<script src="pwa.js" defer></script>
+
+<script src="supabase-config.js"></script>
+<script src="portal-cloud.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دراسة المقترحات والاستبيانات التربوية — المقاطعة الثانية قسنطينة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="proposals.css">
+</head>
+<body class="proposals-page">
+
+<!-- الشريط العلوي الموحد لمنظومة المقاطعة الثانية -->
+<header class="top-strip no-print">
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <a href="index.html" class="back-link" title="العودة إلى البوابة الرئيسية">
+            <i class="fas fa-arrow-right"></i> البوابة الرئيسية
+        </a>
+        <div class="top-nav-links">
+            <a href="arabic.html" class="top-nav-link"><i class="fas fa-book-open-reader"></i> تعليمية العربية</a>
+            <a href="moualaja.html" class="top-nav-link"><i class="fas fa-stethoscope"></i> المعالجة</a>
+            <a href="amal.html" class="top-nav-link"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
+            <a href="niqash.html" class="top-nav-link"><i class="fas fa-comments"></i> ركن النقاش</a>
+            <a href="fahss_ikhtibarat.html" class="top-nav-link"><i class="fas fa-file-circle-check"></i> فحص الاختبارات</a>
+            <a href="bloom_evaluation.html" class="top-nav-link"><i class="fas fa-layer-group"></i> تقويم بلوم</a>
+            <a href="cv.html" class="top-nav-link"><i class="fas fa-address-card"></i> السيرة الذاتية</a>
+            <a href="taqyim.html" class="top-nav-link" id="taqyimTopLink" style="display:none;"><i class="fas fa-award"></i> التقييم</a>
+            <a href="dashboard.html" class="top-nav-link" id="dashTopLink" style="display:none;"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
+        </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+        <span class="user-greet" id="userGreet" style="display:inline-flex;">
+            <i class="fas fa-user-circle"></i>
+            <span class="name" id="userGreetName">المستخدم</span>
+            <span class="role-badge" id="userGreetRole" style="background:rgba(196,155,63,0.3); border:1px solid var(--gold); padding:2px 8px; border-radius:12px; font-size:11px; margin-right:4px;">أستاذ</span>
+        </span>
+        <button class="btn-top-logout" onclick="PortalAuth.logout()" title="تسجيل الخروج">
+            <i class="fas fa-sign-out-alt"></i> خروج
+        </button>
+    </div>
+</header>
+
+<!-- الترويسة الرئيسية للواجهة -->
+<header class="pr-hero">
+    <div class="pr-pattern"></div>
+    <div class="pr-content">
+        <div class="pr-badge"><i class="fas fa-chart-pie"></i></div>
+        <div class="pr-info">
+            <div class="pr-label">
+                <i class="fas fa-landmark"></i> وزارة التربية الوطنية — المقاطعة الثانية قسنطينة
+            </div>
+            <h1>دراسة المقترحات والاستبيانات البيداغوجية</h1>
+            <p class="pr-sub">
+                فضاء تشاركي مهني يتيح لأساتذة المقاطعة التعبير عن آرائهم وتقديم مقترحاتهم الميدانية، 
+                مع تمكين المفتش والمشرف التربوي من رصد الاحتياجات وتوجيه الخطط البيداغوجية.
+            </p>
+            <div style="margin-top:10px; font-size:12.5px; color:var(--moss-dark); font-weight:700;">
+                <i class="fas fa-user-tie"></i> تأطير وإشراف: <strong>مفتش التعليم المتوسط درويش الهلالي</strong>
+            </div>
+        </div>
+        <div class="pr-stats">
+            <div class="pr-stat">
+                <span class="prs-num" id="prStatSurveys">4</span>
+                <span class="prs-lbl">استبيانات مفتوحة</span>
+            </div>
+            <div class="pr-stat">
+                <span class="prs-num" id="prStatResponses">0</span>
+                <span class="prs-lbl">إجمالي المشاركات</span>
+            </div>
+            <div class="pr-stat">
+                <span class="prs-num" id="prStatMine">0</span>
+                <span class="prs-lbl">مشاركاتي</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- أزرار التبويبات -->
+<nav class="pr-tabs" id="prTabs">
+    <button class="pt-btn active" data-tab="surveys" onclick="switchPr('surveys')">
+        <i class="fas fa-list-check"></i> الاستبيانات المتاحة
+    </button>
+    <button class="pt-btn" data-tab="mine" onclick="switchPr('mine')">
+        <i class="fas fa-user-check"></i> مشاركاتي المسجلة
+    </button>
+    <button class="pt-btn" data-tab="results" onclick="switchPr('results')">
+        <i class="fas fa-chart-column"></i> التحليل واستقراء النتائج
+    </button>
+    <button class="pt-btn" data-tab="builder" id="builderTabBtn" onclick="switchPr('builder')" style="display:none; color:var(--moss-dark); font-weight:800;">
+        <i class="fas fa-circle-plus"></i> إدارة ومنشئ الاستبيانات (للمفتش)
+    </button>
+</nav>
+
+<!-- المتن الرئيسي -->
+<main class="pr-main">
+    <!-- تبويب 1: الاستبيانات المفتوحة -->
+    <section class="pr-panel active" id="panel-surveys">
+        <div class="section-heading">
+            <h2>الاستبيانات التربوية المفتوحة للمشاركة</h2>
+            <p>انقر على "شارك الآن" للإجابة وتقديم اقتراحاتك حول أدوات ومنصات المقاطعة.</p>
+        </div>
+        <div class="surveys-grid" id="surveysGrid"></div>
+    </section>
+
+    <!-- تبويب 2: سجل مشاركاتي -->
+    <section class="pr-panel" id="panel-mine">
+        <div class="section-heading">
+            <h2>سجل مشاركاتي في الاستبيانات</h2>
+            <p>متابعة التغذية الراجعة وتأكيد تسجيل إجاباتكم ومقترحاتكم السابقة.</p>
+        </div>
+        <div class="mine-grid" id="mineGrid"></div>
+        <div class="empty-state" id="mineEmpty" style="display:none;">
+            <i class="fas fa-clipboard-check"></i>
+            <p>لم تسجل أي مشاركة بعد. تفضل بالمشاركة في الاستبيانات المفتوحة أعلاه.</p>
+        </div>
+    </section>
+
+    <!-- تبويب 3: النتائج واستقراء التغذية الراجعة -->
+    <section class="pr-panel" id="panel-results">
+        <div class="section-heading">
+            <h2>النتائج العامة والتحليل البيداغوجي</h2>
+            <p>استقراء التغذية الراجعة المستخلصة من كافة متوسطات المقاطعة الثانية.</p>
+        </div>
+        <div style="margin-bottom:16px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <select id="resultsSurveySelect" onchange="renderResults()" style="width:100%; max-width:440px; padding:9px 14px; border-radius:10px; border:1.5px solid var(--line); font-family:inherit; font-size:13.5px; font-weight:600;"></select>
+            <button class="btn btn-outline btn-sm" onclick="exportCurrentSurveyExcel()"><i class="fas fa-file-excel"></i> تصدير نتائج الاستبيان Excel</button>
+        </div>
+        <div id="resultsContent"></div>
+    </section>
+
+    <!-- تبويب 4: منشئ الاستبيانات للمفتش والمشرف -->
+    <section class="pr-panel" id="panel-builder">
+        <div class="section-heading">
+            <h2>منشئ الاستبيانات وإدارتها (خاص بالمفتش والمشرف التربوي)</h2>
+            <p>إطلاق استبيانات جديدة لرصد الممارسات الصفية واستقراء آراء أساتذة المقاطعة.</p>
+        </div>
+
+        <div class="builder-card" style="background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:22px; margin-bottom:24px; box-shadow:0 4px 14px rgba(0,0,0,0.04);">
+            <h3 style="color:var(--moss-dark); font-size:16px; margin-bottom:14px; font-weight:800;">
+                <i class="fas fa-plus-circle"></i> إنشاء استبيان تربوي جديد
+            </h3>
+            <form onsubmit="return handleCreateSurvey(event)">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px; margin-bottom:14px;">
+                    <div>
+                        <label style="display:block; font-size:12px; font-weight:700; margin-bottom:4px; color:var(--ink);">عنوان الاستبيان *</label>
+                        <input type="text" id="newSurveyTitle" required placeholder="مثال: استطلاع حول بنك الوضعيات الإدماجية" style="width:100%; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-family:inherit;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:12px; font-weight:700; margin-bottom:4px; color:var(--ink);">المحور البيداغوجي الموجه *</label>
+                        <select id="newSurveyCategory" style="width:100%; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-family:inherit;">
+                            <option value="arabic">تعليمية اللغة العربية وبناء المقطع</option>
+                            <option value="moualaja">المعالجة البيداغوجية والتشخيص</option>
+                            <option value="amal">تسيير الأعمال الموجهة والتفويج</option>
+                            <option value="fahss">فحص الوقفات التقويمية والاختبارات</option>
+                            <option value="niqash">التواصل المهني والندوات التربوية</option>
+                            <option value="general">تطوير المنظومة الرقمية الشاملة</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-bottom:14px;">
+                    <label style="display:block; font-size:12px; font-weight:700; margin-bottom:4px; color:var(--ink);">وصف الاستبيان والغرض التفتيشي *</label>
+                    <textarea id="newSurveyDesc" required rows="2" placeholder="اكتب نبذة توضح الهدف التربوي من طرح الاستبيان والفئة المستهدفة من الأساتذة..." style="width:100%; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-family:inherit;"></textarea>
+                </div>
+
+                <!-- أسئلة الاستبيان المصممة -->
+                <div style="background:#f9fbf7; border:1px dashed var(--moss); border-radius:10px; padding:16px; margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <span style="font-size:13px; font-weight:700; color:var(--moss-dark);"><i class="fas fa-list-ol"></i> بنك أسئلة الاستبيان (<span id="builderQCount">0</span> أسئلة)</span>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="addQuestionPrompt()"><i class="fas fa-plus"></i> إضافة سؤال</button>
+                    </div>
+                    <div id="builderQuestionsList" style="display:flex; flex-direction:column; gap:8px;">
+                        <p style="font-size:12px; color:#888;">لم تتم إضافة أسئلة بعد. انقر على "إضافة سؤال" أعلاه.</p>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="btn btn-outline" onclick="resetSurveyBuilder()">إلغاء</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> اعتماد ونشر الاستبيان للمقاطعة</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- قائمة الاستبيانات الحالية للتحكم -->
+        <div style="background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:22px;">
+            <h3 style="color:var(--moss-dark); font-size:16px; margin-bottom:14px; font-weight:800;">
+                <i class="fas fa-sliders"></i> إدارة الاستبيانات المنشورة
+            </h3>
+            <div id="managerSurveysList"></div>
+        </div>
+    </section>
+</main>
+
+<!-- نافذة الإجابة على الاستبيان -->
+<div class="modal-overlay" id="answerModal">
+    <div class="modal-box wide">
+        <button class="modal-close" onclick="closeAnswerModal()">&times;</button>
+        <div style="margin-bottom:14px; border-bottom:1px solid var(--line); padding-bottom:10px;">
+            <h3 id="amTitle" style="color:var(--moss-dark); font-size:18px;">—</h3>
+            <p id="amSubtitle" style="font-size:12.5px; color:#6b7280;">—</p>
+        </div>
+        <div class="answer-body" id="amBody"></div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+            <button class="btn btn-outline" onclick="closeAnswerModal()">إلغاء</button>
+            <button class="btn btn-primary" onclick="submitAnswer()"><i class="fas fa-check"></i> تأكيد وإرسال المشاركة</button>
+        </div>
+    </div>
+</div>
+
+<!-- تذييل الصفحة الموحد للمنظومة -->
+<footer class="main-footer no-print">
+    <div class="footer-links">
+        <a href="index.html"><i class="fas fa-home"></i> البوابة الرئيسية</a>
+        <a href="arabic.html"><i class="fas fa-book-open-reader"></i> تعليمية العربية</a>
+        <a href="moualaja.html"><i class="fas fa-stethoscope"></i> المعالجة البيداغوجية</a>
+        <a href="amal.html"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
+        <a href="niqash.html"><i class="fas fa-comments"></i> ركن النقاش</a>
+        <a href="fahss_ikhtibarat.html"><i class="fas fa-file-circle-check"></i> فحص الاختبارات</a>
+        <a href="bloom_evaluation.html"><i class="fas fa-layer-group"></i> تقويم بلوم</a>
+        <a href="cv.html"><i class="fas fa-address-card"></i> السيرة الذاتية</a>
+        <a href="taqyim.html"><i class="fas fa-award"></i> بطاقة الأداء</a>
+        <a href="dashboard.html"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
+    </div>
+    <div class="footer-info">
+        إعداد وتأطير: <strong>مفتش التعليم المتوسط درويش الهلالي</strong>
+        <span class="sep">◆</span> المقاطعة الثانية قسنطينة
+        <span class="sep">◆</span> وزارة التربية الوطنية الجزائرية
+    </div>
+</footer>
+
+<script src="auth.js"></script>
+<script src="app.js"></script>
+<script src="proposals.js"></script>
+</body>
+</html>

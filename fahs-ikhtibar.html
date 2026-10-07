@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0e2744">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<script src="supabase-config.js"></script>
+<script src="portal-cloud.js"></script>
+<script src="wj-shell.js"></script>
+<script src="pwa.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>فحص الاختبارات — الوجيه في الإشراف التربوي</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --gold:#c49b3f; --gold-light:#e6c874; --gold-dark:#8a6a24;
+    --navy:#0e2744; --navy-light:#1b3a5e; --navy-dark:#081729;
+    --bg-pattern:var(--navy); --card:#ffffff; --border:#d9c89a;
+    --text:#1a1a1a; --muted:#6b6250;
+    --success:#1e8449; --danger:#943126; --warning:#b9770e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Segoe UI', Tahoma, 'Traditional Arabic', Arial, sans-serif;
+    color:var(--text);padding:18px;line-height:1.6;
+    background-color:var(--bg-pattern);
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(196,155,63,.18) 0, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(196,155,63,.14) 0, transparent 40%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'><g fill='none' stroke='%23c49b3f' stroke-opacity='0.35' stroke-width='1'><path d='M80 10 L110 40 L110 80 L80 110 L50 80 L50 40 Z'/><path d='M80 30 L98 48 L98 72 L80 90 L62 72 L62 48 Z'/><circle cx='80' cy='60' r='4'/><path d='M0 80 L40 80 M120 80 L160 80 M80 0 L80 40 M80 120 L80 160'/><path d='M20 20 L60 60 M100 100 L140 140 M140 20 L100 60 M60 100 L20 140'/></g></svg>");
+    background-attachment:fixed;background-size:cover, cover, 160px 160px;
+  }
+  body.theme-blue{--bg-pattern:var(--navy-dark);--border:#3a5a80}
+  body.theme-gold{--bg-pattern:var(--gold-dark);--border:#f0e2b0}
+  body.theme-andalusi{--bg-pattern:var(--navy);--border:#c49b3f}
+  .container{max-width:1550px;margin:0 auto}
+
+  .header{
+    background:linear-gradient(135deg, var(--navy-dark), var(--navy), var(--navy-light));
+    color:#fff;border:2px solid var(--gold);border-radius:14px;
+    padding:22px 26px;margin-bottom:20px;box-shadow:0 8px 24px rgba(0,0,0,.4);
+    position:relative;overflow:hidden;
+  }
+  .header::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><g fill='none' stroke='%23c49b3f' stroke-opacity='0.18' stroke-width='1.2'><path d='M60 5 L95 30 L95 70 L60 95 L25 70 L25 30 Z'/><path d='M60 25 L82 42 L82 62 L60 79 L38 62 L38 42 Z'/><circle cx='60' cy='50' r='3'/></g></svg>");
+    background-repeat:repeat;background-size:120px;opacity:.5;
+  }
+  .header > *{position:relative;z-index:1}
+  .header h1{font-size:1.4rem;color:var(--gold-light);margin-bottom:4px}
+  .header h2{font-size:1rem;font-weight:400;opacity:.95;color:#fff}
+  .header h2 .gov{color:var(--gold-light);font-weight:700}
+
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+  .tab{
+    padding:9px 18px;border-radius:8px 8px 0 0;cursor:pointer;font-weight:700;
+    background:rgba(255,255,255,.85);color:var(--navy);border:2px solid var(--gold);
+    border-bottom:none;font-size:.9rem;transition:.2s;
+  }
+  .tab:hover{background:var(--gold-light)}
+  .tab.active{background:linear-gradient(180deg,var(--gold),var(--gold-dark));color:#fff}
+
+  .card{
+    background:var(--card);border-radius:12px;padding:18px;margin-bottom:18px;
+    box-shadow:0 6px 18px rgba(0,0,0,.25);border:2px solid var(--gold);position:relative;
+  }
+  .card::before{
+    content:"";position:absolute;top:6px;right:6px;left:6px;height:6px;
+    background:repeating-linear-gradient(90deg,var(--gold) 0 8px, transparent 8px 16px);
+    opacity:.45;border-radius:3px;
+  }
+  .card-title{
+    font-size:1.1rem;font-weight:800;color:var(--navy);
+    border-bottom:2px solid var(--gold);padding-bottom:8px;margin-bottom:15px;margin-top:6px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .card-title::before{content:"❖";color:var(--gold);font-size:1.1rem}
+
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field label{font-size:.78rem;font-weight:700;color:var(--navy)}
+  .field input,.field select,.field textarea{
+    padding:7px 10px;border:1px solid var(--border);border-radius:6px;
+    font-family:inherit;font-size:.88rem;background:#fff;color:var(--navy);font-weight:600;
+    transition:.2s;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{
+    outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,155,63,.25);
+  }
+  .field textarea{min-height:60px;resize:vertical}
+
+  .upload-area{
+    border:3px dashed var(--gold);border-radius:12px;padding:24px;text-align:center;
+    background:#fdf9ee;cursor:pointer;transition:.2s;margin-top:8px;
+  }
+  .upload-area:hover{background:#f5ecd0;border-color:var(--gold-dark)}
+  .upload-area input{display:none}
+  .upload-icon{font-size:2.5rem;margin-bottom:8px}
+  .upload-text{font-weight:700;color:var(--navy);font-size:.95rem}
+  .upload-hint{font-size:.75rem;color:var(--muted);margin-top:4px}
+
+  .preview-area{
+    margin-top:14px;border:1px solid var(--border);border-radius:10px;
+    background:#f8f4e8;padding:12px;min-height:150px;
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;
+  }
+  .preview-area img{max-width:100%;max-height:500px;border-radius:8px;box-shadow:0 3px 10px rgba(0,0,0,.2)}
+  .preview-area iframe{width:100%;height:600px;border:none;border-radius:8px}
+  .preview-area .empty-msg{color:var(--muted);font-style:italic;font-size:.9rem}
+
+  /* شبكة التقويم */
+  .eval-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:900px){.eval-grid{grid-template-columns:1fr}}
+  .eval-box{
+    background:linear-gradient(180deg,#fdf9ee,#f5ecd0);border:1px solid var(--border);
+    border-radius:10px;padding:14px;border-right:5px solid var(--gold);
+  }
+  .eval-box h3{
+    font-size:1rem;color:var(--navy);margin-bottom:10px;
+    border-bottom:1px dashed var(--gold);padding-bottom:6px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .eval-box h3 .tag{
+    font-size:.72rem;font-weight:700;color:#fff;background:var(--navy);
+    padding:2px 9px;border-radius:10px;
+  }
+  .eval-row{
+    display:grid;grid-template-columns:1fr 70px 70px;gap:8px;align-items:center;
+    padding:6px 0;border-bottom:1px dashed rgba(196,155,63,.3);font-size:.83rem;
+  }
+  .eval-row:last-child{border-bottom:none}
+  .eval-row .criterion{font-weight:600;color:var(--navy);line-height:1.4}
+  .eval-row input[type=number]{
+    width:100%;padding:4px;border:1px solid var(--border);border-radius:5px;
+    text-align:center;font-family:inherit;font-size:.85rem;font-weight:800;
+    color:var(--navy);background:#fff;
+  }
+  .eval-row input[type=number]:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 2px rgba(196,155,63,.3)}
+  .eval-row .verif{
+    text-align:center;font-weight:800;color:var(--navy);
+    background:#fff;border:1px solid var(--border);border-radius:5px;padding:4px;font-size:.85rem;
+  }
+  .eval-row .verif.ok{background:#d5f5e3;color:var(--success);border-color:var(--success)}
+  .eval-row .verif.zero{background:#fadbd8;color:var(--danger);border-color:var(--danger)}
+  .eval-row.total-row{
+    border-top:2px solid var(--gold);border-bottom:none;margin-top:6px;padding-top:8px;
+    font-weight:800;color:var(--navy);
+  }
+  .eval-row.total-row .verif{background:var(--gold);color:var(--navy);font-size:.95rem}
+
+  /* النتيجة */
+  .result-banner{
+    margin-top:16px;padding:16px;border-radius:10px;text-align:center;
+    background:linear-gradient(135deg,var(--navy),var(--navy-light));color:#fff;
+    border:2px solid var(--gold);
+  }
+  .result-banner .score{font-size:2rem;font-weight:900;color:var(--gold-light)}
+  .result-banner .qual{font-size:1.3rem;font-weight:800;margin-top:6px}
+  .result-banner .sub{font-size:.85rem;opacity:.85;margin-top:4px}
+
+  /* الأزرار */
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:15px}
+  .btn{
+    padding:9px 18px;border:none;border-radius:8px;cursor:pointer;
+    font-family:inherit;font-size:.9rem;font-weight:700;
+    display:inline-flex;align-items:center;gap:6px;transition:.2s;
+    border:1px solid transparent;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,.3)}
+  .btn-primary{background:linear-gradient(135deg,var(--navy),var(--navy-light));color:var(--gold-light);border-color:var(--gold)}
+  .btn-success{background:linear-gradient(135deg,#1e8449,#27ae60);color:#fff}
+  .btn-warning{background:linear-gradient(135deg,#b9770e,#f39c12);color:#fff}
+  .btn-danger{background:linear-gradient(135deg,#943126,#c0392b);color:#fff}
+  .btn-gold{background:linear-gradient(135deg,var(--gold-dark),var(--gold));color:var(--navy);border-color:var(--gold-dark)}
+  .btn-outline{background:#fff;color:var(--navy);border:2px solid var(--gold)}
+  .btn-outline:hover{background:var(--gold);color:#fff}
+  .btn-sm{padding:5px 12px;font-size:.8rem}
+
+  /* جداول */
+  .table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
+  table{width:100%;border-collapse:collapse;font-size:.83rem;background:#fff}
+  th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;vertical-align:middle}
+  thead th{
+    background:linear-gradient(180deg,var(--navy),var(--navy-light));
+    color:var(--gold-light);font-weight:700;position:sticky;top:0;font-size:.78rem;
+    line-height:1.3;z-index:2;
+  }
+  thead th.group{background:linear-gradient(180deg,var(--gold-dark),var(--gold));color:var(--navy)}
+  tbody tr:nth-child(even){background:#fbf7ec}
+  tbody tr:hover{background:#f5ecd0}
+  td.name-cell{text-align:right;font-weight:600;padding-right:10px}
+  .badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:.72rem;font-weight:800}
+  .badge-success{background:#d5f5e3;color:#1e8449}
+  .badge-partial{background:#fdebd0;color:#b9770e}
+  .badge-fail{background:#fadbd8;color:#943126}
+
+  .hint{
+    background:#fdf9ee;border-right:4px solid var(--gold);
+    padding:10px 14px;border-radius:6px;font-size:.82rem;color:var(--navy);margin-top:10px;
+    border-top:1px solid var(--border);border-bottom:1px solid var(--border);border-left:1px solid var(--border);
+  }
+
+  .theme-switcher{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .theme-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:.2s}
+  .theme-dot:hover{transform:scale(1.15)}
+  .theme-dot.active{border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,155,63,.5)}
+  .dot-gold{background:var(--gold)}
+  .dot-navy{background:var(--navy)}
+  .dot-andalusi{background:linear-gradient(135deg,var(--navy) 50%,var(--gold) 50%)}
+
+  .hidden{display:none!important}
+
+  @media print{
+    body{background:#fff;padding:0;background-image:none}
+    .toolbar,.no-print,.theme-switcher,.tabs{display:none!important}
+    .card{box-shadow:none;border:1px solid #999;page-break-inside:avoid}
+    .header{background:var(--navy)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+  @media(max-width:600px){body{padding:8px}.header h1{font-size:1rem}}
+
+  /* حسب الدور: المفتش يحرّر، المشرف يطّلع، الأستاذ يرى بطاقاته المتاحة فقط */
+  body.r-supervisor .insp-only, body.r-teacher .insp-only, body.r-teacher .staff-col, body.r-teacher .staff-only{display:none!important}
+</style>
+</head>
+<body class="theme-andalusi">
+<div class="container">
+
+  <!-- الترويسة -->
+  <div class="header">
+    <h1>الجمهورية الجزائرية الديمقراطية الشعبية</h1>
+    <h2>وزارة التربية الوطنية — <span class="gov">المفتشية العامة</span></h2>
+    <h2>مديرية التربية لولاية قسنطينة — المقاطعة الثانية</h2>
+    <h2 style="margin-top:8px;font-size:.95rem">أداة فحص وتقويم الوقفات التقويمية والاختبارات</h2>
+  </div>
+
+  <!-- التبويبات -->
+  <div class="tabs no-print">
+    <div class="tab active" id="tb-eval" onclick="showTab('tab-eval', this)">📝 فحص اختبار</div>
+    <div class="tab" id="tb-db" onclick="showTab('tab-db', this)">📚 قاعدة البيانات</div>
+    <div class="tab" id="tb-ref" onclick="showTab('tab-ref', this)">📖 المرجع (المتوسطات والمستويات)</div>
+  </div>
+
+  <!-- ============ تبويب الفحص ============ -->
+  <div id="tab-eval">
+    <div id="editBanner" class="hint hidden" style="margin-bottom:12px"></div>
+
+    <!-- بيانات الاختبار -->
+    <div class="card">
+      <div class="card-title">بيانات الاختبار والأستاذ</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>اسم ولقب الأستاذ(ة) *</label>
+          <select id="f-teacher"><option value="">— اختر الأستاذ(ة) —</option></select>
+          <div style="font-size:.75rem;margin-top:3px;color:var(--muted)">لم تجده؟ <a href="data-prof.html" style="color:var(--navy);font-weight:700">أضفه من «بيانات الأساتذة»</a></div>
+        </div>
+        <div class="field">
+          <label>المتوسطة *</label>
+          <select id="f-school">
+            <option value="">— اختر المتوسطة —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>المستوى *</label>
+          <select id="f-level">
+            <option value="">— اختر المستوى —</option>
+            <option>أولى متوسط</option>
+            <option>ثانية متوسط</option>
+            <option>ثالثة متوسط</option>
+            <option>رابعة متوسط</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>المادة *</label>
+          <select id="f-subject">
+            <option>اللغة العربية</option>
+            <option>الرياضيات</option>
+            <option>الفيزياء</option>
+            <option>علوم الطبيعة والحياة</option>
+            <option>التاريخ والجغرافيا</option>
+            <option>التربية الإسلامية</option>
+            <option>اللغة الفرنسية</option>
+            <option>اللغة الإنجليزية</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>طبيعة التقويم *</label>
+          <select id="f-type">
+            <option>اختبار</option>
+            <option>وقفة تقويمية</option>
+            <option>فرض</option>
+            <option>وضعية إدماجية</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>فترة الاختبار *</label>
+          <select id="f-period">
+            <option>الفصل الأول</option>
+            <option>الفصل الثاني</option>
+            <option>الفصل الثالث</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>عدد الأقسام</label>
+          <input type="number" id="f-sections" min="1" value="1">
+        </div>
+        <div class="field">
+          <label>عدد الممتحنين</label>
+          <input type="number" id="f-candidates" min="1" value="1">
+        </div>
+      </div>
+    </div>
+
+    <!-- رفع الاختبار -->
+    <div class="card">
+      <div class="card-title">رفع الاختبار المنجز ومعاينته</div>
+      <div class="upload-area" onclick="document.getElementById('f-file').click()">
+        <input type="file" id="f-file" accept="image/*,application/pdf" onchange="handleFileUpload(event)">
+        <div class="upload-icon">📄⬆️</div>
+        <div class="upload-text">اسحب الملف هنا أو اضغط للاختيار</div>
+        <div class="upload-hint">صيغ مدعومة: صور (JPG, PNG) أو PDF</div>
+      </div>
+      <div class="preview-area" id="previewArea">
+        <div class="empty-msg">لم يتم رفع أي اختبار بعد</div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="clearFile()">🗑️ إزالة الملف</button>
+        <span id="fileInfo" style="font-size:.8rem;color:var(--muted);align-self:center"></span>
+      </div>
+    </div>
+
+    <!-- شبكتا التقويم -->
+    <div class="card">
+      <div class="card-title">شبكتا التقويم</div>
+      <div class="eval-grid">
+        <!-- الموارد المكتسبة -->
+        <div class="eval-box">
+          <h3>أولاً: تقويم الموارد المكتسبة <span class="tag">12 نقطة</span></h3>
+          <div id="resources-eval"></div>
+          <div class="eval-row total-row">
+            <div class="criterion">المجموع</div>
+            <div class="verif" id="res-total">0 / 12</div>
+            <div class="verif" id="res-verif">0</div>
+          </div>
+        </div>
+        <!-- الوضعية الإدماجية -->
+        <div class="eval-box">
+          <h3>ثانياً: تقويم الوضعية الإدماجية <span class="tag">8 نقاط</span></h3>
+          <div id="competency-eval"></div>
+          <div class="eval-row total-row">
+            <div class="criterion">المجموع</div>
+            <div class="verif" id="comp-total">0 / 8</div>
+            <div class="verif" id="comp-verif">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- النتيجة -->
+      <div class="result-banner">
+        <div>الوصف الكمي</div>
+        <div class="score" id="quantScore">0 / 20</div>
+        <div class="qual" id="qualScore">—</div>
+        <div class="sub" id="qualDesc">أدخل التقييمات لعرض النتيجة</div>
+      </div>
+    </div>
+
+    <!-- أزرار الحفظ -->
+    <div class="toolbar no-print">
+      <label style="color:#fff;font-weight:700;font-size:.85rem;align-self:center;display:flex;gap:6px;align-items:center"><input type="checkbox" id="f-pub"> إتاحة البطاقة للأستاذ</label>
+      <button class="btn btn-success" id="btn-save" onclick="saveEvaluation()">💾 حفظ في المنظومة</button>
+      <button class="btn btn-warning" onclick="resetForm()">↺ إعادة تعيين النموذج</button>
+      <button class="btn btn-outline" onclick="exportCurrentExcel()">📊 تصدير بطاقة الفحص (.xlsx)</button>
+      <button class="btn btn-outline" onclick="window.print()">🖨️ طباعة</button>
+      <div class="theme-switcher" style="margin-right:auto">
+        <span style="font-size:.8rem;color:#fff;font-weight:700">🎨 الثيم:</span>
+        <div class="theme-dot dot-andalusi active" onclick="setTheme('andalusi',this)" title="أندلسي"></div>
+        <div class="theme-dot dot-navy" onclick="setTheme('blue',this)" title="أزرق داكن"></div>
+        <div class="theme-dot dot-gold" onclick="setTheme('gold',this)" title="ذهبي"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ تبويب قاعدة البيانات ============ -->
+  <div id="tab-db" class="hidden">
+    <div class="card">
+      <div class="card-title">قاعدة بيانات الاختبارات المفحوصة</div>
+      <div class="toolbar no-print">
+        <input type="text" id="db-search" placeholder="🔍 بحث..." oninput="renderDB()"
+          style="padding:7px 12px;border:1px solid var(--border);border-radius:6px;font-family:inherit;min-width:200px">
+        <select id="db-filter-school" onchange="renderDB()" style="padding:7px;border:1px solid var(--border);border-radius:6px;font-family:inherit">
+          <option value="">كل المتوسطات</option>
+        </select>
+        <select id="db-filter-level" onchange="renderDB()" style="padding:7px;border:1px solid var(--border);border-radius:6px;font-family:inherit">
+          <option value="">كل المستويات</option>
+          <option>أولى متوسط</option><option>ثانية متوسط</option>
+          <option>ثالثة متوسط</option><option>رابعة متوسط</option>
+        </select>
+        <select id="db-filter-period" onchange="renderDB()" style="padding:7px;border:1px solid var(--border);border-radius:6px;font-family:inherit">
+          <option value="">كل الفصول</option>
+          <option>الفصل الأول</option><option>الفصل الثاني</option><option>الفصل الثالث</option>
+        </select>
+        <button class="btn btn-outline btn-sm staff-only" onclick="exportDatabaseExcel()">📊 تصدير قاعدة البيانات</button>
+        
+      </div>
+      <div class="table-wrap">
+        <table id="db-table">
+          <thead>
+            <tr>
+              <th>#</th><th>الأستاذ</th><th>المتوسطة</th><th>المستوى</th><th>المادة</th>
+              <th>طبيعة التقويم</th><th>الفترة</th><th>الموارد /12</th>
+              <th>الإدماجية /8</th><th>المجموع /20</th><th>التقدير</th>
+              <th class="no-print staff-col">الإتاحة</th><th class="no-print">معاينة</th><th class="no-print insp-only">تعديل</th><th class="no-print insp-only">حذف</th>
+            </tr>
+          </thead>
+          <tbody id="db-body"></tbody>
+        </table>
+      </div>
+      <div class="hint" id="db-stats" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- ============ تبويب المرجع ============ -->
+  <div id="tab-ref" class="hidden">
+    <div class="card">
+      <div class="card-title">المرجع: المستويات والمتوسطات</div>
+      <div class="eval-grid">
+        <div class="eval-box">
+          <h3>المستويات التعليمية</h3>
+          <ul style="list-style:none;padding:6px">
+            <li style="padding:6px;border-bottom:1px dashed var(--gold)">◈ أولى متوسط</li>
+            <li style="padding:6px;border-bottom:1px dashed var(--gold)">◈ ثانية متوسط</li>
+            <li style="padding:6px;border-bottom:1px dashed var(--gold)">◈ ثالثة متوسط</li>
+            <li style="padding:6px">◈ رابعة متوسط</li>
+          </ul>
+        </div>
+        <div class="eval-box">
+          <h3>قائمة المتوسطات (<span id="schools-n">21</span>)</h3>
+          <ol style="padding-right:22px;font-size:.85rem" id="schools-list"></ol>
+        </div>
+      </div>
+      <div class="hint" style="margin-top:12px">
+        💡 قائمة المتوسطات مشتركة بين كل المستخدمين، ويعدّلها المفتش وحده، وتُستعمل أيضاً في «بيانات الأساتذة».
+      </div>
+      <div style="margin-top:10px">
+        <button class="btn btn-outline btn-sm no-print insp-only" onclick="toggleSchoolsEditor()">✏️ تعديل قائمة المتوسطات</button>
+      </div>
+      <div id="schools-editor" class="hidden" style="margin-top:10px">
+        <textarea id="schools-textarea" style="width:100%;min-height:200px;padding:10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.85rem"></textarea>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button class="btn btn-success btn-sm" onclick="saveSchools()">💾 حفظ القائمة</button>
+          <button class="btn btn-outline btn-sm" onclick="toggleSchoolsEditor()">إلغاء</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ================== الثوابت ================== */
+const RES_CRITERIA = [
+  {text:'تتجاوب وتنسجم الكفاءات المعروضة مع المنهاج', max:2},
+  {text:'الأسئلة تقيس الموارد المستهدفة في المنهاج والمخططات', max:2},
+  {text:'الأسئلة تتوافق مع طبيعة الاختبارات المنصوص عليها في التعليمات الرسمية', max:2},
+  {text:'الأسئلة متدرجة من السهل إلى الصعب تقيس المستويات الصّنافيّة', max:2},
+  {text:'دقيقة غير قابلة للتأويل، وتحدد الإنجاز المطلوب', max:1},
+  {text:'الأسئلة أجوبتها ليست محل خلاف وليست إيحائية ولا تعجيزية', max:1},
+  {text:'الأسئلة متنوعة وغير مكررة ولا تقيس المورد نفسه، مختصرة بعيدة عن التعقيد', max:1},
+  {text:'الأسئلة مناسبة لمدّة الاختبار، سليمة اللغة والمبنى، خالية من الكلمات الغريبة', max:1}
+];
+const COMP_CRITERIA = [
+  {text:'الوضعية الإدماجية تستجيب للكفاءة الشاملة لمرحلة التعليم المتوسط', max:1},
+  {text:'معدّة وفق شروط ومقاييس الوضعية الإدماجية (السياق-الأسناد-التعليمة)', max:1},
+  {text:'تحدد حجم المنتج، وتجند الموارد المكتسبة المناسبة', max:1},
+  {text:'حسن الصياغة ودقتها', max:1},
+  {text:'صحة السند وتوافقه مع النص والسياق', max:1},
+  {text:'دلالية الأسناد', max:1},
+  {text:'وضوح التعليمة، غير قابلة للتأويل (دقيقة، مألوفة، سليمة التركيب)', max:1},
+  {text:'بروز معايير التقييم', max:1}
+];
+
+/* ================== الحالة ================== */
+let schools = [], database = [], profs = [], dbErr = '';
+let editId = null, C = null, ME = null;
+let currentFile = {name:'', type:'', blob:null, path:'', url:''};
+let currentScores = {res:[], comp:[]};
+const $ = id => document.getElementById(id);
+const errT = m => /wajih_reports|wajih_settings|schema cache|bucket|storage/i.test(m||'') ? 'جدول أو مخزن غير موجود في Supabase: شغّل ملف supabase.sql كاملاً ثم حدّث الصفحة' : (m||'');
+
+/* التقدير النوعي وفق معادلة الإكسل الأصلية: واحدة للشاشة والحفظ والتصدير */
+function qualOf(total){
+  if(total > 20)  return ['!!!!','تحقق خطأ في القيم'];
+  if(total >= 19) return ['نموذجي','الاختبار مطابق تماماً لمعايير دليل الاختبارات'];
+  if(total > 16)  return ['ممتاز','الاختبار يستجيب لمعايير الجودة بدرجة عالية'];
+  if(total > 13)  return ['جيد جداً','الاختبار مطابق مع تحسينات ممكنة'];
+  if(total > 9)   return ['مطابق','الاختبار يستجيب للحد الأدنى من المعايير'];
+  if(total > 0)   return ['غير مطابق','الاختبار يحتاج إلى مراجعة جوهرية'];
+  return ['!!!!','لم يتم إدخال أي تقييم'];
+}
+const conforming = t => t > 9;
+const badgeOf = t => t > 13 ? 'badge-success' : t > 9 ? 'badge-partial' : 'badge-fail';
+const round2 = n => Math.round(n * 100) / 100;
+const escapeHtml = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const escapeAttr = escapeHtml;
+const norm = s => String(s||'').replace(/[ًٌٍَُِّْـ]/g,'').replace(/متوسطة|المتوسطة|[\s\-–—_.،()]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه');
+
+/* ================== التهيئة (بعد تسجيل الدخول) ================== */
+WJ.ready.then(async ()=>{
+  C = WJ.c; ME = WJ.me;
+  document.body.classList.add('r-' + WJ.role);
+  schools = await WJ.schools();
+  if(WJ.staff) await loadProfs();
+  await loadDB();
+  populateSchools(); populateTeachers();
+  renderResourcesEval(); renderCompetencyEval(); renderRefLists(); renderDB(); recalcAll();
+  $('f-teacher').addEventListener('change', ()=>{ const p = profs.find(x=>x.id === $('f-teacher').value); if(p && p.data.inst) setSchool(p.data.inst); });
+  const ua = document.querySelector('.upload-area');
+  if(ua){
+    ['dragover','dragenter'].forEach(ev=> ua.addEventListener(ev, e=>{ e.preventDefault(); ua.style.borderColor = 'var(--gold)'; }));
+    ua.addEventListener('dragleave', ()=>{ ua.style.borderColor = ''; });
+    ua.addEventListener('drop', e=>{ e.preventDefault(); ua.style.borderColor = ''; if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+  }
+  applyRole();
+  await openFromUrl();
+});
+
+function applyRole(){
+  if(WJ.role === 'teacher'){
+    $('tb-eval').classList.add('hidden'); $('tb-ref').classList.add('hidden');
+    $('tb-db').textContent = '📚 اختباراتي المفحوصة'; showTab('tab-db', $('tb-db'));
+  } else if(WJ.role === 'supervisor'){
+    $('tb-eval').classList.add('hidden'); showTab('tab-db', $('tb-db'));
+  }
+}
+async function openFromUrl(){
+  const q = new URLSearchParams(location.search), rid = q.get('r'), pid = q.get('prof');
+  if(rid){
+    const rec = database.find(x=>x.id === rid);
+    if(rec){ if(WJ.insp) editRecord(rid); else { showTab('tab-db', $('tb-db')); previewRecord(rid); } }
+  } else if(pid && WJ.insp){
+    $('f-teacher').value = pid; $('f-teacher').dispatchEvent(new Event('change'));
+  }
+}
+
+/* ================== تحميل البيانات ================== */
+async function loadProfs(){
+  const {data} = await C.from('wajih_prof').select('id,user_id,data');
+  profs = (data||[]).filter(p=> p.data && p.data.name).sort((a,b)=> a.data.name.localeCompare(b.data.name,'ar'));
+}
+async function loadDB(){
+  const {data, error} = await C.from('wajih_reports').select('id,prof_id,data,published,created_at,created_by_name').eq('kind','exam').order('created_at',{ascending:false});
+  if(error){ dbErr = errT(error.message); database = []; return; }
+  dbErr = '';
+  database = (data||[]).map(r=> ({...r.data, id:r.id, prof_id:r.prof_id, published:r.published, by:r.created_by_name, savedAt:r.created_at}));
+}
+function populateTeachers(){
+  if(!WJ.staff) return;
+  $('f-teacher').innerHTML = '<option value="">— اختر الأستاذ(ة) —</option>' +
+    profs.map(p=>`<option value="${p.id}">${escapeHtml(p.data.name)}${p.data.inst ? ' — ' + escapeHtml(p.data.inst) : ''}</option>`).join('');
+}
+function populateSchools(){
+  const sel = $('f-school'), filter = $('db-filter-school');
+  sel.innerHTML = '<option value="">— اختر المتوسطة —</option>';
+  filter.innerHTML = '<option value="">كل المتوسطات</option>';
+  schools.forEach(s=>{
+    sel.innerHTML += `<option value="${escapeAttr(s)}">${escapeHtml(s)}</option>`;
+    filter.innerHTML += `<option value="${escapeAttr(s)}">${escapeHtml(s)}</option>`;
+  });
+}
+function setSchool(inst){
+  const sel = $('f-school'), n = norm(inst);
+  let hit = schools.find(s=> norm(s) === n) || schools.find(s=> n.length > 2 && (norm(s).includes(n) || n.includes(norm(s))));
+  if(!hit){ hit = inst; if(![...sel.options].some(o=> o.value === inst)) sel.insertAdjacentHTML('beforeend', `<option value="${escapeAttr(inst)}">${escapeHtml(inst)}</option>`); }
+  sel.value = hit;
+}
+function renderRefLists(){
+  $('schools-list').innerHTML = schools.map(s=>`<li>${escapeHtml(s)}</li>`).join('');
+  const n = $('schools-n'); if(n) n.textContent = schools.length;
+}
+
+/* ================== تبويبات ================== */
+function showTab(id, el){
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  ['tab-eval','tab-db','tab-ref'].forEach(t=>$(t).classList.add('hidden'));
+  $(id).classList.remove('hidden');
+}
+
+/* ================== شبكتا التقويم ================== */
+function renderGrid(boxId, group, list, key){
+  const box = $(boxId);
+  currentScores[key] = list.map(()=>0);
+  box.innerHTML = list.map((c, i)=>`
+    <div class="eval-row">
+      <div class="criterion">${escapeHtml(c.text)} <span style="color:var(--muted);font-size:.75rem">(/${c.max})</span></div>
+      <input type="number" min="0" max="${c.max}" step="0.5" value="0" data-group="${group}" data-idx="${i}" ${WJ.insp ? '' : 'disabled'}>
+      <div class="verif" id="${group}-verif-${i}">0</div>
+    </div>`).join('');
+  box.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const idx = +e.target.dataset.idx;
+      let v = parseFloat(e.target.value) || 0;
+      if(v < 0) v = 0;
+      if(v > list[idx].max){ v = list[idx].max; e.target.value = v; }
+      currentScores[key][idx] = v;
+      updateVerif(group, idx, v, list[idx].max);
+      recalcAll();
+    });
+  });
+  list.forEach((c, i)=> updateVerif(group, i, 0, c.max));
+}
+const renderResourcesEval = () => renderGrid('resources-eval', 'res', RES_CRITERIA, 'res');
+const renderCompetencyEval = () => renderGrid('competency-eval', 'comp', COMP_CRITERIA, 'comp');
+function updateVerif(group, idx, value, max){
+  const el = $(`${group}-verif-${idx}`); if(!el) return;
+  const ok = value >= max;
+  el.textContent = ok ? 1 : 0;
+  el.classList.toggle('ok', ok);
+  el.classList.toggle('zero', value === 0 && !ok);
+}
+function setScores(res, comp){
+  [['res', res, RES_CRITERIA], ['comp', comp, COMP_CRITERIA]].forEach(([g, vals, list])=>{
+    list.forEach((c, i)=>{
+      const v = +((vals||[])[i]) || 0;
+      currentScores[g][i] = v;
+      const inp = document.querySelector(`input[data-group="${g}"][data-idx="${i}"]`);
+      if(inp) inp.value = v;
+      updateVerif(g, i, v, c.max);
+    });
+  });
+  recalcAll();
+}
+function recalcAll(){
+  const resSum = currentScores.res.reduce((a,b)=> a + (+b||0), 0);
+  const compSum = currentScores.comp.reduce((a,b)=> a + (+b||0), 0);
+  const total = resSum + compSum;
+  $('res-total').textContent = `${round2(resSum)} / 12`;
+  $('comp-total').textContent = `${round2(compSum)} / 8`;
+  $('quantScore').textContent = `${round2(total)} / 20`;
+  const [qual, desc] = qualOf(total);
+  $('qualScore').textContent = qual;
+  $('qualDesc').textContent = desc;
+  document.querySelector('.result-banner').style.borderColor = total > 13 ? 'var(--success)' : total > 9 ? 'var(--gold)' : 'var(--danger)';
+  $('res-verif').textContent = currentScores.res.filter((v,i)=> v >= RES_CRITERIA[i].max).length;
+  $('comp-verif').textContent = currentScores.comp.filter((v,i)=> v >= COMP_CRITERIA[i].max).length;
+}
+
+/* ================== الملف المرفق (تخزين Supabase) ================== */
+function handleFileUpload(e){ const f = e.target.files[0]; if(f) setFile(f); }
+function compressImage(f){
+  return new Promise(res=>{
+    const img = new Image(), u = URL.createObjectURL(f);
+    img.onload = ()=>{
+      const s = Math.min(1, 2000 / Math.max(img.width, img.height)), cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * s); cv.height = Math.round(img.height * s);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(u); cv.toBlob(b=> res(b), 'image/jpeg', .85);
+    };
+    img.onerror = ()=> res(null);
+    img.src = u;
+  });
+}
+async function setFile(f){
+  if(!/^(image\/(jpeg|png|webp)|application\/pdf)$/.test(f.type)){ alert('الصيغ المدعومة: صور JPG/PNG/WebP أو PDF'); return; }
+  if(f.size > 10 * 1024 * 1024){ alert('حجم الملف كبير جداً (الحد الأقصى 10 ميغابايت)'); return; }
+  let blob = f;
+  if(f.type.startsWith('image/')) blob = (await compressImage(f)) || f;
+  currentFile = {name:f.name, type:blob.type, blob, path:'', url:URL.createObjectURL(blob)};
+  showPreview();
+  $('fileInfo').textContent = `📎 ${f.name} — ${(blob.size/1024).toFixed(1)} ك.ب`;
+}
+function showPreview(){
+  const area = $('previewArea');
+  if(!currentFile.url){ area.innerHTML = '<div class="empty-msg">لم يتم رفع أي اختبار بعد</div>'; return; }
+  area.innerHTML = currentFile.type.startsWith('image/')
+    ? `<img src="${currentFile.url}" alt="معاينة الاختبار">`
+    : `<iframe src="${currentFile.url}" title="معاينة PDF"></iframe>`;
+}
+function clearFile(){
+  currentFile = {name:'', type:'', blob:null, path:'', url:''};
+  $('f-file').value = ''; $('fileInfo').textContent = ''; showPreview();
+}
+async function signedUrl(path){
+  if(!path) return '';
+  const {data} = await C.storage.from('exams').createSignedUrl(path, 3600);
+  return data ? data.signedUrl : '';
+}
+
+/* ================== الحفظ والتعديل ================== */
+function teacherName(){
+  const p = profs.find(x=> x.id === $('f-teacher').value);
+  return p ? p.data.name : ((database.find(r=> r.id === editId) || {}).teacher || '');
+}
+function setBanner(t){ const b = $('editBanner'); if(!t){ b.classList.add('hidden'); return; } b.textContent = t; b.classList.remove('hidden'); }
+
+async function saveEvaluation(){
+  if(!WJ.insp) return;
+  const old = editId ? (database.find(r=> r.id === editId) || {}) : {};
+  const profId = $('f-teacher').value || old.prof_id;
+  const school = $('f-school').value, level = $('f-level').value;
+  if(!profId){ alert('يرجى اختيار الأستاذ(ة) من القائمة (أضفه من «بيانات الأساتذة» إن لم تجده)'); return; }
+  if(!school){ alert('يرجى اختيار المتوسطة'); return; }
+  if(!level){ alert('يرجى اختيار المستوى'); return; }
+  const resSum = round2(currentScores.res.reduce((a,b)=> a + (+b||0), 0));
+  const compSum = round2(currentScores.comp.reduce((a,b)=> a + (+b||0), 0));
+  const total = round2(resSum + compSum);
+  if(total === 0){ alert('لم يتم إدخال أي تقييم'); return; }
+  const btn = $('btn-save'); btn.disabled = true;
+  try{
+    let file = currentFile.path ? {path:currentFile.path, name:currentFile.name, type:currentFile.type} : null;
+    if(currentFile.blob){
+      const ext = currentFile.type === 'application/pdf' ? 'pdf' : currentFile.type === 'image/png' ? 'png' : currentFile.type === 'image/webp' ? 'webp' : 'jpg';
+      const path = `${profId}/${Date.now()}.${ext}`;
+      const up = await C.storage.from('exams').upload(path, currentFile.blob, {contentType: currentFile.type});
+      if(up.error){ alert('تعذّر رفع الملف: ' + errT(up.error.message)); return; }
+      file = {path, name:currentFile.name, type:currentFile.type};
+    }
+    const rec = {
+      teacher: teacherName(), school, level, subject: $('f-subject').value, type: $('f-type').value, period: $('f-period').value,
+      sections: +$('f-sections').value || 1, candidates: +$('f-candidates').value || 1,
+      resScores: [...currentScores.res], compScores: [...currentScores.comp], resSum, compSum, total, qual: qualOf(total)[0],
+      date: old.date || new Date().toISOString().slice(0,10), file
+    };
+    const published = $('f-pub').checked;
+    const r = editId
+      ? await C.from('wajih_reports').update({data:rec, published, updated_at:new Date().toISOString()}).eq('id', editId).select('id').single()
+      : await C.from('wajih_reports').insert({prof_id:profId, kind:'exam', data:rec, published, created_by:ME.id, created_by_name:ME.full_name || ME.username}).select('id').single();
+    if(r.error){ alert('تعذّر الحفظ: ' + errT(r.error.message)); return; }
+    if(old.file && old.file.path && (!file || file.path !== old.file.path)) C.storage.from('exams').remove([old.file.path]);
+    WJ.act(editId ? 'update' : 'create', 'exam');
+    editId = r.data.id; currentFile.blob = null; currentFile.path = file ? file.path : '';
+    await loadDB(); renderDB();
+    setBanner('✏️ وضع التعديل: أي حفظ جديد يحدّث هذه البطاقة ولا ينشئ نسخة أخرى.' + (published ? ' (متاحة للأستاذ)' : ' (مسودة غير ظاهرة للأستاذ)'));
+    alert('✅ تم حفظ بطاقة الفحص في المنظومة');
+  } finally { btn.disabled = false; }
+}
+
+function editRecord(id){
+  const r = database.find(x=> x.id === id); if(!r || !WJ.insp) return;
+  showTab('tab-eval', $('tb-eval'));
+  editId = id;
+  $('f-teacher').value = r.prof_id;
+  if(!$('f-teacher').value) $('f-teacher').insertAdjacentHTML('beforeend', `<option value="${r.prof_id}">${escapeHtml(r.teacher)}</option>`), $('f-teacher').value = r.prof_id;
+  setSchool(r.school);
+  ['level','subject','type','period'].forEach(k=> $('f-' + k).value = r[k] || '');
+  $('f-sections').value = r.sections || 1; $('f-candidates').value = r.candidates || 1;
+  $('f-pub').checked = !!r.published;
+  setScores(r.resScores, r.compScores);
+  if(r.file && r.file.path){
+    currentFile = {name:r.file.name, type:r.file.type, blob:null, path:r.file.path, url:''};
+    $('fileInfo').textContent = '📎 ' + r.file.name;
+    signedUrl(r.file.path).then(u=>{ currentFile.url = u; showPreview(); });
+  } else clearFile();
+  setBanner(`✏️ وضع التعديل: بطاقة «${r.teacher}» (${r.level} — ${r.period}).`);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function resetForm(){
+  if(!confirm('إعادة تعيين كل حقول النموذج؟')) return;
+  editId = null; setBanner('');
+  $('f-teacher').value = ''; $('f-school').value = ''; $('f-level').value = '';
+  $('f-sections').value = 1; $('f-candidates').value = 1; $('f-pub').checked = false;
+  clearFile(); renderResourcesEval(); renderCompetencyEval(); recalcAll();
+}
+
+/* ================== قاعدة البيانات ================== */
+function renderDB(){
+  const search = ($('db-search').value || '').trim().toLowerCase();
+  const fSchool = $('db-filter-school').value, fLevel = $('db-filter-level').value, fPeriod = $('db-filter-period').value;
+  const filtered = database.filter(r=>{
+    if(fSchool && r.school !== fSchool) return false;
+    if(fLevel && r.level !== fLevel) return false;
+    if(fPeriod && r.period !== fPeriod) return false;
+    if(search && !`${r.teacher} ${r.school} ${r.level} ${r.subject} ${r.type} ${r.period}`.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  const body = $('db-body');
+  if(dbErr) body.innerHTML = `<tr><td colspan="14" style="padding:20px;color:var(--danger)">${escapeHtml(dbErr)}</td></tr>`;
+  else if(!filtered.length) body.innerHTML = `<tr><td colspan="14" style="padding:20px;color:var(--muted)">${WJ.role === 'teacher' ? 'لا توجد بطاقات فحص متاحة لك بعد' : 'لا توجد سجلات مطابقة'}</td></tr>`;
+  else body.innerHTML = filtered.map((r, i)=>`<tr>
+      <td>${i+1}</td>
+      <td class="name-cell">${escapeHtml(r.teacher)}</td>
+      <td>${escapeHtml(r.school)}</td><td>${escapeHtml(r.level)}</td><td>${escapeHtml(r.subject)}</td>
+      <td>${escapeHtml(r.type)}</td><td>${escapeHtml(r.period)}</td>
+      <td>${r.resSum}</td><td>${r.compSum}</td><td><strong>${r.total}</strong></td>
+      <td><span class="badge ${badgeOf(r.total)}">${escapeHtml(r.qual)}</span></td>
+      <td class="no-print staff-col">${WJ.insp
+          ? `<button class="btn btn-outline btn-sm" onclick="setPub('${r.id}', ${!r.published})" title="تبديل الإتاحة للأستاذ">${r.published ? '🟢 متاح' : '⚪ مسودة'}</button>`
+          : (r.published ? '🟢 متاح للأستاذ' : '⚪ مسودة')}</td>
+      <td class="no-print"><button class="btn btn-outline btn-sm" onclick="previewRecord('${r.id}')">👁️</button></td>
+      <td class="no-print insp-only"><button class="btn btn-outline btn-sm" onclick="editRecord('${r.id}')">✏️</button></td>
+      <td class="no-print insp-only"><button class="btn btn-danger btn-sm" onclick="deleteRecord('${r.id}')">✕</button></td>
+    </tr>`).join('');
+  const stats = $('db-stats');
+  if(database.length){
+    const avg = database.reduce((a,b)=> a + b.total, 0) / database.length;
+    const ok = database.filter(r=> conforming(r.total)).length;
+    stats.innerHTML = `<strong>الإجمالي:</strong> ${database.length} اختبار | <strong>المعدل العام:</strong> ${avg.toFixed(2)}/20 | <strong>المطابقة (أكثر من 9):</strong> ${ok} | <strong>غير مطابقة:</strong> ${database.length - ok}`;
+  } else stats.innerHTML = 'لا توجد بيانات محفوظة بعد.';
+}
+
+async function setPub(id, v){
+  if(!WJ.insp) return;
+  const {error} = await C.from('wajih_reports').update({published:v, updated_at:new Date().toISOString()}).eq('id', id);
+  if(error){ alert(errT(error.message)); return; }
+  WJ.act('update', 'exam'); await loadDB(); renderDB();
+}
+async function deleteRecord(id){
+  if(!WJ.insp || !confirm('حذف هذا السجل ومرفقه نهائياً؟')) return;
+  const r = database.find(x=> x.id === id);
+  const {error} = await C.from('wajih_reports').delete().eq('id', id);
+  if(error){ alert(errT(error.message)); return; }
+  if(r && r.file && r.file.path) C.storage.from('exams').remove([r.file.path]);
+  if(editId === id){ editId = null; setBanner(''); }
+  WJ.act('delete', 'exam'); await loadDB(); renderDB();
+}
+
+/* بطاقة المعاينة (داخل الصفحة، تُطبع وتعمل للأستاذ والمشرف والمفتش) */
+async function previewRecord(id){
+  const r = database.find(x=> x.id === id); if(!r) return;
+  const url = r.file && r.file.path ? await signedUrl(r.file.path) : '';
+  const fileHtml = url
+    ? (r.file.type.startsWith('image/') ? `<img src="${url}" style="max-width:100%;border-radius:8px;box-shadow:0 3px 10px rgba(0,0,0,.2)">` : `<iframe src="${url}" style="width:100%;height:520px;border:none;border-radius:8px"></iframe>`)
+    : '<p style="color:#888">لا يوجد ملف مرفق</p>';
+  const rows = (list, vals) => list.map((c, i)=> `<tr><td style="text-align:right">${escapeHtml(c.text)}</td><td>${(vals||[])[i] ?? 0} / ${c.max}</td></tr>`).join('');
+  const old = $('pv'); if(old) old.remove();
+  const d = document.createElement('div'); d.id = 'pv';
+  d.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#0e2744ee;overflow:auto;padding:18px;direction:rtl;color:#1a1a1a;font-family:Tahoma,Arial,sans-serif';
+  d.innerHTML = `<style>#pv .c{background:#fff;border:2px solid #c49b3f;border-radius:12px;padding:16px;margin:0 auto 12px;max-width:900px}#pv h2{color:#0e2744;font-size:1.05rem;margin-bottom:8px}#pv table{width:100%;border-collapse:collapse;font-size:.85rem}#pv th,#pv td{border:1px solid #d9c89a;padding:5px;text-align:center}#pv th{background:#0e2744;color:#e6c874}@media print{body.pv-open .container{display:none!important}#pv{position:static!important;background:#fff!important;padding:0!important;overflow:visible!important}#pv .no-print{display:none!important}}</style>
+    <div class="c no-print" style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="window.print()">🖨️ طباعة</button><button class="btn btn-outline btn-sm" onclick="closePreview()">إغلاق</button></div>
+    <div class="c"><h2>بطاقة فحص اختبار: ${escapeHtml(r.teacher)} — ${escapeHtml(r.school)}</h2>
+      <p><b>المستوى:</b> ${escapeHtml(r.level)} | <b>المادة:</b> ${escapeHtml(r.subject)} | <b>النوع:</b> ${escapeHtml(r.type)} | <b>الفترة:</b> ${escapeHtml(r.period)}</p>
+      <p><b>عدد الأقسام:</b> ${r.sections} | <b>عدد الممتحنين:</b> ${r.candidates} | <b>تاريخ الفحص:</b> ${escapeHtml((r.date || '').split('-').reverse().join('/'))}</p></div>
+    <div class="c"><h2>نتائج التقويم</h2><table><tr><th>الموارد المكتسبة</th><th>الوضعية الإدماجية</th><th>المجموع</th><th>التقدير</th></tr>
+      <tr><td>${r.resSum} / 12</td><td>${r.compSum} / 8</td><td><b>${r.total} / 20</b></td><td><b>${escapeHtml(r.qual)}</b></td></tr></table></div>
+    <div class="c"><h2>أولاً: تقويم الموارد المكتسبة</h2><table><tr><th>المعيار</th><th>النقطة</th></tr>${rows(RES_CRITERIA, r.resScores)}</table></div>
+    <div class="c"><h2>ثانياً: تقويم الوضعية الإدماجية</h2><table><tr><th>المعيار</th><th>النقطة</th></tr>${rows(COMP_CRITERIA, r.compScores)}</table></div>
+    <div class="c"><h2>الاختبار المنجز</h2>${fileHtml}</div>`;
+  document.body.appendChild(d); document.body.classList.add('pv-open');
+}
+function closePreview(){ const d = $('pv'); if(d) d.remove(); document.body.classList.remove('pv-open'); }
+
+/* ================== قائمة المتوسطات (يعدّلها المفتش، وتُحفظ في Supabase) ================== */
+function toggleSchoolsEditor(){
+  const ed = $('schools-editor'); ed.classList.toggle('hidden');
+  if(!ed.classList.contains('hidden')) $('schools-textarea').value = schools.join('\n');
+}
+async function saveSchools(){
+  if(!WJ.insp) return;
+  const list = $('schools-textarea').value.split('\n').map(s=> s.trim().replace(/^\d+\s*[-.)]\s*/, '')).filter(Boolean);
+  if(!list.length){ alert('القائمة فارغة'); return; }
+  const {error} = await C.from('wajih_settings').upsert({key:'schools', value:list, updated_by:ME.id, updated_at:new Date().toISOString()});
+  if(error){ alert('تعذّر الحفظ: ' + errT(error.message)); return; }
+  schools = list; populateSchools(); renderRefLists(); toggleSchoolsEditor();
+  alert('✅ تم تحديث قائمة المتوسطات لكل المستخدمين');
+}
+
+/* ================== الثيم ================== */
+function setTheme(name, el){
+  document.body.className = document.body.className.replace(/theme-\w+/, '') + ' theme-' + name;
+  document.querySelectorAll('.theme-dot').forEach(d=> d.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+
+/* ================== تصدير Excel ================== */
+function exportCurrentExcel(){
+  if(typeof XLSX === 'undefined'){ alert('مكتبة Excel غير محمّلة، تحقق من الاتصال بالإنترنت'); return; }
+  const teacher = teacherName() || 'غير محدد', school = $('f-school').value || 'غير محددة', level = $('f-level').value || 'غير محدد';
+  const subject = $('f-subject').value, type = $('f-type').value, period = $('f-period').value;
+  const resSum = round2(currentScores.res.reduce((a,b)=> a + (+b||0), 0)), compSum = round2(currentScores.comp.reduce((a,b)=> a + (+b||0), 0));
+  const total = round2(resSum + compSum), qual = qualOf(total)[0];
+  const wb = XLSX.utils.book_new();
+  const meta = [
+    ['الجمهورية الجزائرية الديمقراطية الشعبية'], ['وزارة التربية الوطنية — المفتشية العامة'], ['مديرية التربية لولاية قسنطينة — المقاطعة الثانية'], [],
+    ['المتوسطة:', school, '', 'الأستاذ(ة):', teacher],
+    ['عدد الأقسام:', $('f-sections').value, '', 'عدد الممتحنين:', $('f-candidates').value],
+    ['المستوى:', level, '', 'المادة:', subject],
+    ['طبيعة التقويم:', type, '', 'فترة الاختبار:', period], []
+  ];
+  const head1 = ['أولاً: تقويم الموارد المكتسبة (12 نقطة)', 'التقييم', 'التحقق', '', 'ثانياً: تقويم الوضعية الإدماجية (8 نقاط)', 'التقييم', 'التحقق', '', 'تقييم الاختبار'];
+  const head2 = ['المعيار', '', '', '', 'المعيار', '', '', '', ''];
+  const body = [], maxLen = Math.max(RES_CRITERIA.length, COMP_CRITERIA.length);
+  for(let i = 0; i < maxLen; i++){
+    const r = RES_CRITERIA[i] || {text:'', max:''}, c = COMP_CRITERIA[i] || {text:'', max:''};
+    const rv = currentScores.res[i] ?? '', cv = currentScores.comp[i] ?? '';
+    body.push([r.text, rv, i < RES_CRITERIA.length ? (rv >= r.max ? 1 : 0) : '', '', c.text, cv, i < COMP_CRITERIA.length ? (cv >= c.max ? 1 : 0) : '', '', '']);
+  }
+  body.push(['المجموع', resSum, '', '', 'المجموع', compSum, '', '', ''], [], ['', '', '', '', '', '', '', 'الوصف الكمي', total], ['', '', '', '', '', '', '', 'الوصف النوعي', qual]);
+  const ws = XLSX.utils.aoa_to_sheet([...meta, head1, head2, ...body]);
+  ws['!cols'] = [{wch:55},{wch:10},{wch:10},{wch:3},{wch:55},{wch:10},{wch:10},{wch:3},{wch:15}];
+  XLSX.utils.book_append_sheet(wb, ws, 'ملف');
+  const refAoa = [['المستوى', '', 'المتوسطة'], ['أولى متوسط'], ['ثانية متوسط'], ['ثالثة متوسط'], ['رابعة متوسط'], []];
+  schools.forEach((s, i)=> refAoa.push(['', '', (i + 1) + '- ' + s]));
+  const wsRef = XLSX.utils.aoa_to_sheet(refAoa); wsRef['!cols'] = [{wch:18},{wch:5},{wch:40}];
+  XLSX.utils.book_append_sheet(wb, wsRef, 'ورقة1');
+  XLSX.writeFile(wb, `فحص_${teacher.replace(/\s+/g,'_')}_${level}_${period}.xlsx`);
+}
+function exportDatabaseExcel(){
+  if(typeof XLSX === 'undefined'){ alert('مكتبة Excel غير محمّلة'); return; }
+  if(!WJ.staff || !database.length){ alert('لا توجد بيانات لتصديرها'); return; }
+  const wb = XLSX.utils.book_new();
+  const headers = ['المتوسطة','عدد الأقسام','عدد الممتحنين','المستوى','طبيعة التقويم','اختبار في مادة','فترة الاختبار',
+    ...RES_CRITERIA.map(c=> c.text), ...COMP_CRITERIA.map(c=> c.text), 'المجموع','التقدير','الأستاذ'];
+  const rows = database.map(r=> [r.school, r.sections, r.candidates, r.level, r.type, r.subject, r.period, ...(r.resScores||[]), ...(r.compScores||[]), r.total, r.qual, r.teacher]);
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  ws['!cols'] = headers.map(h=> ({wch: Math.max(12, Math.min(40, h.length + 4))}));
+  XLSX.utils.book_append_sheet(wb, ws, 'حفظ البيانات');
+  const avg = database.reduce((a,b)=> a + b.total, 0) / database.length, ok = database.filter(r=> conforming(r.total)).length, byLevel = {};
+  database.forEach(r=>{ (byLevel[r.level] = byLevel[r.level] || {count:0, sum:0}).count++; byLevel[r.level].sum += r.total; });
+  const st = [['إحصاء عام',''], ['عدد الاختبارات المفحوصة', database.length], ['المعدل العام', avg.toFixed(2)], ['عدد المطابقة (أكثر من 9)', ok],
+    ['عدد غير المطابقة', database.length - ok], ['نسبة المطابقة', ((ok/database.length)*100).toFixed(1) + '%'], [],
+    ['حسب المستوى','عدد الاختبارات','المعدل'], ...Object.entries(byLevel).map(([l, d])=> [l, d.count, (d.sum/d.count).toFixed(2)])];
+  const wsS = XLSX.utils.aoa_to_sheet(st); wsS['!cols'] = [{wch:22},{wch:15},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, wsS, 'التقرير');
+  XLSX.writeFile(wb, `قاعدة_بيانات_الاختبارات_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+</script>
+</body>
+</html>
