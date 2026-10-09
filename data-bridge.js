@@ -1,4 +1,4 @@
-// data-bridge.js - الجسر الموحد للبيانات (نسخة كاملة)
+// data-bridge.js - الجسر الموحد للبيانات (نسخة كاملة مع login)
 (function() {
     const firebaseConfig = {
         apiKey: "AIzaSyBdv2RJ7EzlnVQcXyyozlLhVKdgwaKQdaY",
@@ -35,7 +35,6 @@
         } catch (e) { console.warn('Supabase anon auth failed:', e); return null; }
     }
 
-    // ✅ دالة تشفير كلمة المرور (يجب أن تكون متطابقة في كل الصفحات)
     async function hashPassword(password) {
         const encoder = new TextEncoder();
         const data = encoder.encode(password + 'pgb_salt_2026');
@@ -87,12 +86,10 @@
                 const inputHash = await hashPassword(password);
                 if (inputHash !== storedHash) throw new Error('كلمة المرور غير صحيحة');
 
-                // تحديث آخر دخول
                 user.lastLogin = new Date().toISOString();
                 const updatedUsers = users.map(u => u.id === user.id ? user : u);
                 await this.saveUsers(updatedUsers);
 
-                // حفظ الجلسة
                 const session = { user: user, expiresAt: Date.now() + (24 * 60 * 60 * 1000) };
                 localStorage.setItem('pgb_session_persistent', JSON.stringify(session));
                 sessionStorage.setItem('pgb_session', JSON.stringify(session));
