@@ -1137,31 +1137,28 @@ function showGateMsg(text, type) {
     el.classList.remove('hidden');
 }
 
-async function handleLogin(event) {
+async function handleGateLogin(event) {
     event.preventDefault();
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
-    const errorDiv = document.getElementById('loginError');
-
-    if (errorDiv) errorDiv.style.display = 'none';
-    if (!username || !password) {
-        if (errorDiv) { errorDiv.textContent = 'يرجى إدخال البيانات'; errorDiv.style.display = 'block'; }
-        return;
+    const username = document.getElementById('gateUsername').value.trim();
+    const password = document.getElementById('gatePassword').value;
+    const btn = document.getElementById('gateSubmitBtn');
+    if (!username || !password) { showGateMsg('الرجاء إدخال اسم المستخدم وكلمة المرور', 'error'); return false; }
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحقق...';
+    try {
+        const r = await PortalCloud.login(username, password);
+        if (!r.success) { showGateMsg(r.error, 'error'); return false; }
+        enterApp(r.user);
+    } catch (e) {
+        console.error('Login error:', e);
+        showGateMsg('تعذّر الاتصال بالخادم، تحقق من الإنترنت', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'دخول المنظومة';
     }
-
-    const btn = event.target.querySelector('button');
-    if (btn) { btn.disabled = true; btn.textContent = 'جارٍ التحقق...'; }
-
-    const result = await window.DataBridge.login(username, password);
-
-    if (result.success) {
-        if (result.user.role === 'inspector') window.location.href = 'dashboard.html';
-        else window.location.href = 'moualaja.html';
-    } else {
-        if (errorDiv) { errorDiv.textContent = result.message; errorDiv.style.display = 'block'; }
-        if (btn) { btn.disabled = false; btn.textContent = 'دخول المنظومة'; }
-    }
+    return false;
 }
+
 function handleGateLogout() {
     if (!confirm('هل تريد تسجيل الخروج؟')) return;
     try { PortalCloud.signOut(); } catch (e) {}
