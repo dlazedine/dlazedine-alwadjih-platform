@@ -1128,60 +1128,6 @@ async function loadPedagogicalRecords() {
         } catch(err) { console.warn('Supabase traitement_records fetch error:', err); }
     }
 
-    // قراءة السجلات السحابية المتزامنة من جدول portal_data في Supabase
-    try {
-        const client = (window.PortalCloud && await window.PortalCloud.ready) || (typeof sbMain !== 'undefined' ? sbMain : null);
-        if (client) {
-            // جلب سجلات المعالجة (traitementData)
-            const { data: pData, error: pErr } = await client
-                .from('portal_data')
-                .select('*')
-                .eq('key', 'traitementData');
-            
-            // جلب سجلات التلاميذ والخطط التابعة لها (studentsRecords)
-            const { data: sData } = await client
-                .from('portal_data')
-                .select('*')
-                .eq('key', 'studentsRecords');
-
-            let cloudStudentsMap = {};
-            if (sData && Array.isArray(sData)) {
-                sData.forEach(row => {
-                    try {
-                        const parsedS = JSON.parse(row.value || '{}');
-                        if (typeof parsedS === 'object') {
-                            cloudStudentsMap = { ...cloudStudentsMap, ...parsedS };
-                        }
-                    } catch(e) {}
-                });
-            }
-
-            if (!pErr && Array.isArray(pData)) {
-                pData.forEach(row => {
-                    try {
-                        const parsedList = JSON.parse(row.value || '[]');
-                        if (Array.isArray(parsedList)) {
-                            parsedList.forEach(item => {
-                                if (item && item.id) {
-                                    const related = cloudStudentsMap[item.id] || {};
-                                    idMap.set(item.id, {
-                                        ...item,
-                                        plan: item.plan || related.plan || {},
-                                        students: item.students || related.criteria || [],
-                                        created_by_name: item.enseignant || row.updated_by_name || 'أستاذ',
-                                        created_at: item.created_at || row.updated_at
-                                    });
-                                }
-                            });
-                        }
-                    } catch(e) { console.warn('portal_data parse notice:', e); }
-                });
-            }
-        }
-    } catch(err) {
-        console.warn('portal_data fetch warning:', err);
-    }
-
     try {
         const local = JSON.parse(localStorage.getItem('traitementData') || '[]');
         if (Array.isArray(local)) {
