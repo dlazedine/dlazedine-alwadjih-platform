@@ -1,1216 +1,217 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#1f3864">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<link rel="apple-touch-icon" href="icons/icon-180.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="الوجيه">
-<script src="pwa.js" defer></script>
-
-<script src="supabase-config.js"></script>
-<script src="portal-cloud.js"></script>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>بوابة الأدوات الرقمية للممارسة المهنية </title>
-<meta name="description" content="بوابة موحّدة للأدوات الرقمية البيداغوجية والإدارية - المقاطعة الثانية قسنطينة">
-<meta name="author" content="درويش الهلالي">
+<title>الوجيه في الإشراف التربوي - تسجيل الدخول</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<!-- Tailwind CSS via CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          ink: '#0f2340',
-          ink2: '#1a3d6e',
-          gold: '#b6893a',
-          goldDeep: '#8c6423',
-          paper: '#f8f6f0',
-          paper2: '#efece1',
-          line: '#dfd8c5',
-          muted: '#526071',
-          tealPedagogy: '#0f766e',
-          moss: '#246346',
-          maroon: '#8e2323',
-        },
-        fontFamily: {
-          sans: ['Tajawal', 'sans-serif'],
-          serif: ['Amiri', 'serif'],
-        }
-      }
-    }
-  }
-</script>
-
-<!-- Firebase SDK Compat -->
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBdv2RJ7EzlnVQcXyyozlLhVKdgwaKQdaY",
-        authDomain: "mou3ladja.firebaseapp.com",
-        projectId: "mou3ladja",
-        storageBucket: "mou3ladja.firebasestorage.app",
-        messagingSenderId: "986880549463",
-        appId: "1:986880549463:web:b4de098099622040bfb912",
-        measurementId: "G-E0BZPDCZB9"
-    };
-    let fbAuth = null;
-    let fbDb = null;
-    try {
-        if (typeof firebase !== 'undefined') {
-            firebase.initializeApp(firebaseConfig);
-            fbAuth = firebase.auth();
-            fbDb = firebase.firestore();
-        }
-    } catch (e) {
-        console.error('Firebase error:', e);
-    }
-</script>
 
 <style>
-:root {
-    --moss: #7a9a4f;
-    --moss-dark: #5f7a3a;
-    --ink: #152238;
-    --ink-2: #1f3864;
-    --teal: #16a085;
-    --teal-dark: #107a63;
-    --gold: #c49b3f;
-    --gold-dark: #9e7a26;
-    --maroon: #a01c2c;
-    --maroon-dark: #7d1522;
-    --skyblue: #2980b9;
-    --skyblue-dark: #1f618d;
-    --brown: #8b6f3c;
-    --brown-dark: #6b5430;
-    --bg-soft: #f6f4ee;
-    --bg-paper: #fbfaf6;
-    --line: rgba(21, 34, 56, 0.12);
-    --line-gold: rgba(196, 155, 63, 0.35);
-    --shadow-sm: 0 1px 2px rgba(21,34,56,0.06), 0 2px 6px rgba(21,34,56,0.05);
-    --shadow-md: 0 2px 6px rgba(21,34,56,0.07), 0 8px 22px rgba(21,34,56,0.08);
-    --shadow-lg: 0 4px 12px rgba(21,34,56,0.08), 0 16px 40px rgba(21,34,56,0.12);
-    --shadow-xl: 0 8px 24px rgba(21,34,56,0.10), 0 32px 64px rgba(21,34,56,0.16);
-    --ease: cubic-bezier(0.4, 0, 0.2, 1);
-    --trans-fast: 0.18s var(--ease);
-    --trans: 0.3s var(--ease);
-    --trans-slow: 0.5s var(--ease);
-    --glass-bg: rgba(255, 255, 255, 0.55);
-    --glass-bg-dark: rgba(21, 34, 56, 0.45);
-    --glass-border: rgba(255, 255, 255, 0.35);
-    --glass-blur: blur(14px) saturate(140%);
-}
-
-body {
-    background:
-        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><defs><pattern id='girih' width='40' height='40' patternUnits='userSpaceOnUse'><g fill='none' stroke='%237a9a4f' stroke-width='0.4' opacity='0.10'><path d='M20 0 L40 20 L20 40 L0 20 Z'/><path d='M10 10 L30 10 L30 30 L10 30 Z'/><circle cx='20' cy='20' r='3'/></g></pattern></defs><rect width='80' height='80' fill='url(%23girih)'/></svg>"),
-        var(--bg-soft);
-}  
-
-.gold-divider {
-    height: 2px;
-    margin: 22px auto;
-    max-width: 280px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    position: relative;
-}
-.gold-divider::before,
-.gold-divider::after {
-    content: "◆";
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--gold);
-    font-size: 12px;
-}
-.gold-divider::before { left: -8px; }
-.gold-divider::after  { right: -8px; }
-
-.nat-strip {
-    height: 6px;
-    background: linear-gradient(90deg,
-        #006233 0%, #006233 33%,
-        #ffffff 33%, #ffffff 66%,
-        #d21034 66%, #d21034 100%);
-    position: relative;
-    overflow: hidden;
-}
-.nat-strip::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    animation: natShine 4s infinite;
-}
-@keyframes natShine {
-    0%   { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-}
-
-.emblem {
-    width: 68px; height: 68px; margin: 0 auto 14px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #fff, #f3ecd8);
-    border: 2px solid var(--line-gold);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px; color: var(--gold);
-    box-shadow: var(--shadow-md), inset 0 0 0 5px rgba(196,155,63,0.08);
-    position: relative;
-}
-.emblem::before {
-    content: "";
-    position: absolute;
-    inset: -8px;
-    background: radial-gradient(circle, rgba(196,155,63,0.18), transparent 70%);
-    border-radius: 50%;
-    animation: pulseGlow 3s ease-in-out infinite;
-}
-@keyframes pulseGlow {
-    0%,100% { transform: scale(1);   opacity: 0.7; }
-    50%     { transform: scale(1.08); opacity: 1; }
-}
-
-.bento-card {
-    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
-}
-.bento-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 24px -10px rgba(15, 35, 64, 0.12);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Tajawal', sans-serif;
+        min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        background-color: #faf7ef; padding: 20px;
+        background-image: 
+            radial-gradient(circle at 50% 0%, rgba(196,155,63,0.12) 0%, transparent 60%),
+            url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><defs><pattern id='islamic-dash' width='80' height='80' patternUnits='userSpaceOnUse'><g fill='none' stroke='%23c49b3f' stroke-width='0.6' opacity='0.22'><path d='M40 16 L47 27 L60 20 L57 34 L71 39 L60 48 L68 60 L54 61 L51 75 L40 66 L29 75 L26 61 L12 60 L20 48 L9 39 L23 34 L20 20 L33 27 Z'/><rect x='28' y='28' width='24' height='24' rx='2'/><rect x='28' y='28' width='24' height='24' rx='2' transform='rotate(45 40 40)'/><circle cx='0' cy='0' r='14'/><circle cx='80' cy='0' r='14'/><circle cx='0' cy='80' r='14'/><circle cx='80' cy='80' r='14'/></g></pattern></defs><rect width='80' height='80' fill='url(%23islamic-dash)'/></svg>");
+        background-attachment: fixed;
     }
-}
+    .login-card {
+        background: #fff; border-radius: 20px; padding: 40px 30px; max-width: 420px; width: 100%;
+        box-shadow: 0 15px 50px rgba(14,39,68,0.12); border-top: 3.5px solid #c49b3f;
+        position: relative;
+    }
+    .logo-shield {
+        width: 65px; height: 65px; margin: 0 auto 18px; border-radius: 16px;
+        background: linear-gradient(135deg, #faf7ef, #f4eedd); border: 2px solid #c49b3f;
+        display: flex; align-items: center; justify-content: center; font-size: 26px; color: #8c6423;
+    }
+    h1 { font-family: 'Amiri', serif; text-align: center; font-size: 26px; color: #0e2744; margin-bottom: 6px; }
+    .subtitle { text-align: center; color: #5d6b7b; font-size: 12.5px; margin-bottom: 24px; }
+    .error-box {
+        display: none; background: #fbeceb; color: #8b1827; padding: 10px 14px; border-radius: 9px;
+        font-size: 12.5px; text-align: center; margin-bottom: 16px; border: 1px solid #f5c6c6;
+    }
+    .field-group { margin-bottom: 14px; }
+    .field-group label { display: block; font-size: 12.5px; font-weight: 700; color: #0e2744; margin-bottom: 5px; }
+    .field-group input {
+        width: 100%; padding: 11px 14px; border: 1.5px solid #d9ceb4; border-radius: 9px;
+        font-family: inherit; font-size: 13.5px; transition: all 0.2s; background: #fdfcf8;
+    }
+    .field-group input:focus { outline: none; border-color: #c49b3f; background: #fff; }
+    .login-btn {
+        width: 100%; padding: 12px; margin-top: 6px; border: none; border-radius: 9px;
+        background: linear-gradient(135deg, #0e2744, #153861); color: #fff;
+        font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer;
+        transition: all 0.22s; box-shadow: 0 4px 12px rgba(14,39,68,0.25);
+    }
+    .login-btn:hover { transform: translateY(-1.5px); box-shadow: 0 6px 16px rgba(14,39,68,0.35); }
+    .login-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .install-link {
+        display: block; text-align: center; margin-top: 18px; color: #0e2744;
+        font-size: 12px; text-decoration: none; font-weight: 700;
+    }
+    .install-link:hover { color: #c49b3f; }
+    .debug { font-size: 10.5px; color: #5d6b7b; text-align: center; margin-top: 12px; word-break: break-all; }
 </style>
 </head>
-<body class="text-ink antialiased selection:bg-gold/20 selection:text-ink">
+<body>
 
-    <!-- ============ شاشة الدخول الموحّدة ============ -->
-    <div id="gateScreen" class="min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-sm bg-white rounded-3xl p-8 border border-line shadow-xl text-center">
-            <div class="w-14 h-14 rounded-2xl bg-paper border border-gold/40 text-goldDeep flex items-center justify-center text-xl mx-auto mb-3 shadow-2xs">
-                <i class="fas fa-shield-halved"></i>
-            </div>
-            <h1 class="font-serif text-2xl font-bold text-ink mb-1">الوجيه في الإشراف التّربوي</h1>
-            <p class="text-xs text-muted mb-5">المقاطعة الثانية قسنطينة — المفتشية العامة</p>
+<div class="login-card">
+    <div class="logo-shield"><i class="fas fa-shield-halved"></i></div>
+    <h1>الوجيه في الإشراف التربوي</h1>
+    <p class="subtitle">المقاطعة الثانية قسنطينة – المفتشية العامة</p>
 
-            <div id="gateMsg" class="hidden text-xs p-2.5 rounded-xl mb-3 text-right"></div>
+    <div class="error-box" id="loginError"></div>
 
-            <form id="gateForm" onsubmit="return handleGateLogin(event)" class="space-y-3.5 text-right">
-                <div>
-                    <label class="block text-xs font-bold text-ink2 mb-1" for="gateUsername">اسم المستخدم</label>
-                    <input type="text" id="gateUsername" autocomplete="username" placeholder="أدخل اسم المستخدم..." required
-                      class="w-full px-3.5 py-2 rounded-xl border border-line focus:outline-none focus:border-gold text-xs bg-paper/50">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-ink2 mb-1" for="gatePassword">كلمة المرور</label>
-                    <input type="password" id="gatePassword" autocomplete="current-password" placeholder="أدخل كلمة المرور..." required
-                      class="w-full px-3.5 py-2 rounded-xl border border-line focus:outline-none focus:border-gold text-xs bg-paper/50">
-                </div>
-                <button type="submit" id="gateSubmitBtn" class="w-full py-2.5 bg-ink hover:bg-ink2 text-white font-bold rounded-xl transition-colors cursor-pointer text-xs shadow-md">
-                    دخول المنظومة
-                </button>
-            </form>
-            <a href="install.html" class="block text-center mt-3 text-[11px] font-bold text-ink2 hover:text-gold underline"><i class="fas fa-mobile-screen-button"></i> تثبيت التطبيق على هاتفك</a>
-
+    <form id="loginForm">
+        <div class="field-group">
+            <label>اسم المستخدم</label>
+            <input type="text" id="username" autocomplete="username" placeholder="أدخل اسم المستخدم">
         </div>
-    </div>
-
-    <!-- ============ واجهة البوابة الإنفوغرافية المتماسكة ============ -->
-    <div id="appScreen" class="hidden">
-        <!-- الشريط العلوي الرسمي المدمج -->
-        <header class="bg-ink text-amber-100/90 text-xs py-2 px-4 sm:px-8 border-b border-gold/30">
-            <div class="max-w-6xl mx-auto flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                    <span class="font-semibold text-white">الجمهورية الجزائرية الديمقراطية الشعبية</span>
-                    <span class="text-amber-200/40 hidden sm:inline">|</span>
-                    <span class="hidden sm:inline">وزارة التربية الوطنية — المفتشية العامة</span>
-                    <span class="text-amber-200/40 hidden md:inline">|</span>
-                    <span class="hidden md:inline">المقاطعة الثانية قسنطينة</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="text-amber-200">مرحباً، <strong id="gateUserName" class="text-white"></strong> <span id="gateUserRoleBadge" class="bg-gold/20 text-gold px-2 py-0.5 rounded-full text-[10px]"></span></span>
-                    <button onclick="handleGateLogout()" class="text-red-300 hover:text-white transition-colors cursor-pointer text-[11px] bg-white/10 px-2 py-0.5 rounded">
-                        <i class="fas fa-arrow-right-from-bracket"></i> خروج
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- الترويسة الإنفوغرافية المركزة والمجمعة -->
-        <section class="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-4 text-center">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/15 text-goldDeep text-xs font-semibold mb-3 border border-gold/30">
-                <i class="fas fa-certificate text-gold"></i>  وَمَا تَوْفِيقِي إِلاَّ بِاللَّهِ عَلَيْهِ تَوَكَّلْتُ وَإِلَيْهِ أُنِيبُ
-            </div>
-            
-            <div class="emblem">
-                <i class="fas fa-graduation-cap"></i>
-            </div>
-
-            <svg class="arabic-ornament" viewBox="0 0 600 70" width="100%" height="70">
-                <defs>
-                    <linearGradient id="goldGrad" x1="0" x2="1">
-                        <stop offset="0%"  stop-color="#9e7a26"/>
-                        <stop offset="50%" stop-color="#e8c96a"/>
-                        <stop offset="100%" stop-color="#9e7a26"/>
-                    </linearGradient>
-                </defs>
-                <text x="300" y="46" text-anchor="middle"
-                      font-family="'Amiri', 'Tajawal', serif"
-                      font-size="34" font-weight="700"
-                      fill="url(#goldGrad)"
-                      style="letter-spacing: 1.5px;">
-                    البوابة الرقمية الوجيه في الإشراف التّربوي
-                </text>
-            </svg>
-            <div class="gold-divider"></div>            
-            
-            <p class="text-muted max-w-2xl mx-auto text-xs sm:text-sm leading-relaxed mb-6">
-                          حقيبة رقمية تسهم بفاعلية في دعم الممارسة التربوية الواعية، والارتقاء بها في الميدان من أجل بيئة عمل بيداغوجية موحّدة لخدمة العمل التّربوي. 
-                <span class="block text-goldDeep font-medium mt-0.5">إعداد وتأطير: <a href="cv.html" class="underline font-bold hover:text-ink2">درويش الهلالي</a></span>
-            </p>
-
-            <!-- بطاقات الأثر السريع (Metrics Strip) -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-w-4xl mx-auto text-right mb-6">
-                <div class="bg-white/90 backdrop-blur-xs px-3.5 py-2.5 rounded-xl border border-line shadow-2xs flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-lg bg-emerald-50 text-moss flex items-center justify-center shrink-0 text-base">
-                        <i class="fas fa-book-open"></i>
-                    </div>
-                    <div>
-                        <div class="text-moss font-serif font-bold text-lg leading-none">+100</div>
-                        <div class="text-[11px] font-bold text-ink mt-0.5">نشاط علاجي وبيداغوجي</div>
-                    </div>
-                </div>
-
-                <div class="bg-white/90 backdrop-blur-xs px-3.5 py-2.5 rounded-xl border border-line shadow-2xs flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-lg bg-blue-50 text-ink2 flex items-center justify-center shrink-0 text-base">
-                        <i class="fas fa-layer-group"></i>
-                    </div>
-                    <div>
-                        <div class="text-ink2 font-serif font-bold text-lg leading-none">5 مستويات</div>
-                        <div class="text-[11px] font-bold text-ink mt-0.5">فهم قرائي معياري</div>
-                    </div>
-                </div>
-
-                <div class="bg-white/90 backdrop-blur-xs px-3.5 py-2.5 rounded-xl border border-line shadow-2xs flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-lg bg-teal-50 text-tealPedagogy flex items-center justify-center shrink-0 text-base">
-                        <i class="fas fa-user-lock"></i>
-                    </div>
-                    <div>
-                        <div class="text-tealPedagogy font-serif font-bold text-lg leading-none">حساب موحد</div>
-                        <div class="text-[11px] font-bold text-ink mt-0.5">ولوج مباشر لجميع الأدوات</div>
-                    </div>
-                </div>
-
-                <div class="bg-white/90 backdrop-blur-xs px-3.5 py-2.5 rounded-xl border border-line shadow-2xs flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-lg bg-amber-50 text-goldDeep flex items-center justify-center shrink-0 text-base">
-                        <i class="fas fa-award"></i>
-                    </div>
-                    <div>
-                        <div class="text-goldDeep font-serif font-bold text-lg leading-none">100%</div>
-                        <div class="text-[11px] font-bold text-ink mt-0.5">مطابقة المناهج الرسمية</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- مسار رحلة الأستاذ (Cycle Workflow) -->
-        <section class="max-w-6xl mx-auto px-4 sm:px-6 mb-8">
-            <div class="bg-paper2/70 border border-line rounded-2xl p-4">
-                <div class="flex items-center justify-between pb-2.5 border-b border-line/70 mb-3 text-right">
-                    <div>
-                        <span class="text-[11px] font-bold text-goldDeep uppercase tracking-wider">
-                            <i class="fas fa-route ml-1"></i> منظومة الأدوات الرقمية
-                        </span>
-                        <h2 class="font-serif text-lg font-bold text-ink">
-                             السند المهني المتميز، والممارسة البيداغوجية الواعية المتكاملة.
-                        </h2>
-                    </div>
-                    <span class="text-[11px] text-muted hidden sm:inline">مسار عمل مترابط يرافقك طوال السّنة</span>
-                </div>
-                
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 text-right relative">
-
-                    <!-- 01 Arabic -->
-                    <a href="arabic.html" class="p-3 rounded-xl bg-white border border-line hover:border-moss hover:shadow-md transition-all block group relative">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="w-6 h-6 rounded-md bg-emerald-100 text-moss flex items-center justify-center text-xs font-bold shadow-2xs">01</span>
-                            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-moss flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
-                                <i class="fas fa-book-open"></i>
-                            </div>
-                        </div>
-                        <div class="text-[11px] font-bold text-moss mb-0.5">التأسيس البيداغوجي</div>
-                        <div class="text-xs font-bold text-ink group-hover:text-moss line-clamp-1">بناء المقاطع وتصميم المذكرات</div>
-                        <div class="hidden lg:block absolute -left-2 top-1/2 -translate-y-1/2 text-line text-xs pointer-events-none z-10 group-hover:text-moss transition-colors">
-                            <i class="fas fa-chevron-left"></i>
-                        </div>
-                    </a>
-
-                    <!-- 02 Remedial -->
-                    <a href="moualaja.html" class="p-3 rounded-xl bg-white border border-line hover:border-ink2 hover:shadow-md transition-all block group relative">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="w-6 h-6 rounded-md bg-blue-100 text-ink2 flex items-center justify-center text-xs font-bold shadow-2xs">02</span>
-                            <div class="w-7 h-7 rounded-lg bg-blue-50 text-ink2 flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
-                                <i class="fas fa-compass-drafting"></i>
-                            </div>
-                        </div>
-                        <div class="text-[11px] font-bold text-ink2 mb-0.5">التشخيص والعلاج</div>
-                        <div class="text-xs font-bold text-ink group-hover:text-ink2 line-clamp-1">المعالجة وبنك الأنشطة</div>
-                        <div class="hidden lg:block absolute -left-2 top-1/2 -translate-y-1/2 text-line text-xs pointer-events-none z-10 group-hover:text-ink2 transition-colors">
-                            <i class="fas fa-chevron-left"></i>
-                        </div>
-                    </a>
-
-                    <!-- 03 Amal -->
-                    <a href="amal.html" class="p-3 rounded-xl bg-white border border-line hover:border-tealPedagogy hover:shadow-md transition-all block group relative">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="w-6 h-6 rounded-md bg-teal-100 text-tealPedagogy flex items-center justify-center text-xs font-bold shadow-2xs">03</span>
-                            <div class="w-7 h-7 rounded-lg bg-teal-50 text-tealPedagogy flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
-                                <i class="fas fa-users-gear"></i>
-                            </div>
-                        </div>
-                        <div class="text-[11px] font-bold text-tealPedagogy mb-0.5">التطبيق الصفي</div>
-                        <div class="text-xs font-bold text-ink group-hover:text-tealPedagogy line-clamp-1">تسيير الأعمال الموجهة</div>
-                        <div class="hidden lg:block absolute -left-2 top-1/2 -translate-y-1/2 text-line text-xs pointer-events-none z-10 group-hover:text-tealPedagogy transition-colors">
-                            <i class="fas fa-chevron-left"></i>
-                        </div>
-                    </a>
-
-                      <!-- 04 Fahss Ikhtibar -->
-                    <a href="fahs-ikhtibar.html" class="p-3 rounded-xl bg-white border border-line hover:border-emerald-700 hover:shadow-md transition-all block group relative">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="w-6 h-6 rounded-md bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-bold shadow-2xs">04</span>
-                            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-800 flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
-                                <i class="fas fa-file-circle-check"></i>
-                            </div>
-                        </div>
-                        <div class="text-[11px] font-bold text-emerald-800 mb-0.5">تقويم الاختبارات</div>
-                        <div class="text-xs font-bold text-ink group-hover:text-emerald-800 line-clamp-1">فحص ومطابقة الفروض</div>
-                        <div class="hidden lg:block absolute -left-2 top-1/2 -translate-y-1/2 text-line text-xs pointer-events-none z-10 group-hover:text-emerald-800 transition-colors">
-                            <i class="fas fa-chevron-left"></i>
-                        </div>
-                    </a>
-                      <!-- 05 Documents Space (الفضاء التشاركي لبنك الوثائق) -->
-                    <a href="documents.html" class="p-3 rounded-xl bg-white border border-line hover:border-emerald-700 hover:shadow-md transition-all block group relative">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="w-6 h-6 rounded-md bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-bold shadow-2xs">05</span>
-                            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-800 flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
-                                <i class="fas fa-folder-tree"></i>
-                            </div>
-                        </div>
-                        <div class="text-[11px] font-bold text-emerald-800 mb-0.5">بنك الوثائق</div>
-                        <div class="text-xs font-bold text-ink group-hover:text-emerald-800 line-clamp-1">  وقفات، اختبارات، واجبات ومشاريع
-
- </div>
-                        <div class="hidden lg:block absolute -left-2 top-1/2 -translate-y-1/2 text-line text-xs pointer-events-none z-10 group-hover:text-emerald-800 transition-colors">
-                            <i class="fas fa-chevron-left"></i>
-                        </div>
-                    </a>
-
-                    <!-- 06 Niqash -->
-                    <a href="niqash.html" class="p-3 rounded-xl bg-white border border-line hover:border-sky-700 hover:shadow-md transition-all block group relative">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="w-6 h-6 rounded-md bg-sky-100 text-sky-700 flex items-center justify-center text-xs font-bold shadow-2xs">06</span>
-                            <div class="w-7 h-7 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
-                                <i class="fas fa-comments"></i>
-                            </div>
-                        </div>
-                        <div class="text-[11px] font-bold text-sky-700 mb-0.5">المشاركة المهنية</div>
-                        <div class="text-xs font-bold text-ink group-hover:text-sky-700 line-clamp-1">ركن المحادثة والنقاش التّربوي</div>
-                        <div class="hidden lg:block absolute -left-2 top-1/2 -translate-y-1/2 text-line text-xs pointer-events-none z-10 group-hover:text-sky-700 transition-colors">
-                            <i class="fas fa-chevron-left"></i>
-                        </div>
-                    </a>
-
-                    <!-- 07 Proposals -->
-                    <a href="proposals.html" class="p-3 rounded-xl bg-white border border-line hover:border-goldDeep hover:shadow-md transition-all block group relative">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="w-6 h-6 rounded-md bg-amber-100 text-goldDeep flex items-center justify-center text-xs font-bold shadow-2xs">07</span>
-                            <div class="w-7 h-7 rounded-lg bg-amber-50 text-goldDeep flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
-                                <i class="fas fa-chart-pie"></i>
-                            </div>
-                        </div>
-                        <div class="text-[11px] font-bold text-goldDeep mb-0.5">التشارك والرأي</div>
-                        <div class="text-xs font-bold text-ink group-hover:text-goldDeep line-clamp-1">المقترحات والاستبيانات</div>
-                        <div class="hidden lg:block absolute -left-2 top-1/2 -translate-y-1/2 text-line text-xs pointer-events-none z-10 group-hover:text-goldDeep transition-colors">
-                            <i class="fas fa-chevron-left"></i>
-                        </div>
-                    </a>
-                    <!-- 08 Dashboard (Inspector / Supervisor) -->
-                    <a href="dashboard.html" id="flowDashboard" class="p-3 rounded-xl bg-white border border-line hover:border-amber-800 hover:shadow-md transition-all block group">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="w-6 h-6 rounded-md bg-amber-100 text-amber-800 flex items-center justify-center text-xs font-bold shadow-2xs">08</span>
-                            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-800 flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                        </div>
-                        <div class="text-[11px] font-bold text-amber-800 mb-0.5">الحوكمة والقيادة</div>
-                        <div class="text-xs font-bold text-ink group-hover:text-amber-800 line-clamp-1">لوحة التّحكم في المنظومة</div>
-                    </a>
-                    <!-- 09 Taqyim (Inspector / Supervisor) -->
-                    <a href="taqyim.html" id="flowTaqyim" class="p-3 rounded-xl bg-white border border-line hover:border-maroon hover:shadow-md transition-all block group relative">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="w-6 h-6 rounded-md bg-red-100 text-maroon flex items-center justify-center text-xs font-bold shadow-2xs">09</span>
-                            <div class="w-7 h-7 rounded-lg bg-red-50 text-maroon flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
-                                <i class="fas fa-award"></i>
-                            </div>
-                        </div>
-                        <div class="text-[11px] font-bold text-maroon mb-0.5">تقويم الأداء</div>
-                        <div class="text-xs font-bold text-ink group-hover:text-maroon line-clamp-1">بطاقة الأداء التكاملي</div>
-                        <div class="hidden lg:block absolute -left-2 top-1/2 -translate-y-1/2 text-line text-xs pointer-events-none z-10 group-hover:text-maroon transition-colors">
-                            <i class="fas fa-chevron-left"></i>
-                        </div>
-                    </a>
-
-
-                    <!-- 10 Data-prof -->
-                    <a href="data-prof.html" class="p-3 rounded-xl bg-white border border-line hover:border-sky-700 hover:shadow-md transition-all block group relative">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="w-6 h-6 rounded-md bg-sky-100 text-sky-700 flex items-center justify-center text-xs font-bold shadow-2xs">10</span>
-                            <div class="w-7 h-7 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
-                                <i class="fas fa-id-card"></i>
-                            </div>
-                        </div>
-                        <div class="text-[11px] font-bold text-sky-700 mb-0.5">إدارة المقاطعة</div>
-                        <div class="text-xs font-bold text-ink group-hover:text-sky-700 line-clamp-1">الاحتراف المهني</div>
-                        <div class="hidden lg:block absolute -left-2 top-1/2 -translate-y-1/2 text-line text-xs pointer-events-none z-10 group-hover:text-sky-700 transition-colors">
-                            <i class="fas fa-chevron-left"></i>
-                        </div>
-                    </a>
-
-                    <!--11 Install (كل الأدوار) -->
-                    <a href="install.html" class="p-3 rounded-xl bg-white border border-line hover:border-emerald-700 hover:shadow-md transition-all block group relative">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="w-6 h-6 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shadow-2xs">10</span>
-                            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
-                                <i class="fas fa-mobile-screen-button"></i>
-                            </div>
-                        </div>
-                        <div class="text-[11px] font-bold text-emerald-700 mb-0.5">على هاتفك</div>
-                        <div class="text-xs font-bold text-ink group-hover:text-emerald-700 line-clamp-1">تثبيت التطبيق</div>
-                        <div class="hidden lg:block absolute -left-2 top-1/2 -translate-y-1/2 text-line text-xs pointer-events-none z-10 group-hover:text-emerald-700 transition-colors">
-                            <i class="fas fa-chevron-left"></i>
-                        </div>
-                    </a>
-           
-     </div>
+        <div class="field-group">
+            <label>كلمة المرور</label>
+            <input type="password" id="password" autocomplete="current-password" placeholder="أدخل كلمة المرور">
         </div>
-        <!-- شبكة بطاقات الأدوات الإنفوغرافية (Bento Grid) -->
-        <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-16">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-right">
+        <button type="submit" class="login-btn" id="loginBtn">دخول المنظومة</button>
+    </form>
 
-                <!-- 01 Arabic -->
-                <div class="bento-card bg-white rounded-2xl border border-line overflow-hidden shadow-2xs flex flex-col justify-between">
-                    <div class="h-1.5 bg-moss w-full"></div>
-                    <div class="p-5">
-                        <div class="flex items-center justify-between text-xs mb-3">
-                            <span class="font-bold text-moss flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-moss"></span>
-                                <span>01 — ديداكتيك اللغة العربية</span>
-                            </span>
-                        </div>
-
-                        <div class="flex items-start gap-3.5 mb-3">
-                            <div class="w-11 h-11 rounded-xl bg-emerald-50 text-moss border border-emerald-200/60 flex items-center justify-center shrink-0 text-lg shadow-2xs">
-                                <i class="fas fa-book-open-reader"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-serif text-xl font-bold text-ink leading-snug">
-                                    منصة تعليمية اللغة العربية 
-                                </h3>
-                                <p class="text-xs text-goldDeep font-medium mt-0.5">
-                                    مرجعية مستويات الفهم وأنماط النصوص
-                                </p>
-                            </div>
-                        </div>
-
-                        <p class="text-xs text-muted leading-relaxed mb-4">
-                            مرجعية ديداكتيكية كاملة لمستويات الفهم القرائي وأنماط النصوص، مع ورشة تفاعلية مرنة لبناء المقاطع التعلمية وضبط وضعيات الانطلاق.
-                        </p>
-
-                        <div class="space-y-1.5 text-xs text-muted border-t border-line/60 pt-3">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-moss text-[11px]"></i>
-                                <span>تفكيك مؤشرات الفهم الصريح والضمني والنقدي والإبداعي</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-moss text-[11px]"></i>
-                                <span>مصفوفة تخطيط المقطع وفق بيداغوجيا الكفاءات</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-3.5 bg-paper/60 border-t border-line">
-                        <a href="arabic.html" class="flex items-center justify-center gap-2 w-full py-2 bg-moss hover:bg-[#1b4d36] text-white font-bold rounded-xl text-xs transition-colors shadow-2xs">
-                            <span>فتح المنصة</span>
-                            <i class="fas fa-arrow-left text-[11px]"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 02 Remedial -->
-                <div class="bento-card bg-white rounded-2xl border border-line overflow-hidden shadow-2xs flex flex-col justify-between">
-                    <div class="h-1.5 bg-ink2 w-full"></div>
-                    <div class="p-5">
-                        <div class="flex items-center justify-between text-xs mb-3">
-                            <span class="font-bold text-ink2 flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-ink2"></span>
-                                <span>02 — متابعة تربوية وعلاجية</span>
-                            </span>
-                        </div>
-
-                        <div class="flex items-start gap-3.5 mb-3">
-                            <div class="w-11 h-11 rounded-xl bg-blue-50 text-ink2 border border-blue-200/60 flex items-center justify-center shrink-0 text-lg shadow-2xs">
-                                <i class="fas fa-compass-drafting"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-serif text-xl font-bold text-ink leading-snug">
-                                    منصة المعالجة البيداغوجية
-                                </h3>
-                                <p class="text-xs text-goldDeep font-medium mt-0.5">
-                                    تخطيط وتتبع التعثرات وإثراء بنك الأنشطة
-                                </p>
-                            </div>
-                        </div>
-
-                        <p class="text-xs text-muted leading-relaxed mb-4">
-                            نظام متكامل لتشخيص التعثرات وحصر الصعوبات القرائية، وتخطيط حصص المعالجة استناداً إلى بنك الأنشطة وورشة التحرير الموجه.
-                        </p>
-
-                        <div class="space-y-1.5 text-xs text-muted border-t border-line/60 pt-3">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-ink2 text-[11px]"></i>
-                                <span>بنك غني يضم أنشطة علاجية مصنفة</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-ink2 text-[11px]"></i>
-                                <span>شبكات تقويم ومعالجة فارقية هادفة</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-3.5 bg-paper/60 border-t border-line">
-                        <a href="moualaja.html" class="flex items-center justify-center gap-2 w-full py-2 bg-ink2 hover:bg-[#122c50] text-white font-bold rounded-xl text-xs transition-colors shadow-2xs">
-                            <span>فتح المنصة</span>
-                            <i class="fas fa-arrow-left text-[11px]"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 03 Amal -->
-                <div class="bento-card bg-white rounded-2xl border border-line overflow-hidden shadow-2xs flex flex-col justify-between">
-                    <div class="h-1.5 bg-tealPedagogy w-full"></div>
-                    <div class="p-5">
-                        <div class="flex items-center justify-between text-xs mb-3">
-                            <span class="font-bold text-tealPedagogy flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-tealPedagogy"></span>
-                                <span>03 — تسيير وإدارة الصف</span>
-                            </span>
-                        </div>
-
-                        <div class="flex items-start gap-3.5 mb-3">
-                            <div class="w-11 h-11 rounded-xl bg-teal-50 text-tealPedagogy border border-teal-200/60 flex items-center justify-center shrink-0 text-lg shadow-2xs">
-                                <i class="fas fa-diagram-project"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-serif text-xl font-bold text-ink leading-snug">
-                                    منصة تسيير الأعمال الموجهة
-                                </h3>
-                                <p class="text-xs text-goldDeep font-medium mt-0.5">
-                                    لوحة قيادة ومحاكاة العمل الفوجي
-                                </p>
-                            </div>
-                        </div>
-
-                        <p class="text-xs text-muted leading-relaxed mb-4">
-                            إدارة حصص الأعمال الموجهة وتقسيم الأفواج ومحاكاة استراتيجيات التعلم النشط وتوثيق إحصائيات الأداء في لوحة قيادة تفاعلية.
-                        </p>
-
-                        <div class="space-y-1.5 text-xs text-muted border-t border-line/60 pt-3">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-tealPedagogy text-[11px]"></i>
-                                <span>تفويج ديناميكي وتقليل الهدر الزمني</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-tealPedagogy text-[11px]"></i>
-                                <span>توثيق إحصائي فوري لنشاط الأفواج</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-3.5 bg-paper/60 border-t border-line">
-                        <a href="amal.html" class="flex items-center justify-center gap-2 w-full py-2 bg-tealPedagogy hover:bg-[#0b5852] text-white font-bold rounded-xl text-xs transition-colors shadow-2xs">
-                            <span>فتح المنصة</span>
-                            <i class="fas fa-arrow-left text-[11px]"></i>
-                        </a>
-                    </div>
-                </div>
-                <!-- 04 Fahss Ikhtibarat -->
-                <div class="bento-card bg-white rounded-2xl border border-line overflow-hidden shadow-2xs flex flex-col justify-between">
-                    <div class="h-1.5 bg-emerald-800 w-full"></div>
-                    <div class="p-5">
-                        <div class="flex items-center justify-between text-xs mb-3">
-                            <span class="font-bold text-emerald-800 flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-emerald-800"></span>
-                                <span>04 — هندسة التقويم البيداغوجي</span>
-                            </span>
-                            <span class="bg-emerald-50 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold">متاح للجميع</span>
-                        </div>
-
-                        <div class="flex items-start gap-3.5 mb-3">
-                            <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200/60 flex items-center justify-center shrink-0 text-lg shadow-2xs">
-                                <i class="fas fa-file-circle-check"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-serif text-xl font-bold text-ink leading-snug">
-                                    فحص وتقويم الاختبارات
-                                </h3>
-                                <p class="text-xs text-goldDeep font-medium mt-0.5">
-                                    مطابقة الموارد والوضعية الإدماجية
-                                </p>
-                            </div>
-                        </div>
-
-                        <p class="text-xs text-muted leading-relaxed mb-4">
-                            شبكة فحص رقمية معيارية لتقويم الاختبارات المدرسية والفروض وفق شبكة الـ 20 نقطة الرسمية (12ن موارد + 8ن إدماج)، مع معاينة المواضيع وتصدير Excel.
-                        </p>
-
-                        <div class="space-y-1.5 text-xs text-muted border-t border-line/60 pt-3">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-emerald-800 text-[11px]"></i>
-                                <span>تدقيق ذاتي للموضوع قبل الطبع والتوزيع</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-emerald-800 text-[11px]"></i>
-                                <span>أرشيف ومرجع لـ 25 متوسطة بالمقاطعة الثانية</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-3.5 bg-paper/60 border-t border-line">
-                        <a href="fahs-ikhtibar.html" class="flex items-center justify-center gap-2 w-full py-2 bg-emerald-800 hover:bg-[#124e37] text-white font-bold rounded-xl text-xs transition-colors shadow-2xs">
-                            <span>فتح أداة الفحص</span>
-                            <i class="fas fa-arrow-left text-[11px]"></i>
-                        </a>
-                    </div>
-                </div>
-                <!-- 05-B Documents Space (الفضاء التشاركي لبنك الوثائق) -->
-                <div class="bento-card bg-white rounded-2xl border border-line overflow-hidden shadow-2xs flex flex-col justify-between">
-                    <div class="h-1.5 bg-teal-600 w-full"></div>
-                    <div class="p-5">
-                        <div class="flex items-center justify-between text-xs mb-3">
-                            <span class="font-bold text-teal-700 flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-teal-600"></span>
-                                <span>05 — بنك الوثائق والتقويمات</span>
-                            </span>
-                            <span class="bg-teal-100 text-teal-800 text-[10px] px-2 py-0.5 rounded-full font-bold">تشاركي معتمد</span>
-                        </div>
-
-                        <div class="flex items-start gap-3.5 mb-3">
-                            <div class="w-11 h-11 rounded-xl bg-teal-50 text-teal-700 border border-teal-200/60 flex items-center justify-center shrink-0 text-lg shadow-2xs">
-                                <i class="fas fa-folder-tree"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-serif text-xl font-bold text-ink leading-snug">
-                                    الفضاء التشاركي للوثائق
-                                </h3>
-                                <p class="text-xs text-goldDeep font-medium mt-0.5">
-                                    وقفات، اختبارات، واجبات ومشاريع
-                                </p>
-                            </div>
-                        </div>
-
-                        <p class="text-xs text-muted leading-relaxed mb-4">
-                            رفع وتبادل الوقفات التقويمية والاختبارات الفصلية والواجبات والمشاريع مع مسار تدقيق واعتماد وتأشيرة تفتيشية وتحميل موثق لأساتذة المقاطعة.
-                        </p>
-
-                        <div class="space-y-1.5 text-xs text-muted border-t border-line/60 pt-3">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-teal-600 text-[11px]"></i>
-                                <span>6 أصناف وثائق معيارية مع المرفقات</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-teal-600 text-[11px]"></i>
-                                <span>اعتماد تفتيشي وتأشيرة رسمية للمقاطعة</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-3.5 bg-paper/60 border-t border-line">
-                        <a href="documents.html" class="flex items-center justify-center gap-2 w-full py-2 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-xl text-xs transition-colors shadow-2xs">
-                            <span>دخول الفضاء التشاركي</span>
-                            <i class="fas fa-arrow-left text-[11px]"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 06 Niqash -->
-                <div class="bento-card bg-white rounded-2xl border border-line overflow-hidden shadow-2xs flex flex-col justify-between">
-                    <div class="h-1.5 bg-sky-700 w-full"></div>
-                    <div class="p-5">
-                        <div class="flex items-center justify-between text-xs mb-3">
-                            <span class="font-bold text-sky-700 flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-sky-700"></span>
-                                <span>06 — تواصل وتطوير مهني</span>
-                            </span>
-                        </div>
-
-                        <div class="flex items-start gap-3.5 mb-3">
-                            <div class="w-11 h-11 rounded-xl bg-sky-50 text-sky-700 border border-sky-200/60 flex items-center justify-center shrink-0 text-lg shadow-2xs">
-                                <i class="fas fa-comments"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-serif text-xl font-bold text-ink leading-snug">
-                                    ركن النقاش والمحادثة التربوية
-                                </h3>
-                                <p class="text-xs text-goldDeep font-medium mt-0.5">
-                                    تواصل مهني ودفتر مذكرات شخصي
-                                </p>
-                            </div>
-                        </div>
-
-                        <p class="text-xs text-muted leading-relaxed mb-4">
-                            محادثة جماعية حية بين الأساتذة والمفتشية لمناقشة الممارسات الصفية، مع تبادل الملفات ودفتر شخصي لتدوين الملاحظات.
-                        </p>
-
-                        <div class="space-y-1.5 text-xs text-muted border-t border-line/60 pt-3">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-sky-700 text-[11px]"></i>
-                                <span>قناة استفسار تربوي مباشرة وموثوقة</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-sky-700 text-[11px]"></i>
-                                <span>مذكرة رقمية شخصية لكل أستاذ</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-3.5 bg-paper/60 border-t border-line">
-                        <a href="niqash.html" class="flex items-center justify-center gap-2 w-full py-2 bg-sky-700 hover:bg-sky-800 text-white font-bold rounded-xl text-xs transition-colors shadow-2xs">
-                            <span>فتح الركن</span>
-                            <i class="fas fa-arrow-left text-[11px]"></i>
-                        </a>
-                    </div>
-                </div>
-                <!-- 07 Proposals -->
-                <div class="bento-card bg-white rounded-2xl border border-line overflow-hidden shadow-2xs flex flex-col justify-between">
-                    <div class="h-1.5 bg-goldDeep w-full"></div>
-                    <div class="p-5">
-                        <div class="flex items-center justify-between text-xs mb-3">
-                            <span class="font-bold text-goldDeep flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-goldDeep"></span>
-                                <span>07 — التغذية الراجعة والمشاركة</span>
-                            </span>
-                            <span class="bg-amber-50 text-goldDeep text-[10px] px-2 py-0.5 rounded-full font-bold">تشاركي تفاعلي</span>
-                        </div>
-
-                        <div class="flex items-start gap-3.5 mb-3">
-                            <div class="w-11 h-11 rounded-xl bg-amber-50 text-goldDeep border border-amber-200/60 flex items-center justify-center shrink-0 text-lg shadow-2xs">
-                                <i class="fas fa-chart-pie"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-serif text-xl font-bold text-ink leading-snug">
-                                    دراسة المقترحات والاستبيانات
-                                </h3>
-                                <p class="text-xs text-goldDeep font-medium mt-0.5">
-                                    استقراء الآراء والمشاركة الميدانية
-                                </p>
-                            </div>
-                        </div>
-
-                        <p class="text-xs text-muted leading-relaxed mb-4">
-                            استطلاعات رأي واستبيانات دورية لأساتذة المقاطعة لرصد الاحتياجات وتطوير الممارسة الصفية، مع منشئ استبيانات للمفتش وتحليل إحصائي فوري.
-                        </p>
-
-                        <div class="space-y-1.5 text-xs text-muted border-t border-line/60 pt-3">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-goldDeep text-[11px]"></i>
-                                <span>إيصال المقترحات مباشرة للمفتشية التربوية</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-goldDeep text-[11px]"></i>
-                                <span>استقراء التغذية الراجعة وتصدير تقارير المشاركات</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-3.5 bg-paper/60 border-t border-line">
-                        <a href="proposals.html" class="flex items-center justify-center gap-2 w-full py-2 bg-goldDeep hover:bg-goldDark text-white font-bold rounded-xl text-xs transition-colors shadow-2xs">
-                            <span>المشاركة في الاستبيانات</span>
-                            <i class="fas fa-arrow-left text-[11px]"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 08 Dashboard (Inspector / Supervisor) -->
-                <div id="dashboardRow" class="bento-card bg-white rounded-2xl border border-line overflow-hidden shadow-2xs flex flex-col justify-between">
-                    <div class="h-1.5 bg-amber-800 w-full"></div>
-                    <div class="p-5">
-                        <div class="flex items-center justify-between text-xs mb-3">
-                            <span class="font-bold text-amber-800 flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-amber-800"></span>
-                                <span>08 — حوكمة وإدارة</span>
-                            </span>
-                            <span class="bg-amber-100 text-amber-900 text-[10px] px-2 py-0.5 rounded-full font-bold">للمفتش والمشرف</span>
-                        </div>
-
-                        <div class="flex items-start gap-3.5 mb-3">
-                            <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-800 border border-amber-200/60 flex items-center justify-center shrink-0 text-lg shadow-2xs">
-                                <i class="fas fa-user-shield"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-serif text-xl font-bold text-ink leading-snug">
-                                    لوحة التحكم ومراقبة النشاطات
-                                </h3>
-                                <p class="text-xs text-goldDeep font-medium mt-0.5">
-                                    إدارة الحسابات والرصد اللحظي
-                                </p>
-                            </div>
-                        </div>
-
-                        <p class="text-xs text-muted leading-relaxed mb-4">
-                            مركز قيادة موحد لإدارة حسابات الأساتذة في المقاطعة، ومتابعة نشاطاتهم وتفاعلهم اللحظي وسجلات المعالجة وتصدير التقارير المجمعة.
-                        </p>
-
-                        <div class="space-y-1.5 text-xs text-muted border-t border-line/60 pt-3">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-amber-800 text-[11px]"></i>
-                                <span>تحكم في الصلاحيات وكلمات المرور</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-amber-800 text-[11px]"></i>
-                                <span>مؤشرات إحصائية حية لنسب الاستخدام</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-3.5 bg-paper/60 border-t border-line">
-                        <a href="dashboard.html" class="flex items-center justify-center gap-2 w-full py-2 bg-amber-800 hover:bg-[#653a0d] text-white font-bold rounded-xl text-xs transition-colors shadow-2xs">
-                            <span>فتح اللوحة</span>
-                            <i class="fas fa-arrow-left text-[11px]"></i>
-                        </a>
-                    </div>
-                </div>
-                <!-- 09 Taqyim (Inspector / Supervisor) -->
-                <div id="taqyimRow" class="bento-card bg-white rounded-2xl border border-line overflow-hidden shadow-2xs flex flex-col justify-between">
-                    <div class="h-1.5 bg-maroon w-full"></div>
-                    <div class="p-5">
-                        <div class="flex items-center justify-between text-xs mb-3">
-                            <span class="font-bold text-maroon flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-maroon"></span>
-                                <span>09 — تقويم الأداء التربوي</span>
-                            </span>
-                            <span class="bg-red-100 text-maroon text-[10px] px-2 py-0.5 rounded-full font-bold">للمفتش والمشرف</span>
-                        </div>
-
-                        <div class="flex items-start gap-3.5 mb-3">
-                            <div class="w-11 h-11 rounded-xl bg-red-50 text-maroon border border-red-200/60 flex items-center justify-center shrink-0 text-lg shadow-2xs">
-                                <i class="fas fa-award"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-serif text-xl font-bold text-ink leading-snug">
-                                    بطاقة الأداء التكاملي
-                                </h3>
-                                <p class="text-xs text-goldDeep font-medium mt-0.5">
-                                    معايير مهارات القرن 21 بثلاث لغات
-                                </p>
-                            </div>
-                        </div>
-
-                        <p class="text-xs text-muted leading-relaxed mb-4">
-                            بطاقة معيارية لتقييم أداء المعلم والمتعلم ومناخ التعلم الصفي وفق مهارات القرن الحادي والعشرين مع تصدير فوري لتقرير الزيارة.
-                        </p>
-
-                        <div class="space-y-1.5 text-xs text-muted border-t border-line/60 pt-3">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-maroon text-[11px]"></i>
-                                <span>تقييم موضوعي ومؤشرات شفافة</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-circle-check text-maroon text-[11px]"></i>
-                                <span>تصدير مباشر للتقرير النهائي Word / PDF</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-3.5 bg-paper/60 border-t border-line">
-                        <a href="taqyim.html" class="flex items-center justify-center gap-2 w-full py-2 bg-maroon hover:bg-[#6e1a1a] text-white font-bold rounded-xl text-xs transition-colors shadow-2xs">
-                            <span>فتح الأداة</span>
-                            <i class="fas fa-arrow-left text-[11px]"></i>
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-        </main>
-
-        <footer class="text-center py-6 border-t border-line text-xs text-muted bg-white/50">
-            دخول واحد يفتح جميع الأدوات أعلاه — لا حاجة لتسجيل الدخول مرة أخرى داخل كل أداة.
-        </footer>
-    </div>
+    <a href="#" class="install-link"><i class="fas fa-download"></i> تثبيت التطبيق على هاتفك</a>
+    <div class="debug" id="debugInfo"></div>
+</div>
 
 <script>
 // ============================================================
-//  منطق التحقق والجلسات المشتركة مع دعم العمل دون إنترنت
+//  كل شيء داخل هذه الصفحة - لا حاجة لملفات خارجية
 // ============================================================
-const SESSION_KEY = 'pgb_session';
-const SESSION_DURATION = 24 * 60 * 60 * 1000;
 
-// الحسابات المحلية الاحتياطية المعتمدة
-const LOCAL_USERS = [];
+const firebaseConfig = {
+    apiKey: "AIzaSyBdv2RJ7EzlnVQcXyyozlLhVKdgwaKQdaY",
+    authDomain: "mou3ladja.firebaseapp.com",
+    projectId: "mou3ladja",
+    storageBucket: "mou3ladja.firebasestorage.app",
+    messagingSenderId: "986880549463",
+    appId: "1:986880549463:web:b4de098099622040bfb912"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
 
-let cachedUsers = [...LOCAL_USERS];
-let cachedCredentials = {};
-let cloudReady = false;
-
-function getUsersDocRef() {
-    if (!fbDb) return null;
-    try { return fbDb.collection('platform_shared').doc('users'); } catch(e) { return null; }
-}
-function getCredentialsDocRef() {
-    if (!fbDb) return null;
-    try { return fbDb.collection('platform_shared').doc('credentials'); } catch(e) { return null; }
-}
-function ensureFirebaseAnonymousAuth() {
-    if (!fbAuth) return Promise.resolve(null);
-    const authPromise = new Promise((resolve) => {
-        if (fbAuth.currentUser) { resolve(fbAuth.currentUser); return; }
-        fbAuth.signInAnonymously().catch((err) => console.warn('Firebase anon auth notice:', err));
-        const unsub = fbAuth.onAuthStateChanged((user) => { if (user) { unsub(); resolve(user); } });
-    });
-    const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), 3000));
-    return Promise.race([authPromise, timeoutPromise]);
-}
-function listenToCloudData() {
-    const usersRef = getUsersDocRef();
-    const credsRef = getCredentialsDocRef();
-    if (!usersRef || !credsRef) {
-        cloudReady = true;
-        return Promise.resolve({ users: cachedUsers, credentials: cachedCredentials });
-    }
-    const usersPromise = new Promise((resolve) => {
-        usersRef.onSnapshot((doc) => {
-            if (doc.exists && Array.isArray(doc.data().list)) {
-                // دمج مع المستخدمين المحليين
-                const remote = doc.data().list;
-                const map = new Map(LOCAL_USERS.map(u => [u.username.toLowerCase(), u]));
-                remote.forEach(ru => map.set(ru.username.toLowerCase(), ru));
-                cachedUsers = Array.from(map.values());
-            }
-            resolve(cachedUsers);
-        }, () => resolve(cachedUsers));
-    });
-    const credsPromise = new Promise((resolve) => {
-        credsRef.onSnapshot((doc) => {
-            cachedCredentials = (doc.exists && typeof doc.data().hashes === 'object') ? doc.data().hashes : {};
-            resolve(cachedCredentials);
-        }, () => resolve(cachedCredentials));
-    });
-    return Promise.race([Promise.all([usersPromise, credsPromise]), new Promise((res) => setTimeout(res, 3500))])
-        .then(() => { cloudReady = true; return { users: cachedUsers, credentials: cachedCredentials }; })
-        .catch(() => { cloudReady = true; return { users: cachedUsers, credentials: cachedCredentials }; });
+// ---------- دالة تشفير كلمة المرور ----------
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password + 'pgb_salt_2026');
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-function findUserByUsername(username) {
-    const clean = String(username).trim().toLowerCase();
-    // فحص المستخدمين المدمجين
-    let u = cachedUsers.find(x => x.username.toLowerCase() === clean);
-    if (!u) {
-        u = LOCAL_USERS.find(x => x.username.toLowerCase() === clean);
-    }
-    return u || null;
-}
-
-async function hashPassword(password, salt = '') {
+// ---------- دالة تسجيل الدخول ----------
+async function login(username, password) {
     try {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(password + salt + 'pgb_salt_2026');
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-    } catch(e) {
-        return password;
+        // 1. التأكد من الاتصال المجهول
+        if (!auth.currentUser) {
+            await auth.signInAnonymously();
+        }
+
+        // 2. جلب المستخدمين
+        const usersDoc = await db.collection('platform_shared').doc('users').get();
+        if (!usersDoc.exists) throw new Error('لا توجد حسابات مسجلة في قاعدة البيانات');
+        const users = usersDoc.data().list || [];
+        if (users.length === 0) throw new Error('قائمة المستخدمين فارغة');
+
+        // 3. البحث عن المستخدم
+        const user = users.find(u => u.username && u.username.toLowerCase() === username.toLowerCase());
+        if (!user) throw new Error('اسم المستخدم غير موجود');
+        if (user.active === false) throw new Error('هذا الحساب معطل');
+
+        // 4. جلب كلمات المرور المشفرة
+        const credsDoc = await db.collection('platform_shared').doc('credentials').get();
+        if (!credsDoc.exists) throw new Error('قاعدة كلمات المرور غير موجودة');
+        const hashes = credsDoc.data().hashes || {};
+        const storedHash = hashes[user.id];
+        if (!storedHash) throw new Error('لم يتم تعيين كلمة مرور لهذا الحساب. تواصل مع المفتش.');
+
+        // 5. التحقق من كلمة المرور
+        const inputHash = await hashPassword(password);
+        if (inputHash !== storedHash) throw new Error('كلمة المرور غير صحيحة');
+
+        // 6. تحديث آخر دخول
+        user.lastLogin = new Date().toISOString();
+        const updatedUsers = users.map(u => u.id === user.id ? user : u);
+        await db.collection('platform_shared').doc('users').set({ 
+            list: updatedUsers, updatedAt: new Date().toISOString() 
+        });
+
+        // 7. حفظ الجلسة
+        const session = { user: user, expiresAt: Date.now() + (24 * 60 * 60 * 1000) };
+        localStorage.setItem('pgb_session_persistent', JSON.stringify(session));
+        sessionStorage.setItem('pgb_session', JSON.stringify(session));
+
+        return { success: true, user: user };
+    } catch (error) {
+        console.error('Login error:', error);
+        return { success: false, message: error.message };
     }
 }
 
-async function verifyPassword(password, user, hash) {
-    // 1. مطابقة كلمة المرور الافتراضية المباشرة إن وُجدت
-    if (user.pass && user.pass === password) return true;
-    if (user.password && user.password === password) return true;
-    
-    // 2. مطابقة التشفير السحابي
-    if (hash) {
-        const computed = await hashPassword(password);
-        if (computed === hash) return true;
+// ---------- معالج النموذج ----------
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const errorBox = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+
+    errorBox.style.display = 'none';
+
+    if (!username || !password) {
+        errorBox.textContent = 'يرجى إدخال اسم المستخدم وكلمة المرور';
+        errorBox.style.display = 'block';
+        return;
     }
-    
-    return false;
-}
 
-function saveSession(user) {
-    const session = {
-        user: { 
-            id: user.id || 'u_' + Date.now(), 
-            username: user.username, 
-            fullName: user.fullName || user.username, 
-            role: user.role, 
-            email: user.email || '', 
-            school: user.school || '' 
-        },
-        startedAt: Date.now(),
-        expiresAt: Date.now() + SESSION_DURATION
-    };
-    
-    // حفظ في كل المفاتيح لضمان التوافق المطلق مع جميع الصفحات
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    localStorage.setItem(SESSION_KEY + '_persistent', JSON.stringify(session));
-    sessionStorage.setItem('portal_session_v2', JSON.stringify(session));
-    localStorage.setItem('portal_session_v2_persistent', JSON.stringify(session));
-    
-    const roleAr = user.role === 'inspector' ? 'مفتش' : (user.role === 'supervisor' ? 'مشرف' : 'أستاذ');
-    localStorage.setItem('portalUser', JSON.stringify({
-        name: user.fullName || user.username,
-        username: user.username,
-        role: roleAr,
-        email: user.email || '',
-        school: user.school || ''
-    }));
-
-    document.dispatchEvent(new CustomEvent('portal:login', { detail: { user: session.user } }));
-}
-
-function loadSession() {
-    try {
-        let sessionData = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY + '_persistent');
-        if (!sessionData) {
-            sessionData = sessionStorage.getItem('portal_session_v2') || localStorage.getItem('portal_session_v2_persistent');
-        }
-        if (sessionData) {
-            const session = JSON.parse(sessionData);
-            if (Date.now() > session.expiresAt) { clearSession(); return null; }
-            return session;
-        }
-        const legacy = localStorage.getItem('portalUser');
-        if (legacy) {
-            const u = JSON.parse(legacy);
-            return {
-                user: {
-                    id: 'legacy',
-                    username: u.username || 'user',
-                    fullName: u.name || u.username,
-                    role: (u.role === 'مفتش' || u.role === 'inspector') ? 'inspector' : (u.role === 'مشرف' || u.role === 'supervisor' ? 'supervisor' : 'teacher'),
-                    email: u.email || ''
-                }
-            };
-        }
-        return null;
-    } catch(e) { return null; }
-}
-
-function clearSession() {
-    sessionStorage.removeItem(SESSION_KEY);
-    localStorage.removeItem(SESSION_KEY + '_persistent');
-    sessionStorage.removeItem('portal_session_v2');
-    localStorage.removeItem('portal_session_v2_persistent');
-    localStorage.removeItem('portalUser');
-    document.dispatchEvent(new CustomEvent('portal:logout'));
-}
-
-function showGateMsg(text, type) {
-    const el = document.getElementById('gateMsg');
-    if (!el) return;
-    el.textContent = text;
-    el.className = 'text-xs p-2.5 rounded-xl mb-3 text-right ' + (type === 'error' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800');
-    el.classList.remove('hidden');
-}
-
-async function handleGateLogin(event) {
-    event.preventDefault();
-    const username = document.getElementById('gateUsername').value.trim();
-    const password = document.getElementById('gatePassword').value;
-    const btn = document.getElementById('gateSubmitBtn');
-    if (!username || !password) { showGateMsg('الرجاء إدخال اسم المستخدم وكلمة المرور', 'error'); return false; }
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحقق...';
-    try {
-        const r = await PortalCloud.login(username, password);
-        if (!r.success) { showGateMsg(r.error, 'error'); return false; }
-        enterApp(r.user);
-    } catch (e) {
-        console.error('Login error:', e);
-        showGateMsg('تعذّر الاتصال بالخادم، تحقق من الإنترنت', 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = 'دخول المنظومة';
-    }
-    return false;
-}
+    btn.textContent = 'جارٍ التحقق...';
 
-function handleGateLogout() {
-    if (!confirm('هل تريد تسجيل الخروج؟')) return;
-    try { PortalCloud.signOut(); } catch (e) {}
-    clearSession();
-    document.getElementById('appScreen').classList.add('hidden');
-    document.getElementById('gateScreen').classList.remove('hidden');
-    document.getElementById('gateForm').reset();
-    const msg = document.getElementById('gateMsg');
-    if (msg) msg.classList.add('hidden');
-}
+    const result = await login(username, password);
 
-function enterApp(user) {
-    document.getElementById('gateScreen').classList.add('hidden');
-    document.getElementById('appScreen').classList.remove('hidden');
-    document.getElementById('gateUserName').textContent = user.fullName || user.username;
-    
-    const roleBadge = document.getElementById('gateUserRoleBadge');
-    const isInspector = user.role === 'inspector' || user.role === 'مفتش';
-    const isSupervisor = user.role === 'supervisor' || user.role === 'مشرف';
-    
-    if (roleBadge) {
-        roleBadge.textContent = isInspector ? 'مفتش' : (isSupervisor ? 'مشرف' : 'أستاذ(ة)');
-    }
-
-    // إتاحة أدوات التقييم ولوحة التحكم للمفتش والمشرف فقط
-    const taqyimRow = document.getElementById('taqyimRow');
-    const dashboardRow = document.getElementById('dashboardRow');
-    const flowTaqyim = document.getElementById('flowTaqyim');
-    const flowDashboard = document.getElementById('flowDashboard');
-
-    const canManage = isInspector || isSupervisor;
-    if (!canManage) {
-        if (taqyimRow) taqyimRow.style.display = 'none';
-        if (dashboardRow) dashboardRow.style.display = 'none';
-        if (flowTaqyim) flowTaqyim.style.display = 'none';
-        if (flowDashboard) flowDashboard.style.display = 'none';
+    if (result.success) {
+        // التوجيه حسب الدور
+        if (result.user.role === 'inspector') {
+            window.location.href = 'dashboard.html';
+        } else {
+            window.location.href = 'moualaja.html';
+        }
     } else {
-        if (taqyimRow) taqyimRow.style.display = '';
-        if (dashboardRow) dashboardRow.style.display = '';
-        if (flowTaqyim) flowTaqyim.style.display = '';
-        if (flowDashboard) flowDashboard.style.display = '';
+        errorBox.textContent = result.message;
+        errorBox.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'دخول المنظومة';
     }
-}
+});
 
-document.addEventListener('DOMContentLoaded', async () => {
-    
-    
-    const session = loadSession();
-    if (session && session.user) {
-        enterApp(session.user);
+// ---------- تشخيص (اختياري) ----------
+window.addEventListener('load', async () => {
+    try {
+        await auth.signInAnonymously();
+        const credsDoc = await db.collection('platform_shared').doc('credentials').get();
+        const usersDoc = await db.collection('platform_shared').doc('users').get();
+        const credsCount = credsDoc.exists ? Object.keys(credsDoc.data().hashes || {}).length : 0;
+        const usersCount = usersDoc.exists ? (usersDoc.data().list || []).length : 0;
+        document.getElementById('debugInfo').textContent = 
+            `مستخدمون: ${usersCount} | كلمات مرور: ${credsCount}`;
+    } catch(e) {
+        document.getElementById('debugInfo').textContent = 'خطأ في الاتصال: ' + e.message;
     }
 });
 </script>
+
 </body>
 </html>
