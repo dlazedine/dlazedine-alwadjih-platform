@@ -2,6 +2,21 @@
 <html lang="ar" dir="rtl">
 <head>
 <link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0e2744">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="auth.js"></script>
+<script src="supabase-config.js"></script>
+<script src="portal-cloud.js"></script>
+<script src="wj-shell.js"></script>
+<script src="pwa.js" defer></script>
+
+<link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#1f3864">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
@@ -2289,6 +2304,60 @@
         let traitementData = [];
         let studentsRecords = {};
 
+        async function syncWithCloudStorage() {
+            try {
+                const client = (window.PortalCloud && await window.PortalCloud.ready) || (typeof sbMain !== 'undefined' ? sbMain : null);
+                if (!client) return;
+
+                // قراءة السجلات السحابية المشتركة
+                const { data: pData } = await client.from('portal_data').select('*').eq('key', 'traitementData');
+                const { data: sData } = await client.from('portal_data').select('*').eq('key', 'studentsRecords');
+
+                let cloudChanged = false;
+                if (pData && pData.length) {
+                    const localIds = new Set(traitementData.map(d => d.id));
+                    pData.forEach(r => {
+                        try {
+                            const parsed = JSON.parse(r.value || '[]');
+                            if (Array.isArray(parsed)) {
+                                parsed.forEach(item => {
+                                    if (item && item.id && !localIds.has(item.id)) {
+                                        traitementData.push(item);
+                                        cloudChanged = true;
+                                    }
+                                });
+                            }
+                        } catch(e) {}
+                    });
+                }
+
+                if (sData && sData.length) {
+                    sData.forEach(r => {
+                        try {
+                            const parsed = JSON.parse(r.value || '{}');
+                            if (typeof parsed === 'object') {
+                                Object.keys(parsed).forEach(k => {
+                                    if (!studentsRecords[k]) {
+                                        studentsRecords[k] = parsed[k];
+                                        cloudChanged = true;
+                                    }
+                                });
+                            }
+                        } catch(e) {}
+                    });
+                }
+
+                if (cloudChanged) {
+                    localStorage.setItem('traitementData', JSON.stringify(traitementData));
+                    localStorage.setItem('studentsRecords', JSON.stringify(studentsRecords));
+                    renderAll();
+                    renderBank();
+                }
+            } catch(e) {
+                console.warn('syncWithCloudStorage notice:', e);
+            }
+        }
+
         function loadAll() {
             try {
                 traitementData = JSON.parse(localStorage.getItem('traitementData') || '[]');
@@ -2298,6 +2367,8 @@
                 renderBank();
                 populateExerciceSelect();
                 renderExercices();
+                // استرجاع المزامنة السحابية المحدثة
+                setTimeout(syncWithCloudStorage, 600);
             } catch(e) { traitementData = []; studentsRecords = {}; renderAll(); }
         }
 
@@ -2305,6 +2376,62 @@
             try {
                 localStorage.setItem('traitementData', JSON.stringify(traitementData));
                 localStorage.setItem('studentsRecords', JSON.stringify(studentsRecords));
+
+                // مزامنة سحابية استباقية إلى Supabase portal_data
+                if (window.PortalCloud) {
+                    window.PortalCloud.ready.then(c => {
+                        const prof = window.AuthSystem?.currentProfile;
+                        const uName = prof ? prof.full_name : 'أستاذ(ة)';
+                        const uRole = prof ? (prof.role === 'admin' ? 'inspector' : 'teacher') : 'teacher';
+                        const uId = prof ? prof.id : '00000000-0000-0000-0000-000000000000';
+                        const now = new Date().toISOString();
+
+                        // رفع السجلات كـ Shared Data ليراها المفتش وكل الأساتذة
+                        c.from('portal_data').upsert([
+                            {
+                                owner: '00000000-0000-0000-0000-000000000000',
+                                key: 'traitementData',
+                                value: JSON.stringify(traitementData),
+                                shared: true,
+                                updated_by: uId,
+                                updated_by_name: uName,
+                                updated_by_role: uRole,
+                                updated_at: now,
+                                touched: true
+                            },
+                            {
+                                owner: '00000000-0000-0000-0000-000000000000',
+                                key: 'studentsRecords',
+                                value: JSON.stringify(studentsRecords),
+                                shared: true,
+                                updated_by: uId,
+                                updated_by_name: uName,
+                                updated_by_role: uRole,
+                                updated_at: now,
+                                touched: true
+                            }
+                        ]).then(() => {
+                            // تسجيل النشاط في wajih_activity ليظهر فوراً في لوحة تحكم المفتش
+                            c.from('wajih_activity').insert({
+                                user_id: uId,
+                                user_name: uName,
+                                user_role: uRole,
+                                action: 'update',
+                                key: 'traitementData'
+                            }).catch(() => {});
+                        }).catch(e => console.warn('portal_data save warning:', e));
+                    }).catch(() => {});
+                }
+
+                // حفظ نسخة احتياطية في Firestore لمنظومة الوجيه القديمة أيضاً
+                if (typeof fbDb !== 'undefined' && fbDb) {
+                    ensureAnonAuth().then(() => {
+                        fbDb.collection('platform_shared').doc('pedagogical_records').set({
+                            updatedAt: new Date().toISOString(),
+                            recordsJson: JSON.stringify(traitementData)
+                        }, { merge: true }).catch(() => {});
+                    }).catch(() => {});
+                }
             } catch(e) {}
         }
 

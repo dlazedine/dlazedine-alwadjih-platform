@@ -334,9 +334,11 @@ WITH CHECK (true);
 -- يربط حسابات auth.users بأدوار المنظومة (inspector / supervisor / teacher)
 -- ==============================================================================
 CREATE TABLE IF NOT EXISTS public.wajih_users (
-    id UUID PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     username TEXT UNIQUE,
     full_name TEXT NOT NULL,
+    email TEXT,
+    password TEXT DEFAULT 'prof2026',
     role TEXT NOT NULL DEFAULT 'teacher' CHECK (role IN ('inspector', 'supervisor', 'teacher', 'admin')),
     school TEXT,
     phone TEXT,
@@ -344,6 +346,10 @@ CREATE TABLE IF NOT EXISTS public.wajih_users (
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- ضمان وجود حقول البريد وكلمة المرور إن كان الجدول موجوداً مسبقاً
+ALTER TABLE public.wajih_users ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE public.wajih_users ADD COLUMN IF NOT EXISTS password TEXT DEFAULT 'prof2026';
 
 ALTER TABLE public.wajih_users ENABLE ROW LEVEL SECURITY;
 
@@ -356,6 +362,15 @@ DROP POLICY IF EXISTS "Anyone can insert or update wajih_users" ON public.wajih_
 CREATE POLICY "Anyone can insert or update wajih_users"
 ON public.wajih_users FOR ALL
 USING (true);
+
+-- بذر حسابات أساتذة المقاطعة لضمان الدخول السحابي المباشر من أي هاتف أو جهاز
+INSERT INTO public.wajih_users (id, username, full_name, email, password, role, school)
+VALUES
+    ('U_toufouti25houssem', 'toufouti25houssem', 'حسام الدين تفوتي', 'toufouti25houssem@gmail.com', 'prof2026', 'teacher', 'متوسطة الإخوة بوسالم'),
+    ('U_dalilaamoura', 'dalilaamoura', 'دليلة عمورة', 'dalilaamoura37@gmail.com', 'prof2026', 'teacher', 'متوسطة لشطر القرمي'),
+    ('U_mazouzi', 'mazouzi', 'سعاد معزوزي', 'snace25000@gmail.com', 'prof2026', 'teacher', 'متوسطة بوشمال الوزناجي')
+ON CONFLICT (username) DO UPDATE
+SET password = EXCLUDED.password, full_name = EXCLUDED.full_name, school = EXCLUDED.school;
 
 
 -- ==============================================================================
@@ -374,6 +389,7 @@ CREATE TABLE IF NOT EXISTS public.wajih_surveys (
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 ALTER TABLE public.wajih_surveys ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can access wajih_surveys" ON public.wajih_surveys;
 CREATE POLICY "Anyone can access wajih_surveys" ON public.wajih_surveys FOR ALL USING (true);
 
 CREATE TABLE IF NOT EXISTS public.wajih_survey_responses (
@@ -386,6 +402,7 @@ CREATE TABLE IF NOT EXISTS public.wajih_survey_responses (
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 ALTER TABLE public.wajih_survey_responses ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can access wajih_survey_responses" ON public.wajih_survey_responses;
 CREATE POLICY "Anyone can access wajih_survey_responses" ON public.wajih_survey_responses FOR ALL USING (true);
 
 -- ركن النقاش والمحادثة المهنية
@@ -399,6 +416,7 @@ CREATE TABLE IF NOT EXISTS public.wajih_messages (
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 ALTER TABLE public.wajih_messages ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can access wajih_messages" ON public.wajih_messages;
 CREATE POLICY "Anyone can access wajih_messages" ON public.wajih_messages FOR ALL USING (true);
 
 
@@ -451,6 +469,53 @@ CREATE POLICY "Anyone can delete wajih_documents" ON public.wajih_documents FOR 
 CREATE INDEX IF NOT EXISTS idx_wajih_docs_category ON public.wajih_documents (category);
 CREATE INDEX IF NOT EXISTS idx_wajih_docs_status ON public.wajih_documents (status);
 CREATE INDEX IF NOT EXISTS idx_wajih_docs_created ON public.wajih_documents (created_at DESC);
+
+
+-- ==============================================================================
+-- 9️⃣ جدول سجلات المعالجة البيداغوجية ورصد التعثرات (wajih_remedials)
+-- يربط السجلات المضافة من الأساتذة مع لوحة التحكم التفتيشية مباشرة
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.wajih_remedials (
+    id TEXT PRIMARY KEY,
+    school TEXT NOT NULL,
+    teacher TEXT NOT NULL,
+    teacher_username TEXT,
+    sections TEXT DEFAULT '1م1',
+    students_count INT DEFAULT 0,
+    repeating_count INT DEFAULT 0,
+    cat_c_count INT DEFAULT 0,
+    cat_d_count INT DEFAULT 0,
+    criteria_count INT DEFAULT 1,
+    has_plan BOOLEAN DEFAULT false,
+    details JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.wajih_remedials ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Anyone can view wajih_remedials" ON public.wajih_remedials;
+CREATE POLICY "Anyone can view wajih_remedials" ON public.wajih_remedials FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Anyone can insert wajih_remedials" ON public.wajih_remedials;
+CREATE POLICY "Anyone can insert wajih_remedials" ON public.wajih_remedials FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Anyone can update wajih_remedials" ON public.wajih_remedials;
+CREATE POLICY "Anyone can update wajih_remedials" ON public.wajih_remedials FOR UPDATE USING (true);
+
+DROP POLICY IF EXISTS "Anyone can delete wajih_remedials" ON public.wajih_remedials;
+CREATE POLICY "Anyone can delete wajih_remedials" ON public.wajih_remedials FOR DELETE USING (true);
+
+CREATE INDEX IF NOT EXISTS idx_wajih_remedials_created ON public.wajih_remedials (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_wajih_remedials_teacher ON public.wajih_remedials (teacher);
+CREATE INDEX IF NOT EXISTS idx_wajih_remedials_school ON public.wajih_remedials (school);
+
+-- بذر أولي لسجلات المعالجة لضمان ظهور السجلات لكافة الأساتذة في لوحة التحكم
+INSERT INTO public.wajih_remedials (id, school, teacher, teacher_username, sections, students_count, repeating_count, cat_c_count, cat_d_count, criteria_count, has_plan, details)
+VALUES 
+    ('rem_001', 'متوسطة مصطفى فيلالي', 'مناصرية لمين', 'menasria', '2م1', 45, 3, 7, 10, 1, false, '{"field":"الأداء القرائي (خارج فترة الامتحان)","criteria":"احترام الوصل والفصل","level":"تحكم جزئي"}'::jsonb),
+    ('rem_002', 'متوسطة خميسي الجندلي', 'عيساوي سعيدة', 'aissaoui', '1م6 - 1م7', 67, 5, 23, 16, 3, true, '{"field":"فهم المنطوق والمكتوب","criteria":"تحديد الفكرة العامة والنسق اللغوي","level":"تحكم جزئي"}'::jsonb)
+ON CONFLICT (id) DO NOTHING;
 
 
 -- ==============================================================================
