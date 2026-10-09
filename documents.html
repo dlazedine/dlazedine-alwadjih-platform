@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0e2744">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="auth.js"></script>
+<script src="supabase-config.js"></script>
+<script src="portal-cloud.js"></script>
+<script src="wj-shell.js"></script>
+<script src="pwa.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الفضاء التشاركي لبنك الوثائق والتقويمات — الوجيه في الإشراف التربوي</title>
+  
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0e2744">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <script src="auth.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="portal-cloud.js"></script>
+  <script src="wj-shell.js"></script>
+  <script src="documents-manager.js" defer></script>
+  <script src="pwa.js" defer></script>
+
+  <style>
+    :root {
+      --gold: #c49b3f;
+      --gold-light: #e6c874;
+      --gold-dark: #8a6a24;
+      --navy: #0e2744;
+      --navy-light: #1b3a5e;
+      --navy-dark: #081729;
+      --card-bg: #ffffff;
+      --border-color: #d9c89a;
+      --text: #1a1a1a;
+      --muted: #64748b;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      background-color: var(--navy);
+      background-image:
+        radial-gradient(circle at 15% 15%, rgba(196,155,63,0.18) 0, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(196,155,63,0.14) 0, transparent 40%),
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'><g fill='none' stroke='%23c49b3f' stroke-opacity='0.25' stroke-width='1'><path d='M80 10 L110 40 L110 80 L80 110 L50 80 L50 40 Z'/><path d='M80 30 L98 48 L98 72 L80 90 L62 72 L62 48 Z'/><circle cx='80' cy='60' r='4'/><path d='M0 80 L40 80 M120 80 L160 80 M80 0 L80 40 M80 120 L80 160'/></g></svg>");
+      background-attachment: fixed;
+      background-size: cover, cover, 160px 160px;
+      padding: 16px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    /* الشريط العلوي الموحد للبوابة */
+    .top-strip {
+      background: linear-gradient(90deg, var(--navy-dark) 0%, var(--navy) 100%);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 14px;
+      border: 1.5px solid var(--gold);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+    }
+    .top-strip-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .top-strip-title {
+      font-weight: 800;
+      color: var(--gold-light);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13.5px;
+    }
+    .top-strip-nav {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .top-nav-link {
+      color: #e2e8f0;
+      text-decoration: none;
+      padding: 5px 11px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      background: rgba(255,255,255,0.06);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .top-nav-link:hover, .top-nav-link.active {
+      background: var(--gold);
+      color: var(--navy-dark);
+      font-weight: 700;
+    }
+    .btn-portal-back {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+      color: var(--navy-dark) !important;
+      font-weight: 800 !important;
+      border: 1px solid var(--gold-light);
+      box-shadow: 0 2px 8px rgba(196,155,63,0.35);
+    }
+
+    /* الهيدر الرئيسي وفضاء التعريف */
+    .hero-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(252,249,242,0.98) 100%);
+      border-radius: 24px;
+      border: 1.5px solid var(--border-color);
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .hero-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .hero-titles h1 {
+      font-family: 'Amiri', serif;
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.25;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 700;
+      background: rgba(196,155,63,0.15);
+      color: var(--gold-dark);
+      border: 1px solid rgba(196,155,63,0.4);
+      margin-bottom: 8px;
+    }
+    .hero-desc {
+      color: #475569;
+      font-size: 13.5px;
+      max-width: 860px;
+      line-height: 1.7;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+      color: var(--navy-dark);
+      border: none;
+      padding: 10px 22px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(196,155,63,0.35);
+      transition: all 0.2s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(196,155,63,0.45);
+    }
+    .btn-secondary {
+      background: #f1f5f9;
+      color: var(--navy);
+      border: 1px solid #cbd5e1;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    /* شارة المزامنة السحابية الحية */
+    .sync-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 11.5px;
+      font-weight: 700;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      transition: all 0.2s;
+    }
+    .sync-status-badge.synced {
+      background: #f0fdf4;
+      border-color: #86efac;
+      color: #166534;
+    }
+    .sync-status-badge.syncing {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      color: #1e40af;
+    }
+    .sync-status-badge.offline {
+      background: #fffbeb;
+      border-color: #fde68a;
+      color: #92400e;
+    }
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      display: inline-block;
+    }
+    .sync-status-badge.syncing .sync-dot {
+      background: #3b82f6;
+      animation: pulse 1.5s infinite;
+    }
+    .sync-status-badge.offline .sync-dot {
+      background: #eab308;
+    }
+    .btn-resync {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: inherit;
+      padding: 2px 4px;
+      font-size: 12px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .btn-resync:hover {
+      background: rgba(0,0,0,0.08);
+    }
+
+    /* بطاقات الإحصائيات */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 14px;
+      margin-top: 10px;
+    }
+    .stat-box {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.2s;
+    }
+    .stat-box:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .stat-value {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--navy);
+      line-height: 1.1;
+    }
+    .stat-label {
+      font-size: 11.5px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    /* لوحة التصفية والبحث والتبويبات */
+    .controls-panel {
+      background: #ffffff;
+      border-radius: 20px;
+      border: 1.5px solid var(--border-color);
+      padding: 18px 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .search-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .search-input-wrap {
+      flex: 1;
+      min-width: 260px;
+      position: relative;
+    }
+    .search-input-wrap i {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+    }
+    .search-input {
+      width: 100%;
+      padding: 10px 42px 10px 14px;
+      border-radius: 12px;
+      border: 1.5px solid #cbd5e1;
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus {
+      border-color: var(--gold);
+    }
+    .filter-select {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1.5px solid #cbd5e1;
+      font-family: inherit;
+      font-size: 12.5px;
+      background: #fff;
+      color: var(--navy);
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* أشرطة التصنيفات */
+    .categories-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+    }
+    .doc-cat-btn {
+      padding: 8px 14px;
+      border-radius: 12px;
+      border: 1.5px solid #e2e8f0;
+      background: #f8fafc;
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .doc-cat-btn:hover {
+      background: #f1f5f9;
+      border-color: var(--gold);
+    }
+    .doc-cat-btn.active {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+      box-shadow: 0 2px 8px rgba(14,39,68,0.3);
+    }
+
+    .sub-filters-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .status-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .doc-filter-btn {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 700;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .doc-filter-btn:hover {
+      border-color: var(--navy);
+      color: var(--navy);
+    }
+    .doc-filter-btn.active {
+      background: var(--gold);
+      color: var(--navy-dark);
+      border-color: var(--gold);
+    }
+
+    /* شبكة الوثائق */
+    .documents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 18px;
+      margin-bottom: 40px;
+    }
+
+    /* بطاقة الوثيقة */
+    .doc-card {
+      background: #fff;
+      border: 1.5px solid #d9d2bd;
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+      position: relative;
+    }
+    .doc-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      border-color: var(--gold);
+    }
+
+    /* شارات الحالة والاعتماد التفتيشي */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .status-approved {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+    .status-rejected {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+    .status-revision {
+      background: #ffedd5;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+    }
+
+    /* أختام الاعتماد التفتيشي الرسمية */
+    .inspection-seal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, rgba(196,155,63,0.15) 0%, rgba(14,39,68,0.08) 100%);
+      border: 1px solid rgba(196,155,63,0.5);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-top: 6px;
+    }
+
+    /* النوافذ المنبثقة (Modals) */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 23, 41, 0.75);
+      backdrop-filter: blur(5px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-content {
+      background: #fff;
+      border-radius: 24px;
+      max-width: 720px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 2px solid var(--gold);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      padding: 20px 24px;
+      background: linear-gradient(90deg, var(--navy-dark) 0%, var(--navy) 100%);
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--gold);
+    }
+    .modal-title {
+      font-family: 'Amiri', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold-light);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .modal-close {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .modal-close:hover {
+      background: var(--danger);
+    }
+    .modal-body {
+      padding: 24px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1.5px solid #cbd5e1;
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--gold);
+    }
+    .dropzone-area {
+      border: 2px dashed var(--gold);
+      border-radius: 16px;
+      padding: 26px 20px;
+      text-align: center;
+      background: #fdfbf7;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .dropzone-area:hover {
+      background: #f8f4e9;
+      border-color: var(--navy);
+    }
+
+    /* التذييل الموحد */
+    .main-footer {
+      margin-top: 36px;
+      padding: 24px;
+      text-align: center;
+      color: var(--gold-light);
+      font-size: 12.5px;
+      border-top: 1.5px solid rgba(196,155,63,0.35);
+      background: rgba(14,39,68,0.95);
+      border-radius: 16px;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .footer-links a {
+      color: #e2e8f0;
+      text-decoration: none;
+      font-size: 12px;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover {
+      color: var(--gold);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- 1. الشريط العلوي الموحد للبوابة -->
+    <header class="top-strip no-print">
+      <div class="top-strip-right">
+        <a href="index.html" class="top-nav-link btn-portal-back">
+          <i class="fas fa-arrow-right"></i> البوابة الرئيسية
+        </a>
+        <span class="top-strip-title">
+          <i class="fas fa-folder-tree"></i> الفضاء التشاركي لبنك الوثائق والتقويمات
+        </span>
+      </div>
+
+      <nav class="top-strip-nav">
+        <a href="arabic.html" class="top-nav-link"><i class="fas fa-book-open"></i> تعليمية العربية</a>
+        <a href="moualaja.html" class="top-nav-link"><i class="fas fa-compass"></i> المعالجة</a>
+        <a href="amal.html" class="top-nav-link"><i class="fas fa-users-gear"></i> الأعمال الموجهة</a>
+        <a href="niqash.html" class="top-nav-link"><i class="fas fa-comments"></i> النقاش</a>
+        <a href="fahss_ikhtibarat.html" class="top-nav-link"><i class="fas fa-file-circle-check"></i> فحص الاختبارات</a>
+        <a href="proposals.html" class="top-nav-link"><i class="fas fa-clipboard-list"></i> دراسة المقترحات</a>
+        <a href="bloom_evaluation.html" class="top-nav-link"><i class="fas fa-layer-group"></i> تقويم بلوم</a>
+        <a href="cv.html" class="top-nav-link"><i class="fas fa-address-card"></i> السيرة الذاتية</a>
+      </nav>
+    </header>
+
+    <!-- 2. البطاقة التعريفية الرئيسية (Hero Section) -->
+    <section class="hero-card">
+      <div class="hero-top-row">
+        <div class="hero-titles">
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px;">
+            <div class="hero-badge">
+              <i class="fas fa-certificate"></i> فضاء التبادل المهني المعتمد — المقاطعة الثانية قسنطينة
+            </div>
+            <!-- شارة المزامنة السحابية الحية مع Supabase -->
+            <div id="supabaseSyncBadge" class="sync-status-badge ready">
+              <span class="sync-dot"></span>
+              <span class="sync-text">متصل بـ Supabase (wajih_documents / data_prof / 21 متوسطة)</span>
+              <button class="btn-resync" onclick="DocumentsManager.syncWithSupabase(true)" title="تحديث المزامنة الآن">
+                <i class="fas fa-arrows-rotate"></i>
+              </button>
+            </div>
+          </div>
+
+          <h1>
+            <i class="fas fa-share-nodes text-gold"></i>
+            الفضاء التشاركي لبنك الوثائق والتقويمات التربوية
+          </h1>
+          <p class="hero-desc">
+            منظومة رقمية رائدة تؤطر رفع وتبادل <strong>الوقفات التقويمية</strong>، <strong>الاختبارات الفصلية</strong>، <strong>الواجبات المنزلية</strong>، و<strong>المشاريع البيداغوجية</strong> بين كافة أساتذة المقاطعة، مربوطة حياً بـ <strong>بنك الأساتذة (data prof)</strong> ومتوسطات المقاطعة الـ 21 مع استيعاب <strong>فحوصات الاختبارات المعتمدة</strong> ومسار <strong>تدقيق واعتماد تفتيشي موثق</strong>.
+          </p>
+        </div>
+
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="DocumentsManager.openUploadModal()">
+            <i class="fas fa-cloud-arrow-up"></i> رفع وثيقة تربوية جديدة
+          </button>
+          <button class="btn-secondary" onclick="DocumentsManager.syncWithSupabase(true)">
+            <i class="fas fa-arrows-rotate"></i> مزامنة سحابية
+          </button>
+          <button class="btn-secondary" onclick="window.print()">
+            <i class="fas fa-print"></i> طباعة الفهرس
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. مؤشرات الأداء الحية (6 بطاقات إحصائية متكاملة) -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-icon" style="background:#e0f2fe; color:#0369a1;">
+            <i class="fas fa-files"></i>
+          </div>
+          <div>
+            <div class="stat-value" id="statTotalDocs">0</div>
+            <div class="stat-label">إجمالي الوثائق بالبنك</div>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-icon" style="background:#dcfce7; color:#15803d;">
+            <i class="fas fa-circle-check"></i>
+          </div>
+          <div>
+            <div class="stat-value" id="statApprovedDocs">0</div>
+            <div class="stat-label">معتمدة تفتيشياً وموثقة</div>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-icon" style="background:#fef3c7; color:#b45309;">
+            <i class="fas fa-award"></i>
+          </div>
+          <div>
+            <div class="stat-value" id="statAuditedExams">0</div>
+            <div class="stat-label">من فحص الاختبارات (fahs)</div>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-icon" style="background:#fef9c3; color:#a16207;">
+            <i class="fas fa-hourglass-half"></i>
+          </div>
+          <div>
+            <div class="stat-value" id="statPendingDocs">0</div>
+            <div class="stat-label">قيد التدقيق التفتيشي</div>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-icon" style="background:#fae8ff; color:#a21caf;">
+            <i class="fas fa-cloud-arrow-down"></i>
+          </div>
+          <div>
+            <div class="stat-value" id="statTotalDownloads">0</div>
+            <div class="stat-label">إجمالي التحميلات المعتمدة</div>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-icon" style="background:#fef2f2; color:#b91c1c;">
+            <i class="fas fa-school-flag"></i>
+          </div>
+          <div>
+            <div class="stat-value" style="font-size:18px;">
+              <span id="statSchoolsCount">21</span> <span style="font-size:12px; font-weight:700; color:#64748b;">متوسطة</span>
+              <span style="color:#cbd5e1; margin:0 4px;">·</span>
+              <span id="statProfsCount">6</span> <span style="font-size:12px; font-weight:700; color:#64748b;">أساتذة</span>
+            </div>
+            <div class="stat-label">تغطية المقاطعة (data prof)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. لوحة التصفية والبحث والفئات -->
+    <section class="controls-panel">
+      <!-- شريط البحث السريع والفلترة المتقدمة -->
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <i class="fas fa-magnifying-glass"></i>
+          <input type="text" id="docSearchInput" class="search-input" placeholder="ابحث بعنوان الوثيقة، اسم الأستاذ، المتوسطة، أو المحتوى..." oninput="DocumentsManager.handleSearch(this.value)">
+        </div>
+
+        <select id="docTeacherFilter" class="filter-select" onchange="DocumentsManager.handleTeacherFilter(this.value)">
+          <option value="">— كل الأساتذة (data prof) —</option>
+        </select>
+
+        <select id="docSchoolFilter" class="filter-select" onchange="DocumentsManager.handleSchoolFilter(this.value)">
+          <option value="">— كل متوسطات المقاطعة (21) —</option>
+        </select>
+
+        <select id="docLevelFilter" class="filter-select" onchange="DocumentsManager.handleLevelFilter(this.value)">
+          <option value="">— كل المستويات —</option>
+          <option value="أولى متوسط">أولى متوسط (1م)</option>
+          <option value="ثانية متوسط">ثانية متوسط (2م)</option>
+          <option value="ثالثة متوسط">ثالثة متوسط (3م)</option>
+          <option value="رابعة متوسط">رابعة متوسط (4م)</option>
+          <option value="كل المستويات">كل المستويات</option>
+        </select>
+      </div>
+
+      <!-- أزرار الفئات الرئيسية الستة -->
+      <div class="categories-bar" id="docCategoriesBar">
+        <!-- تتولد ديناميكياً بواسطة documents-manager.js -->
+      </div>
+
+      <!-- التصفية الفرعية حسب الحالة والملكية -->
+      <div class="sub-filters-bar">
+        <div class="status-filters">
+          <button class="doc-filter-btn active" data-filter="all" onclick="DocumentsManager.setFilter('all')">
+            <i class="fas fa-list"></i> جميع الوثائق
+          </button>
+          <button class="doc-filter-btn" data-filter="approved" onclick="DocumentsManager.setFilter('approved')">
+            <i class="fas fa-stamp text-success"></i> المعتمدة تفتيشياً فقط
+          </button>
+          <button class="doc-filter-btn" data-filter="audited" onclick="DocumentsManager.setFilter('audited')">
+            <i class="fas fa-award text-gold"></i> من فحص الاختبارات ⭐
+          </button>
+          <button class="doc-filter-btn" data-filter="mine" onclick="DocumentsManager.setFilter('mine')">
+            <i class="fas fa-user text-gold"></i> وثائقي المرفوعة
+          </button>
+          <button class="doc-filter-btn" data-filter="pending" onclick="DocumentsManager.setFilter('pending')">
+            <i class="fas fa-clock text-warning"></i> قيد المراجعة
+          </button>
+          <button class="doc-filter-btn" data-filter="downloaded" onclick="DocumentsManager.setFilter('downloaded')">
+            <i class="fas fa-fire text-danger"></i> الأكثر تحميلاً
+          </button>
+        </div>
+
+        <div style="font-size:12px; color:#64748b;">
+          <i class="fas fa-shield-halved text-gold"></i> بنك تشاركي موصول بـ data prof وفحص الاختبارات لـ 21 متوسطة
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. شبكة الوثائق التشاركية -->
+    <main class="documents-grid" id="documentsGrid">
+      <!-- تتولد تلقائياً بواسطة documents-manager.js -->
+    </main>
+
+  </div>
+
+  <!-- 6. نافذة رفع وثيقة جديدة (Upload Modal) -->
+  <div class="modal-overlay" id="docUploadModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-cloud-arrow-up"></i> رفع ومشاركة وثيقة بيداغوجية مع المقاطعة
+        </h3>
+        <button class="modal-close" onclick="DocumentsManager.closeUploadModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form onsubmit="event.preventDefault(); DocumentsManager.submitDocument();">
+          
+          <div class="form-group">
+            <label class="form-label">عنوان الوثيقة أو الاختبار أو النشاط <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="docTitle" class="form-input" placeholder="مثال: وقفة تقويمية تشخيصية — المقطع الأول (قضايا اجتماعية) مع شبكة التصحيح" required>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+            <div class="form-group">
+              <label class="form-label">نوع الوثيقة <span style="color:var(--danger)">*</span></label>
+              <select id="docCategory" class="form-select" required>
+                <!-- تتولد ديناميكياً -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">المادة التعليمية</label>
+              <select id="docSubject" class="form-select">
+                <option value="اللغة العربية">اللغة العربية</option>
+                <option value="التربية الإسلامية">التربية الإسلامية</option>
+                <option value="نشاط مشترك">نشاط بيداغوجي مدمج</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+            <div class="form-group">
+              <label class="form-label">الأستاذ(ة) المعد(ة) <span style="color:var(--gold); font-size:11px;">[من بنك الأساتذة data prof]</span></label>
+              <select id="docAuthorSelect" class="form-select">
+                <!-- يتولد ديناميكياً من wajih_prof -->
+              </select>
+              <div id="customAuthorWrap" style="display:none; margin-top:6px;">
+                <input type="text" id="docCustomAuthor" class="form-input" placeholder="اكتب اسم الأستاذ(ة) هنا...">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">المؤسسة / المتوسطة <span style="color:var(--gold); font-size:11px;">[21 متوسطة رسمية]</span></label>
+              <select id="docSchool" class="form-select">
+                <!-- تتولد ديناميكياً من متوسطات المقاطعة الـ 21 -->
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+            <div class="form-group">
+              <label class="form-label">المستوى الدراسي</label>
+              <select id="docLevel" class="form-select">
+                <option value="رابعة متوسط">رابعة متوسط (4م)</option>
+                <option value="ثالثة متوسط">ثالثة متوسط (3م)</option>
+                <option value="ثانية متوسط">ثانية متوسط (2م)</option>
+                <option value="أولى متوسط">أولى متوسط (1م)</option>
+                <option value="كل المستويات">كل المستويات</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">الفترة البيداغوجية</label>
+              <select id="docPeriod" class="form-select">
+                <option value="الفصل الأول">الفصل الأول</option>
+                <option value="الفصل الثاني">الفصل الثاني</option>
+                <option value="الفصل الثالث">الفصل الثالث</option>
+                <option value="سنوي/شامل">سنوي / شامل</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">الوصف البيداغوجي ومؤشرات الكفاءة المستهدفة</label>
+            <textarea id="docDescription" class="form-textarea" rows="3" placeholder="وضح باختصار الأهداف المعرفية، نوع الوضعيات، وما إذا كانت الوثيقة مرفقة بشبكة التنقيط المعيارية..."></textarea>
+          </div>
+
+          <!-- منطقة إرفاق الملف (Drag and drop or Click) -->
+          <div class="form-group">
+            <label class="form-label">ملف الوثيقة (PDF أو Word أو Excel أو صورة — حتى 8 ميغابايت) <span style="color:var(--danger)">*</span></label>
+            <input type="file" id="docFileInput" style="display:none;" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,image/*">
+            <div class="dropzone-area" onclick="DocumentsManager.triggerUpload()">
+              <i class="fas fa-file-arrow-up" style="font-size:32px; color:var(--gold); margin-bottom:8px; display:block;"></i>
+              <div style="font-weight:700; color:var(--navy); font-size:13px; margin-bottom:4px;">انقر هنا لاختيار الملف أو أسقطه داخل هذا الإطار</div>
+              <div style="font-size:11.5px; color:#64748b;">يدعم ملفات PDF، ومستندات أوفيس، والصور عالية الجودة</div>
+            </div>
+            <div id="docFilePreview" style="margin-top:10px; display:none;"></div>
+          </div>
+
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:12px 14px; margin-bottom:18px; font-size:12px; color:#166534; display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-stamp text-gold" style="font-size:16px;"></i>
+            <span>تخضع كل وثيقة مرفوعة لتدقيق تفتيشي آلي وميداني لضمان مطابقتها للمناهج الوزارية قبل منحها التأشيرة الرسمية.</span>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button type="button" class="btn-secondary" onclick="DocumentsManager.closeUploadModal()">
+              إلغاء
+            </button>
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-check"></i> تأكيد الرفع والمشاركة
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. نافذة معاينة الوثيقة (Preview Modal) -->
+  <div class="modal-overlay" id="docPreviewModal">
+    <div class="modal-content" style="max-width:900px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-eye"></i> <span id="docPreviewTitle">معاينة الوثيقة</span>
+        </h3>
+        <button class="modal-close" onclick="DocumentsManager.closePreview()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="docPreviewBody">
+        <!-- تتولد ديناميكياً -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. التذييل الموحد المتناسق -->
+  <footer class="main-footer no-print">
+    <div class="footer-links">
+      <a href="index.html"><i class="fas fa-house"></i> البوابة الرئيسية</a>
+      <span>·</span>
+      <a href="arabic.html"><i class="fas fa-book-open"></i> تعليمية العربية</a>
+      <span>·</span>
+      <a href="moualaja.html"><i class="fas fa-compass"></i> المعالجة</a>
+      <span>·</span>
+      <a href="amal.html"><i class="fas fa-users-gear"></i> الأعمال الموجهة</a>
+      <span>·</span>
+      <a href="niqash.html"><i class="fas fa-comments"></i> النقاش</a>
+      <span>·</span>
+      <a href="fahss_ikhtibarat.html"><i class="fas fa-file-circle-check"></i> فحص الاختبارات</a>
+      <span>·</span>
+      <a href="proposals.html"><i class="fas fa-clipboard-list"></i> دراسة المقترحات</a>
+      <span>·</span>
+      <a href="bloom_evaluation.html"><i class="fas fa-layer-group"></i> تقويم بلوم</a>
+      <span>·</span>
+      <a href="cv.html"><i class="fas fa-address-card"></i> السيرة الذاتية</a>
+    </div>
+    <div style="font-weight:700; color:var(--gold); margin-bottom:4px;">
+      إعداد وتأطير: مفتش التعليم المتوسط درويش الهلالي — المقاطعة الثانية قسنطينة
+    </div>
+    <div style="font-size:11.5px; color:#cbd5e1;">
+      الفضاء التشاركي لبنك الوثائق والتقويمات © 2026 — بيئة الممارسة البيداغوجية المتكاملة
+    </div>
+  </footer>
+
+  <script>
+    // دوال مساعدة إضافية للبحث التفاعلي والتصفية
+    function handleCustomSearch(term) {
+      term = (term || '').trim().toLowerCase();
+      const cards = document.querySelectorAll('.doc-card');
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(term) ? 'flex' : 'none';
+      });
+    }
+
+    function handleLevelFilter(level) {
+      const cards = document.querySelectorAll('.doc-card');
+      cards.forEach(card => {
+        if (!level) { card.style.display = 'flex'; return; }
+        card.style.display = card.textContent.includes(level) ? 'flex' : 'none';
+      });
+    }
+
+    function handleSchoolFilter(school) {
+      const cards = document.querySelectorAll('.doc-card');
+      cards.forEach(card => {
+        if (!school) { card.style.display = 'flex'; return; }
+        card.style.display = card.textContent.includes(school) ? 'flex' : 'none';
+      });
+    }
+  </script>
+
+</body>
+</html>

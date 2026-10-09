@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0e2744">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="auth.js"></script>
+<script src="supabase-config.js"></script>
+<script src="portal-cloud.js"></script>
+<script src="wj-shell.js"></script>
+<script src="pwa.js" defer></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>ركن النقاش — بوابة الأدوات الرقمية</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="niqash.css">
+</head>
+<body class="niqash-page">
+
+<!-- ============================================================
+     الشريط العلوي
+     ============================================================ -->
+<header class="top-strip">
+    <div class="left-info">
+        <a href="index.html" class="back-link" title="العودة إلى البوابة">
+            <i class="fas fa-arrow-right"></i>
+        </a>
+        <i class="fas fa-landmark flag-icon"></i>
+        <span class="ministry-label">وزارة التربية الوطنية</span>
+        <span class="divider">|</span>
+        <span class="long-text">ركن النقاش والمحادثة التربوية</span>
+    </div>
+    <div class="right-actions">
+        <span class="user-greet" id="userGreet" style="display:none;">
+            <i class="fas fa-user-circle"></i>
+            <span class="name" id="userGreetName">—</span>
+            <span class="role-badge" id="userGreetRole">—</span>
+        </span>
+        <button class="btn-top-login" id="topLoginBtn" onclick="openLoginModal()">
+            <i class="fas fa-sign-in-alt"></i> دخول
+        </button>
+        <button class="btn-top-logout" id="topLogoutBtn" onclick="handleLogout()" style="display:none;">
+            <i class="fas fa-sign-out-alt"></i> خروج
+        </button>
+    </div>
+</header>
+
+<!-- ============================================================
+     ترويسة الصفحة
+     ============================================================ -->
+<header class="niqash-hero">
+    <div class="nh-pattern"></div>
+    <div class="nh-content">
+        <div class="nh-badge"><i class="fas fa-comments"></i></div>
+        <h1>ركن النقاش والمحادثة التربوية</h1>
+        <div class="gold-divider"></div>
+        <p class="nh-subtitle">
+            فضاء تواصل مهني متكامل: محادثة جماعية حيّة، قنوات نقاش متخصصة،
+            تبادل الملفات التربوية، ودفتر ملاحظات شخصي — في بيئة آمنة ومنظمة.
+        </p>
+
+        <div class="nh-stats">
+            <div class="nh-stat">
+                <span class="nhs-num" id="nhStatChannels">5</span>
+                <span class="nhs-lbl">قنوات نقاش</span>
+            </div>
+            <div class="nh-stat">
+                <span class="nhs-num" id="nhStatMessages">0</span>
+                <span class="nhs-lbl">رسائل</span>
+            </div>
+            <div class="nh-stat">
+                <span class="nhs-num" id="nhStatFiles">0</span>
+                <span class="nhs-lbl">ملفات مشتركة</span>
+            </div>
+            <div class="nh-stat">
+                <span class="nhs-num" id="nhStatNotes">0</span>
+                <span class="nhs-lbl">ملاحظات</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- ============================================================
+     التخطيط الرئيسي: Sidebar + Main
+     ============================================================ -->
+<main class="niqash-main">
+
+    <!-- Sidebar القنوات -->
+    <aside class="channels-sidebar">
+        <div class="cs-header">
+            <h3><i class="fas fa-hashtag"></i> القنوات المتاحة</h3>
+            <button class="cs-add" onclick="openChannelModal()" title="قناة جديدة">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+
+        <div class="cs-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="channelSearch" placeholder="بحث في القنوات..." oninput="renderChannels()">
+        </div>
+
+        <div class="cs-list" id="channelsList"></div>
+
+        <div class="cs-footer">
+            <div class="cs-user">
+                <div class="cs-avatar" id="csUserAvatar">؟</div>
+                <div class="cs-user-info">
+                    <div class="cs-user-name" id="csUserName">أستاذ</div>
+                    <div class="cs-user-status">متصل الآن</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- المساحة الرئيسية -->
+    <section class="chat-area" id="chatArea">
+        <header class="chat-header">
+            <div class="ch-left">
+                <div class="ch-icon" id="chIcon"><i class="fas fa-hashtag"></i></div>
+                <div class="ch-info">
+                    <div class="ch-title" id="chTitle">النقاش العام والتوجيه البيداغوجي</div>
+                    <div class="ch-sub" id="chSub">تبادل مهني عام واستفسارات صفية</div>
+                </div>
+            </div>
+            <div class="ch-right">
+                <button class="chat-action-btn" onclick="toggleFilesPanel()" title="الملفات المشتركة">
+                    <i class="fas fa-paperclip"></i>
+                    <span id="filesCountBadge">0</span>
+                </button>
+                <button class="chat-action-btn" onclick="toggleNotesPanel()" title="دفتر الملاحظات الشخصي">
+                    <i class="fas fa-book"></i>
+                </button>
+                <button class="chat-action-btn" onclick="clearCurrentChannel()" title="مسح المحادثة">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- منطقة الرسائل -->
+        <div class="messages-area" id="messagesArea">
+            <div class="messages-empty" id="messagesEmpty">
+                <div class="me-icon"><i class="fas fa-comments"></i></div>
+                <h3>مرحباً بك في ركن النقاش</h3>
+                <p>اختر قناة من القائمة الجانبية لبدء المحادثة، أو أنشئ قناة جديدة.</p>
+            </div>
+        </div>
+
+        <!-- منطقة الإدخال -->
+        <footer class="chat-input-area">
+            <div class="cia-toolbar">
+                <button class="cia-tool" onclick="triggerFileUpload()" title="إرفاق ملف">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <input type="file" id="fileInput" style="display:none" 
+                       accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif"
+                       onchange="handleFileUpload(event)">
+                <button class="cia-tool" onclick="insertEmoji('👍')" title="إعجاب">👍</button>
+                <button class="cia-tool" onclick="insertEmoji('✅')" title="موافق">✅</button>
+                <button class="cia-tool" onclick="insertEmoji('📚')" title="كتاب">📚</button>
+                <button class="cia-tool" onclick="insertEmoji('💡')" title="فكرة">💡</button>
+                <div class="cia-toolbar-spacer"></div>
+                <span class="cia-hint">اضغط Enter للإرسال • Shift+Enter لسطر جديد</span>
+            </div>
+            <div class="cia-input-wrap">
+                <textarea id="messageInput" 
+                          placeholder="اكتب رسالتك أو استفسارك البيداغوجي هنا..."
+                          rows="1"
+                          oninput="autoResize(this)"
+                          onkeydown="handleMessageKeydown(event)"></textarea>
+                <button class="cia-send" onclick="sendMessage()" title="إرسال">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="cia-file-preview" id="filePreview" style="display:none;"></div>
+        </footer>
+    </section>
+
+    <!-- لوحة الملفات -->
+    <aside class="files-panel" id="filesPanel">
+        <div class="fp-header">
+            <h3><i class="fas fa-folder-open"></i> الملفات المشتركة</h3>
+            <button class="fp-close" onclick="toggleFilesPanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="fp-body" id="filesBody"></div>
+    </aside>
+
+    <!-- لوحة الملاحظات الشخصية -->
+    <aside class="notes-panel" id="notesPanel">
+        <div class="np-header">
+            <h3><i class="fas fa-book"></i> دفتر ملاحظاتي الشخصي</h3>
+            <button class="np-close" onclick="toggleNotesPanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="np-body">
+            <textarea id="notesArea" placeholder="اكتب ملاحظاتك الشخصية هنا...&#10;&#10;• تُحفظ تلقائياً في جهازك&#10;• خاصة بك وحدك"></textarea>
+            <div class="np-footer">
+                <span id="notesStatus"><i class="fas fa-check"></i> محفوظ</span>
+            </div>
+        </div>
+    </aside>
+
+</main>
+
+<!-- ============================================================
+     الفوتر
+     ============================================================ -->
+<footer class="main-footer">
+    <div class="footer-logos">
+        <div class="logo-item"><div class="logo-icon"><i class="fas fa-landmark"></i></div><span class="logo-label">وزارة التربية الوطنية</span></div>
+        <div class="logo-item"><div class="logo-icon"><i class="fas fa-shield-alt"></i></div><span class="logo-label">المفتشية العامة</span></div>
+        <div class="logo-item"><div class="logo-icon"><i class="fas fa-graduation-cap"></i></div><span class="logo-label">التعليم المتوسط</span></div>
+    </div>
+    <div class="footer-links">
+        <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
+        <a href="arabic.html"><i class="fas fa-book-open-reader"></i> تعليمية العربية</a>
+        <a href="moualaja.html"><i class="fas fa-stethoscope"></i> المعالجة</a>
+        <a href="amal.html"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
+        <a href="taqyim.html"><i class="fas fa-award"></i> التقييم</a>
+        <a href="dashboard.html"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
+        <a href="cv.html"><i class="fas fa-user-tie"></i> السيرة</a>
+    </div>
+    <div class="footer-info">
+        إعداد وتأطير: <strong>المفتش درويش الهلالي</strong>
+        <span class="sep">◆</span> المقاطعة الثانية قسنطينة
+        <span class="sep">◆</span> البريد: <strong>dlazedine68@gmail.com</strong>
+        <br>
+        <span style="font-size: 11.5px; opacity: 0.7; margin-top: 8px; display: inline-block;">
+            © 2026 — جميع الحقوق محفوظة
+        </span>
+    </div>
+</footer>
+
+<!-- نافذة إنشاء قناة -->
+<div class="modal-overlay" id="channelModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeChannelModal()">&times;</button>
+        <div class="login-modal-header">
+            <div class="icon-wrap" style="background: linear-gradient(135deg, var(--skyblue), var(--skyblue-dark));">
+                <i class="fas fa-hashtag"></i>
+            </div>
+            <h3>قناة نقاش جديدة</h3>
+            <p>أنشئ قناة لموضوع تربوي محدد</p>
+        </div>
+        <form onsubmit="return saveChannel(event)">
+            <div class="login-field">
+                <label>اسم القناة *</label>
+                <input type="text" id="newChannelName" required placeholder="مثال: وضعيات الإدماج">
+            </div>
+            <div class="login-field">
+                <label>الوصف</label>
+                <textarea id="newChannelDesc" rows="2" placeholder="وصف مختصر للقناة..."></textarea>
+            </div>
+            <div class="login-field">
+                <label>الأيقونة</label>
+                <div class="icon-picker" id="iconPicker">
+                    <button type="button" class="icon-opt active" data-icon="fa-hashtag" onclick="pickIcon(this)"><i class="fas fa-hashtag"></i></button>
+                    <button type="button" class="icon-opt" data-icon="fa-book" onclick="pickIcon(this)"><i class="fas fa-book"></i></button>
+                    <button type="button" class="icon-opt" data-icon="fa-lightbulb" onclick="pickIcon(this)"><i class="fas fa-lightbulb"></i></button>
+                    <button type="button" class="icon-opt" data-icon="fa-graduation-cap" onclick="pickIcon(this)"><i class="fas fa-graduation-cap"></i></button>
+                    <button type="button" class="icon-opt" data-icon="fa-chalkboard" onclick="pickIcon(this)"><i class="fas fa-chalkboard"></i></button>
+                    <button type="button" class="icon-opt" data-icon="fa-flask" onclick="pickIcon(this)"><i class="fas fa-flask"></i></button>
+                    <button type="button" class="icon-opt" data-icon="fa-star" onclick="pickIcon(this)"><i class="fas fa-star"></i></button>
+                </div>
+            </div>
+            <button type="submit" class="login-submit">
+                <i class="fas fa-check"></i> إنشاء القناة
+            </button>
+        </form>
+    </div>
+</div>
+
+<footer class="main-footer no-print" style="margin-top:20px; padding:16px; text-align:center; color:var(--gold-light); font-size:12.5px; border-top:1px solid rgba(196,155,63,0.3);">
+    <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:8px;">
+        <a href="index.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-home"></i> الرئيسية</a>
+        <a href="arabic.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-book-open-reader"></i> تعليمية العربية</a>
+        <a href="moualaja.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-stethoscope"></i> المعالجة</a>
+        <a href="amal.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
+        <a href="fahss_ikhtibarat.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-file-circle-check"></i> فحص الاختبارات</a>
+        <a href="proposals.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-chart-pie"></i> المقترحات</a>
+        <a href="cv.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-address-card"></i> السيرة الذاتية</a>
+    </div>
+    إعداد وتأطير: <strong>مفتش التعليم المتوسط درويش الهلالي</strong>
+    ◆ المقاطعة الثانية قسنطينة ◆ وزارة التربية الوطنية
+</footer>
+
+<!-- نافذة الدخول -->
+<div class="modal-overlay" id="loginModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+        <div class="login-modal-header">
+            <div class="icon-wrap"><i class="fas fa-shield-halved"></i></div>
+            <h3>الدخول الموحّد</h3>
+            <p>حساب واحد يفتح كل أدوات المنظومة</p>
+        </div>
+        <div class="login-msg" id="loginMsg"></div>
+        <form id="loginForm" onsubmit="return handleLogin(event)">
+            <div class="login-field">
+                <label for="loginUsername">اسم المستخدم</label>
+                <input type="text" id="loginUsername" placeholder="أدخل اسم المستخدم...">
+            </div>
+            <div class="login-field">
+                <label for="loginPassword">كلمة المرور</label>
+                <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور...">
+            </div>
+            <button type="submit" class="login-submit">
+                <i class="fas fa-sign-in-alt"></i> دخول
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="auth.js"></script>
+<script src="app.js"></script>
+<script src="niqash.js"></script>
+</body>
+</html>

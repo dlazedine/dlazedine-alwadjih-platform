@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f3864">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="الوجيه">
+<script src="pwa.js" defer></script
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تقرير تفتيش الترسيم — الوجيه في الإشراف التربوي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="supabase-config.js"></script>
+<script src="portal-cloud.js"></script>
+<script src="datefmt.js"></script>
+<script src="export-word.js"></script>
+<link rel="stylesheet" href="report.css">
+<style>
+/* ===== خلفية إسلامية عربية فاخرة وأزرار ملكية مذهبة ===== */
+body{
+  margin:0;
+  font-family:'Tajawal',Tahoma,sans-serif;
+  color:#152238;
+  background-color: #faf7ef;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(196,155,63,0.12) 0%, transparent 60%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><defs><pattern id='islamic-rep' width='80' height='80' patternUnits='userSpaceOnUse'><g fill='none' stroke='%23c49b3f' stroke-width='0.6' opacity='0.20'><path d='M40 16 L47 27 L60 20 L57 34 L71 39 L60 48 L68 60 L54 61 L51 75 L40 66 L29 75 L26 61 L12 60 L20 48 L9 39 L23 34 L20 20 L33 27 Z'/><rect x='28' y='28' width='24' height='24' rx='2'/><rect x='28' y='28' width='24' height='24' rx='2' transform='rotate(45 40 40)'/><circle cx='40' cy='40' r='6' fill='%23c49b3f' fill-opacity='0.08'/></g></pattern></defs><rect width='80' height='80' fill='url(%23islamic-rep)'/></svg>");
+  background-attachment: fixed;
+}
+
+.bar{
+  background: linear-gradient(135deg, #091c33 0%, #0e2744 50%, #153861 100%);
+  color:#fff;
+  padding:12px 20px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  border-bottom:3.5px solid #c49b3f;
+  box-shadow:0 4px 20px rgba(9,28,51,0.35);
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+.bar span#who{
+  font-weight:800;
+  font-size:0.95rem;
+  color:#fce8bd;
+  margin-left:auto;
+}
+.bar .m{
+  font-size:0.85rem;
+  color:#e0eaf5;
+}
+
+/* الأزرار الإسلامية الفاخرة بحجم متناسق */
+.bar button, .bar a{
+  background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%);
+  color: #0c2540;
+  border: 1.5px solid #fff2cc;
+  border-radius: 7px;
+  padding: 4px 11px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.bar button:hover, .bar a:hover{
+  background: linear-gradient(135deg, #ffffff 0%, #f7e7c4 100%);
+  color: #0e2744;
+  border-color: #d4af37;
+  box-shadow: 0 4px 14px rgba(212,175,55,0.55);
+  transform: translateY(-2px);
+}
+.bar button:active, .bar a:active{
+  transform: translateY(0);
+}
+
+.bar #bs{
+  background: linear-gradient(135deg, #1b7a43 0%, #11532c 100%);
+  color: #ffffff;
+  border-color: #72cf97;
+}
+.bar #bs:hover{
+  background: linear-gradient(135deg, #239c56 0%, #176f3c 100%);
+  color: #ffffff;
+  border-color: #aff0c8;
+}
+
+.bar label{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+  color:#fff;
+  font-size:0.85rem;
+  font-weight:700;
+}
+
+.ttl{background:#e7e6e6;border:1px solid #999;text-align:center;font-weight:bold;font-size:1.3em;width:78%;margin:6px auto;padding:2px 8px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+table.ls{width:100%;border-collapse:collapse;margin:4px 0}table.ls th,table.ls td{border:1px solid #000;padding:1px 6px}table.ls th{width:15%;font-weight:normal;text-align:right}table.ls td input{width:100%}
+.q{display:flex;gap:6px;align-items:flex-start}.q input{flex:1;width:100%}
+table.sc{width:100%;border-collapse:collapse;border:1px solid #000;margin-top:4px}table.sc td{border:1px solid #000;padding:2px 8px}
+.bxs{display:flex;justify-content:space-around;margin:10px 0}
+.bxs label{
+  border:1.5px solid #c49b3f;
+  background: #fffdf8;
+  border-radius: 7px;
+  padding:3px 12px;
+  font-size:0.82rem;
+  font-weight:bold;
+  cursor:pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.bxs label:hover{
+  background: #fbf3dc;
+  border-color: #9e7a26;
+}
+table.cm{width:100%;border-collapse:collapse;margin:8px 0}table.cm th,table.cm td{border:1px solid #000;padding:6px;text-align:center;height:38px}table.cm td input{width:100%;text-align:center}
+@media print{.ttl{width:80%}body{background:#fff!important;background-image:none!important}}
+</style>
+</head>
+<body>
+<div class="bar"><span id="who">جارٍ التحميل...</span><span id="sv" class="m"></span><button id="bs" onclick="save()">حفظ</button><label id="bp"><input type="checkbox" id="pub" onchange="pubT(this.checked)" style="min-width:0"> إتاحته للأستاذ</label><button onclick="expW()">تصدير Word</button><button onclick="print()">طباعة</button><a href="data-prof.html">رجوع</a></div>
+<datalist id="tl"></datalist>
+<div id="sheet"></div>
+<script>
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fd=v=>v?String(v).split('-').reverse().join('/'):'';
+const EV=['ممتاز(ة)','جيد(ة) جدا','جيد(ة)','حسن(ة)','مقبولة على العموم','دون المستوى المطلوب','ضعيف(ة)','ضعيف(ة) جدا'],DC=['قبول','تأجيل','رفض'];
+const AUTO=['name','maiden','school','bdate','bplace','since','decno','decdate','visa','visadate','qual','certno','certplace','contest','contestdate','insp_name'];
+const B=()=>{const d=prof.data||{};return{name:d.name,maiden:d.maiden,school:d.inst,bdate:fd(d.birth_date),bplace:d.birth_place,since:fd(d.tr_since),decno:d.tr_dec_no,decdate:fd(d.tr_dec_date),visa:d.visa_no,visadate:fd(d.visa_date),qual:d.qual,certno:d.cert_no,certplace:d.cert_place,contest:d.contest,contestdate:fd(d.contest_date)}};
+let c,me,prof,rep={},repId=null,tm=null,published=false,tl=[];
+const insp=()=>me.role==='inspector';
+const I=(k,t,w)=>{const a=AUTO.includes(k);if(t==='date'||t==='time'){const d=t==='date';return`<input data-k="${k}" data-f="${t}" type="text" inputmode="numeric" placeholder="${d?'jj/mm/aaaa':'hh:mm'}" maxlength="${d?10:5}" value="${esc(d?DF.show(rep[k]):rep[k])}" style="width:${d?'7.5em':'4.5em'}" oninput="S(this)">`}return`<input data-k="${k}" type="${t||'text'}" value="${esc(a?(B()[k]??rep[k]):rep[k])}" ${a?'disabled class="auto"':''} ${w?`style="width:${w}"`:''} oninput="S(this)">`};
+const SEL=(k,o)=>`<select data-k="${k}" onchange="S(this)"><option value=""></option>${o.map(x=>`<option ${rep[k]===x?'selected':''}>${x}</option>`).join('')}</select>`;
+const J=(a,k,w,t)=>`<span>${a} ${I(k,t||'text',w)}</span>`;
+const LR=[['المادة','mat'],['المقطع التعلمي','seg'],['الميدان','dom'],['النشاط','act'],['المحتوى المعرفي','cnt']];
+const tot=()=>(+rep.s1||0)+(+rep.s2||0);
+function build(){const M=i=>`<input data-k="m${i}" list="tl" value="${esc(rep['m'+i])}" oninput="mem(this,${i})">`,MI=i=>`<input data-k="m${i}i" value="${esc(rep['m'+i+'i'])}" oninput="S(this)">`;
+document.getElementById('sheet').innerHTML=`
+<div class="pg"><div class="c b">الجمهورية الجزائرية الديمقراطية الشعبية</div><div class="c b">وزارة التربية الوطنية</div>
+<div class="row"><span>مديرية التربية لولاية: <b>قسنطينة</b></span><span class="code">ت.أ.07</span></div>
+<div>المقاطعة: <b>الثانية</b></div><div>المادة: <b>اللغة العربية</b></div>
+<div class="ttl">تقرير تفتيش الترسيم في سلك أساتذة التعليم المتوسط</div>
+<div>اجتمعت لجنة امتحان شهادة الكفاءة الأستاذية في التعليم المتوسط:</div>
+<div class="row">${J('بتاريخ:','date',null,'date')}${J('في متوسطة:','school')}</div>
+<div>برئاسة السيد(ة): ${I('insp_name')} مفتش(ة) مادة اللغة العربية والتربية الإسلامية</div>
+<div>وعضوية السيد(ة): ${M(1)} أستاذ(ة) ت.م بمتوسطة: ${MI(1)}</div>
+<div>وعضوية السيد(ة): ${M(2)} أستاذ(ة) ت.م بمتوسطة: ${MI(2)}</div>
+<div>لإجراء الامتحان التطبيقي لشهادة الكفاءة للأستاذية في التعليم المتوسط:</div>
+<div class="row">${J('السيد(ة):','name')}${J('المولودة','maiden')}${J('بتاريخ:','bdate')}${J('في:','bplace')}</div>
+<div class="row">${J('المتربص(ة) منذ تاريخ:','since')}${J('بمقتضى قرار التسمية رقم:','decno')}${J('بتاريخ:','decdate')}</div>
+<div class="row">${J('تأشيرة المراقب المالي رقم:','visa')}${J('بتاريخ:','visadate')}</div>
+<div class="row">${J('الحائز على شهادة:','qual')}${J('رقم:','certno')}${J('بـ:','certplace')}</div>
+<div class="row">${J('الناجح(ة) في:','contest')}${J('بتاريخ:','contestdate')}</div>
+<div>واشتمل الامتحان على درسين:</div>
+<table class="ls">${LR.map(([t,k])=>`<tr><th>${t}</th><td colspan="3">${I('l1_'+k)}</td><th>${t}</th><td colspan="3">${I('l2_'+k)}</td></tr>`).join('')}
+<tr><th>المستوى</th><td>${I('l1_lvl')}</td><th>الساعة</th><td>${I('l1_h','time')}</td><th>المستوى</th><td>${I('l2_lvl')}</td><th>الساعة</th><td>${I('l2_h','time')}</td></tr></table>
+<div>العلامة التي أحرزها المترشح(ة) في الدّرسين: ${I('s1','number','4em')} من <b>40</b></div>
+<div class="b">السؤال الشفهي في التربية وعلم النفس والتشريع المدرسي:</div>
+<div class="q">س 1 ${I('q1')}</div><div class="q">س 2 ${I('q2')}</div>
+<table class="sc"><tr><td>العلامة التي أحرزها المترشح(ة) في الشفهي: ${I('s2','number','4em')} من <b>20</b></td><td>قيمة المترشح(ة) الثقافية والتربوية</td></tr>
+<tr><td>المجموع: <b id="tot">${tot()}</b> من <b>60</b></td><td>${SEL('ev',EV)}</td></tr></table>
+<div class="pn">ص-1</div></div>
+<div class="pg"><div>وبناء على هذا، قررت اللجنة أن تقترح على: السيد مدير التربية لولاية: <b>قسنطينة</b></div>
+<div class="bxs">${DC.map(x=>`<label><input type="radio" name="dec" value="${x}" ${rep.dec===x?'checked':''} onchange="S({dataset:{k:'dec'},value:'${x}'})"> ${x}</label>`).join('')}</div>
+<div>السيد(ة): ${I('name')}</div>
+<table class="cm"><tr><th>أعضاء اللجنة</th><th>الاسم واللقب</th><th>الإمضاء</th></tr>
+<tr><td>مفتش(ة) المادة</td><td>${I('insp_name')}</td><td></td></tr><tr><td>أستاذ(ة) ت.م</td><td>${M(1)}</td><td></td></tr><tr><td>أستاذ(ة) ت.م</td><td>${M(2)}</td><td></td></tr></table>
+<div class="ttl" style="width:35%">تقرير المفتش</div>
+<div>تمكّن أعضاء اللجنة من متابعة الأنشطة المقررة في امتحان التثبيت للمترشح(ة): ${I('name')}</div>
+<div>ثم تمّ بعدها إجراء مقابلة بيداغوجية حول التربية وعلم النفس والتشريع المدرسي، وبناء على ما سبق وبعد المداولة:</div>
+<div>قرّرت اللجنةُ أن تقترح على السيد مدير التربية ${SEL('dec',DC)} المترشح(ة) ${I('name')} أستاذا(ة) في سلك التعليم المتوسط.</div>
+<div class="row" style="margin-top:14px"><span>قسنطينة في: ${I('date','date')}</span><span class="b">مفتش التعليم المتوسط<br>${I('insp_name')}</span></div>
+<div style="text-align:left;margin:20px 60px 0 0" class="b">الإمضاء</div><div class="pn" style="margin-top:60px">ص-2</div></div>`;
+if(!insp())document.querySelectorAll('#sheet input,#sheet textarea,#sheet select').forEach(e=>e.disabled=true)}
+function expW(){exportWord(document.getElementById('sheet'),'تقرير_الترسيم_'+((((prof||{}).data)||{}).name||''))}
+const errT=m=>/wajih_reports|schema cache/i.test(m)?'جدول التقارير غير موجود في Supabase: شغّل ملف supabase.sql ثم أعد المحاولة':m;
+function msg(t,e){const x=document.getElementById('sv');x.textContent=t;x.className='m '+(e?'er':'ok')}
+function S(e){const k=e.dataset.k,f=e.dataset.f;let v=e.value;if(f){v=f==='date'?DF.iso(e):DF.time(e);if(v===undefined)return}rep[k]=v;document.querySelectorAll(`[data-k="${k}"]`).forEach(o=>{const s=f==='date'?DF.show(v):v;if(o!==e&&o.value!==s)o.value=s});
+if(k==='dec')document.querySelectorAll('[name=dec]').forEach(r=>r.checked=r.value===rep.dec);if(k==='s1'||k==='s2')document.getElementById('tot').textContent=tot();
+if(insp()){msg('جارٍ الحفظ...');clearTimeout(tm);tm=setTimeout(save,1000)}}
+function mem(e,i){S(e);const t=tl.find(x=>(x.data||{}).name===e.value);if(t&&(t.data||{}).inst){const o=document.querySelector(`[data-k="m${i}i"]`);o.value=t.data.inst;rep['m'+i+'i']=t.data.inst}}
+async function save(){if(!insp())return;const now=new Date().toISOString();
+const r=repId?await c.from('wajih_reports').update({data:rep,published,updated_at:now}).eq('id',repId).select('id').single():await c.from('wajih_reports').insert({prof_id:prof.id,kind:'tarsim',data:rep,published,created_by:me.id,created_by_name:me.full_name||me.username}).select('id').single();
+if(r.error)return msg('تعذّر الحفظ: '+errT(r.error.message),1);repId=r.data.id;history.replaceState(null,'','?prof='+prof.id+'&r='+repId);msg('تم الحفظ ✓')}
+async function pubT(v){published=v;await save();if(!/تعذّر/.test(document.getElementById('sv').textContent))msg(v?'تم الحفظ — التقرير متاح للأستاذ ✓':'تم الحفظ — التقرير غير ظاهر للأستاذ')}
+(async()=>{c=await PortalCloud.ready;const{data:s}=await c.auth.getSession();if(!s.session)return location.replace('index.html');
+const{data:p}=await c.from('wajih_profiles').select('*').eq('id',s.session.user.id).single();if(!p||!p.active)return location.replace('index.html');me=p;
+const q=new URLSearchParams(location.search),pid=q.get('prof'),rid=q.get('r');
+if(!rid&&!['inspector','supervisor'].includes(p.role))return location.replace('data-prof.html');
+const{data:pr}=await c.from('wajih_prof').select('*').eq('id',pid).single();if(!pr)return location.replace('data-prof.html');prof=pr;
+document.getElementById('who').textContent='تقرير الترسيم — '+((pr.data||{}).name||'');
+if(!insp()){bs.style.display=bp.style.display='none'}
+if(['inspector','supervisor'].includes(p.role)){const{data}=await c.from('wajih_prof').select('id,data');tl=data||[];document.getElementById('tl').innerHTML=tl.filter(x=>(x.data||{}).name).map(x=>`<option value="${esc(x.data.name)}">`).join('')}
+if(rid){const{data:r}=await c.from('wajih_reports').select('*').eq('id',rid).single();if(!r)return location.replace('data-prof.html');rep=r.data;repId=r.id;published=!!r.published;pub.checked=published}
+if(!repId)rep={date:new Date().toISOString().slice(0,10),insp_name:me.full_name||''};
+build()})();
+</script>
+</body>
+</html>

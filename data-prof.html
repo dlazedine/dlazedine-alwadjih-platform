@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f3864">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="الوجيه">
+<script src="pwa.js" defer></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>بيانات الأساتذة — الوجيه في الإشراف التربوي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="supabase-config.js"></script>
+<script src="portal-cloud.js"></script>
+<script src="datefmt.js"></script>
+<style>
+:root{
+  --ink:#0e2744;
+  --ink-mid:#1a3d6e;
+  --gold:#c49b3f;
+  --gold-light:#fce8bd;
+  --gold-bright:#d4af37;
+  --gold-dark:#966e20;
+  --bg:#faf7ef;
+  --cd:#ffffff;
+  --ln:#d9ceb4;
+  --ln-gold:#c49b3f;
+  --tx:#152238;
+  --mu:#5d6b7b;
+}
+
+*{box-sizing:border-box}
+
+/* ===== خلفية إسلامية عربية فاخرة بزخارف الأرابيسك المذهبة ===== */
+body{
+  margin:0;
+  color:var(--tx);
+  font-family:'Tajawal',Tahoma,sans-serif;
+  line-height:1.7;
+  background-color: var(--bg);
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(196,155,63,0.12) 0%, transparent 65%),
+    radial-gradient(circle at 100% 100%, rgba(14,39,68,0.06) 0%, transparent 50%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><defs><pattern id='islamic-mesh' width='80' height='80' patternUnits='userSpaceOnUse'><g fill='none' stroke='%23c49b3f' stroke-width='0.6' opacity='0.22'><path d='M40 16 L47 27 L60 20 L57 34 L71 39 L60 48 L68 60 L54 61 L51 75 L40 66 L29 75 L26 61 L12 60 L20 48 L9 39 L23 34 L20 20 L33 27 Z'/><rect x='28' y='28' width='24' height='24' rx='2'/><rect x='28' y='28' width='24' height='24' rx='2' transform='rotate(45 40 40)'/><circle cx='0' cy='0' r='14'/><circle cx='80' cy='0' r='14'/><circle cx='0' cy='80' r='14'/><circle cx='80' cy='80' r='14'/><circle cx='40' cy='40' r='6' fill='%23c49b3f' fill-opacity='0.08'/></g></pattern></defs><rect width='80' height='80' fill='url(%23islamic-mesh)'/></svg>");
+  background-attachment: fixed;
+}
+
+/* ===== الترويسة العلوية الفاخرة ===== */
+header{
+  background: linear-gradient(135deg, #091c33 0%, #0e2744 50%, #153861 100%);
+  color:#fff;
+  padding:14px 20px;
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+  border-bottom:3.5px solid var(--gold);
+  box-shadow: 0 4px 20px rgba(9,28,51,0.35);
+  position: relative;
+}
+header h1{
+  font-family:'Amiri',serif;
+  font-size:1.25rem;
+  font-weight:700;
+  margin:0;
+  flex:1;
+  color:#ffffff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  letter-spacing:0.3px;
+}
+
+/* ===== أزرار الترويسة العربية الإسلامية الفاخرة ===== */
+header a, header button{
+  color: #faeccf;
+  background: linear-gradient(135deg, rgba(196,155,63,0.2) 0%, rgba(14,39,68,0.7) 100%);
+  border: 1.5px solid var(--gold);
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 0.82rem;
+  text-decoration: none;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+header a:hover, header button:hover{
+  background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%);
+  color: #0c2540;
+  border-color: #fff2cc;
+  box-shadow: 0 3px 12px rgba(212,175,55,0.5);
+  transform: translateY(-1.5px);
+}
+header a:active, header button:active{
+  transform: translateY(0);
+}
+
+main{max-width:1100px;margin:auto;padding:16px}
+
+/* ===== أزرار التبويبات الفاخرة (.tabs button) ===== */
+.tabs{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+.tabs button{
+  background: linear-gradient(180deg, #ffffff 0%, #f9f5ea 100%);
+  color: var(--ink-mid);
+  border: 1.5px solid #d4c4a3;
+  border-radius: 9px;
+  padding: 5px 13px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 5px rgba(14,39,68,0.06);
+  position: relative;
+}
+.tabs button:hover{
+  border-color: var(--gold);
+  color: var(--ink);
+  background: #fffdf7;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(196,155,63,0.3);
+}
+.tabs button.on{
+  background: linear-gradient(135deg, #091c33 0%, #153861 50%, #0e2744 100%);
+  color: var(--gold-light);
+  border: 1.5px solid var(--gold);
+  box-shadow: 0 3px 12px rgba(9,28,51,0.3), inset 0 1px 0 rgba(252,232,189,0.35);
+  transform: translateY(-1px);
+}
+
+/* بطاقات المحتوى */
+.c{
+  background:var(--cd);
+  border:1px solid var(--ln);
+  border-top: 3px solid var(--gold);
+  border-radius:14px;
+  padding:15px;
+  margin-bottom:12px;
+  box-shadow: 0 3px 14px rgba(14,39,68,0.06);
+}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+label{font-size:.82rem;color:var(--mu);display:block;font-weight:600;margin-bottom:3px}
+input,select{
+  width:100%;
+  font:inherit;
+  padding:6px 10px;
+  border:1.5px solid var(--ln);
+  border-radius:8px;
+  background:#fff;
+  color:var(--tx);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus,select:focus{
+  outline:none;
+  border-color:var(--gold);
+  box-shadow: 0 0 0 3px rgba(196,155,63,0.2);
+}
+input:disabled,select:disabled{background:#f6f5f0;color:#666}
+
+/* ===== الأزرار الرئيسية الفاخرة (button.p) ===== */
+button.p{
+  background: linear-gradient(135deg, #0e2744 0%, #1a3d6e 100%);
+  color: #fcf6e8;
+  border: 1.5px solid var(--gold);
+  border-radius: 8px;
+  padding: 5px 13px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 7px rgba(14,39,68,0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+  letter-spacing: 0.2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+button.p:hover{
+  background: linear-gradient(135deg, #d4af37 0%, #a67c1e 100%);
+  color: #0c2540;
+  border-color: #fff3cc;
+  box-shadow: 0 4px 14px rgba(212,175,55,0.5);
+  transform: translateY(-1.5px);
+}
+button.p:active{
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(212,175,55,0.3);
+}
+
+/* ===== أزرار الحذف الفاخرة (button.d) ===== */
+button.d{
+  background: linear-gradient(135deg, #8b1827 0%, #630e19 100%);
+  color: #ffffff;
+  border: 1.5px solid #bd3547;
+  border-radius: 7px;
+  padding: 4px 9px;
+  font-size: 0.78rem;
+  font-family: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(139,24,39,0.3);
+}
+button.d:hover{
+  background: linear-gradient(135deg, #aa1e30 0%, #7d1220 100%);
+  border-color: #f77e8d;
+  box-shadow: 0 4px 14px rgba(139,24,39,0.45);
+  transform: translateY(-2px);
+}
+button.d:active{
+  transform: translateY(0);
+}
+
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid var(--ln);padding:7px 8px;text-align:center}
+th{
+  background: linear-gradient(180deg, #f2ecdd 0%, #e6ddc5 100%);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+td input{border:0;text-align:center;padding:4px}
+.ph{
+  width:130px;
+  height:160px;
+  border:2px dashed var(--gold);
+  border-radius:12px;
+  object-fit:cover;
+  background:#faf8f2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--mu);
+  font-size:.8rem;
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.05);
+}
+.m{font-size:.85rem;color:var(--mu)}.ok{color:#1d7a46;font-weight:bold}.er{color:#a01c2c;font-weight:bold}.tb{overflow-x:auto}
+.bd{padding:3px 10px;border-radius:99px;font-size:.8rem;font-weight:bold}.b1{background:#fde2e2;color:#a01c2c;border:1px solid #f8b4b4}.b2{background:#fff0c9;color:#8a6200;border:1px solid #ffd885}.b3{background:#dcf3e4;color:#1d7a46;border:1px solid #a3e2b7}
+.card{
+  max-width:640px;
+  margin:auto;
+  background:#fff;
+  border:2px solid var(--gold);
+  border-radius: 16px;
+  padding:28px;
+  line-height:2.1;
+  position:relative;
+  box-shadow: 0 6px 24px rgba(14,39,68,0.08);
+}
+.card .ph{position:absolute;left:24px;top:24px;width:100px;height:125px}
+
+@media print{
+  header,.tabs,.np{display:none!important}
+  body{background:#fff!important;background-image:none!important}
+  main{padding:0}
+  .c{border:0;padding:0;box-shadow:none}
+}
+</style>
+</head>
+<body>
+<header><h1>🗂️ بيانات الأساتذة — المقاطعة الثانية قسنطينة</h1><span id="who" class="m" style="color:#fff"></span><a href="index.html">البوابة</a><button onclick="out()">خروج</button></header>
+<main id="app"><p class="m">جارٍ التحميل...</p></main>
+<script>
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const F=[['name','الاسم واللقب','text'],['maiden','لقب الآنسة','text'],['inst','مؤسسة العمل','text'],['birth_date','تاريخ الميلاد','date'],['birth_place','مكان الميلاد','text'],['family','الوضعية العائلية','FAM'],['hire_date','تاريخ أول تعيين','date'],['qual','المؤهل العلمي','QUAL'],['status','الصفة','STA'],['frame','الإطار','FRM'],['scale','السلم','number'],['degree','الدرجة','number'],['degree_date','تاريخ سريانها','date'],['phone','رقم الهاتف','tel'],['email','البريد الإلكتروني','email']];
+const FT=[['tr_since','تاريخ بداية التربص','date'],['tr_dec_no','رقم قرار التسمية','text'],['tr_dec_date','تاريخ قرار التسمية','date'],['visa_no','تأشيرة المراقب المالي رقم','text'],['visa_date','تاريخ التأشيرة','date'],['cert_no','رقم الشهادة','text'],['cert_place','تاريخ ومكان الحصول عليها','text'],['contest','الناجح في مسابقة','text'],['contest_date','تاريخ المسابقة','date']];
+const FI=[['num','الرقم','number'],['last_visit','تاريخ آخر زيارة','date'],['mark','العلامة (من 20)','number'],['ent','الاستحقاق (بالسنوات)','number']];
+const L={FAM:['أعزب(عزباء)','متزوج(ة)','مطلق(ة)','أرمل(ة)'],QUAL:['ليسانس','ماستر','مهندس','ماجستير','دكتوراه'],STA:['مرسم(ة)','متربص(ة)','متعاقد(ة)'],FRM:['أ.ت.م','قسم أول' ,'قسم ثان','مميز(ة)']};
+const SL=['08-09','09-10','10-11','11-12','13-14','14-15','15-16','16-17'],DY=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'];
+let c,me,rec,own,view='data',list=[],q='',tm=null;
+const staff=()=>['inspector','supervisor'].includes(me.role),insp=()=>me.role==='inspector';
+const ro=()=>!(insp()||rec.user_id===me.id);
+const yr=()=>{const d=new Date(),y=d.getMonth()>=8?d.getFullYear():d.getFullYear()-1;return y+'/'+(y+1)};
+const fd=v=>v?String(v).split('-').reverse().join('-'):'…………';
+const due=r=>{const l=(r.insp||{}).last_visit;if(!l)return null;const d=new Date(l);d.setFullYear(d.getFullYear()+(+(r.insp||{}).ent||2));return d};
+const st=r=>{const d=due(r);if(!d)return['—',''];const m=(d-new Date())/2.63e9;return m<0?['منته','b1']:m<3?['على وشك الانتهاء','b2']:['فعال','b3']};
+function msg(t,e){const x=document.getElementById('sv');if(x){x.textContent=t;x.className=e?'er':'ok'}}
+function sv(){msg('جارٍ الحفظ...');clearTimeout(tm);tm=setTimeout(save,800)}
+async function save(){if(ro())return;const row={data:rec.data,tt:rec.tt,photo:rec.photo,updated_by_name:me.full_name||me.username};if(insp())row.insp=rec.insp;
+const r=rec.id?await c.from('wajih_prof').update(row).eq('id',rec.id).select('id').single():await c.from('wajih_prof').insert({...row,user_id:rec.user_id}).select('id').single();
+if(r.error)return msg('تعذّر الحفظ: '+r.error.message,1);rec.id=r.data.id;msg('تم الحفظ ✓')}
+function S(g,k,v){const o=g.split('.').reduce((a,x)=>a[x]=a[x]||{},rec);o[k]=v;sv()}
+function pick(f){if(!f.files[0])return;const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const s=Math.min(1,320/Math.max(i.width,i.height)),k=document.createElement('canvas');k.width=i.width*s;k.height=i.height*s;k.getContext('2d').drawImage(i,0,0,k.width,k.height);rec.photo=k.toDataURL('image/jpeg',.82);sv();render()};i.src=r.result};r.readAsDataURL(f.files[0])}
+function fld(g,[k,t,ty]){const v=(rec[g]||{})[k]??'',d=(g==='insp'?!insp():ro())?'disabled':'';
+if(L[ty])return`<div><label>${t}</label><select ${d} onchange="S('${g}','${k}',this.value)"><option value="">—</option>${L[ty].map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select></div>`;
+if(ty==='date')return`<div><label>${t}</label><input type="text" inputmode="numeric" placeholder="jj/mm/aaaa" maxlength="10" ${d} value="${esc(DF.show(v))}" oninput="Sd('${g}','${k}',this)"></div>`;
+return`<div><label>${t}</label><input type="${ty}" ${d} value="${esc(v)}" oninput="S('${g}','${k}',this.value)"></div>`}
+function Sd(g,k,e){const r=DF.iso(e);if(r===undefined)return;S(g,k,r)}
+function who(){return staff()&&rec?`<div class="m np" style="margin-bottom:8px">السجل المعروض: <b>${esc((rec.data||{}).name||'—')}</b>${rec===own?' (بياناتي — يمكنك تعديلها)':ro()?' (للعرض فقط)':''}</div>`:''}
+function vData(){const p=rec.photo?`<img class="ph" src="${rec.photo}">`:'<div class="ph">لا توجد صورة</div>';
+return`${who()}<div class="c"><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start"><div>${p}${ro()?'':'<label class="np" style="margin-top:6px">رفع صورة<input type="file" accept="image/*" onchange="pick(this)"></label>'}</div><div class="g" style="flex:1;min-width:260px">${F.map(f=>fld('data',f)).join('')}</div></div></div>
+<div class="c"><b>بيانات التربص</b> <span class="m">(للأستاذ(ة) المتربص(ة)، وتُملأ منها آلياً بيانات تقرير الترسيم)</span><div class="g">${FT.map(f=>fld('data',f)).join('')}</div></div>
+<div class="c"><b>بيانات يدخلها المفتش(ة)</b><div class="g">${FI.map(f=>fld('insp',f)).join('')}</div></div>
+<div id="sv" class="m"></div>`}
+function vTT(){const W=who();const t=rec.tt=rec.tt||{},d=rec.data||{},g=t.g||{},cl=t.cls||{},x=ro()?'disabled':'';
+const I=(k,v,p)=>`<input ${x} value="${esc(v??'')}" oninput="S('tt','${k}',this.value)" placeholder="${p||''}">`;
+return`${W}<div class="c"><h2 style="text-align:center;border:2px solid var(--ink);border-radius:20px;padding:6px;max-width:360px;margin:0 auto 12px">التوقيت الأسبوعي للأستاذ</h2>
+<div class="g"><div><label>المؤسسة</label>${I('inst',t.inst??d.inst)}</div><div><label>السنة الدراسية</label>${I('year',t.year??yr())}</div><div><label>الأستاذ(ة)</label>${I('name',t.name??d.name)}</div><div><label>المادة</label>${I('subject',t.subject??'اللغة العربية')}</div></div>
+<div class="g" style="margin:10px 0"><div><label>الساعات الواجبة</label>${I('due',t.due??22)}</div><div><label>الساعات المعمولة</label>${I('done',t.done)}</div><div><label>الساعات الفائضة</label>${I('surplus',t.surplus)}</div><div><label>الساعات الإضافية</label>${I('extra',t.extra)}</div></div>
+<div class="tb"><table><tr><th>الأقسام</th><th>الساعة</th><th>الحجرات</th><th>عدد التلاميذ</th></tr>${[0,1,2,3].map(r=>`<tr>${[0,1,2,3].map(k=>`<td><input ${x} value="${esc(cl[r+'-'+k]??'')}" oninput="S('tt.cls','${r+'-'+k}',this.value)"></td>`).join('')}</tr>`).join('')}</table></div>
+<div class="tb" style="margin-top:10px"><table><tr><th>الأيام \ التوقيت</th>${SL.map(s=>`<th>${s}</th>`).join('')}</tr>${DY.map((n,i)=>`<tr><th>${n}</th>${SL.map((s,j)=>`<td><input ${x} value="${esc(g[i+'-'+j]??'')}" oninput="S('tt.g','${i+'-'+j}',this.value)"></td>`).join('')}</tr>`).join('')}</table></div>
+<div class="np" style="margin-top:8px"><button class="p" onclick="print()">طباعة</button> <span id="sv" class="m"></span></div></div>`}
+function vCard(){const d=rec.data||{},i=rec.insp||{};const R=(a,b)=>`<div><b>${a}</b> ${esc(b||'…………')}</div>`;
+return`<div class="c"><div class="card">${rec.photo?`<img class="ph" src="${rec.photo}">`:''}<div style="text-align:center"><b>الجمهورية الجزائرية الديمقراطية الشعبية<br>وزارة التربية الوطنية</b></div>
+${R('مديرية التربية لولاية :','قسنطينة')}${R('المؤسسة :',d.inst)}<h3 style="text-align:center;text-decoration:underline">بطاقة معلومات الموظف(ة)</h3>
+${R('الرقم :',i.num)}${R('الاسم واللقب :',d.name)}${R('تاريخ الميلاد :',fd(d.birth_date))} ${R('مكان الميلاد :',d.birth_place)}${R('الحالة العائلية :',d.family)}${R('تاريخ أول تعيين :',fd(d.hire_date))}${R('المؤهل العلمي :',d.qual)}${R('الصفة :',d.status)}${R('الإطار :',d.frame)}${R('الدرجة :',d.degree)} ${R('تاريخ السريان :',fd(d.degree_date))}${R('تاريخ آخر زيارة تفتيش :',fd(i.last_visit))}${R('النقطة التربوية :',i.mark)}${R('رقم الهاتف :',d.phone)}${R('عنوان البريد الإلكتروني :',d.email)}
+<div style="margin-top:14px">قسنطينة في: ${new Date().toLocaleDateString('fr-FR').replace(/\//g,'-')}<span style="float:left;margin-left:30px"><b>المفتش(ة)</b></span></div></div><div class="np" style="margin-top:8px"><button class="p" onclick="print()">طباعة البطاقة</button></div></div>`}
+function vList(){const r=list.filter(x=>!q||JSON.stringify(x.data).includes(q));
+return`<div class="c"><div class="g"><div><label>بحث</label><input value="${esc(q)}" oninput="q=this.value;render(1)" id="qs"></div>${insp()?'<div style="align-self:end"><button class="p" onclick="addP()">+ إضافة أستاذ(ة)</button></div>':''}</div></div>
+<div class="c tb"><table><tr><th>#</th><th>الاسم واللقب</th><th>المؤسسة</th><th>الصفة / الإطار</th><th>الهاتف</th><th>آخر زيارة</th><th>تجديد الزيارة</th><th>وضعية الآجال</th><th></th></tr>
+${r.map((x,i)=>{const d=x.data||{},[s,b]=st(x),dd=due(x);return`<tr><td>${i+1}</td><td>${esc(d.name)}</td><td>${esc(d.inst)}</td><td>${esc(d.status)} / ${esc(d.frame)}</td><td>${esc(d.phone)}</td><td>${fd((x.insp||{}).last_visit)}</td><td>${dd?fd(dd.toISOString().slice(0,10)):'—'}</td><td><span class="bd ${b}">${s}</span></td><td><button class="p" onclick="open_('${x.id}')">فتح</button> <button class="p" onclick="open_('${x.id}','rep')">التقارير</button>${insp()?` <button class="d" onclick="delP('${x.id}')">حذف</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="9" class="m">لا توجد سجلات بعد. اضغط «+ إضافة أستاذ(ة)»، أو يُنشأ سجل الأستاذ(ة) تلقائياً عند أول حفظ لبياناته.</td></tr>'}</table></div>`}
+let reps=[],repErr='';
+async function go(k){if(k==='mine'){rec=own;view='data';render();return}if(k==='list')await loadList();view=k;if(k==='rep')await loadReps();render()}
+async function loadReps(){const{data,error}=await c.from('wajih_reports').select('id,kind,data,published,created_at').eq('prof_id',rec.id).order('created_at',{ascending:false});reps=data||[];repErr=error?(/wajih_reports|schema cache/i.test(error.message)?'جدول التقارير غير موجود في Supabase: شغّل ملف supabase.sql ثم حدّث الصفحة.':error.message):''}
+async function delR(id){if(!confirm('حذف هذا التقرير نهائياً؟'))return;await c.from('wajih_reports').delete().eq('id',id);await loadReps();render()}
+const RK={peda:['التقرير التربوي','rapport-peda.html'],tarsim:['تقرير الترسيم','rapport-tarsim.html']};
+function vRep(){const u=k=>`${RK[k][1]}?prof=${rec.id}`;
+return`${repErr?`<div class="c er">${esc(repErr)}</div>`:''}${insp()?`<div class="c np"><button class="p" onclick="location.href='${u('peda')}'">+ تقرير تربوي جديد</button> <button class="p" onclick="location.href='${u('tarsim')}'">+ تقرير ترسيم جديد</button></div>`:''}<div class="c tb"><table><tr><th>النوع</th><th>التاريخ</th><th>تفاصيل</th>${staff()?'<th>الحالة</th>':''}<th></th></tr>${reps.map(r=>{const x=r.data||{},k=RK[r.kind]?r.kind:'peda',t=k==='peda'?`${esc(x.cls)} · العلامة ${esc(x.mark)}`:`${esc(x.dec)} · المجموع ${(+x.s1||0)+(+x.s2||0)}/60`;return`<tr><td>${RK[k][0]}</td><td>${fd(x.date)}</td><td>${t}</td>${staff()?`<td>${r.published?'متاح للأستاذ(ة)':'مسودة'}</td>`:''}<td><button class="p" onclick="location.href='${u(k)}&r=${r.id}'">${insp()?'فتح / تحرير':'اطلاع'}</button>${insp()?` <button class="d" onclick="delR('${r.id}')">حذف</button>`:''}</td></tr>`}).join('')||`<tr><td colspan="5" class="m">لا توجد تقارير${staff()?'':' متاحة لك'}.</td></tr>`}</table></div>`}
+function render(keep){const T=staff()?[['list','قائمة الأساتذة'],['mine','بياناتي']]:[];if(rec)T.push(['data','البيانات'],['tt','استعمال الزمن'],['card','بطاقة المعلومات']);if(rec&&rec.id)T.push(['rep','التقارير']);
+const tabs=`<div class="tabs np">${T.map(([k,t])=>`<button class="${(k==='mine'?rec===own&&view!=='list':view===k)?'on':''}" onclick="go('${k}')">${t}</button>`).join('')}</div>`;
+document.getElementById('app').innerHTML=tabs+({list:vList,data:vData,tt:vTT,card:vCard,rep:vRep}[view]||vData)();
+if(keep){const e=document.getElementById('qs');if(e){e.focus();e.setSelectionRange(q.length,q.length)}}}
+async function loadList(){const{data}=await c.from('wajih_prof').select('id,user_id,data,insp').order('updated_at',{ascending:false});list=data||[]}
+async function open_(id,tab){const{data}=await c.from('wajih_prof').select('*').eq('id',id).single();rec=data;view=tab||'data';if(view==='rep')await loadReps();render()}
+async function addP(){const{data,error}=await c.from('wajih_prof').insert({data:{},user_id:null}).select('*').single();if(error)return alert(error.message);rec=data;view='data';render()}
+async function delP(id){if(!confirm('تنبيه: حذف سجل هذا الأستاذ(ة) يحذف معه نهائياً كل تقاريره (التربوية والترسيم) وبياناته واستعمال زمنه.\nهل تريد المتابعة؟'))return;await c.from('wajih_prof').delete().eq('id',id);await loadList();render()}
+async function out(){try{await PortalCloud.signOut()}catch(e){}location.href='index.html'}
+(async()=>{c=await PortalCloud.ready;const{data:s}=await c.auth.getSession();if(!s.session)return location.replace('index.html');
+const{data:p}=await c.from('wajih_profiles').select('*').eq('id',s.session.user.id).single();if(!p||!p.active)return location.replace('index.html');me=p;
+document.getElementById('who').textContent=(p.full_name||p.username)+' · '+({inspector:'مفتش(ة)',supervisor:'مشرف(ة)',teacher:'أستاذ(ة)'}[p.role]);
+const{data:o}=await c.from('wajih_prof').select('*').eq('user_id',p.id).maybeSingle();own=o||{user_id:p.id,data:{name:p.full_name||''},insp:{},tt:{},photo:null};
+if(staff()){await loadList();view='list';rec=null}else rec=own;
+render()})();
+</script>
+</body>
+</html>
