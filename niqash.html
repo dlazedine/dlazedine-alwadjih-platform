@@ -2,19 +2,16 @@
 <html lang="ar" dir="rtl">
 <head>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0e2744">
+<meta name="theme-color" content="#1f3864">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="auth.js"></script>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="الوجيه">
+<script src="pwa.js" defer></script>
+
 <script src="supabase-config.js"></script>
 <script src="portal-cloud.js"></script>
-<script src="wj-shell.js"></script>
-<script src="pwa.js" defer></script>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -284,20 +281,6 @@
         </form>
     </div>
 </div>
-
-<footer class="main-footer no-print" style="margin-top:20px; padding:16px; text-align:center; color:var(--gold-light); font-size:12.5px; border-top:1px solid rgba(196,155,63,0.3);">
-    <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:8px;">
-        <a href="index.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-home"></i> الرئيسية</a>
-        <a href="arabic.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-book-open-reader"></i> تعليمية العربية</a>
-        <a href="moualaja.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-stethoscope"></i> المعالجة</a>
-        <a href="amal.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
-        <a href="fahss_ikhtibarat.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-file-circle-check"></i> فحص الاختبارات</a>
-        <a href="proposals.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-chart-pie"></i> المقترحات</a>
-        <a href="cv.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-address-card"></i> السيرة الذاتية</a>
-    </div>
-    إعداد وتأطير: <strong>مفتش التعليم المتوسط درويش الهلالي</strong>
-    ◆ المقاطعة الثانية قسنطينة ◆ وزارة التربية الوطنية
-</footer>
 
 <!-- نافذة الدخول -->
 <div class="modal-overlay" id="loginModal">

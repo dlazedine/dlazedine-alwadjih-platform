@@ -646,3 +646,14 @@ document.addEventListener('portal:login', () => {
     updateUserInfo();
     renderMessages();
 });
+
+/* مزامنة فورية: تحديث الرسائل عند وصول تغيير من مستخدم آخر */
+window.addEventListener('pc:synced', (e) => {
+    if (!e.detail.keys.some(k => k.indexOf('niqash_') === 0)) return;
+    const cur = nqState.currentChannel;
+    nqLoad();
+    renderChannels();
+    updateGlobalStats();
+    if (nqState.channels.some(c => c.id === cur)) { nqState.currentChannel = cur; renderCurrentChannel(); }
+    else if (nqState.channels.length) selectChannel(nqState.channels[0].id);
+});

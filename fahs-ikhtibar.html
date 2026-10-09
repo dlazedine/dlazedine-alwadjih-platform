@@ -6,11 +6,6 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="auth.js"></script>
 <script src="supabase-config.js"></script>
 <script src="portal-cloud.js"></script>
 <script src="wj-shell.js"></script>
@@ -29,7 +24,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
-    font-family:'Tajawal', 'Segoe UI', Tahoma, Arial, sans-serif;
+    font-family:'Segoe UI', Tahoma, 'Traditional Arabic', Arial, sans-serif;
     color:var(--text);padding:18px;line-height:1.6;
     background-color:var(--bg-pattern);
     background-image:
@@ -42,62 +37,6 @@
   body.theme-gold{--bg-pattern:var(--gold-dark);--border:#f0e2b0}
   body.theme-andalusi{--bg-pattern:var(--navy);--border:#c49b3f}
   .container{max-width:1550px;margin:0 auto}
-
-  /* الشريط العلوي الموحد للبوابة */
-  .top-strip {
-    background: linear-gradient(90deg, var(--navy-dark) 0%, var(--navy) 100%);
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 12px;
-    border: 1.5px solid var(--gold);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    gap: 10px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-  }
-  .top-strip a.back-link {
-    color: var(--gold-light);
-    font-weight: 700;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.08);
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(196,155,63,0.35);
-    transition: 0.2s;
-  }
-  .top-strip a.back-link:hover {
-    background: var(--gold);
-    color: var(--navy-dark);
-  }
-  .top-nav-links {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .top-nav-link {
-    color: #eaf1f8;
-    text-decoration: none;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 16px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    transition: 0.2s;
-  }
-  .top-nav-link:hover, .top-nav-link.active {
-    background: var(--gold);
-    color: var(--navy-dark);
-    border-color: var(--gold);
-  }
 
   .header{
     background:linear-gradient(135deg, var(--navy-dark), var(--navy), var(--navy-light));
@@ -276,7 +215,7 @@
 
   @media print{
     body{background:#fff;padding:0;background-image:none}
-    .toolbar,.no-print,.theme-switcher,.tabs,.top-strip{display:none!important}
+    .toolbar,.no-print,.theme-switcher,.tabs{display:none!important}
     .card{box-shadow:none;border:1px solid #999;page-break-inside:avoid}
     .header{background:var(--navy)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   }
@@ -289,39 +228,11 @@
 <body class="theme-andalusi">
 <div class="container">
 
-  <!-- الشريط العلوي الموحد (زر عودة رئيسي واحد وروابط سريعة لكافة أدوات المنظومة) -->
-  <header class="top-strip no-print">
-    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-      <a href="index.html" class="back-link">
-        <i class="fas fa-arrow-right"></i> البوابة الرئيسية
-      </a>
-      <div class="top-nav-links">
-        <a href="arabic.html" class="top-nav-link"><i class="fas fa-book-open-reader"></i> تعليمية العربية</a>
-        <a href="moualaja.html" class="top-nav-link"><i class="fas fa-stethoscope"></i> المعالجة</a>
-        <a href="amal.html" class="top-nav-link"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
-        <a href="niqash.html" class="top-nav-link"><i class="fas fa-comments"></i> النقاش</a>
-        <a href="documents.html" class="top-nav-link"><i class="fas fa-folder-tree"></i> بنك الوثائق</a>
-        <a href="bloom_evaluation.html" class="top-nav-link"><i class="fas fa-layer-group"></i> تقويم بلوم</a>
-        <a href="proposals.html" class="top-nav-link"><i class="fas fa-chart-pie"></i> المقترحات</a>
-        <a href="cv.html" class="top-nav-link"><i class="fas fa-address-card"></i> السيرة الذاتية</a>
-        <a href="taqyim.html" class="top-nav-link" id="taqyimTopLink" style="display:none;"><i class="fas fa-award"></i> التقييم</a>
-        <a href="dashboard.html" class="top-nav-link" id="dashTopLink" style="display:none;"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
-      </div>
-    </div>
-    <div style="display:flex; align-items:center; gap:10px;">
-      <span id="userBadge" style="background:rgba(255,255,255,0.15); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700;">
-        <i class="fas fa-user-circle"></i> <span id="userNameDisplay">المستخدم</span>
-        <span id="userRoleBadge" style="background:var(--gold); color:var(--navy-dark); padding:1px 6px; border-radius:10px; font-size:10px; margin-right:4px;">أستاذ</span>
-      </span>
-      <button onclick="PortalAuth.logout()" class="top-nav-link" style="background:var(--danger); border-color:var(--danger); color:#fff; cursor:pointer;">خروج</button>
-    </div>
-  </header>
-
-  <!-- الترويسة الرسمية -->
+  <!-- الترويسة -->
   <div class="header">
     <h1>الجمهورية الجزائرية الديمقراطية الشعبية</h1>
-    <h2>وزارة التربية الوطنية — <span class="gov">المفتشية العامة للبيداغوجيا</span></h2>
-    <h2>مديرية التربية لولاية قسنطينة — المقاطعة الثانية (تأطير المفتش درويش الهلالي)</h2>
+    <h2>وزارة التربية الوطنية — <span class="gov">المفتشية العامة</span></h2>
+    <h2>مديرية التربية لولاية قسنطينة — المقاطعة الثانية</h2>
     <h2 style="margin-top:8px;font-size:.95rem">أداة فحص وتقويم الوقفات التقويمية والاختبارات</h2>
   </div>
 
@@ -343,6 +254,7 @@
         <div class="field">
           <label>اسم ولقب الأستاذ(ة) *</label>
           <select id="f-teacher"><option value="">— اختر الأستاذ(ة) —</option></select>
+          <div style="font-size:.75rem;margin-top:3px;color:var(--muted)">لم تجده؟ <a href="data-prof.html" style="color:var(--navy);font-weight:700">أضفه من «بيانات الأساتذة»</a></div>
         </div>
         <div class="field">
           <label>المتوسطة *</label>
@@ -369,6 +281,7 @@
             <option>علوم الطبيعة والحياة</option>
             <option>التاريخ والجغرافيا</option>
             <option>التربية الإسلامية</option>
+            <option>التربية المدنية</option>
             <option>اللغة الفرنسية</option>
             <option>اللغة الإنجليزية</option>
           </select>
@@ -376,10 +289,10 @@
         <div class="field">
           <label>طبيعة التقويم *</label>
           <select id="f-type">
-            <option>اختبار</option>
             <option>وقفة تقويمية</option>
-            <option>فرض</option>
-            <option>وضعية إدماجية</option>
+            <option>اختبار</option>
+            <option>التحرير الكتايي</option>
+            <option>تطبيقات وتمارين عامة</option>
           </select>
         </div>
         <div class="field">
@@ -490,6 +403,7 @@
           <option>الفصل الأول</option><option>الفصل الثاني</option><option>الفصل الثالث</option>
         </select>
         <button class="btn btn-outline btn-sm staff-only" onclick="exportDatabaseExcel()">📊 تصدير قاعدة البيانات</button>
+        
       </div>
       <div class="table-wrap">
         <table id="db-table">
@@ -528,7 +442,7 @@
         </div>
       </div>
       <div class="hint" style="margin-top:12px">
-        💡 قائمة المتوسطات مشتركة بين كل المستخدمين، ويعدّلها المفتش وحده، وتُحفظ مركزياً في Supabase.
+        💡 قائمة المتوسطات مشتركة بين كل المستخدمين، ويعدّلها المفتش وحده، وتُستعمل أيضاً في «بيانات الأساتذة».
       </div>
       <div style="margin-top:10px">
         <button class="btn btn-outline btn-sm no-print insp-only" onclick="toggleSchoolsEditor()">✏️ تعديل قائمة المتوسطات</button>
@@ -542,27 +456,6 @@
       </div>
     </div>
   </div>
-
-  <!-- تذييل الصفحة الموحد -->
-  <footer class="main-footer no-print" style="margin-top:28px; padding:20px; text-align:center; color:var(--gold-light); font-size:12.5px; border-top:1px solid rgba(196,155,63,0.3); background:rgba(14,39,68,0.7); border-radius:12px;">
-    <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin-bottom:12px; font-size:12px;">
-      <a href="index.html" style="color:var(--gold-light); text-decoration:none;"><i class="fas fa-home"></i> البوابة الرئيسية</a>
-      <a href="arabic.html" style="color:#fff; text-decoration:none;"><i class="fas fa-book-open-reader"></i> تعليمية العربية</a>
-      <a href="moualaja.html" style="color:#fff; text-decoration:none;"><i class="fas fa-stethoscope"></i> المعالجة البيداغوجية</a>
-      <a href="amal.html" style="color:#fff; text-decoration:none;"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
-      <a href="niqash.html" style="color:#fff; text-decoration:none;"><i class="fas fa-comments"></i> ركن النقاش</a>
-      <a href="bloom_evaluation.html" style="color:#fff; text-decoration:none;"><i class="fas fa-layer-group"></i> تقويم بلوم</a>
-      <a href="proposals.html" style="color:#fff; text-decoration:none;"><i class="fas fa-chart-pie"></i> دراسة المقترحات</a>
-      <a href="cv.html" style="color:#fff; text-decoration:none;"><i class="fas fa-address-card"></i> السيرة الذاتية</a>
-      <a href="taqyim.html" style="color:#fff; text-decoration:none;"><i class="fas fa-award"></i> بطاقة الأداء</a>
-      <a href="dashboard.html" style="color:#fff; text-decoration:none;"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
-    </div>
-    <div style="color:#d9c89a;">
-      إعداد وتأطير: <strong>مفتش التعليم المتوسط درويش الهلالي</strong>
-      <span style="margin:0 6px;">◆</span> المقاطعة الثانية قسنطينة
-      <span style="margin:0 6px;">◆</span> وزارة التربية الوطنية الجزائرية
-    </div>
-  </footer>
 
 </div>
 
@@ -618,14 +511,6 @@ const norm = s => String(s||'').replace(/[ًٌٍَُِّْـ]/g,'').replace(/م�
 WJ.ready.then(async ()=>{
   C = WJ.c; ME = WJ.me;
   document.body.classList.add('r-' + WJ.role);
-  $('userNameDisplay').textContent = ME.full_name || ME.username || 'المستخدم';
-  const roleAr = WJ.insp ? 'مفتش' : (WJ.role === 'supervisor' ? 'مشرف' : 'أستاذ');
-  $('userRoleBadge').textContent = roleAr;
-  if(WJ.insp || WJ.role === 'supervisor') {
-    const tLink = $('taqyimTopLink'), dLink = $('dashTopLink');
-    if(tLink) tLink.style.display = 'inline-flex';
-    if(dLink) dLink.style.display = 'inline-flex';
-  }
   schools = await WJ.schools();
   if(WJ.staff) await loadProfs();
   await loadDB();
@@ -662,31 +547,14 @@ async function openFromUrl(){
 
 /* ================== تحميل البيانات ================== */
 async function loadProfs(){
-  if(!C) return;
-  try {
-    const {data} = await C.from('wajih_prof').select('id,user_id,data');
-    profs = (data||[]).filter(p=> p.data && p.data.name).sort((a,b)=> a.data.name.localeCompare(b.data.name,'ar'));
-  } catch(e) {
-    console.warn('loadProfs error:', e);
-  }
+  const {data} = await C.from('wajih_prof').select('id,user_id,data');
+  profs = (data||[]).filter(p=> p.data && p.data.name).sort((a,b)=> a.data.name.localeCompare(b.data.name,'ar'));
 }
 async function loadDB(){
-  if(!C) {
-    // الاحتياطي المحلي في حال عدم الربط بعد
-    try {
-      const raw = localStorage.getItem('tqweem_tests_v1');
-      if(raw) database = JSON.parse(raw).database || [];
-    } catch(e){}
-    return;
-  }
-  try {
-    const {data, error} = await C.from('wajih_reports').select('id,prof_id,data,published,created_at,created_by_name').eq('kind','exam').order('created_at',{ascending:false});
-    if(error){ dbErr = errT(error.message); database = []; return; }
-    dbErr = '';
-    database = (data||[]).map(r=> ({...r.data, id:r.id, prof_id:r.prof_id, published:r.published, by:r.created_by_name, savedAt:r.created_at}));
-  } catch(e) {
-    dbErr = errT(e.message);
-  }
+  const {data, error} = await C.from('wajih_reports').select('id,prof_id,data,published,created_at,created_by_name').eq('kind','exam').order('created_at',{ascending:false});
+  if(error){ dbErr = errT(error.message); database = []; return; }
+  dbErr = '';
+  database = (data||[]).map(r=> ({...r.data, id:r.id, prof_id:r.prof_id, published:r.published, by:r.created_by_name, savedAt:r.created_at}));
 }
 function populateTeachers(){
   if(!WJ.staff) return;
@@ -816,26 +684,24 @@ function clearFile(){
   $('f-file').value = ''; $('fileInfo').textContent = ''; showPreview();
 }
 async function signedUrl(path){
-  if(!path || !C) return '';
-  try {
-    const {data} = await C.storage.from('exams').createSignedUrl(path, 3600);
-    return data ? data.signedUrl : '';
-  } catch(e) { return ''; }
+  if(!path) return '';
+  const {data} = await C.storage.from('exams').createSignedUrl(path, 3600);
+  return data ? data.signedUrl : '';
 }
 
 /* ================== الحفظ والتعديل ================== */
 function teacherName(){
   const p = profs.find(x=> x.id === $('f-teacher').value);
-  return p ? p.data.name : ((database.find(r=> r.id === editId) || {}).teacher || 'أستاذ');
+  return p ? p.data.name : ((database.find(r=> r.id === editId) || {}).teacher || '');
 }
 function setBanner(t){ const b = $('editBanner'); if(!t){ b.classList.add('hidden'); return; } b.textContent = t; b.classList.remove('hidden'); }
 
 async function saveEvaluation(){
-  if(!WJ.insp) { alert('هذه العملية متاحة للمفتش فقط'); return; }
+  if(!WJ.insp) return;
   const old = editId ? (database.find(r=> r.id === editId) || {}) : {};
   const profId = $('f-teacher').value || old.prof_id;
   const school = $('f-school').value, level = $('f-level').value;
-  if(!profId){ alert('يرجى اختيار الأستاذ(ة) من القائمة'); return; }
+  if(!profId){ alert('يرجى اختيار الأستاذ(ة) من القائمة (أضفه من «بيانات الأساتذة» إن لم تجده)'); return; }
   if(!school){ alert('يرجى اختيار المتوسطة'); return; }
   if(!level){ alert('يرجى اختيار المستوى'); return; }
   const resSum = round2(currentScores.res.reduce((a,b)=> a + (+b||0), 0));
@@ -845,17 +711,12 @@ async function saveEvaluation(){
   const btn = $('btn-save'); btn.disabled = true;
   try{
     let file = currentFile.path ? {path:currentFile.path, name:currentFile.name, type:currentFile.type} : null;
-    if(currentFile.blob && C){
+    if(currentFile.blob){
       const ext = currentFile.type === 'application/pdf' ? 'pdf' : currentFile.type === 'image/png' ? 'png' : currentFile.type === 'image/webp' ? 'webp' : 'jpg';
       const path = `${profId}/${Date.now()}.${ext}`;
       const up = await C.storage.from('exams').upload(path, currentFile.blob, {contentType: currentFile.type});
-      if(up.error){
-        console.warn('تعذر رفع الملف إلى Supabase:', up.error);
-        alert('⚠️ تنبيه التخزين السحابي:\n' + errT(up.error.message) + '\n\nسيتم حفظ درجات ومعايير الاختبار محلياً لتفادي ضياع جهدك، مع إمكانية تصدير بطاقة الفحص إلى Excel فوراً!');
-        file = {path:'', name:currentFile.name, type:currentFile.type, local:true};
-      } else {
-        file = {path, name:currentFile.name, type:currentFile.type};
-      }
+      if(up.error){ alert('تعذّر رفع الملف: ' + errT(up.error.message)); return; }
+      file = {path, name:currentFile.name, type:currentFile.type};
     }
     const rec = {
       teacher: teacherName(), school, level, subject: $('f-subject').value, type: $('f-type').value, period: $('f-period').value,
@@ -864,44 +725,16 @@ async function saveEvaluation(){
       date: old.date || new Date().toISOString().slice(0,10), file
     };
     const published = $('f-pub').checked;
-    let savedToCloud = false;
-    if (C) {
-      try {
-        const r = editId
-          ? await C.from('wajih_reports').update({data:rec, published, updated_at:new Date().toISOString()}).eq('id', editId).select('id').single()
-          : await C.from('wajih_reports').insert({prof_id:profId, kind:'exam', data:rec, published, created_by:ME.id, created_by_name:ME.full_name || ME.username}).select('id').single();
-        if(r.error){
-          console.warn('Supabase DB error:', r.error);
-          alert('⚠️ تنبيه قاعدة البيانات السحابية:\n' + errT(r.error.message) + '\n\nتم حفظ التقرير في جهازك بنجاح حتى لا يضيع جهدك، ويمكنك تصديره فوراً إلى Excel!');
-        } else {
-          savedToCloud = true;
-          if(old.file && old.file.path && (!file || file.path !== old.file.path)) C.storage.from('exams').remove([old.file.path]);
-          editId = r.data.id;
-        }
-      } catch(ex) {
-        console.warn('DB exception:', ex);
-      }
-    }
-    if (!savedToCloud) {
-      // حفظ احتياطي محلي
-      const recWithId = { ...rec, id: editId || 'local_' + Date.now(), prof_id: profId, published };
-      if(editId) {
-        const idx = database.findIndex(x=>x.id === editId);
-        if(idx>=0) database[idx] = recWithId;
-      } else {
-        database.unshift(recWithId);
-        editId = recWithId.id;
-      }
-      try {
-        localStorage.setItem('wajih_exams_backup', JSON.stringify(database));
-        localStorage.setItem('tqweem_tests_v1', JSON.stringify({database}));
-      } catch(e){}
-    }
+    const r = editId
+      ? await C.from('wajih_reports').update({data:rec, published, updated_at:new Date().toISOString()}).eq('id', editId).select('id').single()
+      : await C.from('wajih_reports').insert({prof_id:profId, kind:'exam', data:rec, published, created_by:ME.id, created_by_name:ME.full_name || ME.username}).select('id').single();
+    if(r.error){ alert('تعذّر الحفظ: ' + errT(r.error.message)); return; }
+    if(old.file && old.file.path && (!file || file.path !== old.file.path)) C.storage.from('exams').remove([old.file.path]);
     WJ.act(editId ? 'update' : 'create', 'exam');
-    currentFile.blob = null; currentFile.path = file ? file.path : '';
+    editId = r.data.id; currentFile.blob = null; currentFile.path = file ? file.path : '';
     await loadDB(); renderDB();
     setBanner('✏️ وضع التعديل: أي حفظ جديد يحدّث هذه البطاقة ولا ينشئ نسخة أخرى.' + (published ? ' (متاحة للأستاذ)' : ' (مسودة غير ظاهرة للأستاذ)'));
-    alert('✅ تم حفظ بطاقة الفحص في المنظومة بنجاح');
+    alert('✅ تم حفظ بطاقة الفحص في المنظومة');
   } finally { btn.disabled = false; }
 }
 
@@ -971,25 +804,21 @@ function renderDB(){
 
 async function setPub(id, v){
   if(!WJ.insp) return;
-  if (C) {
-    const {error} = await C.from('wajih_reports').update({published:v, updated_at:new Date().toISOString()}).eq('id', id);
-    if(error){ alert(errT(error.message)); return; }
-  }
+  const {error} = await C.from('wajih_reports').update({published:v, updated_at:new Date().toISOString()}).eq('id', id);
+  if(error){ alert(errT(error.message)); return; }
   WJ.act('update', 'exam'); await loadDB(); renderDB();
 }
 async function deleteRecord(id){
   if(!WJ.insp || !confirm('حذف هذا السجل ومرفقه نهائياً؟')) return;
   const r = database.find(x=> x.id === id);
-  if (C) {
-    const {error} = await C.from('wajih_reports').delete().eq('id', id);
-    if(error){ alert(errT(error.message)); return; }
-    if(r && r.file && r.file.path) C.storage.from('exams').remove([r.file.path]);
-  }
+  const {error} = await C.from('wajih_reports').delete().eq('id', id);
+  if(error){ alert(errT(error.message)); return; }
+  if(r && r.file && r.file.path) C.storage.from('exams').remove([r.file.path]);
   if(editId === id){ editId = null; setBanner(''); }
   WJ.act('delete', 'exam'); await loadDB(); renderDB();
 }
 
-/* بطاقة المعاينة */
+/* بطاقة المعاينة (داخل الصفحة، تُطبع وتعمل للأستاذ والمشرف والمفتش) */
 async function previewRecord(id){
   const r = database.find(x=> x.id === id); if(!r) return;
   const url = r.file && r.file.path ? await signedUrl(r.file.path) : '';
@@ -1014,23 +843,19 @@ async function previewRecord(id){
 }
 function closePreview(){ const d = $('pv'); if(d) d.remove(); document.body.classList.remove('pv-open'); }
 
-/* ================== قائمة المتوسطات ================== */
+/* ================== قائمة المتوسطات (يعدّلها المفتش، وتُحفظ في Supabase) ================== */
 function toggleSchoolsEditor(){
   const ed = $('schools-editor'); ed.classList.toggle('hidden');
   if(!ed.classList.contains('hidden')) $('schools-textarea').value = schools.join('\n');
 }
 async function saveSchools(){
-  if(!WJ.insp) { alert('تعديل القائمة متاح للمفتش فقط'); return; }
+  if(!WJ.insp) return;
   const list = $('schools-textarea').value.split('\n').map(s=> s.trim().replace(/^\d+\s*[-.)]\s*/, '')).filter(Boolean);
   if(!list.length){ alert('القائمة فارغة'); return; }
-  if (C) {
-    const {error} = await C.from('wajih_settings').upsert({key:'schools', value:list, updated_by:ME.id, updated_at:new Date().toISOString()});
-    if(error){ alert('تعذّر الحفظ: ' + errT(error.message)); return; }
-  }
-  schools = list;
-  localStorage.setItem('wajih_schools', JSON.stringify(list));
-  populateSchools(); renderRefLists(); toggleSchoolsEditor();
-  alert('✅ تم تحديث قائمة المتوسطات لكل المستخدمين وحفظها بنجاح');
+  const {error} = await C.from('wajih_settings').upsert({key:'schools', value:list, updated_by:ME.id, updated_at:new Date().toISOString()});
+  if(error){ alert('تعذّر الحفظ: ' + errT(error.message)); return; }
+  schools = list; populateSchools(); renderRefLists(); toggleSchoolsEditor();
+  alert('✅ تم تحديث قائمة المتوسطات لكل المستخدمين');
 }
 
 /* ================== الثيم ================== */
@@ -1092,6 +917,7 @@ function exportDatabaseExcel(){
   XLSX.utils.book_append_sheet(wb, wsS, 'التقرير');
   XLSX.writeFile(wb, `قاعدة_بيانات_الاختبارات_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
+
 </script>
 </body>
 </html>

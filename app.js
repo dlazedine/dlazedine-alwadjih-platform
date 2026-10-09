@@ -40,33 +40,6 @@ const JOURNEY_DATA = {
         stats: [['∞','مواضيع'], ['∞','ملفات'], ['3','فضاءات']],
         features: ['محادثة جماعية', 'دفتر ملاحظات شخصي', 'تبادل الملفات', 'مناقشات تربوية']
     },
-    fahss: {
-        icon: 'fa-file-circle-check',
-        title: 'فحص وتقويم الاختبارات',
-        subtitle: 'مطابقة الفروض والوقفات التقويمية مع المعايير الوزارية',
-        desc: 'شبكة فحص تقويمية معيارية لتقويم الموارد (12 نقطة) والوضعية الإدماجية (8 نقاط)، مع أرشيف لمتوسطات المقاطعة الثانية وتصدير فوري لبطاقة الفحص إلى Excel.',
-        link: 'fahss_ikhtibarat.html',
-        stats: [['12','نقطة موارد'], ['8','نقاط إدماج'], ['21','متوسطة']],
-        features: ['تقويم الموارد', 'شبكة الوضعية الإدماجية', 'سجل المتوسطات', 'تصدير Excel']
-    },
-    proposals: {
-        icon: 'fa-chart-pie',
-        title: 'المقترحات والاستبيانات',
-        subtitle: 'المشاركة البيداغوجية واستقراء آراء الأساتذة',
-        desc: 'منصة استبيانات واستطلاعات رأي تشاركية لرصد انشغالات الأساتذة واقتراحاتهم الميدانية، مع منشئ استبيانات تفتيشي وتحليل إحصائي فوري.',
-        link: 'proposals.html',
-        stats: [['4','استبيانات'], ['100%','تشاركية'], ['فوري','تحليل النتائج']],
-        features: ['استبيانات مفتوحة', 'منشئ استبيانات', 'تحليل النتائج', 'تصدير التقارير']
-    },
-    bloom: {
-        icon: 'fa-layer-group',
-        title: 'تقويم بلوم والكفاءات',
-        subtitle: 'المجال المعرفي وتقويم الوضعية الإدماجية',
-        desc: 'شبكة معيارية لرصد مستويات صنافة بلوم المعرفية الستة وتقويم معايير الكفاءة المركبة للوضعية، مع تصدير تلقائي لورقتي النتائج ومؤشرات التحكم F1 و F2 إلى Excel.',
-        link: 'bloom_evaluation.html',
-        stats: [['6','مستويات معرفية'], ['4','معايير إدماج'], ['F1+F2','Excel']],
-        features: ['صنافة بلوم المعرفية', 'معايير الوضعية الإدماجية', 'تصدير F1 و F2', 'إحصاءات التحكم']
-    },
     taqyim: {
         icon: 'fa-award',
         title: 'بطاقة الأداء التكاملي',
@@ -100,21 +73,6 @@ const PREVIEW_DATA = {
                link: 'niqash.html',
                stats: [['∞','مواضيع'], ['∞','ملفات'], ['3','فضاءات']],
                features: ['محادثة جماعية', 'دفتر ملاحظات', 'تبادل ملفات'] },
-    fahss:   { title: 'فحص وتقويم الاختبارات', sub: 'مطابقة الفروض والوقفات التقويمية',
-               desc: 'أداة تدقيق وفحص الاختبارات المدرسية وفق معايير المنهاج الوزاري وشبكة الـ 20 نقطة، وتصدير بطاقات الفحص إلى Excel.',
-               link: 'fahss_ikhtibarat.html',
-               stats: [['12','موارد'], ['8','إدماج'], ['21','متوسطة']],
-               features: ['فحص الموارد', 'معايير الوضعية', 'تصدير Excel'] },
-    proposals:{ title: 'المقترحات والاستبيانات', sub: 'استقراء الآراء والمشاركة',
-               desc: 'استبيانات تفاعلية واستطلاعات رأي مهنية لتحسين الممارسة البيداغوجية وتلقي مقترحات أساتذة المقاطعة الثانية.',
-               link: 'proposals.html',
-               stats: [['4','استبيانات'], ['∞','مشاركات'], ['تفاعلي','تحليل']],
-               features: ['استبيانات', 'منشئ استبيانات', 'استقراء النتائج'] },
-    bloom:   { title: 'تقويم بلوم والكفاءات', sub: 'المجال المعرفي والوضعية الإدماجية',
-               desc: 'أداة تقويم وتحليل كفاءات التلاميذ وفق صنافة بلوم المعرفية وشبكة الوضعية الإدماجية وتصدير ورقتي F1 و F2 الرسميتين.',
-               link: 'bloom_evaluation.html',
-               stats: [['6','مستويات'], ['4','معايير'], ['F1+F2','تصدير']],
-               features: ['صنافة بلوم', 'تقويم الوضعية', 'تصدير F1 و F2'] },
     taqyim:  { title: 'بطاقة الأداء التكاملي', sub: 'تقييم المفتش', link: 'taqyim.html',
                desc: 'بطاقة تقييم أداء المعلم والمتعلم وفق مهارات القرن الحادي والعشرين، بثلاث لغات.',
                stats: [['5','محاور'], ['3','لغات'], ['34','مؤشر']],
@@ -181,11 +139,7 @@ function scrollToSection(id) {
 /* ============================================================
    نظام الدخول الموحّد المتوافق مع PortalAuth
    ============================================================ */
-const USERS = {
-    inspector: { pass: 'inspector2026', role: 'مفتش',  name: 'درويش الهلالي', internalRole: 'inspector' },
-    supervisor: { pass: 'supervisor2026', role: 'مشرف', name: 'مشرف تربوي', internalRole: 'supervisor' },
-    teacher:   { pass: 'teacher2026',   role: 'أستاذ',  name: 'أستاذ تجريبي', internalRole: 'teacher' }
-};
+const USERS = {};
 
 function openLoginModal() {
     const modal = document.getElementById('loginModal');
@@ -201,77 +155,25 @@ function closeLoginModal() {
     if (modal) modal.classList.remove('open');
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
     if (e && e.preventDefault) e.preventDefault();
-    const uInput = document.getElementById('loginUsername');
-    const pInput = document.getElementById('loginPassword');
-    const msg = document.getElementById('loginMsg');
-    if (!uInput || !pInput) return false;
-
-    const u = uInput.value.trim().toLowerCase();
-    const p = pInput.value;
-
-    // استخدام PortalAuth إذا كان متاحاً
-    if (window.PortalAuth && window.PortalAuth.login) {
-        const res = window.PortalAuth.login(u, p, true);
-        if (res.success) {
+    const u = document.getElementById('loginUsername'), p = document.getElementById('loginPassword'), msg = document.getElementById('loginMsg');
+    if (!u || !p) return false;
+    if (msg) { msg.style.color = ''; msg.textContent = 'جارٍ التحقق...'; }
+    try {
+        const r = await PortalCloud.login(u.value, p.value);
+        if (r.success) {
             applyUserState();
-            if (msg) {
-                msg.style.color = 'var(--teal)';
-                msg.textContent = '✔ تم الدخول بنجاح — مرحباً ' + (res.user.fullName || res.user.username);
-            }
+            if (msg) { msg.style.color = 'var(--teal)'; msg.textContent = '✔ تم الدخول بنجاح — مرحباً ' + r.user.fullName; }
             setTimeout(closeLoginModal, 700);
-            return false;
-        }
-    }
-
-    if (USERS[u] && USERS[u].pass === p) {
-        const found = USERS[u];
-        const user = {
-            id: u === 'inspector' ? 'U001' : (u === 'supervisor' ? 'U003' : 'U002'),
-            username: u,
-            name: found.name,
-            fullName: found.name,
-            role: found.role,
-            internalRole: found.internalRole
-        };
-        
-        // حفظ في التخزينات الثلاثة لضمان التوافق التام
-        localStorage.setItem('portalUser', JSON.stringify(user));
-        
-        const session = {
-            user: {
-                id: user.id,
-                username: u,
-                fullName: found.name,
-                role: found.internalRole,
-                email: u === 'inspector' ? 'dlazedine68@gmail.com' : `${u}@edu.dz`,
-                school: 'المقاطعة الثانية قسنطينة'
-            },
-            startedAt: Date.now(),
-            expiresAt: Date.now() + 24 * 60 * 60 * 1000
-        };
-        sessionStorage.setItem('pgb_session', JSON.stringify(session));
-        localStorage.setItem('pgb_session_persistent', JSON.stringify(session));
-        sessionStorage.setItem('portal_session_v2', JSON.stringify(session));
-
-        applyUserState();
-        if (msg) {
-            msg.style.color = 'var(--teal)';
-            msg.textContent = '✔ تم الدخول بنجاح — مرحباً ' + user.name;
-        }
-        setTimeout(closeLoginModal, 700);
-    } else {
-        if (msg) {
-            msg.style.color = 'var(--maroon)';
-            msg.textContent = '✖ اسم المستخدم أو كلمة المرور غير صحيحة';
-        }
-    }
+        } else if (msg) { msg.style.color = 'var(--maroon)'; msg.textContent = '✖ ' + r.error; }
+    } catch (err) { if (msg) msg.textContent = '✖ تعذّر الاتصال بالخادم'; }
     return false;
 }
 
 function handleLogout() {
     if (!confirm('هل تريد تسجيل الخروج؟')) return;
+    try { PortalCloud.signOut(); } catch (e) {}
     try {
         localStorage.removeItem('portalUser');
         sessionStorage.removeItem('pgb_session');

@@ -2,19 +2,15 @@
 <html dir="rtl" lang="ar">
 <head>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0e2744">
+<meta name="theme-color" content="#1f3864">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="auth.js"></script>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="الوجيه">
+<script src="pwa.js" defer></script>
 <script src="supabase-config.js"></script>
 <script src="portal-cloud.js"></script>
-<script src="wj-shell.js"></script>
-<script src="pwa.js" defer></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -75,7 +71,10 @@
             --line: #e2e8f0;
             --line-gold: #e2d2aa;
             --green: #2b7a4b;
+            --moss: #7a9a4f;
+            --moss-dark: #5f7a3a;
             --bg-soft: #f6f4ee;
+            --bg-paper: #fbfaf6;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -85,12 +84,14 @@
             background:
                 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><defs><pattern id='girih' width='40' height='40' patternUnits='userSpaceOnUse'><g fill='none' stroke='%237a9a4f' stroke-width='0.4' opacity='0.10'><path d='M20 0 L40 20 L20 40 L0 20 Z'/><path d='M10 10 L30 10 L30 30 L10 30 Z'/><circle cx='20' cy='20' r='3'/></g></pattern></defs><rect width='80' height='80' fill='url(%23girih)'/></svg>"),
                 var(--bg-soft);
-            padding-top: 70px;
-        }
+        }  
 
+        /* شريط التنقل العلوي الموحد للبوابة */
         .portal-nav-bar {
             position: fixed;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             min-height: 56px;
             background: rgba(12, 37, 64, 0.95);
             backdrop-filter: blur(10px);
@@ -172,15 +173,25 @@
             border: 1px solid rgba(255,255,255,0.3);
         }
 
+        .nav-btn-secondary:hover {
+            background: rgba(255,255,255,0.25);
+            color: #fff;
+        }
+
         .nav-btn-logout {
             background: rgba(178, 34, 52, 0.85);
             color: #fff;
             border: 1px solid rgba(178, 34, 52, 0.9);
         }
+        .nav-btn-logout:hover {
+            background: #b22234;
+            color: #fff;
+        }
 
+        /* ورقة السيرة الذاتية */
         .cv-wrapper {
             max-width: 1060px;
-            margin: 24px auto 50px;
+            margin: 80px auto 50px;
             padding: 0 16px;
         }
 
@@ -194,6 +205,7 @@
             background: #fff;
         }
 
+        /* العمود الجانبي */
         .side {
             background: linear-gradient(175deg, var(--navy-deep) 0%, #133357 50%, var(--navy) 100%);
             color: #eaf1f8;
@@ -201,6 +213,7 @@
             position: relative;
         }
 
+        /* صندوق صورة المفتش الثابتة كلياً وغير القابلة للنقر أو التعديل */
         .photo-container {
             text-align: center;
             margin-bottom: 24px;
@@ -217,14 +230,10 @@
             overflow: hidden;
             position: relative;
             background: #0f2340;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .photo-wrap:hover {
-            transform: scale(1.03);
-            border-color: #fff;
-            box-shadow: 0 12px 35px rgba(196,155,63,0.45);
+            /* صورة ثابتة بدون مؤشر نقر */
+            cursor: default;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .photo-wrap img {
@@ -232,25 +241,27 @@
             height: 100%;
             object-fit: cover;
             display: block;
+            pointer-events: none;
+            user-select: none;
         }
 
-        .photo-overlay {
+        /* شارة رسمية ثابتة أسفل الصورة */
+        .photo-badge {
             position: absolute;
-            inset: 0;
-            background: rgba(12, 37, 64, 0.75);
+            bottom: 12px;
+            right: calc(50% - 70px);
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #0c2540;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 4px;
-            opacity: 0;
-            transition: opacity 0.25s ease;
-            color: #fff;
-            font-size: 11px;
-            font-weight: 700;
+            border: 2px solid #0c2540;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            font-size: 13px;
         }
-
-        .photo-wrap:hover .photo-overlay { opacity: 1; }
 
         .side h1 {
             font-family: 'Amiri', serif;
@@ -277,7 +288,9 @@
             line-height: 1.5;
         }
 
-        .side-section { margin-bottom: 26px; }
+        .side-section {
+            margin-bottom: 26px;
+        }
 
         .side-section h3 {
             font-size: 13.5px;
@@ -299,8 +312,14 @@
             color: #e0eaf3;
         }
 
-        .info-row span:first-child { color: #9ab0c4; font-weight: 500; }
-        .info-row span:last-child { font-weight: 700; }
+        .info-row span:first-child {
+            color: #9ab0c4;
+            font-weight: 500;
+        }
+
+        .info-row span:last-child {
+            font-weight: 700;
+        }
 
         .contact-row {
             display: flex;
@@ -313,10 +332,21 @@
             transition: color 0.2s;
         }
 
-        .contact-row:hover { color: var(--gold-light); }
-        .contact-row i { color: var(--gold); width: 18px; text-align: center; }
+        .contact-row:hover {
+            color: var(--gold-light);
+        }
 
-        .lang-item { margin-bottom: 12px; }
+        .contact-row i {
+            color: var(--gold);
+            width: 18px;
+            text-align: center;
+        }
+
+        /* أشرطة اللغات */
+        .lang-item {
+            margin-bottom: 12px;
+        }
+
         .lang-header {
             display: flex;
             justify-content: space-between;
@@ -339,7 +369,12 @@
             border-radius: 10px;
         }
 
-        .skills-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+        /* المهارات */
+        .skills-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
 
         .skill-badge {
             background: rgba(255,255,255,0.08);
@@ -351,12 +386,14 @@
             border-radius: 12px;
         }
 
+        /* المحتوى الرئيسي */
         .main {
             background: #ffffff;
             padding: 42px 40px;
             color: var(--ink);
         }
 
+        /* ترويسة العلامة الرسمية */
         .brand-row {
             display: flex;
             align-items: center;
@@ -374,7 +411,17 @@
             font-weight: 800;
         }
 
-        .brand-row .text span { color: var(--muted); font-size: 12.5px; display: block; }
+        .brand-row .text span {
+            color: var(--muted);
+            font-size: 12.5px;
+            display: block;
+        }
+
+        .brand-row .emblem {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
         .district-badge {
             background: #f8f5ee;
@@ -387,7 +434,11 @@
             white-space: nowrap;
         }
 
-        .section { margin-bottom: 30px; }
+        /* أقسام السيرة */
+        .section {
+            margin-bottom: 30px;
+        }
+
         .section h2 {
             font-size: 17px;
             color: var(--navy-deep);
@@ -396,8 +447,13 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            position: relative;
         }
-        .section h2 i { color: var(--gold-deep); font-size: 16px; }
+
+        .section h2 i {
+            color: var(--gold-deep);
+            font-size: 16px;
+        }
 
         .about-text {
             font-size: 13.5px;
@@ -411,6 +467,7 @@
             text-align: justify;
         }
 
+        /* المخطط الزمني للتعليم والشهادات */
         .edu-timeline {
             position: relative;
             padding-right: 24px;
@@ -420,19 +477,29 @@
         .edu-timeline::before {
             content: '';
             position: absolute;
-            right: 6px; top: 6px; bottom: 6px;
+            right: 6px;
+            top: 6px;
+            bottom: 6px;
             width: 2px;
             background: linear-gradient(180deg, var(--gold), #d8c49d, var(--line));
         }
 
-        .edu-item { position: relative; padding-bottom: 18px; }
-        .edu-item:last-child { padding-bottom: 0; }
+        .edu-item {
+            position: relative;
+            padding-bottom: 18px;
+        }
+
+        .edu-item:last-child {
+            padding-bottom: 0;
+        }
 
         .edu-item::before {
             content: '';
             position: absolute;
-            right: -24px; top: 4px;
-            width: 14px; height: 14px;
+            right: -24px;
+            top: 4px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background: var(--gold);
             border: 3px solid #fff;
@@ -454,9 +521,18 @@
             gap: 6px;
         }
 
-        .edu-title { font-size: 14.5px; color: var(--navy-deep); font-weight: 800; }
-        .edu-place { font-size: 12px; color: var(--muted); }
+        .edu-title {
+            font-size: 14.5px;
+            color: var(--navy-deep);
+            font-weight: 800;
+        }
 
+        .edu-place {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* المخطط الزمني للمهنة */
         .career-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -484,15 +560,34 @@
         .career-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             height: 3px;
             background: var(--gold);
         }
 
-        .career-card .yr { font-size: 13px; font-weight: 800; color: var(--gold-deep); }
-        .career-card .role { font-size: 12.5px; font-weight: 700; color: var(--navy-deep); margin-top: 4px; line-height: 1.4; }
-        .career-card .pl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .career-card .yr {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--gold-deep);
+        }
 
+        .career-card .role {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--navy-deep);
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        .career-card .pl {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* توزيع نسب الخبرة الدائري */
         .experience-circles {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -512,26 +607,44 @@
         }
 
         .dial {
-            width: 72px; height: 72px;
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-bottom: 8px;
             font-weight: 900;
             font-size: 13px;
             color: var(--navy-deep);
+            position: relative;
         }
 
         .dial-inner {
-            width: 54px; height: 54px;
+            width: 54px;
+            height: 54px;
             border-radius: 50%;
             background: #ffffff;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             box-shadow: inset 0 1px 4px rgba(0,0,0,0.08);
         }
 
-        .stat-label { font-size: 11.5px; font-weight: 700; color: var(--navy-deep); line-height: 1.3; }
-        .stat-years { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+        .stat-label {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--navy-deep);
+            line-height: 1.3;
+        }
 
+        .stat-years {
+            font-size: 10.5px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* تذييل السيرة */
         .cv-footer {
             text-align: center;
             margin-top: 36px;
@@ -546,6 +659,11 @@
             gap: 10px;
         }
 
+        .cv-footer b {
+            color: var(--navy-deep);
+        }
+
+        /* إشعار منبثق */
         .toast-msg {
             position: fixed;
             bottom: 24px;
@@ -573,25 +691,37 @@
             opacity: 1;
         }
 
+        /* استجابة الشاشات */
         @media (max-width: 820px) {
             body { padding-top: 100px; }
             .sheet { grid-template-columns: 1fr; }
-            .main, .side { padding: 32px 20px; }
+            .main { padding: 32px 20px; }
+            .side { padding: 32px 20px; }
             .experience-circles { grid-template-columns: repeat(2, 1fr); }
-            .portal-nav-bar { flex-direction: column; align-items: stretch; }
-            .portal-nav-links, .portal-nav-actions { justify-content: center; }
+            .portal-nav-bar {
+                padding: 10px 14px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .portal-nav-links, .portal-nav-actions {
+                justify-content: center;
+            }
         }
 
+        /* تنسيقات الطباعة والتصدير */
         @media print {
             body { padding-top: 0; background: #fff; }
-            .portal-nav-bar, .photo-overlay, .toast-msg { display: none !important; }
+            .portal-nav-bar, .toast-msg { display: none !important; }
             .cv-wrapper { margin: 0; padding: 0; max-width: 100%; }
             .sheet { box-shadow: none; border: none; }
+            .side { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .main { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
 </head>
 <body>
 
+    <!-- شريط التنقل العلوي الموحد -->
     <header class="portal-nav-bar">
         <nav class="portal-nav-links">
             <a href="index.html" class="portal-nav-link"><i class="fas fa-th-large"></i> البوابة الرئيسية</a>
@@ -599,8 +729,6 @@
             <a href="amal.html" class="portal-nav-link"><i class="fas fa-chalkboard-teacher"></i> الأعمال الموجهة</a>
             <a href="arabic.html" class="portal-nav-link"><i class="fas fa-book-open-reader"></i> تعليمية العربية</a>
             <a href="niqash.html" class="portal-nav-link"><i class="fas fa-comments"></i> ركن النقاش</a>
-            <a href="fahss_ikhtibarat.html" class="portal-nav-link"><i class="fas fa-file-circle-check"></i> فحص الاختبارات</a>
-            <a href="proposals.html" class="portal-nav-link"><i class="fas fa-chart-pie"></i> المقترحات</a>
             <a href="dashboard.html" class="portal-nav-link" id="dashboardLink" style="display:none;"><i class="fas fa-chart-line"></i> لوحة التّحكم</a>
         </nav>
 
@@ -618,18 +746,18 @@
         </div>
     </header>
 
-    <input type="file" id="inspectorPhotoInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)">
-
     <div class="cv-wrapper">
         <div class="sheet">
+            <!-- العمود الجانبي -->
             <aside class="side">
+
+                <!-- صندوق صورة المفتش الثابتة كلياً وغير القابلة للنقر أو التعديل -->
                 <div class="photo-container">
-                    <div class="photo-wrap" onclick="triggerPhotoUpload()" title="اضغط لتغيير الصورة">
-                        <img id="inspectorPhotoImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400" alt="المفتش درويش الهلالي" onerror="this.src='';">
-                        <div class="photo-overlay">
-                            <i class="fas fa-camera fa-lg"></i>
-                            <span>تغيير الصورة</span>
-                        </div>
+                    <div class="photo-wrap" title="المفتش درويش الهلالي">
+                        <img id="inspectorPhotoImg" src="inspector_photo.jpg" alt="المفتش درويش الهلالي" onerror="this.src='/inspector_default.svg';">
+                    </div>
+                    <div class="photo-badge" title="مفتش معتمد">
+                        <i class="fas fa-shield-alt"></i>
                     </div>
                 </div>
 
@@ -637,70 +765,118 @@
                 <div class="role">مفتش التعليم المتوسط</div>
                 <div class="locality">المقاطعة الثانية — مديرية التربية لولاية قسنطينة</div>
 
+                <!-- معلومات شخصية -->
                 <div class="side-section">
                     <h3><i class="fas fa-id-card"></i> بيانات شخصية</h3>
-                    <div class="info-row"><span>تاريخ الميلاد</span><span>27 ديسمبر 1968</span></div>
-                    <div class="info-row"><span>الجنسية</span><span>الجزائرية 🇩🇿</span></div>
-                    <div class="info-row"><span>سنوات الخبرة</span><span style="color:var(--gold-light);">36 سنة</span></div>
-                    <div class="info-row"><span>مكان الإقامة</span><span>قسنطينة، الجزائر</span></div>
+                    <div class="info-row">
+                        <span>تاريخ الميلاد</span>
+                        <span>27 ديسمبر 1968</span>
+                    </div>
+                    <div class="info-row">
+                        <span>الجنسية</span>
+                        <span>الجزائرية 🇩🇿</span>
+                    </div>
+                    <div class="info-row">
+                        <span>سنوات الخبرة</span>
+                        <span style="color:var(--gold-light);">36 سنة</span>
+                    </div>
+                    <div class="info-row">
+                        <span>مكان الإقامة</span>
+                        <span>قسنطينة، الجزائر</span>
+                    </div>
                 </div>
 
+                <!-- وسائل الاتصال -->
                 <div class="side-section">
                     <h3><i class="fas fa-address-book"></i> قنوات التواصل</h3>
-                    <a href="tel:0659681227" class="contact-row"><i class="fas fa-phone-alt"></i><span>0659681227</span></a>
-                    <a href="https://wa.me/213659681227" target="_blank" class="contact-row"><i class="fab fa-whatsapp"></i><span>واتساب: 0659681227</span></a>
-                    <a href="mailto:dlazedine68@gmail.com" class="contact-row"><i class="fas fa-envelope"></i><span>dlazedine68@gmail.com</span></a>
+                    <a href="tel:0659681227" class="contact-row">
+                        <i class="fas fa-phone-alt"></i>
+                        <span>0659681227</span>
+                    </a>
+                    <a href="https://wa.me/213659681227" target="_blank" class="contact-row">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>dlazedine68 (واتساب)</span>
+                    </a>
+                    <a href="mailto:dlazedine68@gmail.com" class="contact-row">
+                        <i class="fas fa-envelope"></i>
+                        <span>dlazedine68@gmail.com</span>
+                    </a>
                 </div>
 
+                <!-- اللغات -->
                 <div class="side-section">
                     <h3><i class="fas fa-language"></i> اللغات</h3>
                     <div class="lang-item">
-                        <div class="lang-header"><span>اللغة العربية</span><span>اللغة الأم (100%)</span></div>
-                        <div class="progress-bar"><div class="progress-fill" style="width: 100%;"></div></div>
+                        <div class="lang-header">
+                            <span>اللغة العربية</span>
+                            <span>اللغة الأم (100%)</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100%;"></div>
+                        </div>
                     </div>
                     <div class="lang-item">
-                        <div class="lang-header"><span>اللغة الإنجليزية</span><span>80%</span></div>
-                        <div class="progress-bar"><div class="progress-fill" style="width: 80%;"></div></div>
+                        <div class="lang-header">
+                            <span>اللغة الإنجليزية</span>
+                            <span>80%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 80%;"></div>
+                        </div>
                     </div>
                     <div class="lang-item">
-                        <div class="lang-header"><span>اللغة الفرنسية</span><span>80%</span></div>
-                        <div class="progress-bar"><div class="progress-fill" style="width: 80%;"></div></div>
+                        <div class="lang-header">
+                            <span>اللغة الفرنسية</span>
+                            <span>80%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 80%;"></div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- المهارات الرقمية والمهنية -->
                 <div class="side-section">
                     <h3><i class="fas fa-laptop-code"></i> الكفاءات والرقمنة</h3>
                     <div class="skills-wrap">
                         <span class="skill-badge"><i class="fas fa-chalkboard-teacher"></i> الإشراف والتفتيش البيداغوجي</span>
-                        <span class="skill-badge"><i class="fas fa-graduation-cap"></i> تكوين إطارات التربية</span>
-                        <span class="skill-badge"><i class="fas fa-tasks"></i> تخطيط الأنشطة الفارقية</span>
-                        <span class="skill-badge"><i class="fas fa-cloud"></i> الإشراف الرقمي السحابي</span>
-                        <span class="skill-badge"><i class="fas fa-file-word"></i> إعداد المذكرات والوثائق</span>
+                        <span class="skill-badge"><i class="fas fa-graduation-cap"></i> تكوين إطارات التربية والتعليم</span>
+                        <span class="skill-badge"><i class="fas fa-tasks"></i> تخطيط الأنشطة والفعاليات التربوية</span>
+                        <span class="skill-badge"><i class="fas fa-cloud"></i> دمج التقنية والإشراف الرقمي السحابي</span>
+                        <span class="skill-badge"><i class="fas fa-file-word"></i> MS Word</span>
+                        <span class="skill-badge"><i class="fas fa-file-excel"></i> MS Excel</span>
+                        <span class="skill-badge"><i class="fas fa-file-pdf"></i> معالجة PDF</span>
                     </div>
                 </div>
+
             </aside>
 
+            <!-- المحتوى الأيمن الرئيسي -->
             <main class="main">
+
+                <!-- ترويسة العلامة الوزارية -->
                 <div class="brand-row">
                     <div class="text">
                         <b>الجمهورية الجزائرية الديمقراطية الشعبية</b>
                         <span style="font-size:11.5px; color:var(--gold-deep); font-weight:700;">وزارة التربية الوطنية — المفتشية العامة للبيداغوجيا</span>
-                        <span>مفتشية التعليم المتوسط — المقاطعة الثانية قسنطينة</span>
+                        <span>مفتشية التعليم المتوسط — المقاطعة الثانية</span>
                     </div>
                     <div class="emblem">
                         <span class="district-badge">مديرية التربية لولاية قسنطينة</span>
                     </div>
                 </div>
 
+                <!-- نبذة عني -->
                 <section class="section">
-                    <h2><i class="fas fa-user-check"></i> نبذة تعريفية</h2>
+                    <h2><i class="fas fa-user-check"></i> معلومات عني</h2>
                     <p class="about-text">
                         من مواليد قسنطينة بتاريخ <strong>27 ديسمبر 1968</strong>، خريج جامعة قسنطينة — كلية الحقوق، اختصاص <strong>علوم قانونية وإدارية</strong>، ومتحصل على <strong>شهادة الكفاءة المهنية للمحاماة (CAPA)</strong> من الكلية نفسها.
-                        اشتغلت بالتعليم وامتهنت التدريس على مدار <strong>تسع وعشرين سنة كمعلم وأستاذ مكوّن</strong>، و<strong>سبع سنوات كمفتش للتعليم المتوسط</strong>، لتكون حصيلة الخبرة <strong>ستًّا وثلاثين (36) سنة</strong> مكرسة لبناء الأجيال والارتقاء بالأداء البيداغوجي.
-                        حاصل حديثًا على <strong>شهادة الماستر في القانون</strong> من جامعة العربي بن مهيدي — أم البواقي، تخصص <strong>قانون الأعمال</strong> دفعة 2026.
+                        اشتغلت بالتعليم وامتهنت التدريس على مدار <strong>تسعٍِِ وعشرين سنةً كمعلم وأستاذ مكوّن</strong>، و<strong>سبع سنوات كمفتش للتعليم المتوسط</strong>، لتكون حصيلة الخبرة <strong>ستًّا وثلاثين (36) سنة</strong> مكرسة لبناء الأجيال والارتقاء بالأداء البيداغوجي.
+                        حاصل حديثًا على <strong>شهادة الماستر في القانون</strong> من جامعة العربي بن مهيدي — أم البواقي، تخصص <strong>قانون الأعمال (Business Law)</strong> دفعة 2026.
                     </p>
                 </section>
 
+                <!-- التعليم والشهادات -->
                 <section class="section">
                     <h2><i class="fas fa-graduation-cap"></i> التعليم والشهادات الأكاديمية</h2>
                     <div class="edu-timeline">
@@ -739,8 +915,9 @@
                     </div>
                 </section>
 
+                <!-- المخطط الزمني للمهنة -->
                 <section class="section">
-                    <h2><i class="fas fa-route"></i> المخطط الزمني للمهنة</h2>
+                    <h2><i class="fas fa-route"></i> المخطط الزمني للمهنة (مسار متدرج)</h2>
                     <div class="career-grid">
                         <div class="career-card">
                             <div class="yr">1990</div>
@@ -748,70 +925,98 @@
                             <div class="pl">مرحلة الانطلاق والتأسيس الميداني</div>
                         </div>
                         <div class="career-card">
+                            <div class="yr">1998</div>
+                            <div class="role">أستاذ التعليم الأساسي</div>
+                            <div class="pl">مشارك في دورة المعهد التكنولوجي مريم بوعتورة في مواد التكوين: البرامج والمناهج، الكتاب المدرسي، والتقويم التربوي</div>
+                        </div>
+                        <div class="career-card">
                             <div class="yr">2005</div>
-                            <div class="role">إصلاح المناهج</div>
-                            <div class="pl">عضو في لجنة تقويم الكتاب المدرسي</div>
+                            <div class="role">أستاذ التعليم الأساسي</div>
+                            <div class="pl">عضو في لجنة إصلاح وتقويم الكتاب المدرسي 2005 سنوات الإصلاح</div>
                         </div>
                         <div class="career-card">
                             <div class="yr">2014</div>
                             <div class="role">أستاذ التعليم المتوسط</div>
                             <div class="pl">التعمق الديداكتيكي وتطوير المناهج</div>
                         </div>
-                        <div class="career-card">
+                        <div class="career-card" style="border-color:var(--gold); background:#fffdf8;">
                             <div class="yr">2015</div>
                             <div class="role">أستاذ مكوّن متخصص</div>
                             <div class="pl">تأطير وتكوين الأساتذة الجدد</div>
                         </div>
                         <div class="career-card" style="border-color:var(--gold); background:#fffdf8;">
-                            <div class="yr">2018 - الآن</div>
+                            <div class="yr">2018</div>
+                            <div class="role">منتدب في رتبة مفتش التربية والتكوين</div>
+                            <div class="pl">المفتشية العامة — متابعة المقاطعة</div>
+                        </div>
+                        <div class="career-card" style="border-color:var(--gold); background:#fffdf8;">
+                            <div class="yr">من 2019 إلى يومنا الحالي</div>
                             <div class="role">مفتش التعليم المتوسط</div>
-                            <div class="pl">المقاطعة الثانية قسنطينة</div>
+                            <div class="pl">مسؤول المقاطعة الثانية — مديرية التربية قسنطينة</div>
+                        </div>
+                        <div class="career-card" style="border-color:var(--gold); background:#fffdf8;">
+                            <div class="yr">2025 / 2027</div>
+                            <div class="role">الإشراف التربوي والرقمنة</div>
+                            <div class="pl">المقاطعة الثانية — قسنطينة</div>
                         </div>
                     </div>
                 </section>
 
+                <!-- توزيع الخبرة المئوي (100%) -->
                 <section class="section">
-                    <h2><i class="fas fa-chart-pie"></i> توزيع سنوات الخبرة المتراكمة (36 سنة = 100%)</h2>
+                    <h2><i class="fas fa-chart-pie"></i> توزيع سنوات الخبرة المتراكمة (حاصل 36 سنة = 100%)</h2>
                     <div class="experience-circles">
+
                         <div class="circle-stat">
                             <div class="dial" style="background: conic-gradient(var(--navy) 0% 65%, #e2e8f0 65% 100%);">
                                 <div class="dial-inner">65%</div>
                             </div>
                             <div class="stat-label">أستاذ تعليم أساسي</div>
-                            <div class="stat-years">23 سنة خبرة</div>
+                            <div class="stat-years">22.75 سنة خبرة</div>
                         </div>
+
                         <div class="circle-stat">
                             <div class="dial" style="background: conic-gradient(var(--navy-light) 0% 15%, #e2e8f0 15% 100%);">
                                 <div class="dial-inner">15%</div>
                             </div>
                             <div class="stat-label">أستاذ التعليم المتوسط</div>
-                            <div class="stat-years">5.5 سنوات</div>
+                            <div class="stat-years">5.25 سنوات</div>
                         </div>
+
                         <div class="circle-stat">
                             <div class="dial" style="background: conic-gradient(var(--gold) 0% 12%, #e2e8f0 12% 100%);">
                                 <div class="dial-inner">12%</div>
                             </div>
                             <div class="stat-label">مفتش التعليم المتوسط</div>
-                            <div class="stat-years">4.5 سنوات</div>
+                            <div class="stat-years">4.2 سنوات</div>
                         </div>
+
                         <div class="circle-stat">
                             <div class="dial" style="background: conic-gradient(var(--gold-deep) 0% 8%, #e2e8f0 8% 100%);">
                                 <div class="dial-inner">08%</div>
                             </div>
                             <div class="stat-label">أستاذ مكوّن</div>
-                            <div class="stat-years">3 سنوات</div>
+                            <div class="stat-years">2.8 سنوات</div>
                         </div>
+
                     </div>
                 </section>
 
+                <!-- التذييل الرسمي -->
                 <footer class="cv-footer">
-                    <div><b>مفتشية التعليم المتوسط</b> — المقاطعة الثانية قسنطينة</div>
-                    <div>البريد الرسمي: <a href="mailto:dlazedine68@gmail.com" style="color:var(--navy-deep); text-decoration:none; font-weight:700;">dlazedine68@gmail.com</a></div>
+                    <div>
+                        <b>مفتشية التعليم المتوسط</b> — المقاطعة الثانية قسنطينة
+                    </div>
+                    <div>
+                        البريد الرسمي: <a href="mailto:dlazedine68@gmail.com" style="color:var(--navy-deep); text-decoration:none; font-weight:700;">dlazedine68@gmail.com</a>
+                    </div>
                 </footer>
+
             </main>
         </div>
     </div>
 
+    <!-- إشعار التنبيه -->
     <div id="toastMsg" class="toast-msg">
         <i class="fas fa-check-circle" style="color:#7ee787;"></i>
         <span id="toastText">تمت العملية بنجاح</span>
@@ -820,92 +1025,86 @@
     <script>
     (function() {
         'use strict';
+
         const SESSION_KEY = 'pgb_session';
 
         function getPortalSession() {
             try {
-                let raw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY + '_persistent');
-                if (!raw) raw = sessionStorage.getItem('portal_session_v2') || localStorage.getItem('portal_session_v2_persistent');
-                if (raw) {
-                    const session = JSON.parse(raw);
-                    if (session && session.user && Date.now() <= session.expiresAt) return session.user;
-                }
-                const legacy = localStorage.getItem('portalUser');
-                if (legacy) {
-                    const p = JSON.parse(legacy);
-                    return { fullName: p.name || p.username, role: (p.role === 'مفتش' || p.role === 'inspector') ? 'inspector' : (p.role === 'مشرف' || p.role === 'supervisor' ? 'supervisor' : 'teacher') };
-                }
-                return null;
+                const raw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY + '_persistent');
+                if (!raw) return null;
+                const session = JSON.parse(raw);
+                if (!session || Date.now() > session.expiresAt) return null;
+                return session.user || null;
             } catch (e) { return null; }
         }
 
         const AuthSystem = {
             currentProfile: null,
-            init() {
-                const user = getPortalSession();
-                if (user) {
-                    this.currentProfile = user;
+            async init() {
+                const portalUser = getPortalSession();
+                if (portalUser) {
+                    this.currentProfile = {
+                        id: portalUser.id,
+                        full_name: portalUser.fullName || portalUser.username,
+                        email: portalUser.email || '',
+                        role: portalUser.role === 'inspector' ? 'admin' : 'teacher',
+                        active: true
+                    };
+
                     const badge = document.getElementById('userBadge');
                     if (badge) {
                         badge.style.display = 'inline-flex';
-                        document.getElementById('userBadgeName').textContent = user.fullName || user.username;
+                        document.getElementById('userBadgeName').textContent = this.currentProfile.full_name;
                     }
-                    const canManage = user.role === 'inspector' || user.role === 'supervisor' || user.role === 'مفتش' || user.role === 'مشرف';
-                    if (canManage) {
+
+                    if (this.currentProfile.role === 'admin') {
                         const dashLink = document.getElementById('dashboardLink');
                         if (dashLink) dashLink.style.display = 'inline-flex';
                     }
                 }
+
+                // إقلاع الصورة الثابتة فقط دون أي تفعيل لرفع أو تعديل
                 initInspectorPhoto();
             },
+
             logout() {
                 if (!confirm('هل تريد تسجيل الخروج والعودة إلى البوابة؟')) return;
                 try {
                     sessionStorage.removeItem(SESSION_KEY);
                     localStorage.removeItem(SESSION_KEY + '_persistent');
-                    sessionStorage.removeItem('portal_session_v2');
-                    localStorage.removeItem('portal_session_v2_persistent');
-                    localStorage.removeItem('portalUser');
                 } catch(e) {}
                 window.location.href = 'index.html';
             }
         };
         window.AuthSystem = AuthSystem;
 
-        function showToast(text) {
-            const toast = document.getElementById('toastMsg');
-            const toastText = document.getElementById('toastText');
-            if (!toast || !toastText) return;
-            toastText.textContent = text;
-            toast.className = 'toast-msg show';
-            setTimeout(() => { toast.className = 'toast-msg'; }, 3500);
-        }
+        const DEFAULT_PHOTO = 'inspector_photo.jpg';
+        const STORAGE_KEY = 'inspector_custom_photo';
 
         function initInspectorPhoto() {
             const imgElem = document.getElementById('inspectorPhotoImg');
             if (!imgElem) return;
-            const localPhoto = localStorage.getItem('inspector_custom_photo');
-            if (localPhoto) imgElem.src = localPhoto;
-        }
 
-        function triggerPhotoUpload() {
-            document.getElementById('inspectorPhotoInput')?.click();
-        }
-        window.triggerPhotoUpload = triggerPhotoUpload;
+            const localPhoto = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('inspector_avatar_img');
+            if (localPhoto) {
+                imgElem.src = localPhoto;
+            } else {
+                imgElem.src = DEFAULT_PHOTO;
+            }
 
-        function handlePhotoUpload(event) {
-            const file = event.target.files && event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const imgElem = document.getElementById('inspectorPhotoImg');
-                if (imgElem) imgElem.src = e.target.result;
-                try { localStorage.setItem('inspector_custom_photo', e.target.result); } catch(_) {}
-                showToast('تم تحديث صورة المفتش بنجاح');
-            };
-            reader.readAsDataURL(file);
+            if (typeof fbDb !== 'undefined' && fbDb) {
+                ensureAnonAuth().then(() => {
+                    fbDb.collection('platform_shared').doc('branding').get()
+                        .then(doc => {
+                            if (doc.exists && doc.data() && doc.data().inspectorPhoto) {
+                                const cloudPhoto = doc.data().inspectorPhoto;
+                                imgElem.src = cloudPhoto;
+                            }
+                        })
+                        .catch(err => console.log('Firestore branding check:', err));
+                });
+            }
         }
-        window.handlePhotoUpload = handlePhotoUpload;
 
         AuthSystem.init();
     })();
