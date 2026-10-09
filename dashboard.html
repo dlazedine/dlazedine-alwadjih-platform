@@ -25,6 +25,34 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBdv2RJ7EzlnVQcXyyozlLhVKdgwaKQdaY",
+        authDomain: "mou3ladja.firebaseapp.com",
+        projectId: "mou3ladja",
+        storageBucket: "mou3ladja.firebasestorage.app",
+        messagingSenderId: "986880549463",
+        appId: "1:986880549463:web:b4de098099622040bfb912",
+        measurementId: "G-E0BZPDCZB9"
+    };
+    let fbAuth = null, fbDb = null;
+    try {
+        if (typeof firebase !== 'undefined') {
+            firebase.initializeApp(firebaseConfig);
+            fbAuth = firebase.auth();
+            fbDb = firebase.firestore();
+        }
+    } catch (e) { console.error('⚠️ فشل الاتصال بـ Firebase:', e); }
+
+    const SUPABASE_URL = "https://yzxyttieobyblznaehcl.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u";
+    let sbMain = null;
+    try {
+        if (typeof window.supabase !== 'undefined') {
+            sbMain = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+    } catch (e) { console.error('⚠️ فشل الاتصال بـ Supabase:', e); }
+</script>
 
 <style>
     :root {
@@ -35,32 +63,42 @@
         --border-color: #d9ceb4; --radius: 12px; --shadow: 0 4px 18px rgba(14,39,68,0.06); --transition: all 0.22s ease;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
         font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
-        color: var(--text-dark); line-height: 1.8; background-color: var(--bg-body);
+        color: var(--text-dark);
+        line-height: 1.8;
+        background-color: var(--bg-body);
         background-image: 
             radial-gradient(circle at 50% 0%, rgba(196,155,63,0.12) 0%, transparent 60%),
             radial-gradient(circle at 100% 100%, rgba(14,39,68,0.06) 0%, transparent 50%),
             url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><defs><pattern id='islamic-dash' width='80' height='80' patternUnits='userSpaceOnUse'><g fill='none' stroke='%23c49b3f' stroke-width='0.6' opacity='0.22'><path d='M40 16 L47 27 L60 20 L57 34 L71 39 L60 48 L68 60 L54 61 L51 75 L40 66 L29 75 L26 61 L12 60 L20 48 L9 39 L23 34 L20 20 L33 27 Z'/><rect x='28' y='28' width='24' height='24' rx='2'/><rect x='28' y='28' width='24' height='24' rx='2' transform='rotate(45 40 40)'/><circle cx='0' cy='0' r='14'/><circle cx='80' cy='0' r='14'/><circle cx='0' cy='80' r='14'/><circle cx='80' cy='80' r='14'/><circle cx='40' cy='40' r='6' fill='%23c49b3f' fill-opacity='0.08'/></g></pattern></defs><rect width='80' height='80' fill='url(%23islamic-dash)'/></svg>");
         background-attachment: fixed;
     }
+
     #ssoLoadingScreen { min-height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; }
     .spin { width:36px; height:36px; border:3px solid #d9ceb4; border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
     #appScreen { display:none; }
+
     .user-bar { background: linear-gradient(135deg, #091c33 0%, #0e2744 50%, #153861 100%); color:#f7e7c4; padding:8px 20px; display:flex; align-items:center; justify-content:space-between; font-size:12px; flex-wrap:wrap; gap:8px; border-bottom:3px solid var(--gold); box-shadow:0 3px 15px rgba(9,28,51,0.3); }
     .user-bar a, .user-bar button { color:#faeccf; text-decoration:none; background:linear-gradient(135deg, rgba(196,155,63,0.18) 0%, rgba(14,39,68,0.7) 100%); border:1.5px solid var(--gold); font-family:inherit; font-size:11.5px; font-weight:700; padding:4px 11px; border-radius:7px; cursor:pointer; transition:var(--transition); box-shadow:0 2px 5px rgba(0,0,0,0.2); display:inline-flex; align-items:center; gap:4px; }
     .user-bar a:hover, .user-bar button:hover { background:linear-gradient(135deg, #d4af37 0%, #aa7c11 100%); color:#0c2540; border-color:#fff2cc; transform:translateY(-1.5px); }
     .user-bar .right { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+
     .hero { background: linear-gradient(150deg, #091c33 0%, #0e2744 50%, #153861 100%); color:#fff; padding:22px 20px; text-align:center; border-bottom:1px solid rgba(196,155,63,0.3); }
     .hero h1 { font-family:'Amiri',serif; font-size: clamp(18px, 3.2vw, 24px); margin-bottom:4px; font-weight:700; color:#fff; }
     .hero p { color:#fce8bd; font-size:12px; opacity:0.9; }
+
     .main-tabs { display:flex; justify-content:center; gap:6px; background:#fff; border-bottom:2px solid var(--border-color); padding:0 16px; position:sticky; top:0; z-index:20; overflow-x:auto; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
     .main-tab { padding:11px 16px; cursor:pointer; font-size:12.5px; font-weight:700; color: var(--text-muted); border-bottom:3px solid transparent; display:flex; align-items:center; gap:6px; white-space:nowrap; transition:var(--transition); }
     .main-tab:hover { color: var(--primary); }
     .main-tab.active { color: var(--primary); border-bottom-color: var(--gold); }
+
     .tab-panel { display:none; max-width:1100px; margin:0 auto; padding:18px 16px 50px; }
     .tab-panel.active { display:block; }
+
     .btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; padding:5px 12px; border-radius:8px; border:1.5px solid transparent; font-family:inherit; font-size:12px; font-weight:800; cursor:pointer; transition:var(--transition); box-shadow:0 2px 6px rgba(0,0,0,0.12); }
     .btn:hover { transform:translateY(-1.5px); opacity:0.96; }
     .btn:active { transform:translateY(0); }
@@ -72,8 +110,10 @@
     .btn-outline { background:#fff; border:1.5px solid var(--border-color); color:var(--text-dark); }
     .btn-outline:hover { border-color:var(--gold); color:var(--primary); }
     .btn-sm { padding:4px 9px; font-size:11px; border-radius:6px; }
+
     .card-box { background: var(--bg-card); border:1px solid var(--border-color); border-top:3px solid var(--gold); border-radius: var(--radius); padding:16px; box-shadow: var(--shadow); margin-bottom:16px; }
     .card-box h3 { font-size:14.5px; color: var(--primary); margin-bottom:12px; display:flex; align-items:center; gap:7px; font-weight:700; }
+
     .user-card { display:flex; align-items:center; gap:12px; padding:11px 13px; border:1px solid var(--border-color); border-radius:10px; margin-bottom:8px; flex-wrap:wrap; background:#fff; transition:var(--transition); }
     .user-card:hover { border-color:var(--gold); box-shadow:0 3px 10px rgba(196,155,63,0.15); }
     .user-card-avatar { width:38px; height:38px; border-radius:50%; background: linear-gradient(135deg,#faf7ef,#f4eedd); color: var(--primary); border:1.5px solid var(--gold); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0; }
@@ -84,21 +124,26 @@
     .user-card-role.inspector { background:#f5e6c8; color:#8c6423; border:1px solid var(--gold); }
     .user-card-role.teacher { background:#eef3f9; color:var(--primary); border:1px solid #d0deee; }
     .user-card-role.supervisor { background:#e3f4f5; color:var(--teal); border:1px solid #c2e5e7; }
+
     .field-group { margin-bottom:11px; }
     .field-group label { display:block; font-size:12px; font-weight:700; color: var(--primary); margin-bottom:4px; }
     .field-group input, .field-group select { width:100%; padding:7px 11px; border:1.5px solid var(--border-color); border-radius:7px; font-family:inherit; font-size:12.5px; }
     .field-group input:focus, .field-group select:focus { outline:none; border-color:var(--gold); }
+
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(9,28,51,0.6); z-index:100; align-items:center; justify-content:center; padding:16px; }
     .modal-overlay.active { display:flex; }
     .modal-box { background:#fff; border-radius: var(--radius); width:100%; max-width:500px; padding:20px; max-height:85vh; overflow-y:auto; position:relative; border-top:3.5px solid var(--gold); box-shadow:0 12px 35px rgba(0,0,0,0.3); }
     .modal-close { position:absolute; top:14px; left:14px; background:none; border:none; font-size:20px; color:var(--text-muted); cursor:pointer; }
+
     .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:11px; margin-bottom:16px; }
     .stat-card { background: var(--bg-card); border:1px solid var(--border-color); border-top:3px solid var(--gold); border-radius: var(--radius); padding:13px; text-align:center; box-shadow:var(--shadow); }
     .stat-card .number { font-size:22px; font-weight:900; color: var(--primary); }
     .stat-card .label { font-size:11.5px; color: var(--text-muted); margin-top:3px; }
+
     table.teacher-table { width:100%; border-collapse:collapse; font-size:12.5px; }
     table.teacher-table th { background: linear-gradient(180deg, #f2ecdd 0%, #e6ddc5 100%); padding:8px 9px; text-align:right; color: var(--primary); font-size:11.5px; font-weight:700; border:1px solid var(--border-color); }
     table.teacher-table td { padding:8px 9px; border:1px solid var(--border-color); }
+
     .log-feed { max-height:400px; overflow-y:auto; }
     .log-row { display:flex; align-items:center; gap:9px; padding:8px; border-bottom:1px solid var(--border-color); font-size:12px; }
     .log-action-icon { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; color:#fff; flex-shrink:0; }
@@ -110,6 +155,7 @@
     .status-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-inline-end:5px; }
     .status-dot.active { background: var(--success); }
     .status-dot.inactive { background: var(--danger); }
+
     @media print {
         .user-bar, .main-tabs, .btn, .modal-overlay { display:none!important; }
         body { background:#fff!important; background-image:none!important; }
@@ -148,6 +194,8 @@
                     <p style="margin:0; color:#fce8bd; font-size:12px;">إدارة حسابات الأساتذة ومراقبة النشاطات وسجلات المعالجة البيداغوجية</p>
                 </div>
             </div>
+
+            <!-- بطاقة شعار المقاطعة في الترويسة -->
             <div class="muqataa-logo-box" onclick="changeFooterLogo()" title="انقر لتغيير أو رفع شعار المقاطعة" style="cursor:pointer; display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.1); padding:6px 14px; border-radius:10px; border:1px dashed rgba(255,255,255,0.35); transition:var(--transition);">
                 <img id="heroMuqataaLogo" class="muqataa-logo-img" alt="شعار المقاطعة" style="display:none; max-width:44px; max-height:44px; object-fit:contain; border-radius:6px; background:#fff; padding:2px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
                 <div id="heroMuqataaPlaceholder" class="muqataa-logo-placeholder" style="width:40px; height:40px; border-radius:8px; background:rgba(196,155,63,0.3); display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--gold-light); font-size:15px;">
@@ -161,12 +209,14 @@
         </div>
     </div>
 
+    <!-- شريط التبويبات الثلاثي -->
     <div class="main-tabs">
         <div class="main-tab active" data-maintab="users"><i class="fas fa-users-cog"></i> إدارة المستخدمين</div>
         <div class="main-tab" data-maintab="monitor"><i class="fas fa-satellite-dish"></i> مراقبة النشاطات</div>
         <div class="main-tab" data-maintab="pedagogical"><i class="fas fa-chalkboard-teacher"></i> المعالجة البيداغوجية</div>
     </div>
 
+    <!-- ============ إدارة المستخدمين ============ -->
     <div class="tab-panel active" id="panel-users">
         <div class="card-box">
             <h3><i class="fas fa-users-cog"></i> إدارة المستخدمين</h3>
@@ -184,12 +234,14 @@
         </div>
     </div>
 
+    <!-- ============ مراقبة النشاطات ============ -->
     <div class="tab-panel" id="panel-monitor">
         <div class="stats-grid">
             <div class="stat-card"><div class="number" id="monitorTotalActions">0</div><div class="label">إجمالي العمليات</div></div>
             <div class="stat-card"><div class="number" id="monitorActiveTeachers">0</div><div class="label">أساتذة نشطون</div></div>
             <div class="stat-card"><div class="number" id="monitorToday">0</div><div class="label">عمليات اليوم</div></div>
         </div>
+
         <div class="card-box">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
                 <h3 style="margin-bottom:0;"><i class="fas fa-chart-bar"></i> إحصائيات مفصّلة لكل أستاذ(ة)</h3>
@@ -202,6 +254,7 @@
                 </table>
             </div>
         </div>
+
         <div class="card-box">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
                 <h3 style="margin-bottom:0;"><i class="fas fa-stream"></i> سجلّ العمليات الحيّ</h3>
@@ -216,6 +269,7 @@
         </div>
     </div>
 
+    <!-- ============ المعالجة البيداغوجية ============ -->
     <div class="tab-panel" id="panel-pedagogical">
         <div class="stats-grid">
             <div class="stat-card"><div class="number" id="pedTotalRecords">0</div><div class="label">إجمالي السجلات</div></div>
@@ -223,6 +277,7 @@
             <div class="stat-card"><div class="number" id="pedTotalStudents">0</div><div class="label">إجمالي المتعلمين</div></div>
             <div class="stat-card"><div class="number" id="pedTotalPlans">0</div><div class="label">خطط معالجة</div></div>
         </div>
+
         <div class="card-box">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
                 <h3 style="margin-bottom:0;"><i class="fas fa-list-alt"></i> كل السجلات المُضافة من الأساتذة</h3>
@@ -244,16 +299,27 @@
                 <table class="teacher-table">
                     <thead>
                         <tr>
-                            <th>#</th><th>المؤسسة</th><th>الأستاذ</th><th>الأقسام</th><th>التلاميذ</th>
-                            <th>المعايير</th><th>المتعلمون</th><th>خطة</th><th>التاريخ</th><th>الإجراءات</th>
+                            <th>#</th>
+                            <th>المؤسسة</th>
+                            <th>الأستاذ</th>
+                            <th>الأقسام</th>
+                            <th>التلاميذ</th>
+                            <th>المعايير</th>
+                            <th>المتعلمون</th>
+                            <th>خطة</th>
+                            <th>التاريخ</th>
+                            <th>الإجراءات</th>
                         </tr>
                     </thead>
-                    <tbody id="pedTableBody"><tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;">اضغط "تحديث"</td></tr></tbody>
+                    <tbody id="pedTableBody">
+                        <tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;">اضغط "تحديث"</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
     </div>
 
+    <!-- تذييل لوحة التحكم -->
     <div style="max-width:1100px; margin:20px auto 40px; padding:0 16px;">
         <div class="card-box" style="text-align:center; padding:18px; border-top:3.5px solid var(--gold);">
             <div style="display:flex; justify-content:center; align-items:center; gap:28px; flex-wrap:wrap; margin-bottom:12px;">
@@ -263,6 +329,7 @@
                     </div>
                     <span style="font-size:11px; color:var(--text-muted); font-weight:700;">وزارة التربية الوطنية</span>
                 </div>
+
                 <div class="footer-logo-editable" onclick="changeFooterLogo()" title="انقر لتغيير أو رفع شعار المقاطعة" style="cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 14px; border-radius:10px; border:1.5px dashed var(--gold); transition:var(--transition); background:var(--bg-body);">
                     <img id="footerMuqataaLogo" class="muqataa-logo-img" alt="شعار المقاطعة" style="display:none; max-width:56px; max-height:56px; object-fit:contain; border-radius:6px; filter:drop-shadow(0 2px 5px rgba(0,0,0,0.1));">
                     <div id="footerMuqataaPlaceholder" class="muqataa-logo-placeholder" style="width:44px; height:44px; border-radius:8px; background:#fff; border:1.5px dashed var(--gold); display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--gold-deep); font-size:16px;">
@@ -273,6 +340,7 @@
                     <span style="font-size:9.5px; color:var(--text-muted);"><i class="fas fa-sync-alt"></i> انقر لتعديل الشعار</span>
                 </div>
             </div>
+
             <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
                 <a href="index.html" class="btn btn-sm btn-gold" style="text-decoration:none;"><i class="fas fa-home"></i>  البوابة الرئيسية</a>
                 <a href="moualaja.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-stethoscope"></i> منصة المعالجة  البيداغوجية</a>
@@ -280,6 +348,7 @@
                 <a href="amal.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-chalkboard-teacher"></i> منصة الأعمال  الموجهة</a>
                 <a href="niqash.html" class="btn btn-sm btn-outline" style="text-decoration:none;"><i class="fas fa-comments"></i> ركن المحادثة</a>
             </div>
+
             <div style="font-size:11.5px; color:var(--text-muted); border-top:1px solid var(--border-color); padding-top:8px; margin-top:4px;">
                 مفتشية التعليم المتوسط لمادة اللغة العربية والتربية الإسلامية — المفتش(ة): <strong>درويش الهلالي</strong> · هاتف: 0659681227
             </div>
@@ -287,6 +356,7 @@
     </div>
 </div>
 
+<!-- ============ نافذة المستخدم ============ -->
 <div class="modal-overlay" id="userModal">
     <div class="modal-box">
         <button class="modal-close" onclick="closeUserModal()">&times;</button>
@@ -313,15 +383,10 @@
 
 <div id="toastContainer" style="position:fixed; top:20px; left:20px; z-index:9999; display:flex; flex-direction:column; gap:8px;"></div>
 
-<!-- ✅ الجسر الوحيد المطلوب -->
-<script src="data-bridge.js"></script>
-
 <script>
 // ============================================================
-//  كود لوحة التحكم (نظيف، يعتمد على DataBridge فقط)
+//  1. الجلسة الموحّدة (بدون شاشة إعادة تأكيد)
 // ============================================================
-
-// ---------- الجلسة ----------
 function getPortalSession() {
     try {
         const raw = sessionStorage.getItem('pgb_session') || localStorage.getItem('pgb_session_persistent');
@@ -340,37 +405,130 @@ let currentUser = null;
 let cachedUsers = [];
 let cachedCredentials = {};
 
-// ---------- أدوات ----------
-function generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
-function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
-function formatDateGeorgian() { return new Date().toISOString().split('T')[0]; }
-function formatDateTimeAr(date) {
-    const d = new Date(date);
-    return d.toLocaleDateString('ar-DZ', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' + d.toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' });
-}
-function generateRandomPassword(length = 10) {
-    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
-    let password = '';
-    for (let i = 0; i < length; i++) password += chars.charAt(Math.floor(Math.random() * chars.length));
-    return password;
-}
-function showToast(message, type = 'info', duration = 3500) {
-    const colors = { info: 'var(--info)', success: 'var(--success)', error: 'var(--danger)', warning: 'var(--warning)' };
-    const toast = document.createElement('div');
-    toast.style.cssText = `background:${colors[type] || colors.info}; color:#fff; padding:9px 16px; border-radius:8px; font-weight:700; font-size:12px; box-shadow:0 4px 15px rgba(0,0,0,0.18);`;
-    toast.textContent = message;
-    document.getElementById('toastContainer').appendChild(toast);
-    setTimeout(() => toast.remove(), duration);
-}
-
 async function hashPassword(password) {
     const encoder = new TextEncoder();
     const data = encoder.encode(password + 'pgb_salt_2026');
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
+async function verifyPassword(password, hash) { return (await hashPassword(password)) === hash; }
 
-// ---------- الدخول ----------
+function ensureAnonAuth() {
+    if (!fbAuth) return Promise.resolve(null);
+    const p = new Promise((resolve) => {
+        if (fbAuth.currentUser) { resolve(fbAuth.currentUser); return; }
+        fbAuth.signInAnonymously().catch(() => {});
+        const unsub = fbAuth.onAuthStateChanged((u) => { if (u) { unsub(); resolve(u); } });
+    });
+    const t = new Promise((resolve) => setTimeout(() => resolve(null), 8000));
+    return Promise.race([p, t]);
+}
+
+function ensureSupabaseSession() {
+    if (!sbMain) return Promise.resolve(null);
+    const attempt = sbMain.auth.getSession().then(({ data }) => {
+        if (data && data.session) return data.session;
+        return sbMain.auth.signInAnonymously().then(({ data: signInData, error }) => {
+            if (error) { console.error('⚠️ تعذّر إنشاء جلسة Supabase موثّقة:', error); return null; }
+            return signInData ? signInData.session : null;
+        });
+    }).catch((e) => { console.error('⚠️ Supabase ensureSupabaseSession:', e); return null; });
+    const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 8000));
+    return Promise.race([attempt, timeout]);
+}
+
+function getUsersDocRef() {
+    if (!fbDb) return null;
+    try { return fbDb.collection('platform_shared').doc('users'); }
+    catch (e) { return null; }
+}
+function getCredentialsDocRef() {
+    if (!fbDb) return null;
+    try { return fbDb.collection('platform_shared').doc('credentials'); }
+    catch (e) { return null; }
+}
+
+let cloudReadyPromise = null;
+function listenToCloudData() {
+    if (cloudReadyPromise) return cloudReadyPromise;
+    const usersRef = getUsersDocRef();
+    const credsRef = getCredentialsDocRef();
+    if (!usersRef || !credsRef) {
+        cloudReadyPromise = Promise.resolve({ users: cachedUsers, credentials: cachedCredentials });
+        return cloudReadyPromise;
+    }
+
+    const usersPromise = new Promise((resolve) => {
+        usersRef.onSnapshot(
+            (doc) => {
+                cachedUsers = (doc.exists && Array.isArray(doc.data().list)) ? doc.data().list : [];
+                resolve();
+                if (document.getElementById('appScreen') && document.getElementById('appScreen').style.display !== 'none') {
+                    renderUsersList();
+                }
+            },
+            (err) => { console.error('users snapshot error:', err); resolve(); }
+        );
+    });
+
+    const credsPromise = new Promise((resolve) => {
+        credsRef.onSnapshot(
+            (doc) => {
+                cachedCredentials = (doc.exists && typeof doc.data().hashes === 'object') ? doc.data().hashes : {};
+                resolve();
+            },
+            (err) => { console.error('credentials snapshot error:', err); resolve(); }
+        );
+    });
+
+    const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 8000));
+    cloudReadyPromise = Promise.race([Promise.all([usersPromise, credsPromise]), timeoutPromise])
+        .then(() => ({ users: cachedUsers, credentials: cachedCredentials }));
+    return cloudReadyPromise;
+}
+
+function getUsers() { return cachedUsers; }
+function getCredentials() { return cachedCredentials; }
+
+async function saveUsers(users) {
+    const sanitized = users.map(u => {
+        const copy = { ...u };
+        delete copy.passwordHash;
+        return copy;
+    });
+    cachedUsers = sanitized;
+    try {
+        const docRef = getUsersDocRef();
+        if (!docRef) throw new Error('لا يوجد اتصال');
+        await docRef.set({ list: sanitized, updatedAt: new Date().toISOString() });
+        return true;
+    } catch (e) {
+        console.error(e);
+        showToast('⚠️ تعذّر حفظ قائمة المستخدمين', 'error');
+        return false;
+    }
+}
+
+async function saveCredentialHash(userId, passwordHash) {
+    const creds = { ...cachedCredentials };
+    if (passwordHash === null) {
+        delete creds[userId];
+    } else {
+        creds[userId] = passwordHash;
+    }
+    cachedCredentials = creds;
+    try {
+        const docRef = getCredentialsDocRef();
+        if (!docRef) throw new Error('لا يوجد اتصال');
+        await docRef.set({ hashes: creds, updatedAt: new Date().toISOString() });
+        return true;
+    } catch (e) {
+        console.error(e);
+        showToast('⚠️ تعذّر حفظ كلمة المرور على الخادم', 'error');
+        return false;
+    }
+}
+
 function handleLogout() {
     if (!confirm('هل تريد تسجيل الخروج؟')) return;
     try { PortalCloud.signOut(); } catch (e) {}
@@ -383,29 +541,18 @@ function enterApp(user) {
     document.getElementById('appScreen').style.display = 'block';
     document.getElementById('userNameLabel').textContent = user.fullName || user.username;
     setupMainTabs();
-    refreshAllData();
+    renderUsersList();
+    initMonitor();
+    loadPedagogicalRecords();
     loadCustomFooterLogo();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!__portalUser || __portalUser.role !== 'inspector') return;
+    // الدخول المباشر بدون شاشة إعادة تأكيد
     enterApp(__portalUser);
 });
 
-// ---------- تحديث كل البيانات ----------
-async function refreshAllData() {
-    // 1. المستخدمون
-    cachedUsers = await DataBridge.getUsers();
-    cachedCredentials = await DataBridge.getCredentials();
-    renderUsersList();
-    // 2. المراقبة
-    refreshLog();
-    renderTeacherStats();
-    // 3. المعالجة
-    loadPedagogicalRecords();
-}
-
-// ---------- شعار المقاطعة ----------
 function applyMuqataaLogo(dataUrl) {
     const logoImgs = document.querySelectorAll('.muqataa-logo-img, #footerMuqataaLogo, #heroMuqataaLogo');
     const placeholders = document.querySelectorAll('.muqataa-logo-placeholder, #footerMuqataaPlaceholder, #heroMuqataaPlaceholder');
@@ -428,55 +575,100 @@ function changeFooterLogo() {
     fileInput.type = 'file';
     fileInput.accept = 'image/png, image/jpeg, image/webp, image/svg+xml';
     fileInput.style.display = 'none';
+
     fileInput.onchange = function(e) {
         const file = e.target.files[0];
         if (!file) return;
-        showToast('⏳ جارٍ معالجة الصورة...', 'info', 2000);
+        showToast('⏳ جارٍ معالجة الصورة وحفظ الشعار...', 'info', 2000);
+
         const reader = new FileReader();
         reader.onload = function(evt) {
             const rawData = evt.target.result;
             const tempImg = new Image();
             tempImg.onload = function() {
-                let width = tempImg.width, height = tempImg.height;
+                let width = tempImg.width;
+                let height = tempImg.height;
                 const maxDim = 320;
                 if (width > maxDim || height > maxDim) {
                     if (width > height) { height = Math.round((height * maxDim) / width); width = maxDim; }
                     else { width = Math.round((width * maxDim) / height); height = maxDim; }
                 }
                 const canvas = document.createElement('canvas');
-                canvas.width = width; canvas.height = height;
+                canvas.width = width;
+                canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(tempImg, 0, 0, width, height);
                 const optimizedDataUrl = canvas.toDataURL('image/png', 0.92);
+
+                try { localStorage.setItem('footerMuqataaLogo', optimizedDataUrl); } catch(err) {}
                 applyMuqataaLogo(optimizedDataUrl);
-                DataBridge.saveBrandingLogo(optimizedDataUrl);
-                showToast('✅ تم رفع شعار المقاطعة', 'success');
+
+                if (typeof fbDb !== 'undefined' && fbDb) {
+                    try {
+                        fbDb.collection('platform_shared').doc('branding').set({
+                            muqataaLogo: optimizedDataUrl,
+                            updatedAt: new Date().toISOString()
+                        }, { merge: true }).catch(() => {});
+                    } catch(_) {}
+                }
+                showToast('✅ تم رفع وتحديث شعار المقاطعة بنجاح!', 'success');
             };
             tempImg.onerror = function() {
+                try { localStorage.setItem('footerMuqataaLogo', rawData); } catch(_) {}
                 applyMuqataaLogo(rawData);
-                DataBridge.saveBrandingLogo(rawData);
                 showToast('✅ تم تحديث شعار المقاطعة', 'success');
             };
             tempImg.src = rawData;
         };
         reader.readAsDataURL(file);
     };
+
     document.body.appendChild(fileInput);
     fileInput.click();
     setTimeout(() => fileInput.remove(), 1500);
 }
 
-async function loadCustomFooterLogo() {
-    const savedLogo = localStorage.getItem('footerMuqataaLogo');
-    if (savedLogo) applyMuqataaLogo(savedLogo);
-    const cloudLogo = await DataBridge.getBrandingLogo();
-    if (cloudLogo && cloudLogo !== savedLogo) {
-        localStorage.setItem('footerMuqataaLogo', cloudLogo);
-        applyMuqataaLogo(cloudLogo);
-    }
+function loadCustomFooterLogo() {
+    try {
+        const savedLogo = localStorage.getItem('footerMuqataaLogo');
+        if (savedLogo) applyMuqataaLogo(savedLogo);
+
+        if (typeof fbDb !== 'undefined' && fbDb) {
+            fbDb.collection('platform_shared').doc('branding').get().then(doc => {
+                if (doc.exists && doc.data().muqataaLogo) {
+                    const cloudLogo = doc.data().muqataaLogo;
+                    if (cloudLogo !== savedLogo) {
+                        try { localStorage.setItem('footerMuqataaLogo', cloudLogo); } catch(_) {}
+                        applyMuqataaLogo(cloudLogo);
+                    }
+                }
+            }).catch(() => {});
+        }
+    } catch(e) { console.warn('loadCustomFooterLogo warning:', e); }
 }
 
-// ---------- التبويبات ----------
+function generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+function formatDateGeorgian() { return new Date().toISOString().split('T')[0]; }
+function formatDateTimeAr(date) {
+    const d = new Date(date);
+    return d.toLocaleDateString('ar-DZ', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' + d.toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' });
+}
+function generateRandomPassword(length = 10) {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    let password = '';
+    for (let i = 0; i < length; i++) password += chars.charAt(Math.floor(Math.random() * chars.length));
+    return password;
+}
+function showToast(message, type = 'info', duration = 3500) {
+    const colors = { info: 'var(--info)', success: 'var(--success)', error: 'var(--danger)', warning: 'var(--warning)' };
+    const toast = document.createElement('div');
+    toast.style.cssText = `background:${colors[type] || colors.info}; color:#fff; padding:9px 16px; border-radius:8px; font-weight:700; font-size:12px; box-shadow:0 4px 15px rgba(0,0,0,0.18);`;
+    toast.textContent = message;
+    document.getElementById('toastContainer').appendChild(toast);
+    setTimeout(() => toast.remove(), duration);
+}
+
 function setupMainTabs() {
     document.querySelectorAll('.main-tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -485,17 +677,21 @@ function setupMainTabs() {
             tab.classList.add('active');
             const targetPanel = document.getElementById('panel-' + tab.dataset.maintab);
             if (targetPanel) targetPanel.classList.add('active');
-            if (tab.dataset.maintab === 'pedagogical') loadPedagogicalRecords();
-            if (tab.dataset.maintab === 'monitor') { refreshLog(); renderTeacherStats(); }
+            if (tab.dataset.maintab === 'pedagogical') {
+                loadPedagogicalRecords();
+            }
+            if (tab.dataset.maintab === 'monitor') {
+                refreshLog();
+                renderTeacherStats();
+            }
         });
     });
 }
 
-// ---------- إدارة المستخدمين ----------
 function renderUsersList() {
     const container = document.getElementById('usersListContainer');
     if (!container) return;
-    const users = cachedUsers;
+    const users = getUsers();
     document.getElementById('totalUsersCount').textContent = users.length;
     if (users.length === 0) {
         container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:30px;">جارٍ التحميل أو لا يوجد مستخدمون بعد.</p>';
@@ -562,11 +758,11 @@ async function saveUser() {
     const editId = document.getElementById('editUserId').value;
 
     if (!fullName || !username) { showToast('يرجى إدخال الاسم الكامل واسم المستخدم(ة)', 'error'); return; }
-    if (!/^[a-zA-Z0-9._-]{3,50}$/.test(username)) { showToast('اسم المستخدم يجب أن يكون 3-50 حرفاً', 'error'); return; }
+    if (!/^[a-zA-Z0-9._-]{3,50}$/.test(username)) { showToast('اسم المستخدم يجب أن يكون 3-50 حرفاً (بدون مسافات أو رموز خاصة)', 'error'); return; }
 
-    const users = [...cachedUsers];
+    const users = getUsers();
     const existingUser = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.id !== editId);
-    if (existingUser) { showToast('اسم المستخدم موجود مسبقاً', 'error'); return; }
+    if (existingUser) { showToast('اسم المستخدم (ة)موجود مسبقاً', 'error'); return; }
 
     if (editId) {
         const idx = users.findIndex(u => u.id === editId);
@@ -576,14 +772,13 @@ async function saveUser() {
             users[idx].email = email;
             users[idx].school = school;
             users[idx].role = role;
-            await DataBridge.saveUsers(users);
+            const saved = await saveUsers(users);
             if (password) {
                 const hash = await hashPassword(password);
-                await DataBridge.saveCredential(editId, hash);
+                await saveCredentialHash(editId, hash);
             }
-            cachedUsers = users;
-            showToast('✅ تم تحديث بيانات المستخدم(ة)', 'success');
-            closeUserModal();
+            if (saved) { showToast('✅ تم تحديث بيانات المستخدم(ة) على الخادم', 'success'); closeUserModal(); }
+            else showToast('❌ لم يتم حفظ التغييرات على الخادم', 'error');
             renderUsersList();
         }
     } else {
@@ -594,21 +789,21 @@ async function saveUser() {
             createdAt: new Date().toISOString(), lastLogin: null, mustChangePassword: !password, active: true
         };
         users.push(newUser);
-        await DataBridge.saveUsers(users);
+        const saved = await saveUsers(users);
+        if (!saved) { showToast('❌ لم يتم حفظ الحساب الجديد على الخادم', 'error'); return; }
         const hash = await hashPassword(newPassword);
-        await DataBridge.saveCredential(newId, hash);
-        cachedUsers = users;
+        await saveCredentialHash(newId, hash);
         if (!password) {
             alert(`🔑 تم إنشاء المستخدم(ة) بنجاح!\n\nاسم المستخدم(ة): ${username}\nكلمة المرور: ${newPassword}\n\n⚠️ احفظ كلمة المرور وأرسلها للأستاذ(ة)`);
         }
-        showToast('✅ تم إضافة المستخدم بنجاح', 'success');
+        showToast('✅ تم إضافة المستخدم وحفظه على الخادم بنجاح', 'success');
         closeUserModal();
         renderUsersList();
     }
 }
 
 function editUser(userId) {
-    const user = cachedUsers.find(u => u.id === userId);
+    const user = getUsers().find(u => u.id === userId);
     if (!user) return;
     document.getElementById('userModalTitle').textContent = 'تعديل بيانات المستخدم(ة)';
     document.getElementById('editUserId').value = user.id;
@@ -622,48 +817,45 @@ function editUser(userId) {
 }
 
 async function resetUserPassword(userId) {
-    const user = cachedUsers.find(u => u.id === userId);
+    const user = getUsers().find(u => u.id === userId);
     if (!user) return;
     if (!confirm(`هل تريد إعادة تعيين كلمة المرور للـ ${user.fullName}؟`)) return;
     const newPassword = generateRandomPassword();
     const hash = await hashPassword(newPassword);
-    await DataBridge.saveCredential(userId, hash);
-    const users = [...cachedUsers];
+    await saveCredentialHash(userId, hash);
+    const users = getUsers();
     const idx = users.findIndex(u => u.id === userId);
     if (idx !== -1) {
         users[idx].mustChangePassword = true;
-        await DataBridge.saveUsers(users);
-        cachedUsers = users;
+        await saveUsers(users);
     }
     alert(`🔑 تم إعادة تعيين كلمة المرور!\n\nاسم المستخدم(ة): ${user.username}\nكلمة المرور الجديدة: ${newPassword}\n\n⚠️ احفظ كلمة المرور وأرسلها للأستاذ(ة)`);
     showToast('✅ تم إعادة تعيين كلمة المرور', 'success');
 }
 
 async function toggleUserActive(userId) {
-    const user = cachedUsers.find(u => u.id === userId);
+    const user = getUsers().find(u => u.id === userId);
     if (!user) return;
     const action = user.active ? 'تعطيل' : 'تفعيل';
     if (!confirm(`هل تريد ${action} حساب ${user.fullName}؟`)) return;
-    const users = [...cachedUsers];
+    const users = getUsers();
     const idx = users.findIndex(u => u.id === userId);
     if (idx !== -1) {
         users[idx].active = !users[idx].active;
-        await DataBridge.saveUsers(users);
-        cachedUsers = users;
+        await saveUsers(users);
         showToast(`✅ تم ${action} الحساب`, 'success');
         renderUsersList();
     }
 }
 
 async function deleteUser(userId) {
-    const user = cachedUsers.find(u => u.id === userId);
+    const user = getUsers().find(u => u.id === userId);
     if (!user) return;
-    if (!confirm(`⚠️ هل تريد حذف المستخدم "${user.fullName}" نهائياً؟`)) return;
+    if (!confirm(`⚠️ هل تريد حذف المستخدم "${user.fullName}" نهائياً؟\n\nلا يمكن التراجع عن هذه العملية!`)) return;
     if (!confirm(`تأكيد أخير: سيتم حذف جميع بيانات هذا المستخدم(ة). متابعة؟`)) return;
-    const users = cachedUsers.filter(u => u.id !== userId);
-    await DataBridge.saveUsers(users);
-    await DataBridge.saveCredential(userId, null);
-    cachedUsers = users;
+    const users = getUsers().filter(u => u.id !== userId);
+    await saveUsers(users);
+    await saveCredentialHash(userId, null);
     showToast('✅ تم حذف المستخدم(ة)', 'success');
     renderUsersList();
 }
@@ -676,9 +868,10 @@ async function importUsersFromCSV(event) {
         try {
             const text = e.target.result;
             const lines = text.split('\n').filter(l => l.trim());
-            if (lines.length < 2) { showToast('الملف فارغ', 'error'); return; }
+            if (lines.length < 2) { showToast('الملف فارغ أو لا يحتوي على بيانات', 'error'); return; }
             const dataLines = lines.slice(1);
-            const users = [...cachedUsers];
+            const users = getUsers();
+            const creds = { ...cachedCredentials };
             let imported = 0, skipped = 0;
             const credentials = [];
             for (const line of dataLines) {
@@ -686,37 +879,45 @@ async function importUsersFromCSV(event) {
                 if (parts.length < 3) { skipped++; continue; }
                 const [fullName, username, email, school, role] = parts;
                 if (!fullName || !username) { skipped++; continue; }
-                if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) { skipped++; continue; }
+                const exists = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+                if (exists) { skipped++; continue; }
                 const password = generateRandomPassword();
+                const passwordHash = await hashPassword(password);
                 const newId = 'user_' + generateId();
                 users.push({
                     id: newId, username, fullName, email: email || '', school: school || '',
                     role: role || 'teacher', createdAt: new Date().toISOString(),
                     lastLogin: null, mustChangePassword: true, active: true
                 });
-                const hash = await hashPassword(password);
-                await DataBridge.saveCredential(newId, hash);
+                creds[newId] = passwordHash;
                 credentials.push({ fullName, username, password });
                 imported++;
             }
-            await DataBridge.saveUsers(users);
-            cachedUsers = users;
+            await saveUsers(users);
+            cachedCredentials = creds;
+            try {
+                const credsRef = getCredentialsDocRef();
+                if (credsRef) await credsRef.set({ hashes: creds, updatedAt: new Date().toISOString() });
+            } catch(_) {}
             renderUsersList();
             showToast(`✅ تم استيراد ${imported} مستخدم(ة) (تم تخطي ${skipped})`, 'success');
             if (credentials.length > 0) {
                 let msg = `📋 بيانات الدخول للمستخدمين الجدد:\n\n`;
                 credentials.forEach(c => { msg += `${c.fullName}\n  المستخدم(ة): ${c.username}\n  كلمة المرور: ${c.password}\n\n`; });
-                msg += `⚠️ احفظ هذه البيانات`;
-                alert(msg);
+                msg += `⚠️ احفظ هذه البيانات وأرسلها للأساتذة`;
+                navigator.clipboard.writeText(msg).then(() => alert(msg + '\n\n✅ تم نسخ البيانات إلى الحافظة')).catch(() => alert(msg));
             }
-        } catch (err) { console.error(err); showToast('حدث خطأ في قراءة الملف', 'error'); }
+        } catch (err) {
+            console.error(err);
+            showToast('حدث خطأ في قراءة الملف', 'error');
+        }
         event.target.value = '';
     };
     reader.readAsText(file, 'UTF-8');
 }
 
 function exportUsersCSV() {
-    const users = cachedUsers;
+    const users = getUsers();
     if (users.length === 0) { showToast('لا يوجد مستخدمون للتصدير', 'warning'); return; }
     let csv = '\uFEFF';
     csv += 'الاسم الكامل,اسم المستخدم(ة),البريد الإلكتروني,المؤسسة,الدور,آخر دخول,الحالة\n';
@@ -748,25 +949,39 @@ function downloadCSVTemplate() {
     showToast('📄 تم تحميل النموذج', 'success');
 }
 
-// ---------- مراقبة النشاطات ----------
 let _logCache = [];
 let _realtimeChannel = null;
 
+async function initMonitor() {
+    await ensureAnonAuth();
+    await ensureSupabaseSession();
+    await listenToCloudData();
+    await refreshLog();
+    await renderTeacherStats();
+    subscribeRealtime();
+}
+
 async function refreshLog() {
     const feed = document.getElementById('logFeed');
-    if (!feed) return;
+    if (!sbMain) { feed.innerHTML = '<div style="text-align:center; color:var(--danger); padding:20px;">خدمة المراقبة غير متاحة</div>'; return; }
     feed.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">جارٍ تحميل السجل...</div>';
-    _logCache = await DataBridge.getActivityLog();
-    populateTeacherFilter();
-    renderLog();
-    updateMonitorStats();
+    try {
+        const { data, error } = await sbMain.from('activity_log').select('*').order('created_at', { ascending: false }).limit(300);
+        if (error) throw error;
+        _logCache = data || [];
+        populateTeacherFilter();
+        renderLog();
+        updateMonitorStats();
+    } catch (e) {
+        console.error(e);
+        feed.innerHTML = '<div style="text-align:center; color:var(--danger); padding:20px;">تعذّر تحميل السجل</div>';
+    }
 }
 
 function populateTeacherFilter() {
     const select = document.getElementById('monitorFilterTeacher');
-    if (!select) return;
     const prevVal = select.value;
-    const known = cachedUsers.filter(u => u.role !== 'inspector');
+    const known = getUsers().filter(u => u.role !== 'inspector');
     select.innerHTML = '<option value="">كل الأساتذة</option>' +
         known.map(u => `<option value="${u.id}">${escapeHtml(u.fullName)}</option>`).join('');
     select.value = prevVal;
@@ -774,7 +989,6 @@ function populateTeacherFilter() {
 
 function renderLog() {
     const feed = document.getElementById('logFeed');
-    if (!feed) return;
     const filterId = document.getElementById('monitorFilterTeacher').value;
     const rows = filterId ? _logCache.filter(r => r.teacher_id === filterId) : _logCache;
     if (!rows.length) { feed.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد عمليات مسجّلة بعد</div>'; return; }
@@ -798,44 +1012,55 @@ function updateMonitorStats() {
 async function renderTeacherStats() {
     const tbody = document.getElementById('teacherStatsBody');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> جارٍ التحميل...</td></tr>';
-    const teachers = cachedUsers.filter(u => u.role !== 'inspector');
-    const activities = await DataBridge.getActivities();
-    if (teachers.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">لا يوجد أساتذة مسجّلون بعد.</td></tr>';
-        return;
+    if (!sbMain) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--danger); padding:20px;">خدمة المراقبة غير متاحة</td></tr>'; return; }
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> جارٍ تحميل الإحصائيات...</td></tr>';
+    try {
+        await listenToCloudData();
+        const teachers = getUsers().filter(u => u.role !== 'inspector');
+
+        const { data: activities, error: aErr } = await sbMain.from('activities').select('id, owner_id, title, created_at');
+        if (aErr) throw aErr;
+
+        if (teachers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">لا يوجد أساتذة مسجّلون بعد.</td></tr>';
+            return;
+        }
+
+        const stats = teachers.map(teacher => {
+            const teacherActs = (activities || []).filter(a => a.owner_id === teacher.id);
+            let lastAct = null;
+            if (teacherActs.length > 0) {
+                lastAct = [...teacherActs].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+            }
+            return { ...teacher, count: teacherActs.length, lastTitle: lastAct ? lastAct.title : null, lastDate: lastAct ? lastAct.created_at : null };
+        });
+        stats.sort((a, b) => b.count - a.count);
+
+        tbody.innerHTML = stats.map((s, idx) => {
+            let countColor = '#5d6b7b', countBg = '#f1f4f9';
+            if (s.count >= 5) { countColor = '#155724'; countBg = '#d4edda'; }
+            else if (s.count >= 2) { countColor = '#856404'; countBg = '#fff3cd'; }
+            else if (s.count === 0) { countColor = '#721c24'; countBg = '#f8d7da'; }
+            const lastDateStr = s.lastDate ? new Date(s.lastDate).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).replace(',', '') : '—';
+            return `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td><strong>${escapeHtml(s.fullName || '—')}</strong></td>
+                    <td style="font-size:11.5px; color:var(--text-muted);">${escapeHtml(s.email || '—')}</td>
+                    <td><span style="background:${countBg}; color:${countColor}; padding:3px 10px; border-radius:14px; font-weight:700; font-size:12px;">${s.count}</span></td>
+                    <td style="font-size:12px;">${s.lastTitle ? escapeHtml(s.lastTitle) : '—'}</td>
+                    <td style="font-size:11.5px; color:var(--text-muted);">${lastDateStr}</td>
+                    <td><span class="status-dot ${s.active ? 'active' : 'inactive'}"></span>${s.active ? 'نشط' : 'معطّل'}</td>
+                </tr>`;
+        }).join('');
+    } catch (error) {
+        console.error('renderTeacherStats error:', error);
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--danger); padding:20px;"><i class="fas fa-exclamation-triangle"></i> تعذّر تحميل الإحصائيات: ${escapeHtml(error.message || 'خطأ غير معروف')}</td></tr>`;
     }
-    const stats = teachers.map(teacher => {
-        const teacherActs = (activities || []).filter(a => a.owner_id === teacher.id);
-        let lastAct = null;
-        if (teacherActs.length > 0) lastAct = [...teacherActs].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
-        return { ...teacher, count: teacherActs.length, lastTitle: lastAct ? lastAct.title : null, lastDate: lastAct ? lastAct.created_at : null };
-    }).sort((a, b) => b.count - a.count);
-    tbody.innerHTML = stats.map((s, idx) => {
-        let countColor = '#5d6b7b', countBg = '#f1f4f9';
-        if (s.count >= 5) { countColor = '#155724'; countBg = '#d4edda'; }
-        else if (s.count >= 2) { countColor = '#856404'; countBg = '#fff3cd'; }
-        else if (s.count === 0) { countColor = '#721c24'; countBg = '#f8d7da'; }
-        const lastDateStr = s.lastDate ? new Date(s.lastDate).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).replace(',', '') : '—';
-        return `
-            <tr>
-                <td>${idx + 1}</td>
-                <td><strong>${escapeHtml(s.fullName || '—')}</strong></td>
-                <td style="font-size:11.5px; color:var(--text-muted);">${escapeHtml(s.email || '—')}</td>
-                <td><span style="background:${countBg}; color:${countColor}; padding:3px 10px; border-radius:14px; font-weight:700; font-size:12px;">${s.count}</span></td>
-                <td style="font-size:12px;">${s.lastTitle ? escapeHtml(s.lastTitle) : '—'}</td>
-                <td style="font-size:11.5px; color:var(--text-muted);">${lastDateStr}</td>
-                <td><span class="status-dot ${s.active ? 'active' : 'inactive'}"></span>${s.active ? 'نشط' : 'معطّل'}</td>
-            </tr>`;
-    }).join('');
 }
 
 function subscribeRealtime() {
-    if (_realtimeChannel) return;
-    const sbMain = window.supabase.createClient(
-        "https://yzxyttieobyblznaehcl.supabase.co",
-        "sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u"
-    );
+    if (!sbMain || _realtimeChannel) return;
     _realtimeChannel = sbMain.channel('activity_log_live')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_log' }, (payload) => {
             _logCache.unshift(payload.new);
@@ -851,19 +1076,85 @@ function subscribeRealtime() {
         .subscribe();
 }
 
-// ---------- المعالجة البيداغوجية ----------
 let _pedRecords = [];
 
 async function loadPedagogicalRecords() {
     const tbody = document.getElementById('pedTableBody');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> جارٍ استرجاع السجلات...</td></tr>';
-    _pedRecords = await DataBridge.getPedagogicalRecords();
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> جارٍ استرجاع سجلات المعالجة البيداغوجية من السحابة...</td></tr>';
 
-    document.getElementById('pedTotalRecords').textContent = _pedRecords.length;
-    document.getElementById('pedTotalTeachers').textContent = new Set(_pedRecords.map(r => r.created_by_name || r.enseignant).filter(Boolean)).size;
-    document.getElementById('pedTotalStudents').textContent = _pedRecords.reduce((s, r) => s + (parseInt(r.total_students || r.categorieTotal || r.nb_eleves) || 0), 0);
-    document.getElementById('pedTotalPlans').textContent = _pedRecords.filter(r => r.plan && Object.keys(r.plan).length > 0).length;
+    let records = [];
+    const idMap = new Map();
+
+    if (typeof fbDb !== 'undefined' && fbDb) {
+        try {
+            await ensureAnonAuth();
+            const snap = await fbDb.collection('platform_shared').doc('pedagogical_records').get();
+            if (snap.exists) {
+                const data = snap.data();
+                if (data && data.recordsJson) {
+                    try {
+                        const parsed = JSON.parse(data.recordsJson);
+                        if (Array.isArray(parsed)) {
+                            parsed.forEach(r => { if (r && r.id) idMap.set(r.id, r); });
+                        }
+                    } catch(e) { console.warn('Failed parsing Firestore recordsJson:', e); }
+                }
+            }
+        } catch(err) { console.warn('Firestore pedagogical_records fetch error:', err); }
+    }
+
+    if (typeof sbMain !== 'undefined' && sbMain) {
+        try {
+            await ensureSupabaseSession();
+            const { data, error } = await sbMain
+                .from('traitement_records')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (!error && Array.isArray(data)) {
+                data.forEach(r => {
+                    if (r && r.id && !idMap.has(r.id)) {
+                        idMap.set(r.id, {
+                            ...r,
+                            enseignant: r.created_by_name || r.enseignant,
+                            nbEleves: r.nb_eleves,
+                            nbRedoublants: r.nb_redoublants,
+                            categorieC: r.categorie_c,
+                            categorieD: r.categorie_d
+                        });
+                    }
+                });
+            }
+        } catch(err) { console.warn('Supabase traitement_records fetch error:', err); }
+    }
+
+    try {
+        const local = JSON.parse(localStorage.getItem('traitementData') || '[]');
+        if (Array.isArray(local)) {
+            local.forEach(r => {
+                if (r && r.id && !idMap.has(r.id)) idMap.set(r.id, r);
+            });
+        }
+    } catch(_) {}
+
+    records = Array.from(idMap.values());
+    records.sort((a, b) => new Date(b.created_at || b.updatedAt || 0) - new Date(a.created_at || a.updatedAt || 0));
+    _pedRecords = records;
+
+    const totalRecordsEl = document.getElementById('pedTotalRecords');
+    const totalTeachersEl = document.getElementById('pedTotalTeachers');
+    const totalStudentsEl = document.getElementById('pedTotalStudents');
+    const totalPlansEl = document.getElementById('pedTotalPlans');
+
+    if (totalRecordsEl) totalRecordsEl.textContent = _pedRecords.length;
+    if (totalTeachersEl) totalTeachersEl.textContent = new Set(_pedRecords.map(r => r.created_by_name || r.enseignant).filter(Boolean)).size;
+    if (totalStudentsEl) {
+        totalStudentsEl.textContent = _pedRecords.reduce((s, r) => {
+            const count = parseInt(r.total_students || r.categorieTotal || r.nb_eleves) || 0;
+            return s + count;
+        }, 0);
+    }
+    if (totalPlansEl) totalPlansEl.textContent = _pedRecords.filter(r => r.plan && Object.keys(r.plan).length > 0).length;
 
     const teacherSelect = document.getElementById('pedFilterTeacher');
     if (teacherSelect) {
@@ -873,8 +1164,9 @@ async function loadPedagogicalRecords() {
             teachers.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
         teacherSelect.value = prev;
     }
+
     renderPedagogicalTable();
-    showToast('✅ تم تحميل ' + _pedRecords.length + ' سجل', 'success');
+    showToast('✅ تم تحميل ' + _pedRecords.length + ' سجل معالجة بنجاح', 'success');
 }
 
 function renderPedagogicalTable() {
@@ -886,13 +1178,16 @@ function renderPedagogicalTable() {
     if (teacherFilter) rows = rows.filter(r => (r.created_by_name === teacherFilter || r.enseignant === teacherFilter));
     if (typeFilter === 'with_plan') rows = rows.filter(r => r.plan && Object.keys(r.plan).length > 0);
     if (typeFilter === 'with_students') rows = rows.filter(r => (r.students || []).some(c => (c.students || []).length > 0));
+
     if (rows.length === 0) {
         tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد سجلات مطابقة</td></tr>';
         return;
     }
     tbody.innerHTML = rows.map((r, i) => {
         const criteriaCount = Array.isArray(r.criteria) ? r.criteria.length : 0;
-        const studentsCount = Array.isArray(r.students) ? r.students.reduce((s, c) => s + ((c.students || []).length), 0) : (r.total_students || 0);
+        const studentsCount = Array.isArray(r.students)
+            ? r.students.reduce((s, c) => s + ((c.students || []).length), 0)
+            : (r.total_students || 0);
         const hasPlan = r.plan && Object.keys(r.plan).length > 0;
         return `
             <tr>
@@ -906,9 +1201,9 @@ function renderPedagogicalTable() {
                 <td>${hasPlan ? '<i class="fas fa-check-circle" style="color:var(--success);"></i>' : '<i class="fas fa-times-circle" style="color:var(--text-muted);"></i>'}</td>
                 <td style="font-size:11.5px; color:var(--text-muted); white-space:nowrap;">${r.created_at ? new Date(r.created_at).toLocaleString('ar-DZ') : '—'}</td>
                 <td style="white-space:nowrap;">
-                    <button class="btn btn-sm btn-info" onclick="viewPedRecord('${r.id}')" title="عرض"><i class="fas fa-eye"></i></button>
-                    <button class="btn btn-sm btn-gold" onclick="exportPedRecordWord('${r.id}')" title="Word"><i class="fas fa-file-word"></i></button>
-                    <button class="btn btn-sm btn-danger" onclick="deletePedRecord('${r.id}')" title="حذف"><i class="fas fa-trash-alt"></i></button>
+                    <button class="btn btn-sm btn-info" onclick="viewPedRecord('${r.id}')" title="عرض تفاصيل"><i class="fas fa-eye"></i></button>
+                    <button class="btn btn-sm btn-gold" onclick="exportPedRecordWord('${r.id}')" title="تصدير Word"><i class="fas fa-file-word"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="deletePedRecord('${r.id}')" title="حذف السجل"><i class="fas fa-trash-alt"></i></button>
                 </td>
             </tr>
         `;
@@ -918,18 +1213,38 @@ function renderPedagogicalTable() {
 async function deletePedRecord(id) {
     if (!confirm('هل أنت متأكد من حذف هذا السجل نهائياً؟')) return;
     _pedRecords = _pedRecords.filter(r => r.id !== id);
-    await DataBridge.savePedagogicalRecords(_pedRecords);
-    await DataBridge.logActivity(
-        currentUser ? currentUser.id : 'inspector',
-        currentUser ? (currentUser.fullName || 'المفتش(ة)') : 'المفتش(ة)',
-        'delete', 'حذف سجل معالجة بيداغوجية'
-    );
+    if (typeof fbDb !== 'undefined' && fbDb) {
+        try {
+            await ensureAnonAuth();
+            await fbDb.collection('platform_shared').doc('pedagogical_records').set({
+                updatedAt: new Date().toISOString(),
+                recordsJson: JSON.stringify(_pedRecords)
+            }, { merge: true });
+        } catch(e) { console.warn('Delete error:', e); }
+    }
+    try {
+        const local = JSON.parse(localStorage.getItem('traitementData') || '[]').filter(r => r.id !== id);
+        localStorage.setItem('traitementData', JSON.stringify(local));
+    } catch(_) {}
+
+    if (typeof sbMain !== 'undefined' && sbMain) {
+        try {
+            await sbMain.from('activity_log').insert({
+                teacher_id: currentUser ? currentUser.id : 'inspector',
+                teacher_name: currentUser ? (currentUser.fullName || 'المفتش(ة)') : 'المفتش(ة)',
+                action: 'delete',
+                activity_title: 'حذف سجل معالجة بيداغوجية',
+                created_at: new Date().toISOString()
+            });
+        } catch(_) {}
+    }
+
     document.getElementById('pedTotalRecords').textContent = _pedRecords.length;
     document.getElementById('pedTotalTeachers').textContent = new Set(_pedRecords.map(r => r.created_by_name || r.enseignant).filter(Boolean)).size;
     document.getElementById('pedTotalStudents').textContent = _pedRecords.reduce((s, r) => s + (parseInt(r.total_students || r.nb_eleves) || 0), 0);
     document.getElementById('pedTotalPlans').textContent = _pedRecords.filter(r => r.plan && Object.keys(r.plan).length > 0).length;
     renderPedagogicalTable();
-    showToast('🗑️ تم حذف السجل', 'info');
+    showToast('🗑️ تم حذف السجل بنجاح', 'info');
 }
 
 function openAddPedModal() {
@@ -949,11 +1264,11 @@ function openAddPedModal() {
                 <div><label style="font-weight:700; font-size:12px; display:block; margin-bottom:4px;">تعداد التلاميذ</label><input type="number" id="newPedStudents" value="35" style="width:100%;padding:7px 11px;border:1.5px solid var(--border-color);border-radius:7px;font-family:inherit;"></div>
                 <div><label style="font-weight:700; font-size:12px; display:block; margin-bottom:4px;">المتعلمون في المعالجة</label><input type="number" id="newPedRemediationCount" value="6" style="width:100%;padding:7px 11px;border:1.5px solid var(--border-color);border-radius:7px;font-family:inherit;"></div>
             </div>
-            <div class="field-group"><label>طبيعة الصعوبة المستهدفة</label><input type="text" id="newPedDifficulty" placeholder="مثال: صعوبات لغوية وإملائية"></div>
-            <div class="field-group"><label>الأنشطة المقترحة للخطة</label><textarea id="newPedPlanActivity" placeholder="ورشات علاجية مكيفة" style="width:100%;padding:7px 11px;border:1.5px solid var(--border-color);border-radius:7px;height:65px;font-family:inherit;font-size:12.5px;"></textarea></div>
+            <div class="field-group"><label>طبيعة الصعوبة المستهدفة</label><input type="text" id="newPedDifficulty" placeholder="مثال: صعوبات لغوية وإملائية في رسم الهمزات"></div>
+            <div class="field-group"><label>الأنشطة المقترحة للخطة</label><textarea id="newPedPlanActivity" placeholder="ورشات علاجية مكيفة وسياقية فردية وجماعية" style="width:100%;padding:7px 11px;border:1.5px solid var(--border-color);border-radius:7px;height:65px;font-family:inherit;font-size:12.5px;"></textarea></div>
             <div style="display:flex; justify-content:flex-end; gap:8px;">
                 <button class="btn btn-outline" onclick="document.getElementById('addPedModalOverlay').remove()">إلغاء</button>
-                <button class="btn btn-success" onclick="saveNewPedRecord()"><i class="fas fa-save"></i> حفظ ومزامنة</button>
+                <button class="btn btn-success" onclick="saveNewPedRecord()"><i class="fas fa-save"></i> حفظ ومزامنة سحابية</button>
             </div>
         </div>
     `;
@@ -973,8 +1288,11 @@ async function saveNewPedRecord() {
 
     const newRecord = {
         id: 'rec_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
-        etablissement: school, enseignant: teacher, classes: classes,
-        nb_eleves: nbEleves, nb_redoublants: 2,
+        etablissement: school,
+        enseignant: teacher,
+        classes: classes,
+        nb_eleves: nbEleves,
+        nb_redoublants: 2,
         categorie_c: Math.ceil(remediationCount * 0.7),
         categorie_d: Math.floor(remediationCount * 0.3),
         total_students: remediationCount,
@@ -987,15 +1305,38 @@ async function saveNewPedRecord() {
     };
 
     _pedRecords.unshift(newRecord);
-    await DataBridge.savePedagogicalRecords(_pedRecords);
-    await DataBridge.logActivity(
-        currentUser ? currentUser.id : 'inspector',
-        teacher, 'create',
-        `معالجة بيداغوجية: ${school} - ${classes}`
-    );
+
+    if (typeof fbDb !== 'undefined' && fbDb) {
+        try {
+            await ensureAnonAuth();
+            await fbDb.collection('platform_shared').doc('pedagogical_records').set({
+                updatedAt: new Date().toISOString(),
+                recordsJson: JSON.stringify(_pedRecords)
+            }, { merge: true });
+        } catch(e) { console.warn('Save to Firestore warning:', e); }
+    }
+
+    try {
+        const local = JSON.parse(localStorage.getItem('traitementData') || '[]');
+        local.unshift(newRecord);
+        localStorage.setItem('traitementData', JSON.stringify(local));
+    } catch(_) {}
+
+    if (typeof sbMain !== 'undefined' && sbMain) {
+        try {
+            await sbMain.from('activity_log').insert({
+                teacher_id: currentUser ? currentUser.id : 'inspector',
+                teacher_name: teacher,
+                action: 'create',
+                activity_title: `معالجة بيداغوجية: ${school} - ${classes}`,
+                created_at: new Date().toISOString()
+            });
+        } catch(_) {}
+    }
+
     document.getElementById('addPedModalOverlay')?.remove();
     loadPedagogicalRecords();
-    showToast('✅ تم إضافة السجل بنجاح!', 'success');
+    showToast('✅ تم إضافة السجل ومزامنته سحابياً بنجاح!', 'success');
 }
 
 function viewPedRecord(id) {
@@ -1006,12 +1347,18 @@ function viewPedRecord(id) {
     const students = r.students || [];
 
     let planHtml = Object.entries({
-        'طبيعة الصعوبة': plan.difficultyType, 'مصدر الصعوبة': plan.difficultySource,
-        'تنويع الأنشطة': plan.activityType, 'أعمال تكميلية': plan.complementaryWork,
-        'استثمار المشاريع': plan.projectInvestment, 'استغلال السندات': plan.resourceExploitation,
-        'توقيت المعالجة': plan.timing, 'مخطط زمني': plan.schedulePlan,
-        'تفويج المتعلمين': plan.periodDetermination, 'أنماط المعالجة': plan.treatmentModes,
-        'نمط التقييم': plan.evaluationMode, 'تسيير الأنشطة': plan.managementMode,
+        'طبيعة الصعوبة': plan.difficultyType,
+        'مصدر الصعوبة': plan.difficultySource,
+        'تنويع الأنشطة': plan.activityType,
+        'أعمال تكميلية': plan.complementaryWork,
+        'استثمار المشاريع': plan.projectInvestment,
+        'استغلال السندات': plan.resourceExploitation,
+        'توقيت المعالجة': plan.timing,
+        'مخطط زمني': plan.schedulePlan,
+        'تفويج المتعلمين': plan.periodDetermination,
+        'أنماط المعالجة': plan.treatmentModes,
+        'نمط التقييم': plan.evaluationMode,
+        'تسيير الأنشطة': plan.managementMode,
         'ملاحظات': plan.additionalNotes
     }).filter(([_, v]) => v).map(([k, v]) => `<tr><td style="padding:5px 8px;border:1px solid #ddd;background:#f8fbfd;width:35%;"><strong>${k}</strong></td><td style="padding:5px 8px;border:1px solid #ddd;">${escapeHtml(v)}</td></tr>`).join('');
 
@@ -1059,7 +1406,7 @@ function viewPedRecord(id) {
         <h4 style="color:var(--primary); margin-top:14px; font-size:13px;">🎯 خطة المعالجة المقررة</h4>
         <table style="width:100%; border-collapse:collapse; margin-top:4px; font-size:12px;">${planHtml || '<tr><td style="padding:8px;">لم يتم إعداد خطة بعد</td></tr>'}</table>
         <h4 style="color:var(--primary); margin-top:14px; font-size:13px;">👥 قائمة المتعلمين المعنيين</h4>
-        ${studentsHtml || '<p style="color:var(--text-muted); padding:6px 0; font-size:12px;">لا يوجد متعلمون مسجلون</p>'}
+        ${studentsHtml || '<p style="color:var(--text-muted); padding:6px 0; font-size:12px;">لا يوجد متعلمون مسجلون في هذا السجل</p>'}
     `;
     overlay.appendChild(modal);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
@@ -1085,12 +1432,18 @@ function exportPedRecordWord(id) {
     `).join('');
 
     let planRows = Object.entries({
-        'طبيعة الصعوبة': plan.difficultyType, 'مصدر الصعوبة': plan.difficultySource,
-        'تنويع الأنشطة': plan.activityType, 'أعمال تكميلية': plan.complementaryWork,
-        'استثمار المشاريع': plan.projectInvestment, 'استغلال السندات': plan.resourceExploitation,
-        'توقيت المعالجة': plan.timing, 'مخطط زمني': plan.schedulePlan,
-        'تفويج المتعلمين': plan.periodDetermination, 'أنماط المعالجة': plan.treatmentModes,
-        'نمط التقييم': plan.evaluationMode, 'تسيير الأنشطة': plan.managementMode,
+        'طبيعة الصعوبة': plan.difficultyType,
+        'مصدر الصعوبة': plan.difficultySource,
+        'تنويع الأنشطة': plan.activityType,
+        'أعمال تكميلية': plan.complementaryWork,
+        'استثمار المشاريع': plan.projectInvestment,
+        'استغلال السندات': plan.resourceExploitation,
+        'توقيت المعالجة': plan.timing,
+        'مخطط زمني': plan.schedulePlan,
+        'تفويج المتعلمين': plan.periodDetermination,
+        'أنماط المعالجة': plan.treatmentModes,
+        'نمط التقييم': plan.evaluationMode,
+        'تسيير الأنشطة': plan.managementMode,
         'الأنشطة المقترحة': plan.additionalNotes
     }).filter(([_, v]) => v).map(([k, v]) => `<tr><td style="border:1px solid #333;padding:5px;width:35%;background:#f0f4f8;"><strong>${k}</strong></td><td style="border:1px solid #333;padding:5px;">${escapeHtml(v)}</td></tr>`).join('');
 
@@ -1145,12 +1498,17 @@ function exportPedRecordWord(id) {
 }
 
 function exportPedagogicalCSV() {
-    if (!_pedRecords || _pedRecords.length === 0) { showToast('لا توجد سجلات لتصديرها', 'warning'); return; }
+    if (!_pedRecords || _pedRecords.length === 0) {
+        showToast('لا توجد سجلات لتصديرها', 'warning');
+        return;
+    }
     let csv = '\uFEFF';
     csv += 'المعرف,المؤسسة,الأستاذ,الأقسام,عدد التلاميذ,المعيدون,الفئة ج,الفئة د,عدد المعايير,عدد المتعلمين في المعالجة,خطة معالجة,تاريخ الإضافة\n';
     _pedRecords.forEach(r => {
         const critCount = Array.isArray(r.criteria) ? r.criteria.length : 0;
-        const studCount = Array.isArray(r.students) ? r.students.reduce((s, c) => s + ((c.students || []).length), 0) : (r.total_students || 0);
+        const studCount = Array.isArray(r.students)
+            ? r.students.reduce((s, c) => s + ((c.students || []).length), 0)
+            : (r.total_students || 0);
         const hasPlan = (r.plan && Object.keys(r.plan).length > 0) ? 'نعم' : 'لا';
         const dateStr = r.created_at ? new Date(r.created_at).toLocaleString('ar-DZ') : '';
         csv += `"${r.id || ''}","${r.etablissement || ''}","${r.created_by_name || r.enseignant || ''}","${r.classes || ''}","${r.nb_eleves || 0}","${r.nb_redoublants || 0}","${r.categorie_c || 0}","${r.categorie_d || 0}","${critCount}","${studCount}","${hasPlan}","${dateStr}"\n`;
@@ -1162,14 +1520,9 @@ function exportPedagogicalCSV() {
     link.click();
     showToast('✅ تم تصدير ملف CSV', 'success');
 }
-
-// ---------- بدء الاشتراك الحيّ بعد الدخول ----------
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        subscribeRealtime();
-    }, 1500);
-});
 </script>
 
+<script src="dashboard-supabase.js"></script>
+<script src="admin-panel.js"></script>
 </body>
 </html>
