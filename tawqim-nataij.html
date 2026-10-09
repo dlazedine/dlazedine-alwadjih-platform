@@ -695,7 +695,7 @@ function saveData(){
     theme: document.body.className
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(meta));
-  if(!SYNC_NAMES){ try{ localStorage.setItem(NAMES_KEY, JSON.stringify(students.map(st => st.name || ''))); }catch(e){} }
+  if(!SYNC_NAMES && __loaded){ try{ localStorage.setItem(NAMES_KEY, JSON.stringify(students.map(st => st.name || ''))); }catch(e){} }
   updateHeaderText();
 }
 
@@ -873,10 +873,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
 
   updateHeaderText();
+  __loaded = true; document.dispatchEvent(new Event('wj-loaded'));
 });
 
 /* ========== الربط بالمنظومة: ملف المستخدم وقائمة المتوسطات ========== */
+let __loaded = false;   // تُرفع بعد loadData() حتى لا يكتب أي حفظ مبكر فوق البيانات المخزنة
 if(window.WJ) WJ.ready.then(async ()=>{
+  if(!__loaded) await new Promise(r=> document.addEventListener('wj-loaded', r, {once:true}));
   const d = (WJ.prof && WJ.prof.data) || {};
   const t = document.getElementById('teacher'), sc = document.getElementById('school');
   if(!t.value) t.value = d.name || WJ.me.full_name || '';

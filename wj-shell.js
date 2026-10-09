@@ -14,6 +14,8 @@
     WJ.c = c; WJ.me = me; WJ.role = me.role; WJ.insp = me.role === 'inspector'; WJ.staff = me.role !== 'teacher';
     const { data: p } = await c.from('wajih_prof').select('id,data').eq('user_id', me.id).maybeSingle();
     WJ.prof = p || null;
+    /* الصفحة قد لا تكون جُهّزت بعد (السكربت في <head>): ننتظر اكتمال DOM قبل إدراج الشريط */
+    if (document.readyState === 'loading') await new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
     WJ.bar();
     return WJ;
   })();
@@ -32,7 +34,7 @@
     css.textContent = '#wj-bar{display:flex;gap:6px 10px;align-items:center;flex-wrap:wrap;background:#081729;color:#fff;border:2px solid #c49b3f;border-radius:12px;padding:8px 14px;margin:0 0 14px;font:14px/1.6 Tahoma,Arial,sans-serif;direction:rtl}#wj-bar a,#wj-bar button{color:#e6c874;background:transparent;border:1px solid #c49b3f66;border-radius:8px;padding:3px 11px;text-decoration:none;font:inherit;cursor:pointer}#wj-bar a:hover,#wj-bar button:hover{background:#c49b3f;color:#081729}#wj-bar a.on{background:#c49b3f;color:#081729;font-weight:bold}#wj-bar .sp{flex:1}#wj-bar .u{font-size:13px;color:#e6c874}@media print{#wj-bar{display:none!important}}';
     document.head.appendChild(css);
     const here = location.pathname.split('/').pop() || 'index.html';
-    const L = [['index.html', '→ البوابة'], ['data-prof.html', 'بيانات الأساتذة'], ['tawqim-nataij.html', 'تقويم النتائج'], ['fahs-ikhtibar.html', 'فحص الاختبارات']];
+    const L = [['index.html', '← البوابة'], ['data-prof.html', 'بيانات الأساتذة'], ['tawqim-nataij.html', 'تقويم النتائج'], ['fahs-ikhtibar.html', 'فحص الاختبارات']];
     if (WJ.insp) L.push(['dashboard.html', 'لوحة التحكم']);
     const b = document.createElement('div'); b.id = 'wj-bar'; b.className = 'no-print';
     b.innerHTML = L.map(([h, t]) => `<a href="${h}" class="${h === here ? 'on' : ''}">${t}</a>`).join('') + `<span class="sp"></span><span class="u"></span><button type="button">خروج</button>`;
