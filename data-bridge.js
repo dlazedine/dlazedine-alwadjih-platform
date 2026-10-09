@@ -1,4 +1,4 @@
-// data-bridge.js - الجسر الموحد للبيانات
+// data-bridge.js - الجسر الموحد للبيانات (نسخة كاملة)
 (function() {
     const firebaseConfig = {
         apiKey: "AIzaSyBdv2RJ7EzlnVQcXyyozlLhVKdgwaKQdaY",
@@ -35,7 +35,16 @@
         } catch (e) { console.warn('Supabase anon auth failed:', e); return null; }
     }
 
+    // ✅ دالة تشفير كلمة المرور (يجب أن تكون متطابقة في كل الصفحات)
+    async function hashPassword(password) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password + 'pgb_salt_2026');
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     window.DataBridge = {
+        // ============ دوال المستخدمين ============
         async getUsers() {
             await ensureAnonAuth();
             const doc = await fbDb.collection('platform_shared').doc('users').get();
@@ -59,6 +68,43 @@
             await fbDb.collection('platform_shared').doc('credentials').set({ hashes: creds, updatedAt: new Date().toISOString() });
             return true;
         },
+
+        // ============ ✅ دالة تسجيل الدخول الموحدة ============
+        async login(username, password) {
+            try {
+                await ensureAnonAuth();
+                const users = await this.getUsers();
+                if (!users.length) throw new Error('لا توجد حسابات مسجلة');
+
+                const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+                if (!user) throw new Error('اسم المستخدم غير موجود');
+                if (user.active === false) throw new Error('هذا الحساب معطل، تواصل مع المفتش');
+
+                const hashes = await this.getCredentials();
+                const storedHash = hashes[user.id];
+                if (!storedHash) throw new Error('لم يتم تعيين كلمة مرور لهذا الحساب');
+
+                const inputHash = await hashPassword(password);
+                if (inputHash !== storedHash) throw new Error('كلمة المرور غير صحيحة');
+
+                // تحديث آخر دخول
+                user.lastLogin = new Date().toISOString();
+                const updatedUsers = users.map(u => u.id === user.id ? user : u);
+                await this.saveUsers(updatedUsers);
+
+                // حفظ الجلسة
+                const session = { user: user, expiresAt: Date.now() + (24 * 60 * 60 * 1000) };
+                localStorage.setItem('pgb_session_persistent', JSON.stringify(session));
+                sessionStorage.setItem('pgb_session', JSON.stringify(session));
+
+                return { success: true, user: user };
+            } catch (error) {
+                console.error('Login error:', error);
+                return { success: false, message: error.message };
+            }
+        },
+
+        // ============ دوال المعالجة البيداغوجية ============
         async getPedagogicalRecords() {
             let records = [];
             try {
@@ -93,6 +139,8 @@
             localStorage.setItem('traitementData', JSON.stringify(records));
             return true;
         },
+
+        // ============ دوال المراقبة ============
         async getActivities() {
             await ensureSupabaseSession();
             const { data, error } = await sbMain.from('activities').select('id, owner_id, title, created_at');
@@ -113,6 +161,8 @@
                 });
             } catch(e) { console.warn('Log activity failed:', e); }
         },
+
+        // ============ دوال الشعار ============
         async getBrandingLogo() {
             try {
                 const doc = await fbDb.collection('platform_shared').doc('branding').get();
