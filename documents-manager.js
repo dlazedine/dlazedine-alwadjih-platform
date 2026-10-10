@@ -12,7 +12,49 @@
   const LS_DOCS = 'portal_documents_v1';
   const LS_CATEGORIES = 'portal_doc_categories_v1';
   const LS_PROFS_CACHE = 'wajih_profs_cache_v1';
-  const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8 ميغا
+  const MAX_MB = (window.PORTAL_CFG && window.PORTAL_CFG.MAX_FILE_MB) || 50;
+  const MAX_FILE_SIZE = MAX_MB * 1024 * 1024;
+  const BUCKET = (window.PORTAL_CFG && window.PORTAL_CFG.FILES_BUCKET) || 'portal-files';
+
+  /* عميل Supabase المصادَق (أو null إن لم توجد جلسة) — لا ننتظر WJ.ready لأنه لا يكتمل دون جلسة */
+  async function cloud() {
+    try {
+      if (!window.PortalCloud) return null;
+      const c = await window.PortalCloud.ready;
+      const { data } = await c.auth.getSession();
+      return data && data.session ? c : null;
+    } catch (e) { return null; }
+  }
+  const uuid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+    : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, ch => { const r = Math.random() * 16 | 0; return (ch === 'x' ? r : (r & 3 | 8)).toString(16); });
+  const fileExt = n => ((String(n || '').split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin').slice(0, 8);
+
+  /* رابط الملف: مسار تخزين (رابط موقّع) أو dataUrl قديم */
+  async function docFileUrl(d, forDownload) {
+    const f = d && d.file; if (!f) return '';
+    if (f.path) {
+      const c = await cloud(); if (!c) return '';
+      const { data, error } = await c.storage.from(f.bucket || BUCKET).createSignedUrl(f.path, 3600, forDownload ? { download: f.name || true } : undefined);
+      return error || !data ? '' : data.signedUrl;
+    }
+    if (f.dataUrl && /^(data:|https?:)/.test(f.dataUrl)) return f.dataUrl;
+    return '';
+  }
+  /* بصمة لكشف الوثيقة المكررة */
+  const fp = d => [d.title, d.author, d.file && d.file.name, d.file && d.file.size].map(x => String(x || '').trim()).join('|');
+  function dedupeDocs(list) {
+    const byId = new Map(), out = [];
+    list.forEach(d => { if (d && d.id && !byId.has(d.id)) { byId.set(d.id, 1); out.push(d); } });
+    const best = new Map();
+    out.forEach(d => {
+      if (d.isExamAudit || String(d.id).indexOf('sample') >= 0 || !(d.file && d.file.name)) return;
+      const k = fp(d), cur = best.get(k);
+      const score = x => (x.file && x.file.path ? 4 : 0) + (/^[0-9a-f]{8}-/.test(x.id) ? 2 : 0) + (x.status === 'approved' ? 1 : 0);
+      if (!cur || score(d) > score(cur)) best.set(k, d);
+    });
+    return out.filter(d => d.isExamAudit || String(d.id).indexOf('sample') >= 0 || !(d.file && d.file.name) || best.get(fp(d)) === d);
+  }
+
 
   const DEFAULT_CATEGORIES = [
     { id: 'waqfah', name: 'وقفة تقويمية', icon: 'fa-stopwatch', color: '#c49b3f' },
@@ -270,10 +312,11 @@
           auditScore: `${scoreTotal} / 20`,
           auditQual: qual,
           file: {
-            name: r.fileName || `اختبار_${(r.school||'').replace(/\s+/g,'_')}_${(r.level||'').replace(/\s+/g,'_')}.pdf`,
+            name: (r.file && r.file.name) || r.fileName || `اختبار_${(r.school||'').replace(/\s+/g,'_')}_${(r.level||'').replace(/\s+/g,'_')}.pdf`,
             size: r.fileSize || 1850000,
-            type: r.fileType || 'application/pdf',
-            dataUrl: r.fileUrl || ''
+            type: (r.file && r.file.type) || r.fileType || 'application/pdf',
+            dataUrl: r.fileUrl || '',
+            ...(r.file && r.file.path ? { path: r.file.path, bucket: 'exams' } : {})
           },
           uploadedAt: r.savedAt || r.date || new Date().toISOString(),
           reviewedBy: 'مفتش التعليم المتوسط درويش الهلالي',
@@ -295,11 +338,38 @@
     }
   }
 
+  /* نقل وثائق قديمة مخزّنة كـ base64 محلياً إلى التخزين السحابي مرة واحدة (حتى لا تضيع) */
+  async function migrateLocalDocs(C, cloudIds) {
+    const todo = state.documents.filter(d => !cloudIds.has(d.id) && !d.isExamAudit && d.file && d.file.dataUrl && /^data:/.test(d.file.dataUrl));
+    for (const d of todo) {
+      try {
+        const blob = await (await fetch(d.file.dataUrl)).blob();
+        const oldId = d.id, id = /^[0-9a-f]{8}-/.test(oldId) ? oldId : uuid();
+        const path = 'documents/' + id + '/' + Date.now() + '.' + fileExt(d.file.name);
+        const up = await C.storage.from(BUCKET).upload(path, blob, { contentType: d.file.type || 'application/octet-stream' });
+        if (up.error) continue;
+        const file = { name: d.file.name, size: d.file.size, type: d.file.type, path };
+        const ins = await C.from('wajih_documents').insert(rowFor({ ...d, id, file }));
+        if (ins.error) { C.storage.from(BUCKET).remove([path]); continue; }
+        d.id = id; d.file = file;
+      } catch (e) { console.warn('migrate doc', e); }
+    }
+    if (todo.length) { state.documents = dedupeDocs(state.documents); save(); }
+  }
+  function rowFor(d) {
+    return {
+      id: d.id, title: d.title, category: d.category, subject: d.subject, level: d.level, period: d.period,
+      description: d.description, school: d.school, author: d.author, author_username: d.authorUsername, author_role: d.authorRole,
+      status: d.status, file_name: d.file.name, file_size: d.file.size, file_type: d.file.type, file_url: '',
+      file_data: { name: d.file.name, size: d.file.size, type: d.file.type, path: d.file.path }
+    };
+  }
+
   /* ---------- المزامنة السحابية الكاملة مع Supabase ---------- */
   async function syncWithSupabase(interactive = false) {
     updateSyncBadge('syncing', 'جاري المزامنة مع Supabase...');
 
-    const C = window.WJ?.c || (window.initPortalCloud ? await window.initPortalCloud() : null);
+    const C = await cloud();
     if (!C) {
       updateSyncBadge('offline', 'وضع غير متصل — البيانات محفوظة محلياً');
       if (interactive) {
@@ -400,18 +470,18 @@
             views: row.views || 0
           }));
 
-          // دمج آمن: نحافظ على الوثائق المحلية وندمج معطيات السحابة
-          const merged = [...state.documents];
+          // السحابة هي المرجع: نحذف المحلي الذي حُذف سحابياً (باستثناء الاختبارات المستخرجة والعيّنات والوثائق غير المنقولة بعد)
+          const cloudIds = new Set(cloudDocs.map(x => x.id));
+          const keepLocal = state.documents.filter(x => cloudIds.has(x.id) || x.isExamAudit || String(x.id).indexOf('sample') >= 0 || (x.file && x.file.dataUrl && /^data:/.test(x.file.dataUrl)));
+          const merged = [...keepLocal];
           cloudDocs.forEach(cd => {
             const idx = merged.findIndex(x => x.id === cd.id);
-            if (idx >= 0) {
-              merged[idx] = { ...merged[idx], ...cd };
-            } else {
-              merged.push(cd);
-            }
+            if (idx >= 0) merged[idx] = { ...merged[idx], ...cd };
+            else merged.push(cd);
           });
-          state.documents = merged;
+          state.documents = dedupeDocs(merged);
           save();
+          await migrateLocalDocs(C, cloudIds);
         }
       } catch (e) {
         console.warn('Sync documents warning:', e);
@@ -495,8 +565,8 @@
   }
 
   function getUser() {
-    if (window.PortalAuth && typeof window.PortalAuth.getCurrentUser === 'function') {
-      const u = window.PortalAuth.getCurrentUser();
+    if (window.PortalAuth && typeof window.PortalAuth.getUser === 'function') {
+      const u = window.PortalAuth.getUser();
       if (u) return u;
     }
     if (window.WJ && window.WJ.me) return window.WJ.me;
@@ -569,23 +639,18 @@
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      alert(`حجم الملف كبير جداً (${formatSize(file.size)}). الحد الأقصى المسموح به هو 8 ميغابايت.`);
+      alert(`حجم الملف كبير جداً (${formatSize(file.size)}). الحد الأقصى المسموح به هو ${MAX_MB} ميغابايت.`);
       e.target.value = '';
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = function (ev) {
-      state.pendingFile = {
-        name: file.name,
-        size: file.size,
-        type: file.type || 'application/octet-stream',
-        dataUrl: ev.target.result,
-        rawFile: file
-      };
-      renderPendingFile();
+    state.pendingFile = {
+      name: file.name,
+      size: file.size,
+      type: file.type || 'application/octet-stream',
+      rawFile: file
     };
-    reader.readAsDataURL(file);
+    renderPendingFile();
   }
 
   function renderPendingFile() {
@@ -649,6 +714,14 @@
 
   /* ---------- حفظ وثيقة جديدة ---------- */
   async function submitDocument() {
+    if (state.submitting) return;           // يمنع الرفع المزدوج بالضغط المتكرر
+    state.submitting = true;
+    const sb = document.querySelector('#docUploadModal button[type="submit"], form[onsubmit*="submitDocument"] button[type="submit"]');
+    if (sb) sb.disabled = true;
+    try { await _submitDocument(); } finally { state.submitting = false; if (sb) sb.disabled = false; }
+  }
+
+  async function _submitDocument() {
     const user = getUser();
     if (!user) { alert('يجب تسجيل الدخول أولاً.'); return; }
 
@@ -683,7 +756,14 @@
       return;
     }
 
-    const docId = 'doc_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+    const C = await cloud();
+    if (!C) { alert('لا توجد جلسة متصلة بالسحابة: سجّل الدخول من جديد ثم أعد رفع الوثيقة، حتى لا يضيع الملف.'); return; }
+
+    const docId = uuid();
+    const path = 'documents/' + docId + '/' + Date.now() + '.' + fileExt(file.name);
+    const up = await C.storage.from(BUCKET).upload(path, file.rawFile, { contentType: file.type, upsert: false });
+    if (up.error) { alert('تعذّر رفع الملف: ' + up.error.message); return; }
+
     const newDoc = {
       id: docId,
       title,
@@ -697,51 +777,25 @@
       authorUsername: user.username || 'teacher',
       authorRole: user.role || 'teacher',
       status: isStaff() ? 'approved' : 'pending',
-      file: {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        dataUrl: file.dataUrl
-      },
+      file: { name: file.name, size: file.size, type: file.type, path },
       uploadedAt: new Date().toISOString(),
-      reviewedBy: isStaff() ? (user.fullName || 'درويش الهلالي') : null,
+      reviewedBy: isStaff() ? (user.fullName || user.full_name || 'درويش الهلالي') : null,
       reviewedAt: isStaff() ? new Date().toISOString() : null,
       reviewNote: isStaff() ? 'وثيقة مرجعية معتمدة مباشرة من المفتشية' : '',
       downloads: 0,
       views: 0
     };
 
-    // حفظ محلي فوري مؤكد
-    state.documents.unshift(newDoc);
-    save();
-
-    // حفظ في Supabase (wajih_documents) إذا كان العميل متاحاً
-    const C = window.WJ?.c;
-    if (C) {
-      try {
-        await C.from('wajih_documents').insert({
-          id: docId,
-          title: newDoc.title,
-          category: newDoc.category,
-          subject: newDoc.subject,
-          level: newDoc.level,
-          period: newDoc.period,
-          description: newDoc.description,
-          school: newDoc.school,
-          author: newDoc.author,
-          author_username: newDoc.authorUsername,
-          author_role: newDoc.authorRole,
-          status: newDoc.status,
-          file_name: file.name,
-          file_size: file.size,
-          file_type: file.type,
-          file_url: file.dataUrl && file.dataUrl.startsWith('http') ? file.dataUrl : '',
-          file_data: { name: file.name, size: file.size, type: file.type, dataUrl: file.dataUrl }
-        });
-      } catch (e) {
-        console.warn('Supabase document insert fallback:', e);
-      }
+    const ins = await C.from('wajih_documents').insert(rowFor(newDoc));
+    if (ins.error) {
+      C.storage.from(BUCKET).remove([path]);
+      alert('تعذّر حفظ الوثيقة في قاعدة البيانات: ' + ins.error.message);
+      return;
     }
+    if (window.PortalCloud && PortalCloud.log) PortalCloud.log('create', 'documents');
+
+    state.documents = dedupeDocs([newDoc, ...state.documents.filter(x => x.id !== docId)]);
+    save();
 
     closeUploadModal();
     renderDocuments();
@@ -998,7 +1052,7 @@
   }
 
   /* ---------- معاينة الوثيقة ---------- */
-  function previewDoc(id) {
+  async function previewDoc(id) {
     const d = state.documents.find(x => x.id === id);
     if (!d) return;
 
@@ -1015,11 +1069,15 @@
       const badge = getStatusBadge(d.status);
 
       let filePreviewHtml = '';
-      if (d.file?.dataUrl) {
-        if (d.file.type.startsWith('image/')) {
-          filePreviewHtml = `<div style="text-align:center; margin:16px 0;"><img src="${d.file.dataUrl}" style="max-width:100%; max-height:480px; border-radius:10px; border:1px solid #e2e8f0;"></div>`;
-        } else if (d.file.type === 'application/pdf') {
-          filePreviewHtml = `<div style="margin:16px 0; height:450px;"><iframe src="${d.file.dataUrl}" style="width:100%; height:100%; border:none; border-radius:10px;"></iframe></div>`;
+      const fUrl = await docFileUrl(d, false);
+      const fType = (d.file?.type || '').toLowerCase(), fExt = (d.file?.name || '').split('.').pop().toLowerCase();
+      if (fUrl) {
+        if (fType.startsWith('image/') || /^(jpe?g|png|webp|gif)$/.test(fExt)) {
+          filePreviewHtml = `<div style="text-align:center; margin:16px 0;"><img src="${fUrl}" style="max-width:100%; max-height:480px; border-radius:10px; border:1px solid #e2e8f0;"></div>`;
+        } else if (fType === 'application/pdf' || fExt === 'pdf') {
+          filePreviewHtml = `<div style="margin:16px 0; height:450px;"><iframe src="${fUrl}" style="width:100%; height:100%; border:none; border-radius:10px;"></iframe></div>`;
+        } else {
+          filePreviewHtml = `<div style="margin:16px 0; padding:14px; background:#f8fafc; border-radius:10px; text-align:center; font-size:12.5px; color:#475569;">لا تتوفر معاينة لهذا النوع من الملفات في المتصفح، استعمل زر التحميل.</div>`;
         }
       }
 
@@ -1091,7 +1149,7 @@
   }
 
   /* ---------- تحميل الوثيقة ---------- */
-  function downloadDoc(id) {
+  async function downloadDoc(id) {
     const d = state.documents.find(x => x.id === id);
     if (!d) return;
 
@@ -1099,16 +1157,13 @@
     save();
 
     // تحديث العداد في Supabase إذا كان متوفراً
-    const C = window.WJ?.c;
-    if (C) {
-      try {
-        C.from('wajih_documents').update({ downloads: d.downloads }).eq('id', d.id).then();
-      } catch (e) {}
-    }
+    cloud().then(C => { if (C) C.from('wajih_documents').update({ downloads: d.downloads }).eq('id', d.id).then(() => {}, () => {}); });
 
-    if (d.file?.dataUrl) {
+    const dUrl = await docFileUrl(d, true);
+    if (d.file && (d.file.path || d.file.dataUrl) && !dUrl) { alert('تعذّر الوصول إلى الملف. تأكد من الاتصال وتسجيل الدخول ثم أعد المحاولة.'); return; }
+    if (dUrl) {
       const a = document.createElement('a');
-      a.href = d.file.dataUrl;
+      a.href = dUrl;
       a.download = d.file.name || `وثيقة_${d.title}.pdf`;
       document.body.appendChild(a);
       a.click();
@@ -1173,7 +1228,7 @@
     save();
 
     // تحديث Supabase
-    const C = window.WJ?.c;
+    const C = await cloud();
     if (C) {
       try {
         await C.from('wajih_documents').update({
@@ -1216,10 +1271,13 @@
     state.documents = state.documents.filter(x => x.id !== id);
     save();
 
-    const C = window.WJ?.c;
+    const C = await cloud();
     if (C) {
       try {
-        await C.from('wajih_documents').delete().eq('id', id);
+        const r = await C.from('wajih_documents').delete().eq('id', id);
+        if (r.error) alert('تعذّر الحذف من السحابة: ' + r.error.message);
+        else if (d.file && d.file.path && !d.file.bucket) C.storage.from(BUCKET).remove([d.file.path]);
+        if (window.PortalCloud && PortalCloud.log) PortalCloud.log('delete', 'documents');
       } catch (e) {}
     }
 
@@ -1296,7 +1354,7 @@
     renderStats();
 
     // ربط مستمعي الأحداث
-    document.getElementById('docFileInput')?.addEventListener('change', handleFileSelect);
+    { const fi = document.getElementById('docFileInput'); if (fi && !fi.dataset.bound) { fi.dataset.bound = '1'; fi.addEventListener('change', handleFileSelect); } }
     document.getElementById('docAuthorSelect')?.addEventListener('change', handleAuthorSelectChange);
 
     // بدء المزامنة السحابية الخلفية

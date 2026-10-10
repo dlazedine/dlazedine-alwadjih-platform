@@ -11,14 +11,16 @@
     if (typeof firebase !== 'undefined' && !firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
-    const fbDb = firebase.firestore();
-    const fbAuth = firebase.auth();
+    let fbDb = null, fbAuth = null;
+    try { fbDb = firebase.firestore(); fbAuth = firebase.auth(); } catch (e) { console.warn('Firebase غير متاح:', e); }
 
     const SUPABASE_URL = "https://yzxyttieobyblznaehcl.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u";
-    const sbMain = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const _anon = () => window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const getSb = async () => (window.PortalCloud ? await window.PortalCloud.ready : _anon());
 
     async function ensureAnonAuth() {
+        if (!fbAuth) return null;
         if (fbAuth.currentUser) return fbAuth.currentUser;
         try {
             const cred = await fbAuth.signInAnonymously();
@@ -27,12 +29,9 @@
     }
 
     async function ensureSupabaseSession() {
-        const { data } = await sbMain.auth.getSession();
-        if (data && data.session) return data.session;
-        try {
-            const { data: signInData } = await sbMain.auth.signInAnonymously();
-            return signInData?.session || null;
-        } catch (e) { console.warn('Supabase anon auth failed:', e); return null; }
+        const sb = await getSb();
+        const { data } = await sb.auth.getSession();
+        return (data && data.session) || null;      // لا تسجيل دخول مجهول: يتجاوز سياسات الحماية ويستبدل الجلسة
     }
 
     async function hashPassword(password) {
@@ -45,60 +44,24 @@
     window.DataBridge = {
         // ============ دوال المستخدمين ============
         async getUsers() {
-            await ensureAnonAuth();
-            const doc = await fbDb.collection('platform_shared').doc('users').get();
-            return doc.exists ? (doc.data().list || []) : [];
+            try {
+                const sb = await getSb();
+                const { data, error } = await sb.from('wajih_profiles').select('*').order('created_at');
+                if (error) throw error;
+                return (data || []).map(u => ({ id: u.id, username: u.username, fullName: u.full_name || u.username, email: '', role: u.role, school: u.school || '', active: u.active !== false }));
+            } catch (e) { console.warn('getUsers:', e); return []; }
         },
-        async saveUsers(users) {
-            await ensureAnonAuth();
-            const sanitized = users.map(u => { const c = {...u}; delete c.passwordHash; return c; });
-            await fbDb.collection('platform_shared').doc('users').set({ list: sanitized, updatedAt: new Date().toISOString() });
+        async saveUsers(users) {     // الحسابات تُدار من تبويب «إدارة المستخدمين» (Supabase): لا كتابة في Firestore
             return true;
         },
-        async getCredentials() {
-            await ensureAnonAuth();
-            const doc = await fbDb.collection('platform_shared').doc('credentials').get();
-            return doc.exists ? (doc.data().hashes || {}) : {};
-        },
-        async saveCredential(userId, hash) {
-            await ensureAnonAuth();
-            const creds = await this.getCredentials();
-            if (hash === null) delete creds[userId]; else creds[userId] = hash;
-            await fbDb.collection('platform_shared').doc('credentials').set({ hashes: creds, updatedAt: new Date().toISOString() });
-            return true;
-        },
+        async getCredentials() { return {}; },
+        async saveCredential(userId, hash) { return true; },
 
         // ============ ✅ دالة تسجيل الدخول الموحدة ============
         async login(username, password) {
-            try {
-                await ensureAnonAuth();
-                const users = await this.getUsers();
-                if (!users.length) throw new Error('لا توجد حسابات مسجلة');
-
-                const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-                if (!user) throw new Error('اسم المستخدم غير موجود');
-                if (user.active === false) throw new Error('هذا الحساب معطل، تواصل مع المفتش');
-
-                const hashes = await this.getCredentials();
-                const storedHash = hashes[user.id];
-                if (!storedHash) throw new Error('لم يتم تعيين كلمة مرور لهذا الحساب');
-
-                const inputHash = await hashPassword(password);
-                if (inputHash !== storedHash) throw new Error('كلمة المرور غير صحيحة');
-
-                user.lastLogin = new Date().toISOString();
-                const updatedUsers = users.map(u => u.id === user.id ? user : u);
-                await this.saveUsers(updatedUsers);
-
-                const session = { user: user, expiresAt: Date.now() + (24 * 60 * 60 * 1000) };
-                localStorage.setItem('pgb_session_persistent', JSON.stringify(session));
-                sessionStorage.setItem('pgb_session', JSON.stringify(session));
-
-                return { success: true, user: user };
-            } catch (error) {
-                console.error('Login error:', error);
-                return { success: false, message: error.message };
-            }
+            if (!window.PortalCloud) return { success: false, message: 'نظام الدخول غير محمّل' };
+            const r = await window.PortalCloud.login(username, password);
+            return r.success ? { success: true, user: r.user } : { success: false, message: r.error };
         },
 
         // ============ دوال المعالجة البيداغوجية ============
@@ -106,15 +69,16 @@
             let records = [];
             try {
                 await ensureAnonAuth();
-                const doc = await fbDb.collection('platform_shared').doc('pedagogical_records').get();
-                if (doc.exists && doc.data().recordsJson) {
+                const doc = fbDb ? await fbDb.collection('platform_shared').doc('pedagogical_records').get() : null;
+                if (doc && doc.exists && doc.data().recordsJson) {
                     const parsed = JSON.parse(doc.data().recordsJson);
                     if (Array.isArray(parsed)) records = parsed;
                 }
             } catch(e) { console.warn('Firestore fetch error:', e); }
             try {
                 await ensureSupabaseSession();
-                const { data, error } = await sbMain.from('traitement_records').select('*').order('created_at', { ascending: false });
+                const sbm = await getSb();
+                const { data, error } = await sbm.from('traitement_records').select('*').order('created_at', { ascending: false });
                 if (!error && data) {
                     const existingIds = new Set(records.map(r => r.id));
                     data.forEach(r => { if (r.id && !existingIds.has(r.id)) records.push(r); });
@@ -128,49 +92,50 @@
             return records.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
         },
         async savePedagogicalRecords(records) {
-            await ensureAnonAuth();
-            await fbDb.collection('platform_shared').doc('pedagogical_records').set({
-                updatedAt: new Date().toISOString(),
-                recordsJson: JSON.stringify(records)
-            }, { merge: true });
-            localStorage.setItem('traitementData', JSON.stringify(records));
+            try {
+                await ensureAnonAuth();
+                if (fbDb) await fbDb.collection('platform_shared').doc('pedagogical_records').set({
+                    updatedAt: new Date().toISOString(),
+                    recordsJson: JSON.stringify(records)
+                }, { merge: true });
+            } catch (e) { console.warn('Firestore save:', e); }
+            localStorage.setItem('traitementData', JSON.stringify(records));   // يُزامَن تلقائياً مع Supabase عبر portal-cloud.js
             return true;
         },
 
         // ============ دوال المراقبة ============
         async getActivities() {
-            await ensureSupabaseSession();
-            const { data, error } = await sbMain.from('activities').select('id, owner_id, title, created_at');
-            return error ? [] : (data || []);
+            const log = await this.getActivityLog(1000);
+            return log.map(r => ({ id: r.id, owner_id: r.teacher_id, title: r.activity_title, created_at: r.created_at }));
         },
         async getActivityLog(limit = 300) {
-            await ensureSupabaseSession();
-            const { data, error } = await sbMain.from('activity_log').select('*').order('created_at', { ascending: false }).limit(limit);
-            return error ? [] : (data || []);
+            try {
+                const sb = await getSb(), L = (window.PORTAL_CFG && PORTAL_CFG.LABELS) || {}, H = window.PORTAL_CFG && PORTAL_CFG.HIDE;
+                const { data, error } = await sb.from('wajih_activity').select('*').order('created_at', { ascending: false }).limit(limit);
+                if (error) return [];
+                return (data || []).filter(r => !(H && H.test(r.key || ''))).map(r => ({ id: r.id, action: r.action, teacher_id: r.user_id, teacher_name: r.user_name, activity_title: L[r.key] || r.key, created_at: r.created_at }));
+            } catch (e) { return []; }
         },
         async logActivity(teacherId, teacherName, action, title) {
-            try {
-                await ensureSupabaseSession();
-                await sbMain.from('activity_log').insert({
-                    teacher_id: teacherId, teacher_name: teacherName,
-                    action: action, activity_title: title,
-                    created_at: new Date().toISOString()
-                });
-            } catch(e) { console.warn('Log activity failed:', e); }
+            try { if (window.PortalCloud && PortalCloud.log) await PortalCloud.log(action, 'traitementData'); }
+            catch (e) { console.warn('Log activity failed:', e); }
         },
 
         // ============ دوال الشعار ============
         async getBrandingLogo() {
             try {
+                if (!fbDb) return localStorage.getItem('footerMuqataaLogo');
                 const doc = await fbDb.collection('platform_shared').doc('branding').get();
                 return doc.exists ? (doc.data().muqataaLogo || null) : null;
             } catch(e) { return null; }
         },
         async saveBrandingLogo(dataUrl) {
-            await ensureAnonAuth();
-            await fbDb.collection('platform_shared').doc('branding').set({
-                muqataaLogo: dataUrl, updatedAt: new Date().toISOString()
-            }, { merge: true });
+            try {
+                await ensureAnonAuth();
+                if (fbDb) await fbDb.collection('platform_shared').doc('branding').set({
+                    muqataaLogo: dataUrl, updatedAt: new Date().toISOString()
+                }, { merge: true });
+            } catch (e) { console.warn('Branding save:', e); }
             localStorage.setItem('footerMuqataaLogo', dataUrl);
         }
     };
