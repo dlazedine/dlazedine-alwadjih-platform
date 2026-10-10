@@ -29,7 +29,7 @@ function wordNorm(root){
 const BL=new Set(['DIV','P','TABLE']),XE=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const hx=c=>{const m=/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/.exec(c||'');if(m)return(m[4]!==undefined&&+m[4]===0)?null:[m[1],m[2],m[3]].map(v=>(+v).toString(16).padStart(2,'0')).join('').toUpperCase();return null};
 const SZ=20;
-function dRun(t,c){return t===''?'':`<w:r><w:rPr><w:rFonts w:ascii="Tahoma" w:hAnsi="Tahoma" w:cs="Tahoma"/>${c.b?'<w:b/><w:bCs/>':''}${c.col?`<w:color w:val="${c.col}"/>`:''}<w:sz w:val="${c.sz||SZ}"/><w:szCs w:val="${c.sz||SZ}"/>${c.u?'<w:u w:val="single"/>':''}<w:rtl/></w:rPr><w:t xml:space="preserve">${XE(window.toWesternDigits?window.toWesternDigits(t):t)}</w:t></w:r>`}
+function dRun(t,c){return t===''?'':`<w:r><w:rPr><w:rFonts w:ascii="Tahoma" w:hAnsi="Tahoma" w:cs="Tahoma"/>${c.b?'<w:b/><w:bCs/>':''}${c.col?`<w:color w:val="${c.col}"/>`:''}<w:sz w:val="${c.sz||SZ}"/><w:szCs w:val="${c.sz||SZ}"/>${c.u?'<w:u w:val="single"/>':''}<w:rtl/></w:rPr><w:t xml:space="preserve">${XE(t)}</w:t></w:r>`}
 function dSty(el,c){const s=el.style,k=el.classList,o={...c};
   if(el.tagName==='B'||k.contains('b')||k.contains('v')||k.contains('sh')||/bold|[6-9]00/.test(s.fontWeight))o.b=1;
   if(k.contains('u')||k.contains('sh')||/underline/.test(s.textDecoration))o.u=1;

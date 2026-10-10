@@ -1,17 +1,4 @@
 /* PortalCloud: الدخول + المزامنة مع Supabase (يحلّ محلّ الحسابات المحلية) */
-
-/* ---- الأرقام الغربية (0-9) في كل الصفحات: التواريخ والأعداد والحقول ---- */
-(function(){const L=a=>(typeof a==='string'&&/^ar(-|$)/i.test(a));
-const fix=(a,o)=>{o=Object.assign({},o||{});if(L(a)&&!o.numberingSystem){o.numberingSystem='latn'}return[a,o]};
-['toLocaleString','toLocaleDateString','toLocaleTimeString'].forEach(m=>{const f=Date.prototype[m];Date.prototype[m]=function(a,o){const r=fix(a,o);return f.call(this,r[0],r[1])}});
-const nf=Number.prototype.toLocaleString;Number.prototype.toLocaleString=function(a,o){const r=fix(a,o);return nf.call(this,r[0],r[1])};
-const NF=Intl.NumberFormat;Intl.NumberFormat=function(a,o){const r=fix(a,o);return new NF(r[0],r[1])};Intl.NumberFormat.prototype=NF.prototype;Intl.NumberFormat.supportedLocalesOf=NF.supportedLocalesOf;
-const DF=Intl.DateTimeFormat;Intl.DateTimeFormat=function(a,o){const r=fix(a,o);return new DF(r[0],r[1])};Intl.DateTimeFormat.prototype=DF.prototype;Intl.DateTimeFormat.supportedLocalesOf=DF.supportedLocalesOf;
-const MAP={'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9','۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'};
-const RE=/[٠-٩۰-۹]/;const conv=t=>t.replace(/[٠-٩۰-۹]/g,c=>MAP[c]);
-addEventListener('input',e=>{const el=e.target;if(!el||!/^(INPUT|TEXTAREA)$/.test(el.tagName)||e.isComposing)return;const ty=(el.type||'text').toLowerCase();if(!/^(text|search|tel|number|date|textarea|)$/.test(ty))return;
-const v=el.value;if(typeof v!=='string'||!RE.test(v))return;const a=el.selectionStart,b=el.selectionEnd;el.value=conv(v);try{el.setSelectionRange(a,b)}catch(x){}},true);
-window.toWesternDigits=conv})();
 (function(){'use strict';const C=window.PORTAL_CFG,SH='00000000-0000-0000-0000-000000000000';
 const EX=/session|portalUser|^sb-|firebase|avatar|media_files|Logo|^pc_|redirect/i;
 const rawSet=Storage.prototype.setItem,RL={inspector:'مفتش',supervisor:'مشرف',teacher:'أستاذ'};
@@ -71,9 +58,7 @@ const{data,error}=await c.auth.signInWithPassword({email:em,password:p});if(erro
 const{data:pr}=await c.from('wajih_profiles').select('*').eq('id',data.user.id).single();
 if(!pr||!pr.active){await c.auth.signOut();return{success:false,error:'الحساب غير مفعّل'}}
 prof=pr;if(pr.must_change)await forceChange(c);const user=saveSession(prof);await pull();return{success:true,user}}
-const lastLog={};async function log(action,key){try{if((action||'update')==='update'){const n=Date.now();if(lastLog[key]&&n-lastLog[key]<60000)return;lastLog[key]=n}const c=await ready;let p=prof;if(!p){const{data:s}=await c.auth.getSession();if(!s.session)return;const{data}=await c.from('wajih_profiles').select('*').eq('id',s.session.user.id).single();p=data}
-if(!p)return;await c.from('wajih_activity').insert({user_id:p.id,user_name:p.full_name||p.username,user_role:p.role,action:action||'update',key:key})}catch(e){console.warn('log',e&&e.message||e)}}
-window.PortalCloud={ready,login,signOut,flush,log,get profile(){return prof}};
+window.PortalCloud={ready,login,signOut,flush,get profile(){return prof}};
 (async()=>{const c=await ready,{data}=await c.auth.getSession();const has=!!(sessionStorage.getItem('pgb_session')||localStorage.getItem('pgb_session_persistent'));
 if(!data.session){if(has)clearSession();return}if(!has){await c.auth.signOut();return}
 const{data:p}=await c.from('wajih_profiles').select('*').eq('id',data.session.user.id).single();if(!p||!p.active){await signOut();return}

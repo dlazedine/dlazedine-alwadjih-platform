@@ -54,15 +54,6 @@ function nqLoad() {
     nqState.messages = JSON.parse(localStorage.getItem(LS_NQ_MESSAGES) || '{}');
     nqState.files    = JSON.parse(localStorage.getItem(LS_NQ_FILES)    || '{}');
     nqState.notes    = localStorage.getItem(LS_NQ_NOTES) || '';
-    // إزالة التكرار (نفس المعرّف / نفس المسار)
-    Object.keys(nqState.messages).forEach(k => {
-        const ids = new Set();
-        nqState.messages[k] = (nqState.messages[k] || []).filter(m => { if (!m || !m.id) return true; if (ids.has(m.id)) return false; ids.add(m.id); return true; });
-    });
-    Object.keys(nqState.files).forEach(k => {
-        const ps = new Set();
-        nqState.files[k] = (nqState.files[k] || []).filter(f => { const key = f.path || f.mid || (f.name + '|' + f.time); if (ps.has(key)) return false; ps.add(key); return true; });
-    });
 }
 
 function nqSave() {
@@ -258,8 +249,7 @@ function renderMessages() {
                         <div class="mf-name">${escapeHtml(m.file.name)}</div>
                         <div class="mf-meta">${formatFileSize(m.file.size)}</div>
                     </div>
-                    <button class="mf-action" onclick="previewFile('${m.id}')" title="معاينة"><i class="fas fa-eye"></i></button>
-                    <button class="mf-action" onclick="downloadFile('${m.id}')" title="تنزيل">
+                    <button class="mf-action" onclick="downloadFile('${escapeHtml(m.file.name)}')" title="تنزيل">
                         <i class="fas fa-download"></i>
                     </button>
                 </div>
@@ -296,8 +286,7 @@ function escapeHtml(text) {
 /* ============================================================
    إرسال الرسائل
    ============================================================ */
-async function sendMessage() {
-    if (nqState.sending) return;                       // يمنع التكرار عند الضغط المتتالي
+function sendMessage() {
     if (!nqState.currentChannel) {
         alert('اختر قناة أولاً.');
         return;
@@ -309,10 +298,9 @@ async function sendMessage() {
 
     if (!text && !file) return;
 
-    const channelId = nqState.currentChannel;
     const me = getCurrentUser();
     const msg = {
-        id: 'M' + Date.now() + Math.random().toString(36).slice(2, 6),
+        id: 'M' + Date.now(),
         author: me.name,
         role: me.role,
         text,
@@ -321,40 +309,24 @@ async function sendMessage() {
     };
 
     if (file) {
-        nqState.sending = true;
-        const sendBtn = document.querySelector('[onclick*="sendMessage"]');
-        if (sendBtn) sendBtn.disabled = true;
-        try {
-            const c = await PortalCloud.ready;
-            const ext = ((file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin').slice(0, 8);
-            const path = 'niqash/' + channelId.replace(/[^A-Za-z0-9_-]/g, '_') + '/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
-            const up = await c.storage.from(NQ_BUCKET()).upload(path, file.blob, { contentType: file.type, upsert: false });
-            if (up.error) throw up.error;
-            msg.file = { name: file.name, size: file.size, type: file.type, path };
-        } catch (err) {
-            alert('تعذّر رفع الملف: ' + (err && err.message ? err.message : err));
-            nqState.sending = false;
-            if (sendBtn) sendBtn.disabled = false;
-            return;
-        }
-        nqState.sending = false;
-        if (sendBtn) sendBtn.disabled = false;
-
-        if (!nqState.files[channelId]) nqState.files[channelId] = [];
-        nqState.files[channelId].unshift({
-            id: msg.id,
-            mid: msg.id,
+        msg.file = {
             name: file.name,
             size: file.size,
             type: file.type,
-            path: msg.file.path,
+            dataUrl: file.dataUrl
+        };
+
+        if (!nqState.files[nqState.currentChannel]) nqState.files[nqState.currentChannel] = [];
+        nqState.files[nqState.currentChannel].unshift({
+            name: file.name,
+            size: file.size,
             author: me.name,
             time: msg.time
         });
     }
 
-    if (!nqState.messages[channelId]) nqState.messages[channelId] = [];
-    nqState.messages[channelId].push(msg);
+    if (!nqState.messages[nqState.currentChannel]) nqState.messages[nqState.currentChannel] = [];
+    nqState.messages[nqState.currentChannel].push(msg);
 
     input.value = '';
     input.style.height = 'auto';
@@ -399,27 +371,27 @@ function triggerFileUpload() {
     document.getElementById('fileInput')?.click();
 }
 
-const NQ_CFG = () => window.PORTAL_CFG || {};
-const NQ_BUCKET = () => NQ_CFG().FILES_BUCKET || 'portal-files';
-const NQ_MAX = () => (NQ_CFG().MAX_FILE_MB || 50) * 1024 * 1024;
-
 function handleFileUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > NQ_MAX()) {
-        alert('حجم الملف كبير جداً. الحد الأقصى ' + (NQ_CFG().MAX_FILE_MB || 50) + ' ميغابايت.');
+    if (file.size > 5 * 1024 * 1024) {
+        alert('حجم الملف كبير جداً. الحد الأقصى 5 ميغابايت.');
         e.target.value = '';
         return;
     }
 
-    nqState.pendingFile = {
-        name: file.name,
-        size: file.size,
-        type: file.type || 'application/octet-stream',
-        blob: file
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+        nqState.pendingFile = {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            dataUrl: evt.target.result
+        };
+        showFilePreview();
     };
-    showFilePreview();
+    reader.readAsDataURL(file);
     e.target.value = '';
 }
 
@@ -477,26 +449,17 @@ function renderFilesPanel() {
         return;
     }
 
-    const seen = new Set();
-    body.innerHTML = files.filter(f => {                       // إزالة التكرار
-        const k = f.path || f.mid || (f.name + '|' + f.time);
-        if (seen.has(k)) return false;
-        seen.add(k);
-        return true;
-    }).map(f => {
+    body.innerHTML = files.map(f => {
         const ext = (f.name.split('.').pop() || '').toLowerCase();
         const icon = FILE_ICONS[ext] || 'fa-file';
-        const ref = f.mid || f.id || '';
-        const arg = ref ? `'${ref}'` : `'${escapeHtml(f.name).replace(/'/g, '&#39;')}', true`;
         return `
-            <div class="file-item" onclick="previewFile(${arg})">
+            <div class="file-item" onclick="downloadFile('${escapeHtml(f.name)}')">
                 <div class="fi-icon"><i class="fas ${icon}"></i></div>
                 <div class="fi-info">
                     <div class="fi-name">${escapeHtml(f.name)}</div>
                     <div class="fi-meta">${escapeHtml(f.author)} • ${formatFileSize(f.size)}</div>
                 </div>
-                <button class="mf-action" onclick="event.stopPropagation(); previewFile(${arg})" title="معاينة"><i class="fas fa-eye"></i></button>
-                <button class="mf-action" onclick="event.stopPropagation(); downloadFile(${arg})" title="تنزيل">
+                <button class="mf-action" onclick="event.stopPropagation(); downloadFile('${escapeHtml(f.name)}')">
                     <i class="fas fa-download"></i>
                 </button>
             </div>
@@ -510,77 +473,17 @@ function updateFilesBadge() {
     if (badge) badge.textContent = count;
 }
 
-function findFileRecord(ref, byName) {
-    const ch = nqState.currentChannel;
-    const msgs = nqState.messages[ch] || [];
-    let m = byName ? msgs.find(x => x.file && x.file.name === ref) : msgs.find(x => x.id === ref);
-    if (!m) {                                                   // بحث احتياطي في القنوات الأخرى
-        for (const k in nqState.messages) {
-            m = (nqState.messages[k] || []).find(x => x.file && (byName ? x.file.name === ref : x.id === ref));
-            if (m) break;
-        }
+function downloadFile(fileName) {
+    const messages = nqState.messages[nqState.currentChannel] || [];
+    const msg = messages.find(m => m.file && m.file.name === fileName);
+    if (!msg || !msg.file?.dataUrl) {
+        alert('الملف غير متاح للتنزيل.');
+        return;
     }
-    return m && m.file ? m.file : null;
-}
-
-async function nqFileUrl(f, forDownload) {
-    if (f.path) {
-        const c = await PortalCloud.ready;
-        const { data, error } = await c.storage.from(NQ_BUCKET()).createSignedUrl(f.path, 3600, forDownload ? { download: f.name } : undefined);
-        if (error || !data) throw (error || new Error('تعذّر إنشاء الرابط'));
-        return data.signedUrl;
-    }
-    if (f.dataUrl) return f.dataUrl;                            // ملفات قديمة مخزّنة سابقاً
-    throw new Error('الملف غير متاح.');
-}
-
-async function downloadFile(ref, byName) {
-    const f = findFileRecord(ref, byName);
-    if (!f) { alert('الملف غير متاح للتنزيل.'); return; }
-    try {
-        const url = await nqFileUrl(f, true);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = f.name;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    } catch (err) {
-        alert('تعذّر تنزيل الملف: ' + (err && err.message ? err.message : err));
-    }
-}
-
-async function previewFile(ref, byName) {
-    const f = findFileRecord(ref, byName);
-    if (!f) { alert('الملف غير متاح.'); return; }
-    const ext = (f.name.split('.').pop() || '').toLowerCase();
-    const t = f.type || '';
-    const kind = /^image\//.test(t) || /^(jpe?g|png|gif|webp|bmp|svg)$/.test(ext) ? 'img'
-        : (t === 'application/pdf' || ext === 'pdf') ? 'pdf'
-        : /^video\//.test(t) || /^(mp4|webm|ogg)$/.test(ext) ? 'video'
-        : /^audio\//.test(t) || /^(mp3|wav|m4a)$/.test(ext) ? 'audio'
-        : (/^text\//.test(t) || ext === 'txt') ? 'pdf' : '';
-    if (!kind) { return downloadFile(ref, byName); }            // Word/Excel/PowerPoint: لا معاينة في المتصفح
-    try {
-        const url = await nqFileUrl(f, false);
-        const d = document.createElement('div');
-        d.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;direction:rtl';
-        const inner = kind === 'img' ? `<img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain;background:#fff">`
-            : kind === 'video' ? `<video src="${url}" controls style="max-width:100%;max-height:100%"></video>`
-            : kind === 'audio' ? `<audio src="${url}" controls></audio>`
-            : `<iframe src="${url}" style="width:100%;height:100%;border:0;background:#fff"></iframe>`;
-        d.innerHTML = `<div style="width:min(96vw,1000px);height:100%;max-height:92vh;display:flex;flex-direction:column;gap:8px">
-            <div style="display:flex;gap:8px;align-items:center;color:#fff"><strong style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(f.name)}</strong>
-            <button data-dl style="padding:6px 14px;border-radius:8px;border:0;cursor:pointer">تنزيل</button>
-            <button data-x style="padding:6px 14px;border-radius:8px;border:0;cursor:pointer">إغلاق</button></div>
-            <div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center">${inner}</div></div>`;
-        d.querySelector('[data-x]').onclick = () => d.remove();
-        d.querySelector('[data-dl]').onclick = () => downloadFile(ref, byName);
-        d.addEventListener('click', (ev) => { if (ev.target === d) d.remove(); });
-        document.body.appendChild(d);
-    } catch (err) {
-        alert('تعذّر فتح المعاينة: ' + (err && err.message ? err.message : err));
-    }
+    const a = document.createElement('a');
+    a.href = msg.file.dataUrl;
+    a.download = fileName;
+    a.click();
 }
 
 /* ============================================================
@@ -661,8 +564,6 @@ function saveChannel(e) {
 function clearCurrentChannel() {
     if (!nqState.currentChannel) return;
     if (!confirm('هل تريد مسح جميع رسائل هذه القناة؟')) return;
-    const paths = (nqState.messages[nqState.currentChannel] || []).filter(m => m.file && m.file.path).map(m => m.file.path);
-    if (paths.length) PortalCloud.ready.then(c => c.storage.from(NQ_BUCKET()).remove(paths)).catch(() => {});
     nqState.messages[nqState.currentChannel] = [];
     nqState.files[nqState.currentChannel] = [];
     nqSave();

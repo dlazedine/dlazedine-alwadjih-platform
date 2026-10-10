@@ -784,7 +784,7 @@ function renderLog() {
         <div class="log-row">
             <div class="log-action-icon ${escapeHtml(r.action)}"><i class="fas ${iconMap[r.action] || 'fa-circle'}"></i></div>
             <div><span class="log-teacher">${escapeHtml(r.teacher_name)}</span> — ${labelMap[r.action] || r.action}: <strong>${escapeHtml(r.activity_title || '—')}</strong></div>
-            <span class="log-time">${new Date(r.created_at).toLocaleString('ar-DZ')}</span>
+            <span class="log-time">${new Date(r.created_at).toLocaleString('ar-EG')}</span>
         </div>`).join('');
 }
 
@@ -832,25 +832,23 @@ async function renderTeacherStats() {
 
 function subscribeRealtime() {
     if (_realtimeChannel) return;
-    const LBL = (window.PORTAL_CFG && PORTAL_CFG.LABELS) || {};
-    PortalCloud.ready.then(function (sb) {
-        _realtimeChannel = sb.channel('wajih_activity_live')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'wajih_activity' }, (payload) => {
-                const n = payload.new || {};
-                if (window.PORTAL_CFG && PORTAL_CFG.HIDE.test(n.key || '')) return;
-                const title = LBL[n.key] || n.key || '';
-                _logCache.unshift({ action: n.action, teacher_id: n.user_id, teacher_name: n.user_name, activity_title: title, created_at: n.created_at });
-                renderLog();
-                updateMonitorStats();
-                if (typeof window.renderTeacherStats === 'function') window.renderTeacherStats();
-                const actionLabelMap = { create: 'أضاف نشاطاً جديداً', update: 'عدّل نشاطاً', delete: 'حذف نشاطاً' };
-                const iconMap = { create: '🔔', update: '✏️', delete: '🗑️' };
-                const toastTypeMap = { create: 'success', update: 'info', delete: 'warning' };
-                const titlePart = title ? (': "' + title + '"') : '';
-                showToast((iconMap[n.action] || '🔔') + ' ' + n.user_name + ' ' + (actionLabelMap[n.action] || 'قام بعملية') + titlePart, toastTypeMap[n.action] || 'info', 4000);
-            })
-            .subscribe();
-    });
+    const sbMain = window.supabase.createClient(
+        "https://yzxyttieobyblznaehcl.supabase.co",
+        "sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u"
+    );
+    _realtimeChannel = sbMain.channel('activity_log_live')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_log' }, (payload) => {
+            _logCache.unshift(payload.new);
+            renderLog();
+            updateMonitorStats();
+            const actionLabelMap = { create: 'أضاف نشاطاً جديداً', update: 'عدّل نشاطاً', delete: 'حذف نشاطاً' };
+            const iconMap = { create: '🔔', update: '✏️', delete: '🗑️' };
+            const toastTypeMap = { create: 'success', update: 'info', delete: 'warning' };
+            const action = payload.new.action;
+            const titlePart = payload.new.activity_title ? (': "' + payload.new.activity_title + '"') : '';
+            showToast((iconMap[action] || '🔔') + ' ' + payload.new.teacher_name + ' ' + (actionLabelMap[action] || 'قام بعملية') + titlePart, toastTypeMap[action] || 'info', 4000);
+        })
+        .subscribe();
 }
 
 // ---------- المعالجة البيداغوجية ----------
@@ -1116,7 +1114,7 @@ function exportPedRecordWord(id) {
             <tr><td style="border:1px solid #333;padding:5px;"><strong>عدد التلاميذ</strong></td><td style="border:1px solid #333;padding:5px;">${r.nb_eleves || 0}</td></tr>
             <tr><td style="border:1px solid #333;padding:5px;"><strong>المعيدون</strong></td><td style="border:1px solid #333;padding:5px;">${r.nb_redoublants || 0}</td></tr>
         </table>
-        <h4 style="color:#0e2744; margin-top:14px;">المعايير المستهدفة</h4>
+        <h4 style="color:#0e2744; margin-top:14px;">📚 المعايير المستهدفة</h4>
         <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">
             <thead><tr style="background:#eef3f9;">
                 <th style="border:1px solid #333;padding:5px;">#</th>
@@ -1127,28 +1125,17 @@ function exportPedRecordWord(id) {
             </tr></thead>
             <tbody>${criteriaRows || '<tr><td colspan="5" style="border:1px solid #333;padding:5px;text-align:center;">لا توجد معايير</td></tr>'}</tbody>
         </table>
-        <h4 style="color:#0e2744; margin-top:14px;">خطة المعالجة</h4>
+        <h4 style="color:#0e2744; margin-top:14px;">🎯 خطة المعالجة</h4>
         <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">${planRows || '<tr><td style="border:1px solid #333;padding:5px;text-align:center;">لم تعد الخطة بعد</td></tr>'}</table>
-        <h4 style="color:#0e2744; margin-top:14px;">المتعلمون المعنيون</h4>
+        <h4 style="color:#0e2744; margin-top:14px;">👥 المتعلمون المعنيون</h4>
         <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">${studentsRows || '<tr><td style="border:1px solid #333;padding:5px;text-align:center;">لا يوجد متعلمون مسجلون</td></tr>'}</table>
-        <table style="width:100%;border:none;margin-top:22px;"><tr>
-            <td style="border:none;width:50%;"><strong>توقيع الأستاذ(ة):</strong> .....................</td>
-            <td style="border:none;width:50%;text-align:left;"><strong>المفتش(ة):</strong> ${inspectorName} — ${formatDateGeorgian()}</td>
-        </tr></table>
+        <div style="margin-top:22px;display:flex;justify-content:space-between;">
+            <div><strong>توقيع الأستاذ(ة):</strong> .....................</div>
+            <div><strong>المفتش(ة):</strong> ${inspectorName} — ${formatDateGeorgian()}</div>
+        </div>
     `;
 
-    const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" lang="ar" dir="rtl"><head><meta charset="utf-8"><title>تقرير المعالجة البيداغوجية</title>
-<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->
-<style>
-@page WordSection1{size:21cm 29.7cm;margin:2cm 1.8cm 2cm 1.8cm;mso-page-orientation:portrait}
-div.WordSection1{page:WordSection1}
-body{font-family:'Traditional Arabic','Simplified Arabic',Arial,sans-serif;direction:rtl;text-align:right;font-size:13pt;line-height:1.6}
-h3,h4{font-family:Arial,sans-serif;text-align:center;margin:4pt 0}
-h4{text-align:right}
-table{border-collapse:collapse;width:100%;direction:rtl;mso-table-lspace:0;mso-table-rspace:0}
-td,th{border:1px solid #333;padding:4pt 6pt;text-align:right;vertical-align:top;font-size:12pt}
-th{background:#DCE6F1;text-align:center}
-</style></head><body dir="rtl"><div class="WordSection1" dir="rtl">${html}</div></body></html>`;
+    const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>body{font-family:'Tajawal',Arial;direction:rtl;padding:30px;font-size:13px;line-height:1.7;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #333;padding:5px;}</style></head><body>${html}</body></html>`;
     const blob = new Blob(['\ufeff', fullHtml], { type: 'application/msword;charset=utf-8' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -1183,10 +1170,6 @@ window.addEventListener('load', () => {
     }, 1500);
 });
 </script>
-
-<script src="dashboard-supabase.js"></script>
-<script src="admin-panel.js"></script>
-<script src="bulk-users.js"></script>
 
 </body>
 </html>
