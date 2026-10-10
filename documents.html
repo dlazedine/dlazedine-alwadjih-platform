@@ -10,11 +10,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="auth.js"></script>
-<script src="supabase-config.js"></script>
-<script src="portal-cloud.js"></script>
-<script src="wj-shell.js"></script>
-<script src="pwa.js" defer></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>الفضاء التشاركي لبنك الوثائق والتقويمات — الوجيه في الإشراف التربوي</title>
@@ -943,7 +938,7 @@
 
           <!-- منطقة إرفاق الملف (Drag and drop or Click) -->
           <div class="form-group">
-            <label class="form-label">ملف الوثيقة (PDF أو Word أو Excel أو صورة — حتى 8 ميغابايت) <span style="color:var(--danger)">*</span></label>
+            <label class="form-label">ملف الوثيقة (PDF أو Word أو Excel أو صورة — حتى 50 ميغابايت) <span style="color:var(--danger)">*</span></label>
             <input type="file" id="docFileInput" style="display:none;" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,image/*">
             <div class="dropzone-area" onclick="DocumentsManager.triggerUpload()">
               <i class="fas fa-file-arrow-up" style="font-size:32px; color:var(--gold); margin-bottom:8px; display:block;"></i>
