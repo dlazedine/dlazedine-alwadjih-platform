@@ -181,6 +181,55 @@ create policy wj_pf_insert on storage.objects for insert to authenticated with c
 drop policy if exists wj_pf_delete on storage.objects;
 create policy wj_pf_delete on storage.objects for delete to authenticated using (bucket_id = 'portal-files');
 
+-- ---------- 7) تفاصيل النشاط (اسم المقطع/المذكرة...) ----------
+alter table public.wajih_activity add column if not exists detail text;
+
+-- ---------- 8) سجلات المعالجة: يراها الجميع، ويعدّلها المفتش/المشرف أو صاحبها ----------
+-- كل مستخدم يكتب في صفّه فقط (سياسة wj_pd_*)؛ هنا نسمح بقراءة المفتاحين للجميع، وبالكتابة في صفوف الغير للمفتش والمشرف.
+drop policy if exists wj_pd_read_records on public.portal_data;
+create policy wj_pd_read_records on public.portal_data for select to authenticated
+  using (key in ('traitementData','studentsRecords'));
+drop policy if exists wj_pd_staff_ins on public.portal_data;
+create policy wj_pd_staff_ins on public.portal_data for insert to authenticated
+  with check (public.wj_role() in ('inspector','supervisor') and key in ('traitementData','studentsRecords'));
+drop policy if exists wj_pd_staff_upd on public.portal_data;
+create policy wj_pd_staff_upd on public.portal_data for update to authenticated
+  using (public.wj_role() in ('inspector','supervisor') and key in ('traitementData','studentsRecords'))
+  with check (public.wj_role() in ('inspector','supervisor') and key in ('traitementData','studentsRecords'));
+
+-- ---------- 9) إعلانات شاشة الدخول (ندوات وأخبار) ----------
+create table if not exists public.wajih_announcements (
+  id uuid primary key default gen_random_uuid(),
+  kind text not null default 'news' check (kind in ('seminar','news','notice')),
+  title text not null,
+  body text,
+  event_date text,
+  place text,
+  link text,
+  pinned boolean not null default false,
+  active boolean not null default true,
+  created_by_name text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table public.wajih_announcements enable row level security;
+drop policy if exists wj_ann_read on public.wajih_announcements;
+create policy wj_ann_read on public.wajih_announcements for select to anon
+  using (active);
+drop policy if exists wj_ann_read_auth on public.wajih_announcements;
+create policy wj_ann_read_auth on public.wajih_announcements for select to authenticated
+  using (active or public.wj_role() in ('inspector','supervisor'));
+drop policy if exists wj_ann_ins on public.wajih_announcements;
+create policy wj_ann_ins on public.wajih_announcements for insert to authenticated
+  with check (public.wj_role() in ('inspector','supervisor'));
+drop policy if exists wj_ann_upd on public.wajih_announcements;
+create policy wj_ann_upd on public.wajih_announcements for update to authenticated
+  using (public.wj_role() in ('inspector','supervisor')) with check (public.wj_role() in ('inspector','supervisor'));
+drop policy if exists wj_ann_del on public.wajih_announcements;
+create policy wj_ann_del on public.wajih_announcements for delete to authenticated
+  using (public.wj_role() in ('inspector','supervisor'));
+grant select on public.wajih_announcements to anon;
+
 -- ==============================================================================
 --  ملاحظات مهمة
 --  1) supabase.sql القديم: لا تشغّله مجدداً. فهو يعيد كتابة قائمة المتوسطات (schools) بالقائمة الافتراضية،

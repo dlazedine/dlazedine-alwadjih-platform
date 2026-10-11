@@ -66,40 +66,41 @@
 
         // ============ دوال المعالجة البيداغوجية ============
         async getPedagogicalRecords() {
-            let records = [];
+            // سجلات كل الأساتذة (من صفوفهم في portal_data) مع خطة المعالجة وقوائم المتعلمين لتكتمل المعاينة
             try {
-                await ensureAnonAuth();
-                const doc = fbDb ? await fbDb.collection('platform_shared').doc('pedagogical_records').get() : null;
-                if (doc && doc.exists && doc.data().recordsJson) {
-                    const parsed = JSON.parse(doc.data().recordsJson);
-                    if (Array.isArray(parsed)) records = parsed;
-                }
-            } catch(e) { console.warn('Firestore fetch error:', e); }
-            try {
-                await ensureSupabaseSession();
-                const sbm = await getSb();
-                const { data, error } = await sbm.from('traitement_records').select('*').order('created_at', { ascending: false });
-                if (!error && data) {
-                    const existingIds = new Set(records.map(r => r.id));
-                    data.forEach(r => { if (r.id && !existingIds.has(r.id)) records.push(r); });
-                }
-            } catch(e) { console.warn('Supabase fetch error:', e); }
-            try {
-                const local = JSON.parse(localStorage.getItem('traitementData') || '[]');
-                const existingIds = new Set(records.map(r => r.id));
-                local.forEach(r => { if (r.id && !existingIds.has(r.id)) records.push(r); });
-            } catch(e) {}
-            return records.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+                const all = await window.PortalRecords.loadAll();
+                window.__recSnap = all.snapshot;
+                return all.records.map(r => {
+                    const sr = all.plans[r.id] || {};
+                    const total = r.categorieTotal || ((r.categorieC || 0) + (r.categorieD || 0)) || sr.totalStudentsCount || 0;
+                    return {
+                        id: r.id, etablissement: r.etablissement, enseignant: r.enseignant, classes: r.classes,
+                        nb_eleves: r.nbEleves || 0, nb_redoublants: r.nbRedoublants || 0,
+                        categorie_c: r.categorieC || 0, categorie_d: r.categorieD || 0, total_students: total,
+                        criteria: r.criteria || [], students: Array.isArray(sr.criteria) ? sr.criteria : [],
+                        plan: sr.plan || {}, created_by_name: r.ownerName || r.enseignant, ownerId: r.ownerId,
+                        created_at: r.created_at || r.createdAt || new Date(0).toISOString(),
+                        _raw: r, _plan: sr
+                    };
+                }).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+            } catch (e) { console.warn('getPedagogicalRecords:', e); return []; }
         },
         async savePedagogicalRecords(records) {
-            try {
-                await ensureAnonAuth();
-                if (fbDb) await fbDb.collection('platform_shared').doc('pedagogical_records').set({
-                    updatedAt: new Date().toISOString(),
-                    recordsJson: JSON.stringify(records)
-                }, { merge: true });
-            } catch (e) { console.warn('Firestore save:', e); }
-            localStorage.setItem('traitementData', JSON.stringify(records));   // يُزامَن تلقائياً مع Supabase عبر portal-cloud.js
+            const me = await window.PortalCloud.me();
+            const recs = [], plans = {};
+            records.forEach(r => {
+                if (r._raw) { recs.push({ ...r._raw, ownerId: r.ownerId }); if (r._plan && Object.keys(r._plan).length) plans[r.id] = r._plan; return; }
+                const id = r.id || ('rec_' + Date.now().toString(36));
+                recs.push({
+                    id, etablissement: r.etablissement, enseignant: r.enseignant, classes: r.classes,
+                    nbEleves: r.nb_eleves || 0, nbRedoublants: r.nb_redoublants || 0, categorieC: r.categorie_c || 0, categorieD: r.categorie_d || 0,
+                    categorieTotal: r.total_students || 0, criteria: r.criteria || [], created_at: r.created_at,
+                    ownerId: r.ownerId || (me && me.id), ownerName: r.created_by_name || (me && (me.full_name || me.username))
+                });
+                plans[id] = { etablissement: r.etablissement, enseignant: r.enseignant, classes: r.classes, criteria: r.students || [], plan: r.plan || {} };
+            });
+            const res = await window.PortalRecords.saveAll(recs, plans, { includeSelf: true });
+            if (res.denied && res.denied.length) throw new Error('لا تملك صلاحية تعديل بعض السجلات');
             return true;
         },
 
@@ -113,7 +114,7 @@
                 const sb = await getSb(), L = (window.PORTAL_CFG && PORTAL_CFG.LABELS) || {}, H = window.PORTAL_CFG && PORTAL_CFG.HIDE;
                 const { data, error } = await sb.from('wajih_activity').select('*').order('created_at', { ascending: false }).limit(limit);
                 if (error) return [];
-                return (data || []).filter(r => !(H && H.test(r.key || ''))).map(r => ({ id: r.id, action: r.action, teacher_id: r.user_id, teacher_name: r.user_name, activity_title: L[r.key] || r.key, created_at: r.created_at }));
+                return (data || []).filter(r => !(H && H.test(r.key || ''))).map(r => ({ id: r.id, action: r.action, teacher_id: r.user_id, teacher_name: r.user_name, activity_title: (L[r.key] || r.key) + (r.detail ? ' — ' + r.detail : ''), created_at: r.created_at }));
             } catch (e) { return []; }
         },
         async logActivity(teacherId, teacherName, action, title) {

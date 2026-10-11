@@ -13,6 +13,7 @@
 <script src="auth.js"></script>
 <script src="supabase-config.js"></script>
 <script src="portal-cloud.js"></script>
+<script src="portal-records.js"></script>
 <script src="wj-shell.js"></script>
 <script src="pwa.js" defer></script>
 
@@ -23,9 +24,6 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="الوجيه">
-<script src="pwa.js" defer></script>
-<script src="supabase-config.js"></script>
-<script src="portal-cloud.js"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2152,6 +2150,7 @@
                     return;
                 }
                 await this.ensureSupabaseSession();
+                try { window.__me = await PortalCloud.me(); } catch (e) {}
                 this.currentProfile = {
                     id: portalUser.id,
                     full_name: portalUser.fullName || portalUser.username,
@@ -2184,23 +2183,22 @@
             },
 
             async ensureSupabaseSession() {
-                if (typeof sbMain === 'undefined' || !sbMain) return null;
                 try {
-                    const { data } = await sbMain.auth.getSession();
-                    if (data && data.session) return data.session;
-                    const { data: s, error } = await sbMain.auth.signInAnonymously();
-                    if (error) { console.warn('⚠️ Supabase anonymous auth:', error); return null; }
-                    return s ? s.session : null;
+                    const c = window.PortalCloud ? await window.PortalCloud.ready : sbMain;
+                    if (!c) return null;
+                    const { data } = await c.auth.getSession();
+                    return (data && data.session) || null;
                 } catch (e) { console.warn('⚠️ ensureSupabaseSession:', e); return null; }
             },
 
             logout() {
                 if (!confirm('هل تريد تسجيل الخروج والعودة إلى البوابة؟')) return;
+                const go = () => { window.location.href = 'index.html'; };
                 try {
                     sessionStorage.removeItem(SESSION_KEY);
                     localStorage.removeItem(SESSION_KEY + '_persistent');
                 } catch(e) {}
-                window.location.href = 'index.html';
+                if (window.PortalCloud) window.PortalCloud.signOut().then(go, go); else go();
             }
         };
         window.AuthSystem = AuthSystem;
@@ -2304,59 +2302,33 @@
         let traitementData = [];
         let studentsRecords = {};
 
+        const _isStaff = () => !!(window.__me && PortalRecords.isStaff(window.__me));
+        const _canEdit = (rec) => PortalRecords.canEdit(window.__me, rec);
+        const _warnRO = () => showToast('هذا السجل لزميل لك: للاطلاع فقط. التعديل والحذف للمفتش أو المشرف أو صاحب السجل.', 'warning');
+
         async function syncWithCloudStorage() {
             try {
-                const client = (window.PortalCloud && await window.PortalCloud.ready) || (typeof sbMain !== 'undefined' ? sbMain : null);
-                if (!client) return;
-
-                // قراءة السجلات السحابية المشتركة
-                const { data: pData } = await client.from('portal_data').select('*').eq('key', 'traitementData');
-                const { data: sData } = await client.from('portal_data').select('*').eq('key', 'studentsRecords');
-
-                let cloudChanged = false;
-                if (pData && pData.length) {
-                    const localIds = new Set(traitementData.map(d => d.id));
-                    pData.forEach(r => {
-                        try {
-                            const parsed = JSON.parse(r.value || '[]');
-                            if (Array.isArray(parsed)) {
-                                parsed.forEach(item => {
-                                    if (item && item.id && !localIds.has(item.id)) {
-                                        traitementData.push(item);
-                                        cloudChanged = true;
-                                    }
-                                });
-                            }
-                        } catch(e) {}
-                    });
-                }
-
-                if (sData && sData.length) {
-                    sData.forEach(r => {
-                        try {
-                            const parsed = JSON.parse(r.value || '{}');
-                            if (typeof parsed === 'object') {
-                                Object.keys(parsed).forEach(k => {
-                                    if (!studentsRecords[k]) {
-                                        studentsRecords[k] = parsed[k];
-                                        cloudChanged = true;
-                                    }
-                                });
-                            }
-                        } catch(e) {}
-                    });
-                }
-
-                if (cloudChanged) {
-                    localStorage.setItem('traitementData', JSON.stringify(traitementData));
-                    localStorage.setItem('studentsRecords', JSON.stringify(studentsRecords));
-                    renderAll();
-                    renderBank();
-                }
-            } catch(e) {
+                const me = window.__me || (window.__me = await PortalCloud.me());
+                if (!me) return;
+                const all = await PortalRecords.loadAll();
+                window.__recSnap = all.snapshot;
+                // سجلاتي من التخزين المحلي (المرجع)، وسجلات الغير من السحابة
+                const own = traitementData.filter(r => !r.ownerId || r.ownerId === me.id);
+                own.forEach(r => { if (!r.ownerId) { r.ownerId = me.id; r.ownerName = me.full_name || me.username; } });
+                const ownIds = new Set(own.map(r => r.id));
+                const others = all.records.filter(r => r.ownerId !== me.id && !ownIds.has(r.id));
+                const before = JSON.stringify([traitementData.length, others.map(r => r.id)]);
+                Object.keys(studentsRecords).forEach(k => { const rec = traitementData.find(r => r.id === k); if (rec && rec.ownerId && rec.ownerId !== me.id) delete studentsRecords[k]; });
+                traitementData = own.concat(others);
+                others.forEach(r => { if (all.plans[r.id]) studentsRecords[r.id] = all.plans[r.id]; });
+                // سجلات السحابة التي تخصّني ولم تصل لهذا الجهاز بعد
+                all.records.filter(r => r.ownerId === me.id && !ownIds.has(r.id)).forEach(r => { traitementData.unshift(r); if (all.plans[r.id]) studentsRecords[r.id] = all.plans[r.id]; });
+                renderAll(); renderBank();
+            } catch (e) {
                 console.warn('syncWithCloudStorage notice:', e);
             }
         }
+        setInterval(() => { if (!document.hidden && !document.querySelector('.modal.active, .modal-overlay.active')) syncWithCloudStorage(); }, 45000);
 
         function loadAll() {
             try {
@@ -2374,62 +2346,18 @@
 
         function saveAll() {
             try {
-                localStorage.setItem('traitementData', JSON.stringify(traitementData));
-                localStorage.setItem('studentsRecords', JSON.stringify(studentsRecords));
-
-                // مزامنة سحابية استباقية إلى Supabase portal_data
-                if (window.PortalCloud) {
-                    window.PortalCloud.ready.then(c => {
-                        const prof = window.AuthSystem?.currentProfile;
-                        const uName = prof ? prof.full_name : 'أستاذ(ة)';
-                        const uRole = prof ? (prof.role === 'admin' ? 'inspector' : 'teacher') : 'teacher';
-                        const uId = prof ? prof.id : '00000000-0000-0000-0000-000000000000';
-                        const now = new Date().toISOString();
-
-                        // رفع السجلات كـ Shared Data ليراها المفتش وكل الأساتذة
-                        c.from('portal_data').upsert([
-                            {
-                                owner: '00000000-0000-0000-0000-000000000000',
-                                key: 'traitementData',
-                                value: JSON.stringify(traitementData),
-                                shared: true,
-                                updated_by: uId,
-                                updated_by_name: uName,
-                                updated_by_role: uRole,
-                                updated_at: now,
-                                touched: true
-                            },
-                            {
-                                owner: '00000000-0000-0000-0000-000000000000',
-                                key: 'studentsRecords',
-                                value: JSON.stringify(studentsRecords),
-                                shared: true,
-                                updated_by: uId,
-                                updated_by_name: uName,
-                                updated_by_role: uRole,
-                                updated_at: now,
-                                touched: true
-                            }
-                        ]).then(() => {
-                            // تسجيل النشاط في wajih_activity ليظهر فوراً في لوحة تحكم المفتش
-                            c.from('wajih_activity').insert({
-                                user_id: uId,
-                                user_name: uName,
-                                user_role: uRole,
-                                action: 'update',
-                                key: 'traitementData'
-                            }).catch(() => {});
-                        }).catch(e => console.warn('portal_data save warning:', e));
-                    }).catch(() => {});
-                }
-
-                // حفظ نسخة احتياطية في Firestore لمنظومة الوجيه القديمة أيضاً
-                if (typeof fbDb !== 'undefined' && fbDb) {
-                    ensureAnonAuth().then(() => {
-                        fbDb.collection('platform_shared').doc('pedagogical_records').set({
-                            updatedAt: new Date().toISOString(),
-                            recordsJson: JSON.stringify(traitementData)
-                        }, { merge: true }).catch(() => {});
+                const me = window.__me;
+                const mine = (r) => !me || !r.ownerId || r.ownerId === me.id;
+                const own = traitementData.filter(mine);
+                const ownIds = new Set(own.map(r => r.id));
+                const sr = {};
+                Object.keys(studentsRecords).forEach(k => { if (ownIds.has(k) || !traitementData.find(r => r.id === k)) sr[k] = studentsRecords[k]; });
+                localStorage.setItem('traitementData', JSON.stringify(own));      // يُزامَن تلقائياً مع صفّي الخاص عبر portal-cloud.js
+                localStorage.setItem('studentsRecords', JSON.stringify(sr));
+                // سجلات الزملاء: يحفظها المفتش/المشرف فقط، وغيرهم تُرفض تعديلاته
+                if (me && traitementData.some(r => r.ownerId && r.ownerId !== me.id) || (window.__recSnap && Object.keys(window.__recSnap).some(o => me && o !== me.id))) {
+                    PortalRecords.saveAll(traitementData, studentsRecords, { includeSelf: false }).then(res => {
+                        if (res && res.denied && res.denied.length) { _warnRO(); syncWithCloudStorage(); }
                     }).catch(() => {});
                 }
             } catch(e) {}
@@ -2487,13 +2415,13 @@
                         criteriaHtml += '</div>';
                     } else { criteriaHtml = 'لا توجد معايير'; }
                     tbody.innerHTML += `<tr>
-                        <td>${idx + 1}</td><td>${item.etablissement || ''}</td><td>${item.enseignant || ''}</td>
+                        <td>${idx + 1}</td><td>${item.etablissement || ''}</td><td>${item.enseignant || ''}${(item.ownerId && window.__me && item.ownerId !== window.__me.id) ? '<br><small style="opacity:.65">سجل زميل (للاطلاع)</small>' : ''}</td>
                         <td>${item.classes || ''}</td><td>${item.nbEleves || 0}</td><td>${item.nbRedoublants || 0}</td>
                         <td>${item.categorieC || 0}</td><td>${item.categorieD || 0}</td>
                         <td style="max-width:300px;">${criteriaHtml}</td>
                         <td>
-                            <button class="btn btn-sm btn-info" onclick="editRecord('${item.id}')"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteRecord('${item.id}')"><i class="fas fa-trash"></i></button>
+                            ${_canEdit(item) ? `<button class="btn btn-sm btn-info" onclick="editRecord('${item.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteRecord('${item.id}')"><i class="fas fa-trash"></i></button>` : '<span style="font-size:11px;opacity:.7"><i class="fas fa-eye"></i> للاطلاع</span>'}
                         </td>
                     </tr>`;
                 });
@@ -2557,7 +2485,7 @@
                 if (!model) { showToast('النموذج غير موجود', 'error'); return; }
                 const inspector = getInspectorData();
                 const content = `<div style="text-align:center; border-bottom:2px solid #1a3d6e; padding-bottom:10px;"><h3>بطاقة معالجة بيداغوجية</h3><h4>${model.matiere}</h4></div><p><strong>الكفاءة:</strong> ${model.competence}</p><p><strong>المعيار:</strong> ${model.critere}</p><p><strong>الصعوبة:</strong> ${model.difficulte}</p><p><strong>المصدر:</strong> ${model.source}</p><p><strong>النشاط:</strong> ${model.activite}</p><p><strong>الخطوات:</strong><br>${model.etapes.replace(/\n/g, '<br>')}</p><p><strong>التوجيهات:</strong><br>${model.tawjih.replace(/\n/g, '<br>')}</p><p><strong>ملاحظات:</strong> ${model.notes}</p><div style="margin-top:20px; border-top:1px solid #ccc; padding-top:10px; display:flex; justify-content:space-between;"><div><strong>المفتش:</strong> ${inspector.name}</div><div>${formatDateGeorgian()}</div></div>`;
-                const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>بطاقة معالجة</title><style>body{font-family:'Simplified Arabic',Arial;direction:rtl;padding:30px;}</style></head><body>${content}</body></html>`;
+                const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" lang="ar" dir="rtl"><head><meta charset="utf-8"><!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]--><style>@page{size:21cm 29.7cm;margin:2cm 1.8cm}body,td,th,p,div{font-family:'Traditional Arabic','Simplified Arabic',Arial,sans-serif;direction:rtl;text-align:right;font-size:13pt;line-height:1.6}h1,h2,h3,h4{font-family:Arial,sans-serif}table{direction:rtl}</style><title>بطاقة معالجة</title><style>body{font-family:'Simplified Arabic',Arial;direction:rtl;padding:30px;}</style></head><body dir="rtl">${content}</body></html>`;
                 const blob = new Blob([fullHtml], { type: 'application/msword;charset=utf-8' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
@@ -2661,6 +2589,7 @@
             try {
                 const item = traitementData.find(d => d.id === id);
                 if (!item) { showToast('السجل غير موجود', 'error'); return; }
+                if (!_canEdit(item)) { _warnRO(); return; }
                 document.getElementById('modalTitle').textContent = 'تعديل السجل';
                 document.getElementById('editId').value = id;
                 document.getElementById('mEtablissement').value = item.etablissement || '';
@@ -2717,6 +2646,7 @@
                 if (!data.etablissement || !data.enseignant) { showToast('المؤسسة والأستاذ(ة) إلزاميان.', 'warning'); return; }
                 if (id) {
                     const idx = traitementData.findIndex(d => d.id === id);
+                    if (idx !== -1 && !_canEdit(traitementData[idx])) { _warnRO(); return; }
                     if (idx !== -1) {
                         traitementData[idx] = { ...traitementData[idx], ...data };
                         if (studentsRecords[id]) {
@@ -2734,6 +2664,9 @@
                 } else {
                     const newId = generateId();
                     data.id = newId;
+                    data.ownerId = window.__me ? window.__me.id : '';
+                    data.ownerName = window.__me ? (window.__me.full_name || window.__me.username) : '';
+                    data.created_at = new Date().toISOString();
                     traitementData.push(data);
                     studentsRecords[newId] = { etablissement: data.etablissement, enseignant: data.enseignant, classes: data.classes, criteria: criteria.map(c => ({ ...c, students: [] })), plan: { difficultyType: '', difficultySource: '', activityType: '', complementaryWork: '', projectInvestment: '', resourceExploitation: '', timing: '', schedulePlan: '', periodDetermination: '', treatmentModes: '', evaluationMode: '', managementMode: '', additionalNotes: '' }, totalStudentsCount: 0, exercices: [] };
                 }
@@ -2746,6 +2679,8 @@
         };
 
         window.deleteRecord = function(id) {
+            const _r = traitementData.find(d => d.id === id);
+            if (_r && !_canEdit(_r)) { _warnRO(); return; }
             if (!confirm('حذف هذا السجل نهائياً؟')) return;
             try {
                 traitementData = traitementData.filter(d => d.id !== id);
@@ -2905,7 +2840,7 @@
                 const id = document.getElementById('reportSelect').value;
                 if (!id) { showToast('اختر سجلاً.', 'warning'); return; }
                 const display = document.getElementById('reportDisplay').innerHTML;
-                const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>تقرير المعالجة</title><style>body{font-family:'Simplified Arabic',Arial;direction:rtl;padding:30px;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #333;padding:6px;text-align:right;}</style></head><body>${display}</body></html>`;
+                const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" lang="ar" dir="rtl"><head><meta charset="utf-8"><!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]--><style>@page{size:21cm 29.7cm;margin:2cm 1.8cm}body,td,th,p,div{font-family:'Traditional Arabic','Simplified Arabic',Arial,sans-serif;direction:rtl;text-align:right;font-size:13pt;line-height:1.6}h1,h2,h3,h4{font-family:Arial,sans-serif}table{direction:rtl}</style><title>تقرير المعالجة</title><style>body{font-family:'Simplified Arabic',Arial;direction:rtl;padding:30px;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #333;padding:6px;text-align:right;}</style></head><body dir="rtl">${display}</body></html>`;
                 const blob = new Blob([fullHtml], { type: 'application/msword;charset=utf-8' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
@@ -3063,7 +2998,7 @@
                     html += `</ul>`;
                 });
                 const content = `<div style="text-align:center; border-bottom:2px solid #1a3d6e; padding-bottom:10px;"><h3>سجل المتعلمين</h3></div><p><strong>المؤسسة:</strong> ${record.etablissement}</p><p><strong>الأستاذ(ة):</strong> ${record.enseignant}</p><p><strong>الأقسام:</strong> ${record.classes}</p><hr>${html}<div style="margin-top:20px; border-top:1px solid #ccc; padding-top:10px; text-align:center;"><strong>المفتش المشرف:</strong> ${inspector.name}</div>`;
-                const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>سجل المتعلمين</title><style>body{font-family:'Simplified Arabic',Arial;direction:rtl;padding:30px;}</style></head><body>${content}</body></html>`;
+                const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" lang="ar" dir="rtl"><head><meta charset="utf-8"><!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]--><style>@page{size:21cm 29.7cm;margin:2cm 1.8cm}body,td,th,p,div{font-family:'Traditional Arabic','Simplified Arabic',Arial,sans-serif;direction:rtl;text-align:right;font-size:13pt;line-height:1.6}h1,h2,h3,h4{font-family:Arial,sans-serif}table{direction:rtl}</style><title>سجل المتعلمين</title><style>body{font-family:'Simplified Arabic',Arial;direction:rtl;padding:30px;}</style></head><body dir="rtl">${content}</body></html>`;
                 const blob = new Blob([fullHtml], { type: 'application/msword;charset=utf-8' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
@@ -3131,7 +3066,7 @@
                 const p = record.plan || {};
                 const inspector = getInspectorData();
                 const content = `<div style="text-align:center; border-bottom:2px solid #1a3d6e; padding-bottom:10px;"><h3>خطة المعالجة البيداغوجية</h3></div><p><strong>المؤسسة:</strong> ${record.etablissement}</p><p><strong>الأستاذ(ة):</strong> ${record.enseignant}</p><p><strong>الأقسام:</strong> ${record.classes}</p><hr><p><strong>1. طبيعة الصعوبة:</strong> ${p.difficultyType || '-'}</p><p><strong>2. مصدر الصعوبة:</strong> ${p.difficultySource || '-'}</p><p><strong>3. تنويع الأنشطة:</strong> ${p.activityType || '-'}</p><p><strong>4. أعمال تكميلية:</strong> ${p.complementaryWork || '-'}</p><p><strong>5. استثمار المشاريع:</strong> ${p.projectInvestment || '-'}</p><p><strong>6. استغلال سندات:</strong> ${p.resourceExploitation || '-'}</p><p><strong>7. توقيت ومدة المعالجة:</strong> ${p.timing || '-'}</p><p><strong>8. مخطط زمني:</strong> ${p.schedulePlan || '-'}</p><p><strong>9. تفويج المتعلمين:</strong> ${p.periodDetermination || '-'}</p><p><strong>10. أنماط المعالجة:</strong> ${p.treatmentModes || '-'}</p><p><strong>11. نمط التقييم:</strong> ${p.evaluationMode || '-'}</p><p><strong>12. تسيير الأنشطة:</strong> ${p.managementMode || '-'}</p><p><strong>13. ملاحظات إضافية:</strong> ${p.additionalNotes || '-'}</p><div style="margin-top:20px; border-top:1px solid #ccc; padding-top:10px; display:flex; justify-content:space-between;"><div><strong>المفتش:</strong> ${inspector.name}</div><div>${formatDateGeorgian()}</div></div>`;
-                const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>خطة المعالجة</title><style>body{font-family:'Simplified Arabic',Arial;direction:rtl;padding:30px;}</style></head><body>${content}</body></html>`;
+                const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" lang="ar" dir="rtl"><head><meta charset="utf-8"><!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]--><style>@page{size:21cm 29.7cm;margin:2cm 1.8cm}body,td,th,p,div{font-family:'Traditional Arabic','Simplified Arabic',Arial,sans-serif;direction:rtl;text-align:right;font-size:13pt;line-height:1.6}h1,h2,h3,h4{font-family:Arial,sans-serif}table{direction:rtl}</style><title>خطة المعالجة</title><style>body{font-family:'Simplified Arabic',Arial;direction:rtl;padding:30px;}</style></head><body dir="rtl">${content}</body></html>`;
                 const blob = new Blob([fullHtml], { type: 'application/msword;charset=utf-8' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
@@ -3211,19 +3146,26 @@
                 record.exercices.forEach((ex, idx) => {
                     const div = document.createElement('div');
                     div.className = 'exercice-item';
-                    const fileDisplay = ex.fileData ? `<span class="ex-file"><i class="fas fa-paperclip"></i> ${ex.fileName || 'ملف مرفق'}</span>` : '';
-                    div.innerHTML = `<div class="ex-title">${ex.title}</div><div class="ex-desc">${ex.description || ''}</div><div style="margin-top:4px;">${fileDisplay}</div><div class="ex-actions"><button class="btn btn-sm btn-info" onclick="editExercice(${idx})"><i class="fas fa-edit"></i> تعديل</button><button class="btn btn-sm btn-word" onclick="exportExerciceWord(${idx})"><i class="fas fa-file-word"></i> Word</button><button class="btn btn-sm btn-danger" onclick="deleteExercice(${idx})"><i class="fas fa-trash"></i> حذف</button>${ex.fileData ? `<button class="btn btn-sm btn-success" onclick="downloadExerciceFile(${idx})"><i class="fas fa-download"></i> تحميل</button>` : ''}</div>`;
+                    const fileDisplay = (ex.fileData || ex.filePath) ? `<span class="ex-file"><i class="fas fa-paperclip"></i> ${ex.fileName || 'ملف مرفق'}</span>` : '';
+                    div.innerHTML = `<div class="ex-title">${ex.title}</div><div class="ex-desc">${ex.description || ''}</div><div style="margin-top:4px;">${fileDisplay}</div><div class="ex-actions"><button class="btn btn-sm btn-info" onclick="editExercice(${idx})"><i class="fas fa-edit"></i> تعديل</button><button class="btn btn-sm btn-word" onclick="exportExerciceWord(${idx})"><i class="fas fa-file-word"></i> Word</button><button class="btn btn-sm btn-danger" onclick="deleteExercice(${idx})"><i class="fas fa-trash"></i> حذف</button>${(ex.fileData || ex.filePath) ? `<button class="btn btn-sm btn-success" onclick="downloadExerciceFile(${idx})"><i class="fas fa-download"></i> تحميل</button>` : ''}</div>`;
                     container.appendChild(div);
                 });
             } catch(e) {}
         }
 
-        window.downloadExerciceFile = function(idx) {
+        window.downloadExerciceFile = async function(idx) {
             try {
                 const record = studentsRecords[currentExercicePlanId];
                 if (!record || !record.exercices || !record.exercices[idx]) return;
                 const ex = record.exercices[idx];
-                if (!ex.fileData) { showToast('لا يوجد ملف.', 'warning'); return; }
+                if (!ex.fileData && !ex.filePath) { showToast('لا يوجد ملف.', 'warning'); return; }
+                if (ex.filePath) {
+                    const c = await window.PortalCloud.ready;
+                    const { data, error } = await c.storage.from((window.PORTAL_CFG && PORTAL_CFG.FILES_BUCKET) || 'portal-files').createSignedUrl(ex.filePath, 3600, { download: ex.fileName || true });
+                    if (error || !data) { showToast('تعذّر تنزيل الملف.', 'warning'); return; }
+                    const a = document.createElement('a'); a.href = data.signedUrl; a.download = ex.fileName || 'ملف'; document.body.appendChild(a); a.click(); a.remove();
+                    return;
+                }
                 const bc = atob(ex.fileData);
                 const bn = new Array(bc.length);
                 for (let i = 0; i < bc.length; i++) bn[i] = bc.charCodeAt(i);
@@ -3244,6 +3186,7 @@
                 document.getElementById('exTitle').value = ex.title || '';
                 document.getElementById('exDesc').value = ex.description || '';
                 document.getElementById('exFileData').value = ex.fileData || '';
+                window.__exFile = null;
                 document.getElementById('exFileType').value = ex.fileType || '';
                 if (ex.fileName) document.getElementById('exFileName').textContent = ex.fileName;
                 document.getElementById('exerciceModal').classList.add('active');
@@ -3257,7 +3200,7 @@
                 const ex = record.exercices[idx];
                 const inspector = getInspectorData();
                 const content = `<h3 style="text-align:center;">وضعية معالجة بيداغوجية</h3><p><strong>عنوان التمرين:</strong> ${ex.title}</p><p><strong>الوصف:</strong> ${ex.description || 'لا يوجد وصف'}</p><div style="margin-top:20px; border-top:1px solid #ccc; padding-top:10px; display:flex; justify-content:space-between;"><div><strong>أستاذ المادة:</strong> ${record.enseignant}</div><div><strong>المفتش:</strong> ${inspector.name}</div></div>`;
-                const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>وضعية</title><style>body{font-family:'Simplified Arabic',Arial;direction:rtl;padding:30px;}</style></head><body>${content}</body></html>`;
+                const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" lang="ar" dir="rtl"><head><meta charset="utf-8"><!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]--><style>@page{size:21cm 29.7cm;margin:2cm 1.8cm}body,td,th,p,div{font-family:'Traditional Arabic','Simplified Arabic',Arial,sans-serif;direction:rtl;text-align:right;font-size:13pt;line-height:1.6}h1,h2,h3,h4{font-family:Arial,sans-serif}table{direction:rtl}</style><title>وضعية</title><style>body{font-family:'Simplified Arabic',Arial;direction:rtl;padding:30px;}</style></head><body dir="rtl">${content}</body></html>`;
                 const blob = new Blob([fullHtml], { type: 'application/msword;charset=utf-8' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
@@ -3270,17 +3213,16 @@
             try {
                 const file = input.files[0];
                 if (!file) return;
+                const ext = (file.name.split('.').pop() || '').toLowerCase();
                 const validTypes = ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/pdf'];
-                if (!validTypes.includes(file.type)) { showToast('Word أو PDF فقط.', 'warning'); input.value = ''; return; }
-                if (file.size > 5 * 1024 * 1024) { showToast('الحد الأقصى 5MB.', 'warning'); input.value = ''; return; }
+                if (!validTypes.includes(file.type) && !['doc', 'docx', 'pdf'].includes(ext)) { showToast('Word أو PDF فقط.', 'warning'); input.value = ''; return; }
+                const maxMB = (window.PORTAL_CFG && PORTAL_CFG.MAX_FILE_MB) || 50;
+                if (file.size > maxMB * 1024 * 1024) { showToast('الحد الأقصى ' + maxMB + ' ميغابايت.', 'warning'); input.value = ''; return; }
                 document.getElementById('exFileName').textContent = file.name;
                 document.getElementById('clearFileBtn').style.display = 'inline-flex';
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('exFileData').value = e.target.result.split(',')[1];
-                    document.getElementById('exFileType').value = file.type;
-                };
-                reader.readAsDataURL(file);
+                window.__exFile = file;                                   // يُرفع عند الحفظ
+                document.getElementById('exFileData').value = 'pending';
+                document.getElementById('exFileType').value = file.type || (ext === 'pdf' ? 'application/pdf' : 'application/msword');
             } catch(e) {}
         };
 
@@ -3291,6 +3233,7 @@
                 document.getElementById('exFileData').value = '';
                 document.getElementById('exFileType').value = '';
                 document.getElementById('clearFileBtn').style.display = 'none';
+                window.__exFile = null;
             } catch(e) {}
         };
 
@@ -3314,7 +3257,7 @@
             clearFileUpload();
         };
 
-        window.saveExercice = function() {
+        window.saveExercice = async function() {
             try {
                 const title = document.getElementById('exTitle').value.trim();
                 const description = document.getElementById('exDesc').value.trim();
@@ -3326,20 +3269,35 @@
                 const record = studentsRecords[currentExercicePlanId];
                 if (!record) { showToast('الخطة غير موجودة.', 'warning'); return; }
                 if (!record.exercices) record.exercices = [];
-                const ed = { id: generateId(), title, description, fileData: fileData || '', fileType: fileType || '', fileName: (fileData && fileName !== 'لم يتم اختيار ملف') ? fileName : '' };
+                let filePath = '';
+                if (fileData === 'pending' && window.__exFile) {
+                    try {
+                        const f = window.__exFile, c = await window.PortalCloud.ready;
+                        const ext = ((f.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin').slice(0, 8);
+                        filePath = 'moualaja/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+                        const up = await c.storage.from((window.PORTAL_CFG && PORTAL_CFG.FILES_BUCKET) || 'portal-files').upload(filePath, f, { contentType: fileType || f.type, upsert: false });
+                        if (up.error) { showToast('تعذّر رفع الملف: ' + up.error.message, 'warning'); return; }
+                    } catch (e) { showToast('تعذّر رفع الملف.', 'warning'); return; }
+                }
+                const hasNew = !!filePath;
+                const ed = { id: generateId(), title, description, fileData: (hasNew || fileData === 'pending') ? '' : (fileData || ''), filePath, fileType: fileType || '', fileName: ((hasNew || fileData) && fileName !== 'لم يتم اختيار ملف') ? fileName : '' };
                 if (editIdx !== '') {
                     const idx = parseInt(editIdx);
                     if (idx >= 0 && idx < record.exercices.length) {
-                        if (!fileData && record.exercices[idx].fileData) {
-                            ed.fileData = record.exercices[idx].fileData;
-                            ed.fileType = record.exercices[idx].fileType;
-                            ed.fileName = record.exercices[idx].fileName;
+                        const old = record.exercices[idx];
+                        if (!fileData && (old.fileData || old.filePath)) {
+                            ed.fileData = old.fileData || '';
+                            ed.filePath = old.filePath || '';
+                            ed.fileType = old.fileType;
+                            ed.fileName = old.fileName;
                         }
+                        ed.id = old.id || ed.id;
                         record.exercices[idx] = ed;
                     }
                 } else record.exercices.push(ed);
                 saveAll();
                 renderExercices();
+                window.__exFile = null;
                 closeExerciceModal();
                 showToast('تم الحفظ!', 'success');
             } catch(e) {}
@@ -4008,7 +3966,7 @@
                     rowsHtml += `<tr><td style="border:1px solid #333; padding:6px; text-align:center;">${idx + 1}</td><td style="border:1px solid #333; padding:6px;">${escapeHtml(r.learnerName)}</td><td style="border:1px solid #333; padding:6px;">${escapeHtml(r.quizTitle)}</td><td style="border:1px solid #333; padding:6px; text-align:center;">${r.score}/${r.total}</td><td style="border:1px solid #333; padding:6px; text-align:center;">${r.percent}٪</td><td style="border:1px solid #333; padding:6px; text-align:center; font-size: 12px;">${dateStr} - ${timeStr}</td></tr>`;
                 });
                 const content = `<div style="text-align:center; border-bottom:2px solid #1a3d6e; padding-bottom:10px;"><h3>الجمهورية الجزائرية الديمقراطية الشعبية</h3><h4>وزارة التربية الوطنية</h4><h3 style="color:#1a3d6e;">سجل نتائج نشاط المتعلمين</h3></div><h4 style="color:#1a3d6e;">📊 إحصائيات عامة</h4><table style="width:100%; border-collapse:collapse; margin:8px 0;"><tr><td style="border:1px solid #333; padding:5px; font-weight:bold;">إجمالي المحاولات</td><td style="border:1px solid #333; padding:5px; text-align:center;">${totalCount}</td><td style="border:1px solid #333; padding:5px; font-weight:bold;">عدد المتعلمين</td><td style="border:1px solid #333; padding:5px; text-align:center;">${uniqueLearners}</td></tr><tr><td style="border:1px solid #333; padding:5px; font-weight:bold;">المعدل العام</td><td style="border:1px solid #333; padding:5px; text-align:center;">${avgPercent}٪</td><td style="border:1px solid #333; padding:5px; font-weight:bold;">أعلى نتيجة</td><td style="border:1px solid #333; padding:5px; text-align:center;">${bestScore}٪</td></tr></table><h4 style="color:#1a3d6e;">📋 تفاصيل النتائج</h4><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#f0f4f8;"><th style="border:1px solid #333; padding:6px;">#</th><th style="border:1px solid #333; padding:6px;">اسم المتعلم</th><th style="border:1px solid #333; padding:6px;">الاختبار</th><th style="border:1px solid #333; padding:6px;">النتيجة</th><th style="border:1px solid #333; padding:6px;">النسبة</th><th style="border:1px solid #333; padding:6px;">التاريخ</th></tr></thead><tbody>${rowsHtml}</tbody></table><div style="margin-top:20px; border-top:1px solid #ccc; padding-top:10px; text-align:center;"><strong>المفتش المشرف:</strong> ${inspector.name} - ${inspector.role}<br><strong>التاريخ:</strong> ${today}</div>`;
-                const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>سجل النتائج</title><style>body{font-family:'Simplified Arabic',Arial;direction:rtl;padding:30px;}</style></head><body>${content}</body></html>`;
+                const fullHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" lang="ar" dir="rtl"><head><meta charset="utf-8"><!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]--><style>@page{size:21cm 29.7cm;margin:2cm 1.8cm}body,td,th,p,div{font-family:'Traditional Arabic','Simplified Arabic',Arial,sans-serif;direction:rtl;text-align:right;font-size:13pt;line-height:1.6}h1,h2,h3,h4{font-family:Arial,sans-serif}table{direction:rtl}</style><title>سجل النتائج</title><style>body{font-family:'Simplified Arabic',Arial;direction:rtl;padding:30px;}</style></head><body dir="rtl">${content}</body></html>`;
                 const blob = new Blob([fullHtml], { type: 'application/msword;charset=utf-8' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);

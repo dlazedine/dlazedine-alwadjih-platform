@@ -199,7 +199,7 @@ body {
 <body class="text-ink antialiased selection:bg-gold/20 selection:text-ink">
 
     <!-- ============ شاشة الدخول الموحّدة ============ -->
-    <div id="gateScreen" class="min-h-screen flex items-center justify-center p-4">
+    <div id="gateScreen" class="min-h-screen flex flex-col items-center justify-center gap-4 p-4">
         <div class="w-full max-w-sm bg-white rounded-3xl p-8 border border-line shadow-xl text-center">
             <div class="w-14 h-14 rounded-2xl bg-paper border border-gold/40 text-goldDeep flex items-center justify-center text-xl mx-auto mb-3 shadow-2xs">
                 <i class="fas fa-shield-halved"></i>
@@ -226,6 +226,12 @@ body {
             </form>
             <a href="install.html" class="block text-center mt-3 text-[11px] font-bold text-ink2 hover:text-gold underline"><i class="fas fa-mobile-screen-button"></i> تثبيت التطبيق على هاتفك</a>
 
+        </div>
+
+        <!-- إعلانات وندوات قبل الدخول (يديرها المفتش من لوحة التحكم) -->
+        <div id="gateAnn" class="hidden w-full max-w-sm bg-white rounded-3xl p-5 border border-line shadow-xl text-right">
+            <h2 class="font-serif text-base font-bold text-ink mb-3"><i class="fas fa-bullhorn text-goldDeep"></i> إعلانات وندوات</h2>
+            <div id="gateAnnList" class="space-y-2.5"></div>
         </div>
     </div>
 
@@ -1211,6 +1217,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         enterApp(session.user);
     }
 });
+</script>
+
+<script>
+(function(){
+  const KIND={seminar:'🎓 ندوة',news:'📰 خبر',notice:'📌 إعلان'};
+  async function loadAnnouncements(){
+    try{
+      const box=document.getElementById('gateAnn'),list=document.getElementById('gateAnnList');
+      if(!box||!window.PortalCloud)return;
+      const c=await PortalCloud.ready;
+      const {data,error}=await c.from('wajih_announcements').select('*').eq('active',true).order('pinned',{ascending:false}).order('created_at',{ascending:false}).limit(8);
+      if(error||!data||!data.length)return;
+      list.textContent='';
+      data.forEach(r=>{
+        const d=document.createElement('div');d.className='rounded-xl border border-line bg-paper/50 p-3';
+        const h=document.createElement('div');h.className='text-xs font-bold text-ink';h.textContent=(KIND[r.kind]||'')+' — '+r.title+(r.pinned?' 📌':'');d.appendChild(h);
+        const meta=[r.event_date,r.place].filter(Boolean).join(' • ');
+        if(meta){const m=document.createElement('div');m.className='text-[11px] text-goldDeep mt-0.5';m.textContent=meta;d.appendChild(m)}
+        if(r.body){const b=document.createElement('div');b.className='text-[11px] text-ink2 mt-1 leading-relaxed whitespace-pre-line';b.textContent=r.body;d.appendChild(b)}
+        if(r.link&&/^https?:\/\//i.test(r.link)){const a=document.createElement('a');a.href=r.link;a.target='_blank';a.rel='noopener noreferrer';a.className='inline-block mt-1 text-[11px] font-bold underline text-ink2';a.textContent='التفاصيل / التسجيل';d.appendChild(a)}
+        list.appendChild(d);
+      });
+      box.classList.remove('hidden');
+    }catch(e){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadAnnouncements);else loadAnnouncements();
+})();
 </script>
 </body>
 </html>

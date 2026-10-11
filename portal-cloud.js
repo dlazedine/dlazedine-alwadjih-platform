@@ -42,8 +42,11 @@ if(T.length)err=(await c.from('portal_data').upsert(T)).error;if(!err&&F.length)
 rows.forEach(r=>{if(r.shared)seen[r.key]=now});rawSet.call(localStorage,'pc_seen',JSON.stringify(seen));
 if(ch.length)window.dispatchEvent(new CustomEvent('pc:synced',{detail:{keys:ch}}));
 let le={};try{le=JSON.parse(localStorage.getItem('pc_ev')||'{}')}catch(e){}
-const ev=T.filter(r=>!C.HIDE.test(r.key)&&!(le[r.key]>now-6e4)).map(r=>({user_id:prof.id,user_name:prof.full_name||prof.username,user_role:prof.role,action:le[r.key]?'update':'create',key:r.key}));
-T.forEach(r=>le[r.key]=now);rawSet.call(localStorage,'pc_ev',JSON.stringify(le));if(ev.length)c.from('wajih_activity').insert(ev).then(()=>{})}
+const base={user_id:prof.id,user_name:prof.full_name||prof.username,user_role:prof.role};let ev=[];
+T.filter(r=>!C.HIDE.test(r.key)).forEach(r=>{const d=detailEvents(r.key,r.value);
+if(d&&d.length){d.forEach(x=>ev.push({...base,action:x[0],key:r.key,detail:x[1]}))}
+else if(!d&&!(le[r.key]>now-6e4))ev.push({...base,action:le[r.key]?'update':'create',key:r.key})});
+T.forEach(r=>le[r.key]=now);rawSet.call(localStorage,'pc_ev',JSON.stringify(le));if(ev.length)insAct(c,ev).then(()=>{},()=>{})}
 catch(e){console.warn('sync',e.message||e);Object.keys(snap).forEach(k=>{if(pending[k]===undefined){pending[k]=snap[k];if(sa[k])pendAct[k]=true}})}}
 async function pull(){const c=await ready;const{data,error}=await c.from('portal_data').select('key,value,owner,updated_at');if(error||!data)return 0;
 const t=ts();let n=0;data.forEach(r=>{if(r.owner!==SH&&r.owner!==prof.id)return;const u=Date.parse(r.updated_at);
@@ -70,14 +73,42 @@ const{data:em}=await c.rpc('wj_email_for_username',{u});if(!em)return bad;
 const{data,error}=await c.auth.signInWithPassword({email:em,password:p});if(error)return bad;
 const{data:pr}=await c.from('wajih_profiles').select('*').eq('id',data.user.id).single();
 if(!pr||!pr.active){await c.auth.signOut();return{success:false,error:'الحساب غير مفعّل'}}
-prof=pr;if(pr.must_change)await forceChange(c);const user=saveSession(prof);await pull();return{success:true,user}}
-const lastLog={};async function log(action,key){try{if((action||'update')==='update'){const n=Date.now();if(lastLog[key]&&n-lastLog[key]<60000)return;lastLog[key]=n}const c=await ready;let p=prof;if(!p){const{data:s}=await c.auth.getSession();if(!s.session)return;const{data}=await c.from('wajih_profiles').select('*').eq('id',s.session.user.id).single();p=data}
-if(!p)return;await c.from('wajih_activity').insert({user_id:p.id,user_name:p.full_name||p.username,user_role:p.role,action:action||'update',key:key})}catch(e){console.warn('log',e&&e.message||e)}}
-window.PortalCloud={ready,login,signOut,flush,log,get profile(){return prof}};
+prof=pr;if(pr.must_change)await forceChange(c);const user=saveSession(prof);await pull();startPresence();return{success:true,user}}
+const lastLog={};
+async function insAct(c,rows){const r=await c.from('wajih_activity').insert(rows);
+if(r.error&&/detail/i.test(r.error.message||'')){const st=rows.map(x=>{const o={...x};delete o.detail;return o});return c.from('wajih_activity').insert(st)}return r}
+async function me(){if(prof)return prof;const c=await ready;const{data:s}=await c.auth.getSession();if(!s.session)return null;const{data}=await c.from('wajih_profiles').select('*').eq('id',s.session.user.id).single();if(data&&data.active)prof=data;return prof}
+async function log(action,key,detail){try{if((action||'update')==='update'&&!detail){const n=Date.now();if(lastLog[key]&&n-lastLog[key]<60000)return;lastLog[key]=n}const c=await ready;const p=await me();
+if(!p)return;await insAct(c,{user_id:p.id,user_name:p.full_name||p.username,user_role:p.role,action:action||'update',key:key,detail:detail||null})}catch(e){console.warn('log',e&&e.message||e)}}
+
+/* ---- تفاصيل نشاطات منصة اللغة العربية: ما أُضيف أو عُدّل أو حُذف من مقاطع ومذكرات ---- */
+const DOM={oral:'فهم المنطوق',written:'فهم المكتوب',grammar:'الظواهر اللغوية',production:'الإنتاج الكتابي'};
+const hs=t=>{let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return h};
+function items(k,v){try{const J=JSON.parse(v),o={};
+if(k==='didactic_portal_segments'&&Array.isArray(J))J.forEach(x=>{if(x&&x.id)o[x.id]={l:'مقطع: '+(x.title||x.id),h:hs(JSON.stringify(x))}});
+else if(k==='didactic_portal_memos'&&J&&typeof J==='object'){let segs=[];try{segs=JSON.parse(localStorage.getItem('didactic_portal_segments')||'[]')}catch(e){}
+Object.keys(J).forEach(id=>{const m=/^memo_(.+)_([a-z]+)$/.exec(id),sg=m&&segs.find(z=>z.id===m[1]),d=J[id]||{};
+o[id]={l:'مذكرة '+(m?(DOM[m[2]]||m[2]):'')+(sg?' — '+sg.title:'')+(d.teacher?' (الأستاذ: '+d.teacher+')':''),h:hs(JSON.stringify(d))}})}
+else return null;return o}catch(e){return null}}
+function detailEvents(k,v){const cur=items(k,v);if(!cur)return null;const sk='pc_snap:'+k;let prev=null;try{prev=JSON.parse(localStorage.getItem(sk)||'null')}catch(e){}
+const snap={};Object.keys(cur).forEach(i=>snap[i]=cur[i].h);rawSet.call(localStorage,sk,JSON.stringify(snap));if(!prev)return[];
+const out=[];Object.keys(cur).forEach(i=>{if(!(i in prev))out.push(['create',cur[i].l]);else if(prev[i]!==cur[i].h)out.push(['update',cur[i].l])});
+Object.keys(prev).forEach(i=>{if(!(i in cur))out.push(['delete','حذف عنصر ('+i+')'])});return out.slice(0,20)}
+
+/* ---- المتصلون الآن (Realtime Presence) ---- */
+let pres=null;
+const pagePayload=()=>({id:prof.id,name:prof.full_name||prof.username,role:prof.role,page:(location.pathname.split('/').pop()||'index.html'),since:new Date().toISOString()});
+function presList(){if(!pres)return[];const st=pres.presenceState(),m={};Object.values(st).forEach(a=>a.forEach(p=>{if(p&&p.id&&(!m[p.id]||String(p.since)>String(m[p.id].since)))m[p.id]=p}));return Object.values(m)}
+async function startPresence(){if(pres||!prof)return;const c=await ready;
+pres=c.channel('wajih-presence',{config:{presence:{key:prof.id+':'+Math.random().toString(36).slice(2,7)}}});
+pres.on('presence',{event:'sync'},()=>window.dispatchEvent(new CustomEvent('pc:presence',{detail:presList()})));
+pres.subscribe(st=>{if(st==='SUBSCRIBED')pres.track(pagePayload())})}
+addEventListener('pagehide',()=>{try{if(pres)pres.untrack()}catch(e){}});
+window.PortalCloud={ready,login,signOut,flush,log,me,presence:{list:()=>presList(),start:startPresence},get profile(){return prof}};
 (async()=>{const c=await ready,{data}=await c.auth.getSession();const has=!!(sessionStorage.getItem('pgb_session')||localStorage.getItem('pgb_session_persistent'));
 if(!data.session){if(has)clearSession();return}if(!has){await c.auth.signOut();return}
 const{data:p}=await c.from('wajih_profiles').select('*').eq('id',data.session.user.id).single();if(!p||!p.active){await signOut();return}
-prof=p;if(p.must_change)await forceChange(c);const n=await pull();const g='pc_r:'+location.pathname;
+prof=p;startPresence();if(p.must_change)await forceChange(c);const n=await pull();const g='pc_r:'+location.pathname;
 if(n&&Date.now()-(+sessionStorage.getItem(g)||0)>6e4){sessionStorage.setItem(g,Date.now());location.reload()}})();
 addEventListener('pagehide',()=>{if(prof&&Object.keys(pending).length)flush()});
 })();
