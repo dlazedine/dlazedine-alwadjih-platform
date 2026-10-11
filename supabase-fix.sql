@@ -114,18 +114,18 @@ drop policy if exists wj_pd_insert on public.portal_data;
 create policy wj_pd_insert on public.portal_data for insert to authenticated
   with check ((owner = auth.uid() and not shared)
            or (shared and owner = '00000000-0000-0000-0000-000000000000'::uuid)
-           or public.wj_role() = 'inspector');
+           or (public.wj_role() = 'inspector' and key <> 'tqweem_ar_v4'));
 drop policy if exists wj_pd_update on public.portal_data;
 create policy wj_pd_update on public.portal_data for update to authenticated
   using ((owner = auth.uid() and not shared)
       or (shared and owner = '00000000-0000-0000-0000-000000000000'::uuid)
-      or public.wj_role() = 'inspector')
+      or (public.wj_role() = 'inspector' and key <> 'tqweem_ar_v4'))
   with check ((owner = auth.uid() and not shared)
       or (shared and owner = '00000000-0000-0000-0000-000000000000'::uuid)
-      or public.wj_role() = 'inspector');
+      or (public.wj_role() = 'inspector' and key <> 'tqweem_ar_v4'));
 drop policy if exists wj_pd_delete on public.portal_data;
 create policy wj_pd_delete on public.portal_data for delete to authenticated
-  using (owner = auth.uid() or public.wj_role() = 'inspector');
+  using (owner = auth.uid() or (public.wj_role() = 'inspector' and key <> 'tqweem_ar_v4'));
 
 -- ---------- 4) سجل النشاط (يغذّي مراقبة النشاطات في لوحة التحكم) ----------
 create table if not exists public.wajih_activity (

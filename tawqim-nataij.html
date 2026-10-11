@@ -13,7 +13,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>تقويم نتائج الاختبار — الوجيه في الإشراف التربوي</title>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="export-xlsx.js"></script>
 <style>
   :root{
     --gold:#c49b3f;
@@ -680,6 +681,7 @@ function loadDemo(){
 
 /* ========== حفظ/استرجاع ========== */
 function saveData(){
+  if(window.__roMeta) return;            // وضع الاطلاع: لا حفظ إطلاقاً
   const meta = {
     wilaya: document.getElementById('wilaya').value,
     district: document.getElementById('district').value,
@@ -700,7 +702,7 @@ function saveData(){
 }
 
 function loadData(){
-  const raw = localStorage.getItem(STORAGE_KEY);
+  const raw = window.__roMeta ? JSON.stringify(window.__roMeta) : localStorage.getItem(STORAGE_KEY);
   if(raw){
     try{
       const meta = JSON.parse(raw);
@@ -726,7 +728,7 @@ function loadData(){
       document.getElementById('passMark').value = passMark;
 
       students = meta.students && meta.students.length ? meta.students : Array.from({length:25}, blankStudent);
-      if(!SYNC_NAMES){ try{ const nm = JSON.parse(localStorage.getItem(NAMES_KEY) || '[]'); students.forEach((st,i)=>{ if(!st.name && nm[i]) st.name = nm[i]; }); }catch(e){} }
+      if(!SYNC_NAMES && !window.__roMeta){ try{ const nm = JSON.parse(localStorage.getItem(NAMES_KEY) || '[]'); students.forEach((st,i)=>{ if(!st.name && nm[i]) st.name = nm[i]; }); }catch(e){} }
       if(meta.theme) document.body.className = meta.theme;
       return true;
     }catch(e){ console.warn('load error', e); }
@@ -815,8 +817,10 @@ function exportExcel(){
     {s:{r:1,c:0},e:{r:1,c:13}},
     {s:{r:2,c:0},e:{r:2,c:13}},
     {s:{r:7,c:2},e:{r:7,c:7}},
-    {s:{r:7,c:8},e:{r:7,c:11}}
+    {s:{r:7,c:8},e:{r:7,c:11}},
+    {s:{r:7,c:0},e:{r:8,c:0}},{s:{r:7,c:1},e:{r:8,c:1}},{s:{r:7,c:12},e:{r:8,c:12}},{s:{r:7,c:13},e:{r:8,c:13}}
   ];
+  window.XLSXFmt && XLSXFmt.polish(ws1, {titleRows:[0,1,2,3,4,5], headerRows:[7,8], tableFrom:7, zebra:true});
 
   XLSX.utils.book_append_sheet(wb, ws1, 'F1');
 
@@ -844,10 +848,11 @@ function exportExcel(){
 
   const ws2 = XLSX.utils.aoa_to_sheet(f2);
   ws2['!cols'] = [{wch:18},{wch:6},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10}];
+  window.XLSXFmt && XLSXFmt.polish(ws2, {headerRows:[0,1,2], tableFrom:0});
   XLSX.utils.book_append_sheet(wb, ws2, 'F2');
 
   const fileName = `تقويم_${document.getElementById('classSection').value || 'قسم'}_${new Date().toISOString().slice(0,10)}.xlsx`;
-  XLSX.writeFile(wb, fileName);
+  (window.XLSXFmt ? XLSXFmt.write : (w, n) => XLSX.writeFile(w, n))(wb, fileName);
 }
 
 /* ========== التهيئة ========== */
@@ -884,7 +889,38 @@ if(window.WJ) WJ.ready.then(async ()=>{
   document.getElementById('sigRole').textContent = WJ.insp ? 'مفتش اللغة العربية' : (WJ.role === 'supervisor' ? 'مشرف تربوي' : 'أستاذ(ة) اللغة العربية');
   try{ const list = await WJ.schools(); document.getElementById('dl-schools').innerHTML = list.map(x=>`<option value="${escapeHtml(x)}">`).join(''); }catch(e){}
   updateHeaderText();
-  saveData();
+  if(!window.__roMeta) saveData();
+
+  /* المفتش والمشرف: اطلاع فقط على نتائج الأساتذة (التعديل والحذف لصاحب الحساب وحده) */
+  if(WJ.staff){
+    const bar = document.createElement('div');
+    bar.className = 'no-print';
+    bar.style.cssText = 'margin:0 0 14px;padding:10px 14px;border:2px solid #c49b3f;border-radius:12px;background:#fffdf6;direction:rtl;font:14px/1.8 Tahoma,Arial,sans-serif';
+    bar.innerHTML = '<b>عرض نتائج أستاذ (للاطلاع فقط):</b> <select id="roSel" style="padding:5px 10px;border-radius:8px;border:1px solid #d8cfb8"><option value="">— اختر أستاذاً —</option></select> <span id="roMsg" style="color:#a01c2c;font-weight:bold"></span>';
+    const host = document.querySelector('.container'); const wb = document.getElementById('wj-bar');
+    if(wb && wb.parentNode) wb.parentNode.insertBefore(bar, wb.nextSibling); else if(host) host.prepend(bar);
+    const css = document.createElement('style');
+    css.textContent = 'body.ro .container input:not(#roSel),body.ro .container select:not(#roSel),body.ro .container textarea{pointer-events:none;background:#f1efe6!important}';
+    document.head.appendChild(css);
+    try{
+      const [rows, profs] = await Promise.all([
+        WJ.c.from('portal_data').select('owner,updated_at').eq('key', STORAGE_KEY).neq('owner','00000000-0000-0000-0000-000000000000'),
+        WJ.c.from('wajih_profiles').select('id,full_name,username,role').eq('role','teacher')
+      ]);
+      const nm = {}; (profs.data||[]).forEach(p=>nm[p.id]=p.full_name||p.username);
+      const sel = document.getElementById('roSel');
+      (rows.data||[]).filter(r=>r.owner!==WJ.me.id).forEach(r=>{ const o=document.createElement('option'); o.value=r.owner; o.textContent=nm[r.owner]||r.owner; sel.appendChild(o); });
+      sel.onchange = async ()=>{
+        if(!sel.value){ location.reload(); return; }
+        const { data } = await WJ.c.from('portal_data').select('value').eq('owner', sel.value).eq('key', STORAGE_KEY).maybeSingle();
+        if(!data){ alert('لا توجد نتائج محفوظة لهذا الأستاذ.'); return; }
+        try{ window.__roMeta = JSON.parse(data.value); }catch(e){ alert('بيانات غير صالحة'); return; }
+        document.body.classList.add('ro');
+        loadData(); renderScales(); renderHeaderRows(); renderTable(); calculateAll(); updateHeaderText();
+        document.getElementById('roMsg').textContent = 'وضع الاطلاع فقط — لا يمكن تعديل هذه النقاط أو حذفها (لصاحب الحساب وحده)';
+      };
+    }catch(e){ console.warn('ro viewer', e); }
+  }
 });
 </script>
 </body>

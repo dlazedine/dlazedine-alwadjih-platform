@@ -13,7 +13,7 @@ addEventListener('input',e=>{const el=e.target;if(!el||!/^(INPUT|TEXTAREA)$/.tes
 const v=el.value;if(typeof v!=='string'||!RE.test(v))return;const a=el.selectionStart,b=el.selectionEnd;el.value=conv(v);try{el.setSelectionRange(a,b)}catch(x){}},true);
 window.toWesternDigits=conv})();
 (function(){'use strict';const C=window.PORTAL_CFG,SH='00000000-0000-0000-0000-000000000000';
-const EX=/session|portalUser|^sb-|firebase|avatar|media_files|Logo|^pc_|redirect/i;
+const EX=/session|portalUser|^sb-|firebase|avatar|media_files|Logo|^pc_|^local_|redirect/i;
 const rawSet=Storage.prototype.setItem,RL={inspector:'مفتش',supervisor:'مشرف',teacher:'أستاذ'};
 let prof=null,pending={},pendAct={},timer=null,gest=0;
 const ready=new Promise(res=>{const go=()=>res(window.supabase.createClient(C.SUPABASE_URL,C.SUPABASE_KEY));

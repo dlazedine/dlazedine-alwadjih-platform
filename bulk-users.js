@@ -13,7 +13,7 @@
   const genUser = () => 'ens' + rnd(5).map((x) => '23456789'[x % 8]).join('');
   const genPass = () => { const C = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'; return rnd(12).map((x) => C[x % C.length]).join(''); };
   const parse = (t) => t.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map((l) => {
-    const a = l.split(/\t|;|,|،/).map((x) => x.trim()); return { name: a[0], inst: a[1] || '', user: (a[2] || '').toLowerCase() };
+    const a = l.split(/\t|;|,|،|\||\s[-–—]\s/).map((x) => x.trim()); return { name: a[0], inst: a[1] || '', user: (a[2] || '').toLowerCase() };
   }).filter((r) => r.name);
 
   addEventListener('DOMContentLoaded', async () => {
@@ -27,14 +27,17 @@
 .bk table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}.bk td,.bk th{border:1px solid #ddd5bd;padding:4px 8px;text-align:center}.bk .m{font-size:.85rem;color:#6b7280}.bk .er{color:#a01c2c}.bk .ok{color:#1d7a46}
 .bk .pb{height:10px;background:#e5dcc5;border-radius:6px;overflow:hidden;margin:8px 0}.bk .pb i{display:block;height:100%;width:0;background:#c49b3f;transition:width .3s}</style>
 <h2>👥 إنشاء حسابات دفعة واحدة</h2>
-<p class="m">الصق القائمة، سطراً لكل أستاذ: <b>الاسم واللقب</b> ثم (اختيارياً) <b>المؤسسة</b> ثم <b>اسم مستخدم</b>. يمكنك لصق عمودين مباشرة من Excel. إن لم تكتب اسم مستخدم يُولَّد اسم مؤقت (مثل <bdi dir="ltr">ens48213</bdi>) ويختار الأستاذ اسمه النهائي عند أول دخول.</p>
+<p class="m">الصق القائمة، سطراً لكل أستاذ: <b>الاسم واللقب</b> ثم (اختيارياً) <b>المؤسسة</b> ثم <b>اسم مستخدم</b>، مفصولة بـ Tab أو فاصلة أو <b>-</b> أو <b>|</b>. أو اكتب الأسماء فقط واختر المؤسسة من الخانة أدناه فتُطبَّق على الجميع. يمكنك لصق عمودين مباشرة من Excel. إن لم تكتب اسم مستخدم يُولَّد اسم مؤقت (مثل <bdi dir="ltr">ens48213</bdi>) ويختار الأستاذ اسمه النهائي عند أول دخول.</p>
 <textarea id="bkT" placeholder="حمدوش سامية\tمتوسطة علي عرباوي&#10;براهيمي فاطمة\tمتوسطة مصطفى فيلالي"></textarea>
+<div>المؤسسة لكل الأسماء الخالية منها: <input id="bkI" list="bkIL" placeholder="اختر أو اكتب اسم المؤسسة" style="min-width:260px;font:inherit;padding:7px 12px;border-radius:9px;border:1px solid #d8cfb8"><datalist id="bkIL"></datalist></div>
 <div>الدور: <select id="bkR"><option value="teacher">أستاذ</option><option value="supervisor">مشرف</option></select> <button id="bkP" class="p">معاينة</button></div>
 <div id="bkV"></div><div id="bkS" class="m"></div><div id="bkO"></div>`;
-    const $ = (id) => box.querySelector('#' + id); let rows = [], res = [], stop = false, running = false;
+    const $ = (id) => box.querySelector('#' + id);
+    try { const st = await c.from('wajih_settings').select('value').eq('key', 'schools').maybeSingle(); const L = st.data && Array.isArray(st.data.value) ? st.data.value : (CFG.SCHOOLS || []); $('bkIL').innerHTML = L.map((x) => '<option value="' + esc(x) + '">').join(''); } catch (e) {} let rows = [], res = [], stop = false, running = false;
 
     $('bkP').onclick = () => {
       rows = parse($('bkT').value);
+      const di = $('bkI').value.trim(); if (di) rows.forEach((r) => { if (!r.inst) r.inst = di; });
       if (!rows.length) { $('bkV').innerHTML = '<p class="er">لا توجد أسماء.</p>'; return; }
       if (rows.length > 400) { $('bkV').innerHTML = '<p class="er">الحد الأقصى 400 اسم في المرة الواحدة.</p>'; return; }
       $('bkV').innerHTML = `<p><b>${rows.length}</b> حساباً سيُنشأ. هذه أول الأسماء للتأكد من الأعمدة:</p><table><tr><th>#</th><th>الاسم واللقب</th><th>المؤسسة</th><th>اسم المستخدم</th></tr>${rows.slice(0, 5).map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.name)}</td><td>${esc(r.inst)}</td><td>${esc(r.user || 'مؤقت تلقائي')}</td></tr>`).join('')}</table>
@@ -47,7 +50,11 @@
     async function signUp(c2, u, pw) {
       for (let k = 0; k < 4; k++) {
         const { data, error } = await c2.auth.signUp({ email: u + '@' + CFG.EMAIL_DOMAIN, password: pw });
-        if (!error && data && data.user) return { id: data.user.id };
+        if (!error && data && data.user) {
+          if (data.user.identities && data.user.identities.length === 0) return { err: 'اسم المستخدم مستعمل' };
+          if (!data.session) T.confirmOn = true;      // Supabase يطلب تأكيد البريد: الحسابات لن تدخل
+          return { id: data.user.id };
+        }
         if (error && (error.status === 429 || /rate limit/i.test(error.message))) { await wait(T.rateWait); continue; }
         return { err: error ? error.message : 'تعذّر الإنشاء' };
       }
@@ -67,7 +74,7 @@
         taken.add(u); const pw = genPass(); $('bkS').textContent = `جارٍ إنشاء الحساب ${i + 1} من ${rows.length}: ${r.name}`;
         const a = await signUp(c2, u, pw); let ok = false, msg = a.err || '';
         if (a.id) {
-          const p1 = await c.from('wajih_profiles').insert({ id: a.id, username: u, full_name: r.name, school: r.inst || null, role, must_change: true });
+          const p1 = await c.from('wajih_profiles').insert({ id: a.id, username: u, full_name: r.name, school: r.inst || null, role, must_change: true, active: true });
           if (p1.error) msg = 'أُنشئ الدخول وتعذّر الملف: ' + p1.error.message;
           else { ok = true; await c.from('wajih_prof').insert({ user_id: a.id, data: { name: r.name, inst: r.inst || '' }, updated_by_name: me.full_name || me.username }); }
         }
@@ -80,6 +87,7 @@
     function finish() {
       const okN = res.filter((x) => x.ok).length, bad = res.filter((x) => !x.ok);
       $('bkS').innerHTML = `<b class="${bad.length ? '' : 'ok'}">اكتمل: تم إنشاء ${okN} من ${rows.length} حساباً.</b>${stop ? ' (أُوقف يدوياً)' : ''}`;
+      if (T.confirmOn) $('bkS').innerHTML += `<p class="er"><b>تنبيه مهم:</b> Supabase يطلب تأكيد البريد الإلكتروني، فلن يتمكن الأساتذة من الدخول. عطّل «Confirm email» من Authentication ← Providers ← Email، ثم أكّد الحسابات المعلّقة من Authentication ← Users.</p>`;
       $('bkO').innerHTML = `<p class="er"><b>مهم:</b> كلمات المرور المؤقتة تظهر هنا مرة واحدة فقط ولا تُحفظ في أي مكان. نزّل الملف أو اطبع البطاقات الآن، وسلّم كل أستاذ بياناته على انفراد.</p>
 <button id="bkC" class="p">تنزيل CSV</button> <button id="bkK" class="p">طباعة بطاقات الدخول</button>
 ${bad.length ? `<p class="er">تعذّر ${bad.length}: ${bad.map((x) => esc(x.name) + ' (' + esc(x.msg) + ')').join('، ')}. انسخ أسماءهم وأعد المحاولة.</p>` : ''}
