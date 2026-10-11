@@ -114,18 +114,18 @@ drop policy if exists wj_pd_insert on public.portal_data;
 create policy wj_pd_insert on public.portal_data for insert to authenticated
   with check ((owner = auth.uid() and not shared)
            or (shared and owner = '00000000-0000-0000-0000-000000000000'::uuid)
-           or (public.wj_role() = 'inspector' and key <> 'tqweem_ar_v4'));
+           or (public.wj_role() = 'inspector' and key not in ('tqweem_ar_v4','carnet_tanqit_v1')));
 drop policy if exists wj_pd_update on public.portal_data;
 create policy wj_pd_update on public.portal_data for update to authenticated
   using ((owner = auth.uid() and not shared)
       or (shared and owner = '00000000-0000-0000-0000-000000000000'::uuid)
-      or (public.wj_role() = 'inspector' and key <> 'tqweem_ar_v4'))
+      or (public.wj_role() = 'inspector' and key not in ('tqweem_ar_v4','carnet_tanqit_v1')))
   with check ((owner = auth.uid() and not shared)
       or (shared and owner = '00000000-0000-0000-0000-000000000000'::uuid)
-      or (public.wj_role() = 'inspector' and key <> 'tqweem_ar_v4'));
+      or (public.wj_role() = 'inspector' and key not in ('tqweem_ar_v4','carnet_tanqit_v1')));
 drop policy if exists wj_pd_delete on public.portal_data;
 create policy wj_pd_delete on public.portal_data for delete to authenticated
-  using (owner = auth.uid() or (public.wj_role() = 'inspector' and key <> 'tqweem_ar_v4'));
+  using (owner = auth.uid() or (public.wj_role() = 'inspector' and key not in ('tqweem_ar_v4','carnet_tanqit_v1')));
 
 -- ---------- 4) سجل النشاط (يغذّي مراقبة النشاطات في لوحة التحكم) ----------
 create table if not exists public.wajih_activity (
@@ -229,6 +229,22 @@ drop policy if exists wj_ann_del on public.wajih_announcements;
 create policy wj_ann_del on public.wajih_announcements for delete to authenticated
   using (public.wj_role() in ('inspector','supervisor'));
 grant select on public.wajih_announcements to anon;
+
+-- ---------- 10) إسقاط السياسات القديمة المكشوفة على portal_data ----------
+-- ظهرت في فحص pg_policies سياسات بدور public (أي لأي زائر بالمفتاح العام دون تسجيل دخول):
+-- d_sel, d_ins, d_upd, d_del, "Allow public read access", "Allow authenticated inserts", "Allow users to update their own data"
+-- وهي تبطل كل سياسات wj_* لأن السياسات تُجمع بـ«أو». نحذفها: التطبيق يعمل بسياسات wj_pd_* وحدها.
+drop policy if exists "d_sel" on public.portal_data;
+drop policy if exists "d_ins" on public.portal_data;
+drop policy if exists "d_upd" on public.portal_data;
+drop policy if exists "d_del" on public.portal_data;
+drop policy if exists "Allow public read access" on public.portal_data;
+drop policy if exists "Allow authenticated inserts" on public.portal_data;
+drop policy if exists "Allow users to update their own data" on public.portal_data;
+
+-- افحص بقية الجداول بالطريقة نفسها (أي سياسة بدور public أو بشرط using (true) تحتاج مراجعة):
+--   select tablename, policyname, cmd, roles, qual, with_check
+--   from pg_policies where schemaname in ('public','storage') order by 1,2;
 
 -- ==============================================================================
 --  ملاحظات مهمة

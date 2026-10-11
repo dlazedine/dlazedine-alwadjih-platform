@@ -1284,9 +1284,7 @@ html, body {
             try {
                 const { data } = await sbMain.auth.getSession();
                 if (data && data.session) return data.session;
-                const { data: s, error } = await sbMain.auth.signInAnonymously();
-                if (error) { console.warn('⚠️ Supabase anonymous auth:', error); return null; }
-                return s ? s.session : null;
+                return null;      // لا دخول مجهول: الجلسة الحقيقية تأتي من portal-cloud.js
             } catch (e) { console.warn('⚠️ ensureSupabaseSession:', e); return null; }
         },
 
@@ -1647,18 +1645,7 @@ html, body {
                     segments: portalState.segments
                 }, { merge: true });
             }
-            if (typeof sbMain !== 'undefined' && sbMain) {
-                try {
-                    await ensureSupabaseSession();
-                    await sbMain.from('activity_log').insert({
-                        teacher_id: AuthSystem.currentProfile ? AuthSystem.currentProfile.id : 'didactic_teacher',
-                        teacher_name: AuthSystem.currentProfile ? AuthSystem.currentProfile.full_name : 'أستاذ(ة) اللغة العربية',
-                        action: 'update',
-                        activity_title: 'تحديث وهندسة مقاطع اللغة العربية',
-                        created_at: new Date().toISOString()
-                    });
-                } catch(_) {}
-            }
+            // النشاط يسجَّل تلقائياً بتفاصيله (اسم المقطع/المذكرة) عبر portal-cloud.js
             if (badge) badge.innerHTML = '<i class="fas fa-cloud-check"></i> متزامن مع السحابة';
             return true;
         } catch(e) {
@@ -1680,18 +1667,7 @@ html, body {
                     memos: JSON.stringify(portalState.memos)
                 }, { merge: true });
             }
-            if (typeof sbMain !== 'undefined' && sbMain) {
-                try {
-                    await ensureSupabaseSession();
-                    await sbMain.from('activity_log').insert({
-                        teacher_id: AuthSystem.currentProfile ? AuthSystem.currentProfile.id : 'didactic_teacher',
-                        teacher_name: AuthSystem.currentProfile ? AuthSystem.currentProfile.full_name : 'أستاذ(ة) اللغة العربية',
-                        action: 'create',
-                        activity_title: `حفظ مذكرة: ${memoTitle}`,
-                        created_at: new Date().toISOString()
-                    });
-                } catch(_) {}
-            }
+            // النشاط يسجَّل تلقائياً بتفاصيله (اسم المقطع/المذكرة) عبر portal-cloud.js
             if (badge) badge.innerHTML = '<i class="fas fa-cloud-check"></i> متزامن مع السحابة';
             return true;
         } catch(e) {
@@ -1720,27 +1696,12 @@ html, body {
                                     if (!currentMap.has(cs.id)) {
                                         portalState.segments.push(cs);
                                         changed = true;
-                                    } else {
-                                        const cur = currentMap.get(cs.id);
-                                        if (JSON.stringify(cs) !== JSON.stringify(cur)) {
-                                            const idx = portalState.segments.findIndex(s => s.id === cs.id);
-                                            if (idx !== -1) portalState.segments[idx] = cs;
-                                            changed = true;
-                                        }
                                     }
                                 });
                             }
                         } catch(e) { console.warn('Parse cloud segments error:', e); }
                     }
-                    if (data.memos) {
-                        try {
-                            const cloudMemos = JSON.parse(data.memos);
-                            if (cloudMemos && typeof cloudMemos === 'object') {
-                                portalState.memos = { ...portalState.memos, ...cloudMemos };
-                                changed = true;
-                            }
-                        } catch(e) { console.warn('Parse cloud memos error:', e); }
-                    }
+                    // المذكرات شخصية: لا تُستورد من الوثيقة المشتركة حتى لا تطغى على ما حفظه الأستاذ (تُستعاد من صفّه الخاص عبر portal-cloud.js)
                     if (changed) {
                         localStorage.setItem('didactic_portal_segments', JSON.stringify(portalState.segments));
                         localStorage.setItem('didactic_portal_memos', JSON.stringify(portalState.memos));
@@ -2211,57 +2172,57 @@ html, body {
             <div class="field-row">
                 <div class="field">
                     <label>المؤسسة التربوية:</label>
-                    <input type="text" id="memo_school" value="${escapeHtml(savedMemo.school || 'متوسطة قريبة رابح')}">
+                    <input type="text" id="memo_school" value="${escapeHtml(savedMemo.school ?? ('متوسطة قريبة رابح'))}">
                 </div>
                 <div class="field">
                     <label>الأستاذ(ة):</label>
-                    <input type="text" id="memo_teacher" value="${escapeHtml(savedMemo.teacher || 'أستاذ المادة')}">
+                    <input type="text" id="memo_teacher" value="${escapeHtml(savedMemo.teacher ?? ('أستاذ المادة'))}">
                 </div>
                 <div class="field">
                     <label>السنة الدراسية:</label>
-                    <input type="text" id="memo_year" value="${escapeHtml(savedMemo.year || '2025 / 2026')}">
+                    <input type="text" id="memo_year" value="${escapeHtml(savedMemo.year ?? ('2025 / 2026'))}">
                 </div>
                 <div class="field">
                     <label>المدة الزمنية:</label>
-                    <input type="text" id="memo_duration" value="${escapeHtml(savedMemo.duration || (portalState.currentDomain === 'written' ? 'ساعتان' : 'ساعة واحدة'))}">
+                    <input type="text" id="memo_duration" value="${escapeHtml(savedMemo.duration ?? ((portalState.currentDomain === 'written' ? 'ساعتان' : 'ساعة واحدة')))}">
                 </div>
             </div>
 
             <div class="memo-section-title"><i class="fas fa-scroll"></i> 2. القسم النظري (المرجعية الديداكتيكية الرسمية)</div>
             <div class="field">
                 <label>الكفاءة الختامية للميدان:</label>
-                <textarea id="memo_competency">${escapeHtml(savedMemo.competency || seg.competencies?.listening || seg.competency || '')}</textarea>
+                <textarea id="memo_competency">${escapeHtml(savedMemo.competency ?? (seg.competencies?.listening || seg.competency || ''))}</textarea>
             </div>
             <div class="field">
                 <label>مركبات الكفاءة المستهدفة:</label>
-                <textarea id="memo_components">${escapeHtml(savedMemo.components || seg.components || '')}</textarea>
+                <textarea id="memo_components">${escapeHtml(savedMemo.components ?? (seg.components || ''))}</textarea>
             </div>
             <div class="field-row">
                 <div class="field">
                     <label>الموارد المعرفية والمنهجية:</label>
-                    <textarea id="memo_resources">${escapeHtml(savedMemo.resources || seg.resources || '')}</textarea>
+                    <textarea id="memo_resources">${escapeHtml(savedMemo.resources ?? (seg.resources || ''))}</textarea>
                 </div>
                 <div class="field">
                     <label>القيم والكفاءات العرضية:</label>
-                    <textarea id="memo_values">${escapeHtml(savedMemo.values || seg.values || seg.crossCompetencies || '')}</textarea>
+                    <textarea id="memo_values">${escapeHtml(savedMemo.values ?? (seg.values || seg.crossCompetencies || ''))}</textarea>
                 </div>
             </div>
 
             <div class="memo-section-title gold"><i class="fas fa-pen-ruler"></i> 3. القسم التطبيقي وسيرورة بناء الحصة</div>
             <div class="field">
                 <label>🚀 وضعية الانطلاق والتمهيد:</label>
-                <textarea id="memo_launch">${escapeHtml(savedMemo.launch || (seg.motherSituation?.context || 'إثارة دافعية المتعلمين عبر استرجاع المكتسبات القبلية وربطها بموضوع الحصة...'))}</textarea>
+                <textarea id="memo_launch">${escapeHtml(savedMemo.launch ?? ((seg.motherSituation?.context || 'إثارة دافعية المتعلمين عبر استرجاع المكتسبات القبلية وربطها بموضوع الحصة...')))}</textarea>
             </div>
 
             ${buildDomainSpecificFields(portalState.currentDomain, savedMemo)}
 
             <div class="field">
                 <label>🎯 التقويم التكويني والإدماجي:</label>
-                <textarea id="memo_eval">${escapeHtml(savedMemo.eval || 'مهمة فردية أو ثنائية يقيس من خلالها الأستاذ مدى تحقق مؤشرات الكفاءة ومعالجة التعثرات فورياً...')}</textarea>
+                <textarea id="memo_eval">${escapeHtml(savedMemo.eval ?? ('مهمة فردية أو ثنائية يقيس من خلالها الأستاذ مدى تحقق مؤشرات الكفاءة ومعالجة التعثرات فورياً...'))}</textarea>
             </div>
             <div class="field">
                 <label>📝 التقييم الذاتي وملاحظات الأستاذ:</label>
-                <textarea id="memo_notes">${escapeHtml(savedMemo.notes || '')}</textarea>
+                <textarea id="memo_notes">${escapeHtml(savedMemo.notes ?? (''))}</textarea>
             </div>
         `;
 
@@ -2271,31 +2232,31 @@ html, body {
     function buildDomainSpecificFields(domain, saved) {
         if (domain === 'oral') {
             return `
-                <div class="field"><label>📖 الإسماع الأول (الفهم الإجمالي):</label><textarea id="memo_step1">${escapeHtml(saved.step1 || 'تسميع السند المنطوق بجهارة وتعبير سليم، يليه سؤال الفهم العام لاستخلاص الفكرة العامة.')}</textarea></div>
-                <div class="field"><label>❓ أسئلة الفهم العام وتحديد النمط:</label><textarea id="memo_step2">${escapeHtml(saved.step2 || '1. ما موضوع الخطاب المستمع إليه؟\n2. ما النمط الغالب على الخطاب؟ وما القرائن الدالة عليه؟')}</textarea></div>
-                <div class="field"><label>📖 الإسماع الثاني (التحليل والتركيب):</label><textarea id="memo_step3">${escapeHtml(saved.step3 || 'إعادة الإسماع لتعميق الفهم، استخراج الأفكار الأساسية ومناقشة الدلالات والقيم.')}</textarea></div>
-                <div class="field"><label>🎤 الإنتاج الشفهي (التعبير والتواصل):</label><textarea id="memo_step4">${escapeHtml(saved.step4 || 'تكليف المتعلمين بالتعبير عن الموقف بلغة سليمة ومحاكاة النمط المستهدف (سرد/وصف/حوار/توجيه).')}</textarea></div>
+                <div class="field"><label>📖 الإسماع الأول (الفهم الإجمالي):</label><textarea id="memo_step1">${escapeHtml(saved.step1 ?? ('تسميع السند المنطوق بجهارة وتعبير سليم، يليه سؤال الفهم العام لاستخلاص الفكرة العامة.'))}</textarea></div>
+                <div class="field"><label>❓ أسئلة الفهم العام وتحديد النمط:</label><textarea id="memo_step2">${escapeHtml(saved.step2 ?? ('1. ما موضوع الخطاب المستمع إليه؟\n2. ما النمط الغالب على الخطاب؟ وما القرائن الدالة عليه؟'))}</textarea></div>
+                <div class="field"><label>📖 الإسماع الثاني (التحليل والتركيب):</label><textarea id="memo_step3">${escapeHtml(saved.step3 ?? ('إعادة الإسماع لتعميق الفهم، استخراج الأفكار الأساسية ومناقشة الدلالات والقيم.'))}</textarea></div>
+                <div class="field"><label>🎤 الإنتاج الشفهي (التعبير والتواصل):</label><textarea id="memo_step4">${escapeHtml(saved.step4 ?? ('تكليف المتعلمين بالتعبير عن الموقف بلغة سليمة ومحاكاة النمط المستهدف (سرد/وصف/حوار/توجيه).'))}</textarea></div>
             `;
         } else if (domain === 'written') {
             return `
-                <div class="field"><label>📖 القراءة الصامتة الفردية الواعية:</label><textarea id="memo_step1">${escapeHtml(saved.step1 || 'قراءة صامتة متبوعة بأسئلة الفحص السريع للتحقق من الفهم الأولي واستخراج الفكرة العامة.')}</textarea></div>
-                <div class="field"><label>🔊 القراءات الجهرية النموذجية والفردية:</label><textarea id="memo_step2">${escapeHtml(saved.step2 || 'قراءة الأستاذ المعبرة، تليها قراءات المتعلمين مع تصويب النطق وضبط الوقف وتمثل المعاني.')}</textarea></div>
-                <div class="field"><label>🔍 المناقشة والتحليل وبناء مستويات الفهم:</label><textarea id="memo_step3">${escapeHtml(saved.step3 || 'التدرج من الفهم الحرفي، إلى الاستنتاجي والتفسيري، وصولاً إلى الفهم الناقد والتذوقي.')}</textarea></div>
-                <div class="field"><label>📚 أثر الكاتب والقيم المستخلصة:</label><textarea id="memo_step4">${escapeHtml(saved.step4 || 'استنباط المغزى العام للنص والقيم التربوية والسلوكية التي يكرسها.')}</textarea></div>
+                <div class="field"><label>📖 القراءة الصامتة الفردية الواعية:</label><textarea id="memo_step1">${escapeHtml(saved.step1 ?? ('قراءة صامتة متبوعة بأسئلة الفحص السريع للتحقق من الفهم الأولي واستخراج الفكرة العامة.'))}</textarea></div>
+                <div class="field"><label>🔊 القراءات الجهرية النموذجية والفردية:</label><textarea id="memo_step2">${escapeHtml(saved.step2 ?? ('قراءة الأستاذ المعبرة، تليها قراءات المتعلمين مع تصويب النطق وضبط الوقف وتمثل المعاني.'))}</textarea></div>
+                <div class="field"><label>🔍 المناقشة والتحليل وبناء مستويات الفهم:</label><textarea id="memo_step3">${escapeHtml(saved.step3 ?? ('التدرج من الفهم الحرفي، إلى الاستنتاجي والتفسيري، وصولاً إلى الفهم الناقد والتذوقي.'))}</textarea></div>
+                <div class="field"><label>📚 أثر الكاتب والقيم المستخلصة:</label><textarea id="memo_step4">${escapeHtml(saved.step4 ?? ('استنباط المغزى العام للنص والقيم التربوية والسلوكية التي يكرسها.'))}</textarea></div>
             `;
         } else if (domain === 'grammar') {
             return `
-                <div class="field"><label>📄 الشواهد والأمثلة المستخلصة من النص:</label><textarea id="memo_step1">${escapeHtml(saved.step1 || 'كتابة الجمل والشواهد المحتوية على الظاهرة اللغوية المستهدفة على السبورة وقراءتها.')}</textarea></div>
-                <div class="field"><label>🔍 الملاحظة والتحليل والاستنتاج:</label><textarea id="memo_step2">${escapeHtml(saved.step2 || 'عزل الكلمات المستهدفة، موازنة حركاتها الإعرابية، وبناء القاعدة النحوية/الصرفية تشاركياً مع المتعلمين.')}</textarea></div>
-                <div class="field"><label>📋 الخلاصة والقاعدة اللغوية المضبوطة:</label><textarea id="memo_step3">${escapeHtml(saved.step3 || 'تدوين القاعدة بوضوح مع تمييز الحالات الإعرابية والأوزان الصرفية.')}</textarea></div>
-                <div class="field"><label>✍️ التطبيقات والتمارين التثبيتية:</label><textarea id="memo_step4">${escapeHtml(saved.step4 || 'إنجاز تمارين فورية وإعراب نموذجي لقياس التحكم في المورد وتصحيحه.')}</textarea></div>
+                <div class="field"><label>📄 الشواهد والأمثلة المستخلصة من النص:</label><textarea id="memo_step1">${escapeHtml(saved.step1 ?? ('كتابة الجمل والشواهد المحتوية على الظاهرة اللغوية المستهدفة على السبورة وقراءتها.'))}</textarea></div>
+                <div class="field"><label>🔍 الملاحظة والتحليل والاستنتاج:</label><textarea id="memo_step2">${escapeHtml(saved.step2 ?? ('عزل الكلمات المستهدفة، موازنة حركاتها الإعرابية، وبناء القاعدة النحوية/الصرفية تشاركياً مع المتعلمين.'))}</textarea></div>
+                <div class="field"><label>📋 الخلاصة والقاعدة اللغوية المضبوطة:</label><textarea id="memo_step3">${escapeHtml(saved.step3 ?? ('تدوين القاعدة بوضوح مع تمييز الحالات الإعرابية والأوزان الصرفية.'))}</textarea></div>
+                <div class="field"><label>✍️ التطبيقات والتمارين التثبيتية:</label><textarea id="memo_step4">${escapeHtml(saved.step4 ?? ('إنجاز تمارين فورية وإعراب نموذجي لقياس التحكم في المورد وتصحيحه.'))}</textarea></div>
             `;
         } else {
             return `
-                <div class="field"><label>📄 السند والتعليمة:</label><textarea id="memo_step1">${escapeHtml(saved.step1 || 'قراءة سند الوضعية وتحليله وتحديد التعليمة والنمط المطلوب وشروط الإنجاز.')}</textarea></div>
-                <div class="field"><label>🎯 النمط المستهدف وخصائصه:</label><textarea id="memo_step2">${escapeHtml(saved.step2 || 'استذكار مؤشرات النمط المستهدف وضوابط تصميمه (المقدمة، العرض، الخاتمة).')}</textarea></div>
-                <div class="field"><label>📋 شبكة المعايير والمؤشرات الذاتية:</label><textarea id="memo_step3">${escapeHtml(saved.step3 || 'عرض معايير التصحيح الأربعة لتمكين المتعلم من التقييم الذاتي أثناء التحرير.')}</textarea></div>
-                <div class="field"><label>✍️ التحرير الفردي والمراجعة والتصحيح:</label><textarea id="memo_step4">${escapeHtml(saved.step4 || 'مرافقة المتعلمين أثناء التحرير وتقديم التغذية الراجعة وتثمين أحسن الإنتاجات.')}</textarea></div>
+                <div class="field"><label>📄 السند والتعليمة:</label><textarea id="memo_step1">${escapeHtml(saved.step1 ?? ('قراءة سند الوضعية وتحليله وتحديد التعليمة والنمط المطلوب وشروط الإنجاز.'))}</textarea></div>
+                <div class="field"><label>🎯 النمط المستهدف وخصائصه:</label><textarea id="memo_step2">${escapeHtml(saved.step2 ?? ('استذكار مؤشرات النمط المستهدف وضوابط تصميمه (المقدمة، العرض، الخاتمة).'))}</textarea></div>
+                <div class="field"><label>📋 شبكة المعايير والمؤشرات الذاتية:</label><textarea id="memo_step3">${escapeHtml(saved.step3 ?? ('عرض معايير التصحيح الأربعة لتمكين المتعلم من التقييم الذاتي أثناء التحرير.'))}</textarea></div>
+                <div class="field"><label>✍️ التحرير الفردي والمراجعة والتصحيح:</label><textarea id="memo_step4">${escapeHtml(saved.step4 ?? ('مرافقة المتعلمين أثناء التحرير وتقديم التغذية الراجعة وتثمين أحسن الإنتاجات.'))}</textarea></div>
             `;
         }
     }
@@ -2335,29 +2296,42 @@ html, body {
     };
 
     window.exportCurrentMemoToWord = function() {
-        const title = document.getElementById('memoModalHeading')?.innerText || 'مذكرة تربوية';
-        const content = document.getElementById('memoModalBody')?.innerHTML;
-        if (!content) return;
+        const body = document.getElementById('memoModalBody');
+        if (!body || !body.children.length) return;
+        const title = (document.getElementById('memoModalHeading')?.innerText || 'مذكرة تربوية').replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\uFE0F]/gu, '').trim();
+        const W = window.toWesternDigits || (x => x);
+        const esc = t => String(t == null ? '' : t).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 
-        const html = `
-            <html dir="rtl" lang="ar">
-            <head>
-            <meta charset="UTF-8">
-            <title>${title}</title>
-            <style>
-                body { font-family: 'Simplified Arabic', Arial, sans-serif; padding: 25px; direction: rtl; line-height: 1.8; font-size: 14pt; }
-                h2, h3, h4 { color: #1a3d6e; }
-                .memo-section-title { background: #eef3f9; color: #1a3d6e; padding: 6px 12px; font-weight: bold; border-right: 4px solid #c49b3f; margin: 14px 0 8px; }
-                .field { border-bottom: 1px dashed #ccc; padding: 6px 0; margin-bottom: 6px; }
-                label { font-weight: bold; color: #1a3d6e; display: block; margin-bottom: 4px; }
-                input, textarea { width: 100%; border: 1px solid #ccc; padding: 6px; font-family: inherit; }
-            </style>
-            </head>
-            <body>
-                ${content}
-            </body>
-            </html>
-        `;
+        // نأخذ القيم الحالية للحقول (innerHTML لا يحمل ما كتبه المستخدم) ونحوّل الحقول إلى نصوص
+        const clone = body.cloneNode(true);
+        const live = [...body.querySelectorAll('input,textarea')], cl = [...clone.querySelectorAll('input,textarea')];
+        cl.forEach((el, i) => {
+            const v = W((live[i].value || '').trim());
+            const d = document.createElement('div');
+            d.className = 'val';
+            d.innerHTML = v ? esc(v).replace(/\n/g, '<br>') : '……………………………………';
+            el.replaceWith(d);
+        });
+        clone.querySelectorAll('.field-row').forEach(r => {
+            const tb = document.createElement('table'); tb.setAttribute('width', '100%'); tb.style.cssText = 'width:100%;border-collapse:collapse';
+            const tr = document.createElement('tr');
+            [...r.children].forEach(ch => { const td = document.createElement('td'); td.style.cssText = 'vertical-align:top;padding:2pt 6pt;border:1pt solid #bbbbbb'; td.innerHTML = ch.innerHTML; tr.appendChild(td); });
+            tb.appendChild(tr); r.replaceWith(tb);
+        });
+        clone.querySelectorAll('i').forEach(i => i.remove());
+        const content = clone.innerHTML.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\uFE0F]/gu, '');
+
+        const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>${esc(title)}</title>
+<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->
+<style>
+@page{size:21cm 29.7cm;margin:1.8cm 1.6cm}
+body{font-family:'Traditional Arabic','Simplified Arabic',Arial,sans-serif;direction:rtl;text-align:right;font-size:13pt;line-height:1.6}
+.memo-section-title{background:#dfe8f3;color:#1a3d6e;padding:4pt 8pt;font-weight:bold;border-right:3pt solid #c49b3f;margin:10pt 0 6pt}
+.field{border-bottom:1px dashed #bbbbbb;padding:3pt 0;margin-bottom:4pt}
+label{font-weight:bold;color:#1a3d6e;display:block;margin-bottom:2pt}
+.val{padding:2pt 4pt}
+table{direction:rtl}
+</style></head><body dir="rtl">${content}</body></html>`;
 
         const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
         const link = document.createElement('a');
@@ -2366,6 +2340,7 @@ html, body {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(link.href), 3000);
     };
 
     window.exportWordFromActive = function() {

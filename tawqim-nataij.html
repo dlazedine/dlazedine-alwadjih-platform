@@ -917,11 +917,16 @@ if(window.WJ) WJ.ready.then(async ()=>{
         try{ window.__roMeta = JSON.parse(data.value); }catch(e){ alert('بيانات غير صالحة'); return; }
         document.body.classList.add('ro');
         loadData(); renderScales(); renderHeaderRows(); renderTable(); calculateAll(); updateHeaderText();
+        try{
+          const cr = await WJ.c.from('portal_data').select('value').eq('owner', sel.value).eq('key', 'carnet_tanqit_v1').maybeSingle();
+          if(window.Carnet) Carnet.view(cr.data ? cr.data.value : 'null');
+        }catch(e){}
         document.getElementById('roMsg').textContent = 'وضع الاطلاع فقط — لا يمكن تعديل هذه النقاط أو حذفها (لصاحب الحساب وحده)';
       };
     }catch(e){ console.warn('ro viewer', e); }
   }
 });
 </script>
+<script src="carnet-tanqit.js"></script>
 </body>
 </html>

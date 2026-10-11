@@ -3,7 +3,7 @@
    • يوضع في جذر الموقع بجانب index.html (نطاقه هو المجلد الذي يوجد فيه)
    • ارفع رقم VERSION كلما أضفتَ ملفاً جديداً أو غيّرتَ قائمة LOCAL
    ====================================================================== */
-const VERSION = 'v1.0.3';
+const VERSION = 'v1.0.6';
 const PRE = 'wajih-pre-' + VERSION;   // ملفات المنظومة (قشرة التطبيق)
 const RUN = 'wajih-run-' + VERSION;   // مكتبات CDN والخطوط
 const MAX_RUN = 90;                   // أقصى عدد عناصر في ذاكرة CDN
@@ -20,6 +20,20 @@ const LOCAL = [
   "cv.html",
   "dashboard-supabase.js",
   "dashboard.html",
+  "documents.html",
+  "documents-manager.js",
+  "data-bridge.js",
+  "export-xlsx.js",
+  "carnet-tanqit.js",
+  "portal-records.js",
+  "admin-extras.js",
+  "fahs-ikhtibar.html",
+  "proposals.js",
+  "pwa.js",
+  "proposals.html",
+  "proposals.css",
+  "tawqim-nataij.html",
+  "wj-shell.js",
   "data-prof.html",
   "datefmt.js",
   "export-word.js",
@@ -52,6 +66,7 @@ const CDN = [
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css",
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css",
   "https://cdn.tailwindcss.com",
+  "https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js",
   "https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js",
   "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js",
   "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js",
