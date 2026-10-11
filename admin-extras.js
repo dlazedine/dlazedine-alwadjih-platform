@@ -34,9 +34,9 @@
     }
     function render() {
       const e = editing || {};
-      sec.innerHTML = CSS + `<h2>📢 إعلانات شاشة الدخول (ندوات وأخبار)</h2>recommendation
+      sec.innerHTML = CSS + `<h2>📢 إعلانات شاشة الدخول (ندوات وأخبار)</h2>
 <p style="font-size:13px">تظهر للجميع قبل الدخول إلى الموقع.</p>
-<div><select id="anK"><option value="seminar">ندوة</option><option value="recommendation">توصية</option><option value="news">خبر</option><option value="notice">إعلان</option></select>
+<div><select id="anK"><option value="seminar">ندوة</option><option value="news">خبر</option><option value="notice">إعلان</option></select>
 <input id="anT" placeholder="العنوان" style="min-width:260px"> <input id="anD" placeholder="التاريخ والتوقيت (مثال: 12/11/2026 على 09:00)"> <input id="anP" placeholder="المكان">
 <input id="anL" placeholder="رابط (اختياري) https://..." dir="ltr" style="min-width:240px"><textarea id="anB" placeholder="التفاصيل"></textarea>
 <label><input type="checkbox" id="anPin"> تثبيت في الأعلى</label> <button id="anS">${editing ? 'حفظ التعديل' : 'نشر الإعلان'}</button>${editing ? ' <button class="gr" id="anC">إلغاء</button>' : ''}</div>
