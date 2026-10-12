@@ -896,33 +896,55 @@ if(window.WJ) WJ.ready.then(async ()=>{
     const bar = document.createElement('div');
     bar.className = 'no-print';
     bar.style.cssText = 'margin:0 0 14px;padding:10px 14px;border:2px solid #c49b3f;border-radius:12px;background:#fffdf6;direction:rtl;font:14px/1.8 Tahoma,Arial,sans-serif';
-    bar.innerHTML = '<b>عرض نتائج أستاذ (للاطلاع فقط):</b> <select id="roSel" style="padding:5px 10px;border-radius:8px;border:1px solid #d8cfb8"><option value="">— اختر أستاذاً —</option></select> <span id="roMsg" style="color:#a01c2c;font-weight:bold"></span>';
+    bar.innerHTML = '<b>عرض نقاط ودفتر تنقيط أستاذ (للاطلاع فقط):</b> <input id="roFind" type="text" placeholder="بحث بالاسم أو المؤسسة" style="padding:5px 10px;border-radius:8px;border:1px solid #d8cfb8;width:190px"> <select id="roSel" style="padding:5px 10px;border-radius:8px;border:1px solid #d8cfb8;min-width:260px"><option value="">— اختر أستاذاً من القائمة —</option></select> <span id="roMsg" style="color:#a01c2c;font-weight:bold"></span>';
     const host = document.querySelector('.container'); const wb = document.getElementById('wj-bar');
     if(wb && wb.parentNode) wb.parentNode.insertBefore(bar, wb.nextSibling); else if(host) host.prepend(bar);
     const css = document.createElement('style');
     css.textContent = 'body.ro .container input:not(#roSel),body.ro .container select:not(#roSel),body.ro .container textarea{pointer-events:none;background:#f1efe6!important}';
     document.head.appendChild(css);
     try{
+      /* كل الأساتذة من قاعدة البيانات (لا الذين لهم نقاط فقط)، مع بيان من لديه نقاط أو دفتر */
       const [rows, profs] = await Promise.all([
-        WJ.c.from('portal_data').select('owner,updated_at').eq('key', STORAGE_KEY).neq('owner','00000000-0000-0000-0000-000000000000'),
-        WJ.c.from('wajih_profiles').select('id,full_name,username,role').eq('role','teacher')
+        WJ.c.from('portal_data').select('owner,key').in('key', [STORAGE_KEY, 'carnet_tanqit_v1']),
+        WJ.c.from('wajih_profiles').select('id,full_name,username,school,role,active').eq('role','teacher')
       ]);
-      const nm = {}; (profs.data||[]).forEach(p=>nm[p.id]=p.full_name||p.username);
-      const sel = document.getElementById('roSel');
-      (rows.data||[]).filter(r=>r.owner!==WJ.me.id).forEach(r=>{ const o=document.createElement('option'); o.value=r.owner; o.textContent=nm[r.owner]||r.owner; sel.appendChild(o); });
-      sel.onchange = async ()=>{
-        if(!sel.value){ location.reload(); return; }
-        const { data } = await WJ.c.from('portal_data').select('value').eq('owner', sel.value).eq('key', STORAGE_KEY).maybeSingle();
-        if(!data){ alert('لا توجد نتائج محفوظة لهذا الأستاذ.'); return; }
-        try{ window.__roMeta = JSON.parse(data.value); }catch(e){ alert('بيانات غير صالحة'); return; }
-        document.body.classList.add('ro');
-        loadData(); renderScales(); renderHeaderRows(); renderTable(); calculateAll(); updateHeaderText();
-        try{
-          const cr = await WJ.c.from('portal_data').select('value').eq('owner', sel.value).eq('key', 'carnet_tanqit_v1').maybeSingle();
-          if(window.Carnet) Carnet.view(cr.data ? cr.data.value : 'null');
-        }catch(e){}
-        document.getElementById('roMsg').textContent = 'وضع الاطلاع فقط — لا يمكن تعديل هذه النقاط أو حذفها (لصاحب الحساب وحده)';
+      const has = {}; (rows.data||[]).forEach(r=>{ (has[r.owner] = has[r.owner] || {})[r.key] = 1; });
+      const T = (profs.data||[]).filter(p=>p.active!==false && p.id!==WJ.me.id).map(p=>({ id:p.id, name:p.full_name||p.username, school:(p.school||'').trim(), pts:!!(has[p.id]&&has[p.id][STORAGE_KEY]), car:!!(has[p.id]&&has[p.id]['carnet_tanqit_v1']) }));
+      T.sort((a,b)=>(a.school||'~').localeCompare(b.school||'~','ar') || a.name.localeCompare(b.name,'ar'));
+      const sel = document.getElementById('roSel'), find = document.getElementById('roFind'), msg = document.getElementById('roMsg');
+      const label = id => { const x=T.find(y=>y.id===id); return x ? x.name + (x.school ? ' — ' + x.school : '') : ''; };
+      const fill = ()=>{
+        const q = (find.value||'').trim(), cur = sel.value; sel.innerHTML = '<option value="">— اختر أستاذاً من القائمة —</option>';
+        const groups = {};
+        T.filter(x=>!q || (x.name+' '+x.school).includes(q)).forEach(x=>{ (groups[x.school||'بدون مؤسسة'] = groups[x.school||'بدون مؤسسة'] || []).push(x); });
+        Object.keys(groups).forEach(g=>{ const og=document.createElement('optgroup'); og.label=g;
+          groups[g].forEach(x=>{ const o=document.createElement('option'); o.value=x.id; o.textContent = x.name + (x.pts||x.car ? '  ●' + (x.pts?' نقاط':'') + (x.car?' دفتر':'') : '  (لا بيانات بعد)'); og.appendChild(o); });
+          sel.appendChild(og); });
+        if(cur) sel.value = cur;
       };
+      fill(); find.oninput = fill;
+      const apply = async owner=>{
+        const [a, c] = await Promise.all([
+          WJ.c.from('portal_data').select('value').eq('owner', owner).eq('key', STORAGE_KEY).maybeSingle(),
+          WJ.c.from('portal_data').select('value').eq('owner', owner).eq('key', 'carnet_tanqit_v1').maybeSingle()
+        ]);
+        if(!a.data && !c.data){ alert('لا نقاط ولا دفتر تنقيط محفوظ لهذا الأستاذ بعد.'); sel.value=''; return; }
+        if(a.data){
+          try{ window.__roMeta = JSON.parse(a.data.value); }catch(e){ alert('بيانات النقاط غير صالحة'); return; }
+          loadData(); renderScales(); renderHeaderRows(); renderTable(); calculateAll(); updateHeaderText();
+          document.body.classList.add('ro');            // بعد loadData لأنه يعيد كتابة className من الثيم المحفوظ
+        }
+        if(window.Carnet) Carnet.view(c.data ? c.data.value : 'null', label(owner));
+        msg.textContent = 'اطلاع فقط على: ' + label(owner) + ' — ' + (a.data ? 'النقاط' : 'لا نقاط') + ' / ' + (c.data ? 'دفتر التنقيط' : 'لا دفتر') + ' (التعديل والحذف لصاحب الحساب وحده)';
+        const cn = document.getElementById('carnet'); if(cn && !a.data) cn.scrollIntoView({behavior:'smooth'});
+      };
+      sel.onchange = ()=>{
+        if(!sel.value){ location.reload(); return; }
+        if(window.__roMeta){ sessionStorage.setItem('ro_pick', sel.value); location.reload(); return; }   // تبديل الأستاذ: صفحة نظيفة
+        apply(sel.value);
+      };
+      const pick = sessionStorage.getItem('ro_pick');
+      if(pick){ sessionStorage.removeItem('ro_pick'); sel.value = pick; if(sel.value === pick) apply(pick); }
     }catch(e){ console.warn('ro viewer', e); }
   }
 });
