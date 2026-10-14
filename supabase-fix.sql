@@ -3,6 +3,11 @@
 --  • لا يحذف ولا يستبدل أي بيانات موجودة، ولا يمسّ السياسات الحالية: يضيف فقط ما ينقص.
 --  • لا تُشغّل ملف supabase.sql القديم بعد الآن (انظر الملاحظات في الأسفل).
 --  شغّله في: Supabase ← SQL Editor ← New query ← Run
+--  إن ظهر خطأ «operator does not exist: text = uuid» فمعناه أن عموداً موجوداً عندك نوعه text؛ هذه النسخة تقارن بعد التحويل إلى text.
+--  لمعرفة أنواع أعمدتك الفعلية شغّل هذا الاستعلام وحده:
+--    select table_name, column_name, data_type from information_schema.columns
+--    where table_schema='public' and table_name in ('portal_data','wajih_profiles','wajih_activity','wajih_prof','wajih_reports','wajih_documents','activities')
+--      and column_name in ('id','owner','user_id','owner_id','prof_id','updated_by') order by 1,2;
 -- ==============================================================================
 create extension if not exists pgcrypto with schema extensions;
 
@@ -28,13 +33,13 @@ update public.wajih_profiles set active = true where active is null;
 -- دالة الدور (security definer لتفادي التكرار اللانهائي داخل سياسات RLS)
 create or replace function public.wj_role() returns text
 language sql stable security definer set search_path = public as
-$$ select role from public.wajih_profiles where id = auth.uid() and active $$;
+$$ select role from public.wajih_profiles where id::text = auth.uid()::text and active $$;
 grant execute on function public.wj_role() to authenticated;
 
 alter table public.wajih_profiles enable row level security;
 drop policy if exists wj_prof_select on public.wajih_profiles;
 create policy wj_prof_select on public.wajih_profiles for select to authenticated
-  using (id = auth.uid() or public.wj_role() in ('inspector','supervisor'));
+  using (id::text = auth.uid()::text or public.wj_role() in ('inspector','supervisor'));
 drop policy if exists wj_prof_insert on public.wajih_profiles;
 create policy wj_prof_insert on public.wajih_profiles for insert to authenticated
   with check (public.wj_role() = 'inspector');
@@ -45,7 +50,7 @@ create policy wj_prof_update on public.wajih_profiles for update to authenticate
 -- ---------- 2) دوال الدخول وإدارة الحسابات ----------
 create or replace function public.wj_email_for_username(u text) returns text
 language sql stable security definer set search_path = public, auth as
-$$ select au.email::text from auth.users au join public.wajih_profiles p on p.id = au.id
+$$ select au.email::text from auth.users au join public.wajih_profiles p on p.id::text = au.id::text
    where p.username = lower(trim(u)) limit 1 $$;
 grant execute on function public.wj_email_for_username(text) to anon, authenticated;
 
@@ -54,7 +59,7 @@ language plpgsql security definer set search_path = public as $$
 begin
   if auth.uid() is null then raise exception 'not authenticated'; end if;
   if new_username !~ '^[a-z0-9_.-]{4,30}$' then raise exception 'invalid username'; end if;
-  update public.wajih_profiles set username = lower(new_username), must_change = false where id = auth.uid();
+  update public.wajih_profiles set username = lower(new_username), must_change = false where id::text = auth.uid()::text;
 end $$;
 grant execute on function public.wj_complete_first_login(text) to authenticated;
 
@@ -64,7 +69,7 @@ begin
   if public.wj_role() is distinct from 'inspector' then raise exception 'forbidden'; end if;
   if length(new_pass) < 10 then raise exception 'password too short'; end if;
   update auth.users set encrypted_password = extensions.crypt(new_pass, extensions.gen_salt('bf')), updated_at = now() where id = uid;
-  update public.wajih_profiles set must_change = true where id = uid;
+  update public.wajih_profiles set must_change = true where id::text = uid::text;
 end $$;
 grant execute on function public.wj_reset_password(uuid, text) to authenticated;
 
@@ -74,9 +79,9 @@ begin
   if public.wj_role() is distinct from 'inspector' then raise exception 'forbidden'; end if;
   if uid = auth.uid() then raise exception 'cannot delete yourself'; end if;
   if wipe then
-    delete from public.portal_data where owner = uid;
-    delete from public.wajih_activity where user_id = uid;
-    delete from public.wajih_prof where user_id = uid;
+    delete from public.portal_data where owner::text = uid::text;
+    delete from public.wajih_activity where user_id::text = uid::text;
+    delete from public.wajih_prof where user_id::text = uid::text;
   end if;
   delete from auth.users where id = uid;
 end $$;
@@ -109,23 +114,23 @@ create index if not exists idx_portal_data_shared on public.portal_data(shared) 
 alter table public.portal_data enable row level security;
 drop policy if exists wj_pd_select on public.portal_data;
 create policy wj_pd_select on public.portal_data for select to authenticated
-  using (owner = auth.uid() or shared or public.wj_role() in ('inspector','supervisor'));
+  using (owner::text = auth.uid()::text or shared or public.wj_role() in ('inspector','supervisor'));
 drop policy if exists wj_pd_insert on public.portal_data;
 create policy wj_pd_insert on public.portal_data for insert to authenticated
-  with check ((owner = auth.uid() and not shared)
-           or (shared and owner = '00000000-0000-0000-0000-000000000000'::uuid)
+  with check ((owner::text = auth.uid()::text and not shared)
+           or (shared and owner::text = '00000000-0000-0000-0000-000000000000')
            or (public.wj_role() = 'inspector' and key not in ('tqweem_ar_v4','carnet_tanqit_v1')));
 drop policy if exists wj_pd_update on public.portal_data;
 create policy wj_pd_update on public.portal_data for update to authenticated
-  using ((owner = auth.uid() and not shared)
-      or (shared and owner = '00000000-0000-0000-0000-000000000000'::uuid)
+  using ((owner::text = auth.uid()::text and not shared)
+      or (shared and owner::text = '00000000-0000-0000-0000-000000000000')
       or (public.wj_role() = 'inspector' and key not in ('tqweem_ar_v4','carnet_tanqit_v1')))
-  with check ((owner = auth.uid() and not shared)
-      or (shared and owner = '00000000-0000-0000-0000-000000000000'::uuid)
+  with check ((owner::text = auth.uid()::text and not shared)
+      or (shared and owner::text = '00000000-0000-0000-0000-000000000000')
       or (public.wj_role() = 'inspector' and key not in ('tqweem_ar_v4','carnet_tanqit_v1')));
 drop policy if exists wj_pd_delete on public.portal_data;
 create policy wj_pd_delete on public.portal_data for delete to authenticated
-  using (owner = auth.uid() or (public.wj_role() = 'inspector' and key not in ('tqweem_ar_v4','carnet_tanqit_v1')));
+  using (owner::text = auth.uid()::text or (public.wj_role() = 'inspector' and key not in ('tqweem_ar_v4','carnet_tanqit_v1')));
 
 -- ---------- 4) سجل النشاط (يغذّي مراقبة النشاطات في لوحة التحكم) ----------
 create table if not exists public.wajih_activity (
@@ -141,7 +146,7 @@ create index if not exists idx_wajih_activity_created on public.wajih_activity(c
 alter table public.wajih_activity enable row level security;
 drop policy if exists wj_act_insert on public.wajih_activity;
 create policy wj_act_insert on public.wajih_activity for insert to authenticated
-  with check (user_id = auth.uid());
+  with check (user_id::text = auth.uid()::text);
 drop policy if exists wj_act_select on public.wajih_activity;
 create policy wj_act_select on public.wajih_activity for select to authenticated
   using (public.wj_role() in ('inspector','supervisor'));
@@ -279,14 +284,14 @@ drop policy if exists wj_actv_select on public.activities;
 create policy wj_actv_select on public.activities for select to authenticated using (true);
 drop policy if exists wj_actv_insert on public.activities;
 create policy wj_actv_insert on public.activities for insert to authenticated
-  with check (owner_id = auth.uid() or public.wj_role() in ('inspector','supervisor'));
+  with check (owner_id::text = auth.uid()::text or public.wj_role() in ('inspector','supervisor'));
 drop policy if exists wj_actv_update on public.activities;
 create policy wj_actv_update on public.activities for update to authenticated
-  using (owner_id = auth.uid() or public.wj_role() in ('inspector','supervisor'))
-  with check (owner_id = auth.uid() or public.wj_role() in ('inspector','supervisor'));
+  using (owner_id::text = auth.uid()::text or public.wj_role() in ('inspector','supervisor'))
+  with check (owner_id::text = auth.uid()::text or public.wj_role() in ('inspector','supervisor'));
 drop policy if exists wj_actv_delete on public.activities;
 create policy wj_actv_delete on public.activities for delete to authenticated
-  using (owner_id = auth.uid() or public.wj_role() in ('inspector','supervisor'));
+  using (owner_id::text = auth.uid()::text or public.wj_role() in ('inspector','supervisor'));
 do $$ begin
   alter publication supabase_realtime add table public.activities;
 exception when duplicate_object then null; when undefined_object then null; end $$;
