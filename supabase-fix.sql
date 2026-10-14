@@ -246,6 +246,52 @@ drop policy if exists "Allow users to update their own data" on public.portal_da
 --   select tablename, policyname, cmd, roles, qual, with_check
 --   from pg_policies where schemaname in ('public','storage') order by 1,2;
 
+-- ---------- 11) بنك الأعمال الموجهة المشترك (جدول activities) — يقرؤه لسان «الأعمال الموجهة» في اللوحة ----------
+create table if not exists public.activities (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid,
+  owner_name text,
+  title text,
+  subject text,
+  level text,
+  topic text,
+  pedagogy text,
+  style text,
+  classes text,
+  groups text,
+  start_situation text,
+  teacher_role text,
+  group_work text,
+  end_situation text,
+  text text,
+  questions text,
+  answer text,
+  description text,
+  students jsonb not null default '[]'::jsonb,
+  intelligences jsonb not null default '[]'::jsonb,
+  vark jsonb not null default '[]'::jsonb,
+  goal_id text,
+  created_at timestamptz not null default now()
+);
+create index if not exists idx_activities_created on public.activities(created_at desc);
+alter table public.activities enable row level security;
+drop policy if exists wj_actv_select on public.activities;
+create policy wj_actv_select on public.activities for select to authenticated using (true);
+drop policy if exists wj_actv_insert on public.activities;
+create policy wj_actv_insert on public.activities for insert to authenticated
+  with check (owner_id = auth.uid() or public.wj_role() in ('inspector','supervisor'));
+drop policy if exists wj_actv_update on public.activities;
+create policy wj_actv_update on public.activities for update to authenticated
+  using (owner_id = auth.uid() or public.wj_role() in ('inspector','supervisor'))
+  with check (owner_id = auth.uid() or public.wj_role() in ('inspector','supervisor'));
+drop policy if exists wj_actv_delete on public.activities;
+create policy wj_actv_delete on public.activities for delete to authenticated
+  using (owner_id = auth.uid() or public.wj_role() in ('inspector','supervisor'));
+do $$ begin
+  alter publication supabase_realtime add table public.activities;
+exception when duplicate_object then null; when undefined_object then null; end $$;
+-- تنبيه: إن كان جدول activities موجوداً سابقاً بسياسات قديمة بدور public، فشغّل استعلام pg_policies أعلاه وأرسل نتيجته.
+
 -- ==============================================================================
 --  ملاحظات مهمة
 --  1) supabase.sql القديم: لا تشغّله مجدداً. فهو يعيد كتابة قائمة المتوسطات (schools) بالقائمة الافتراضية،

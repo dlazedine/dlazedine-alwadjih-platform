@@ -1816,7 +1816,8 @@
                     id: portalUser.id,
                     full_name: portalUser.fullName || portalUser.username,
                     email: portalUser.email || '',
-                    role: portalUser.role === 'inspector' ? 'admin' : 'teacher',
+                    role: (portalUser.role === 'inspector' || portalUser.role === 'supervisor') ? 'admin' : 'teacher',   // المفتش والمشرف: تعديل/حذف أي عمل موجه
+                    portalRole: portalUser.role,
                     active: true
                 };
 
@@ -1830,7 +1831,7 @@
                     badge.style.display = 'flex';
                     document.getElementById('userBadgeName').textContent = this.currentProfile.full_name;
                     const rolePill = document.getElementById('userBadgeRole');
-                    rolePill.textContent = this.currentProfile.role === 'admin' ? 'مفتش' : 'أستاذ(ة)';
+                    rolePill.textContent = this.currentProfile.role === 'admin' ? (this.currentProfile.portalRole === 'supervisor' ? 'مشرف' : 'مفتش') : 'أستاذ(ة)';
                     rolePill.className = 'role-pill ' + (this.currentProfile.role === 'admin' ? 'admin' : 'teacher');
                 }
 
@@ -1855,9 +1856,7 @@
                 try {
                     const { data } = await sbMain.auth.getSession();
                     if (data && data.session) return data.session;
-                    const { data: s, error } = await sbMain.auth.signInAnonymously();
-                    if (error) { console.warn('⚠️ Supabase anonymous auth:', error); return null; }
-                    return s ? s.session : null;
+                    return null;      // لا دخول مجهول: الجلسة الحقيقية تأتي من portal-cloud.js
                 } catch (e) { console.warn('⚠️ ensureSupabaseSession:', e); return null; }
             },
 
@@ -1883,28 +1882,11 @@ function isValidUUID(str) {
 }
 
 async function logActivityAction(action, activityTitle, extra) {
-    if (typeof sbMain === 'undefined' || !sbMain || !AuthSystem.currentProfile) return;
     extra = extra || {};
-    const teacherId = AuthSystem.currentProfile.id;
-
-    // ⚠️ teacher_id في جدول activity_log من نوع UUID،
-    // لذلك لا نرسل إلا معرّفات صالحة (UUID) — وإلا نتخطى التسجيل.
-    if (!isValidUUID(teacherId)) {
-        console.warn('⚠️ لم يتم تسجيل العملية في سجل المراقبة: معرّف المستخدم ليس UUID صالحاً:', teacherId);
-        return;
-    }
-
     try {
-        const { error } = await sbMain.from('activity_log').insert({
-            teacher_id: teacherId,
-            teacher_name: AuthSystem.currentProfile.full_name || 'مستخدم',
-            action: action,
-            activity_title: activityTitle || '',
-            subject: extra.subject || '',
-            level: extra.level || ''
-        });
-        if (error) console.error('⚠️ activity_log insert:', error);
-    } catch (e) { console.error('⚠️ logActivityAction:', e); }
+        const d = (activityTitle || '') + (extra.subject ? ' — ' + extra.subject : '') + (extra.level ? ' (' + extra.level + ')' : '');
+        if (window.PortalCloud) await window.PortalCloud.log(action || 'update', 'amal_activity', d);
+    } catch (e) { console.warn('logActivityAction:', e); }
 }
         // ================================================================
         //  بنك الأنشطة المشترك (Supabase Realtime)
@@ -2760,43 +2742,62 @@ async function logActivityAction(action, activityTitle, extra) {
                 const icon = getMediaIcon(file.type);
                 const color = getMediaColor(file.type);
                 let previewHtml = '';
-                if (file.type === 'image' && file.dataUrl) previewHtml = '<img src="' + file.dataUrl + '" alt="' + sanitize(file.name) + '">';
-                else if (file.type === 'video' && file.dataUrl) previewHtml = '<video src="' + file.dataUrl + '" muted preload="metadata"></video>';
+                if (file.type === 'image' && (file.dataUrl || file.path)) previewHtml = '<img ' + (file.dataUrl ? 'src="' + file.dataUrl + '"' : 'data-mpath="' + file.path + '"') + ' alt="' + sanitize(file.name) + '">';
+                else if (file.type === 'video' && (file.dataUrl || file.path)) previewHtml = '<video ' + (file.dataUrl ? 'src="' + file.dataUrl + '"' : 'data-mpath="' + file.path + '"') + ' muted preload="metadata"></video>';
                 else previewHtml = '<i class="fas ' + icon + '" style="font-size:48px; color:' + color + ';"></i>';
                 return '<div class="media-item" data-id="' + file.id + '"><div class="media-preview" onclick="app.openMediaViewer(\'' + file.id + '\')">' + previewHtml + '</div><div class="media-title">' + sanitize(file.name) + '</div><span class="media-type">' + (file.type === 'image' ? 'صورة' : file.type === 'video' ? 'فيديو' : 'عرض') + '</span><div class="media-actions"><button onclick="app.openMediaViewer(\'' + file.id + '\')" title="عرض"><i class="fas fa-eye"></i></button><button onclick="app.downloadMedia(\'' + file.id + '\')" title="تحميل"><i class="fas fa-download"></i></button><button onclick="app.deleteMedia(\'' + file.id + '\')" class="btn-danger" title="حذف"><i class="fas fa-trash"></i></button></div></div>';
             }).join('');
+            hydrateMedia();
         }
 
-        function handleMediaUpload(files) {
+        const _mediaUrls = {};
+        async function mediaSignedUrl(path) {
+            if (!path) return '';
+            if (_mediaUrls[path] && _mediaUrls[path].t > Date.now()) return _mediaUrls[path].u;
+            const c = await PortalCloud.ready;
+            const { data } = await c.storage.from((window.PORTAL_CFG && PORTAL_CFG.FILES_BUCKET) || 'portal-files').createSignedUrl(path, 3600);
+            const u = data ? data.signedUrl : '';
+            _mediaUrls[path] = { u, t: Date.now() + 3000 * 1000 };
+            return u;
+        }
+        function hydrateMedia() {
+            document.querySelectorAll('[data-mpath]').forEach(async (el) => {
+                try { const u = await mediaSignedUrl(el.getAttribute('data-mpath')); if (u) { el.src = u; el.removeAttribute('data-mpath'); } } catch (e) {}
+            });
+        }
+
+        async function handleMediaUpload(files) {
+            const maxMB = (window.PORTAL_CFG && PORTAL_CFG.MAX_FILE_MB) || 50;
             for (const file of files) {
                 const type = getMediaType(file);
                 if (type === 'other') { showToast('الملف ' + file.name + ' غير مدعوم', 'warning'); continue; }
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    Store.state.mediaFiles.push({
-                        id: 'media_' + generateId(),
-                        name: file.name, type: type, size: file.size,
-                        dataUrl: e.target.result, timestamp: Date.now()
-                    });
+                if (file.size > maxMB * 1024 * 1024) { showToast('الملف ' + file.name + ' يتجاوز ' + maxMB + ' ميغابايت', 'warning'); continue; }
+                try {
+                    const c = await PortalCloud.ready;
+                    const ext = ((file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin').slice(0, 8);
+                    const path = 'amal/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+                    const up = await c.storage.from((window.PORTAL_CFG && PORTAL_CFG.FILES_BUCKET) || 'portal-files').upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: false });
+                    if (up.error) { showToast('تعذّر رفع ' + file.name + ': ' + up.error.message, 'error'); continue; }
+                    Store.state.mediaFiles.push({ id: 'media_' + generateId(), name: file.name, type: type, size: file.size, path: path, timestamp: Date.now() });
                     Store.persist();
                     localStorage.setItem('media_files', JSON.stringify(Store.state.mediaFiles));
                     renderMedia();
                     showToast('تم رفع ' + file.name, 'success');
-                };
-                reader.readAsDataURL(file);
+                } catch (e) { showToast('تعذّر رفع ' + file.name, 'error'); }
             }
         }
-        function openMediaViewer(id) {
+        async function openMediaViewer(id) {
             const file = Store.state.mediaFiles.find(f => f.id === id);
             if (!file) return;
+            const murl = file.dataUrl || await mediaSignedUrl(file.path);
             const viewer = document.getElementById('mediaViewer');
             const content = document.getElementById('viewerContent');
             const title = document.getElementById('viewerTitle');
             const info = document.getElementById('viewerInfo');
             title.textContent = file.name;
             if (info) info.textContent = 'الحجم: ' + (file.size / (1024 * 1024)).toFixed(2) + ' MB';
-            if (file.type === 'image') content.innerHTML = '<img src="' + file.dataUrl + '" alt="' + sanitize(file.name) + '">';
-            else if (file.type === 'video') content.innerHTML = '<video src="' + file.dataUrl + '" controls autoplay style="max-width:100%; max-height:70vh;"></video>';
+            if (file.type === 'image') content.innerHTML = '<img src="' + murl + '" alt="' + sanitize(file.name) + '">';
+            else if (file.type === 'video') content.innerHTML = '<video src="' + murl + '" controls autoplay style="max-width:100%; max-height:70vh;"></video>';
             else content.innerHTML = '<div style="text-align:center; padding:30px;"><i class="fas fa-file-powerpoint" style="font-size:64px; color:#dc3545; margin-bottom:14px; display:block;"></i><p style="margin-bottom:14px; font-size:16px;">' + sanitize(file.name) + '</p><button class="btn btn-info" onclick="app.downloadMedia(\'' + file.id + '\')"><i class="fas fa-download"></i> تحميل الملف</button></div>';
             viewer.classList.add('active');
         }

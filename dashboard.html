@@ -1075,7 +1075,7 @@ function exportPedRecordWord(id) {
     const plan = r.plan || {};
     const criteria = r.criteria || [];
     const students = r.students || [];
-    const inspectorName = 'درويش الهلالي';
+    const _me = (window.PortalCloud && PortalCloud.profile) || {}; const inspectorName = (_me.full_name || _me.username || (typeof currentUser !== 'undefined' && currentUser && (currentUser.fullName || currentUser.name)) || '');
 
     let criteriaRows = criteria.map((c, i) => `
         <tr>
@@ -1189,6 +1189,7 @@ window.addEventListener('load', () => {
 <script src="admin-panel.js"></script>
 <script src="bulk-users.js"></script>
 <script src="admin-extras.js"></script>
+<script src="amal-dashboard.js"></script>
 
 </body>
 </html>
