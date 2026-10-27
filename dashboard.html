@@ -767,7 +767,7 @@ function populateTeacherFilter() {
     const select = document.getElementById('monitorFilterTeacher');
     if (!select) return;
     const prevVal = select.value;
-    const known = cachedUsers.filter(u => u.role !== 'inspector');
+    const teachers = cachedUsers.filter(u => u.role !== 'inspector');
     select.innerHTML = '<option value="">كل الأساتذة</option>' +
         known.map(u => `<option value="${u.id}">${escapeHtml(u.fullName)}</option>`).join('');
     select.value = prevVal;
