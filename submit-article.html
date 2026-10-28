@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>إرسال مقال - ركن الكتابة الهادفة</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+    :root {
+        --primary: #0e2744; --gold: #c49b3f; --gold-light: #fce8bd; --bg-body: #faf7ef; --bg-card: #ffffff;
+        --text-dark: #152238; --text-muted: #5d6b7b; --border-color: #d9ceb4; --radius: 12px; --shadow: 0 6px 20px rgba(14,39,68,0.08);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Tajawal', sans-serif; background-color: var(--bg-body); color: var(--text-dark); line-height: 1.8;
+        background-image: radial-gradient(circle at 50% 0%, rgba(196,155,63,0.12) 0%, transparent 60%), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><defs><pattern id='islamic-dash' width='80' height='80' patternUnits='userSpaceOnUse'><g fill='none' stroke='%23c49b3f' stroke-width='0.6' opacity='0.15'><path d='M40 16 L47 27 L60 20 L57 34 L71 39 L60 48 L68 60 L54 61 L51 75 L40 66 L29 75 L26 61 L12 60 L20 48 L9 39 L23 34 L20 20 L33 27 Z'/></g></pattern></defs><rect width='80' height='80' fill='url(%23islamic-dash)'/></svg>");
+        background-attachment: fixed;
+        padding-bottom: 60px;
+    }
+    .top-bar { background: linear-gradient(135deg, #091c33, #0e2744); color: #f7e7c4; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--gold); flex-wrap: wrap; gap: 10px;}
+    .top-bar a { color: #fff; text-decoration: none; font-size: 12px; font-weight: 700; background: rgba(196,155,63,0.2); padding: 6px 14px; border-radius: 7px; border: 1px solid var(--gold); transition: all 0.2s;}
+    .top-bar a:hover { background: var(--gold); color: #091c33; }
+    .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+    .form-card { background: #fff; border-radius: 16px; border-top: 5px solid var(--gold); box-shadow: var(--shadow); padding: 30px 40px; }
+    h1 { font-family: 'Amiri', serif; color: var(--primary); font-size: 28px; margin-bottom: 8px; text-align: center; }
+    .subtitle { text-align: center; color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
+    .field-group { margin-bottom: 20px; }
+    .field-group label { display: block; font-size: 13.5px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+    .field-group input, .field-group select, .field-group textarea {
+        width: 100%; padding: 11px 14px; border: 1.5px solid var(--border-color); border-radius: 8px;
+        font-family: inherit; font-size: 14px; transition: all 0.2s; background: #fdfcf8;
+    }
+    .field-group input:focus, .field-group select:focus, .field-group textarea:focus { outline: none; border-color: var(--gold); background: #fff; }
+    .field-group textarea { min-height: 250px; resize: vertical; line-height: 1.8; }
+    .btn-submit {
+        width: 100%; padding: 14px; background: linear-gradient(135deg, #0e2744, #153861); color: #fff;
+        border: none; border-radius: 9px; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer;
+        transition: all 0.22s; box-shadow: 0 4px 12px rgba(14,39,68,0.25); margin-top: 10px;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(14,39,68,0.35); }
+    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .msg { display: none; padding: 12px; border-radius: 8px; text-align: center; font-weight: 700; font-size: 13px; margin-top: 15px; }
+    .msg.success { background: #d4edda; color: #155724; display: block; }
+    .msg.error { background: #f8d7da; color: #721c24; display: block; }
+    @media (max-width: 600px) { .form-card { padding: 20px; } }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div><i class="fas fa-feather-alt" style="color:var(--gold); margin-left:5px;"></i> إرسال مقال جديد</div>
+    <a href="sahafa.html"><i class="fas fa-arrow-right"></i> العودة للركن</a>
+</div>
+
+<div class="container">
+    <div class="form-card">
+        <h1>شارك إبداعك</h1>
+        <p class="subtitle">سيتم مراجعة مقالك من طرف المفتشية قبل نشره في الركن.</p>
+
+        <form id="articleForm">
+            <div class="field-group">
+                <label>عنوان المقال <span style="color:red">*</span></label>
+                <input type="text" id="title" required placeholder="اكتب عنواناً جذاباً لمقالك...">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="field-group">
+                    <label>التصنيف <span style="color:red">*</span></label>
+                    <select id="category" required>
+                        <option value="">اختر التصنيف...</option>
+                        <option value="adab">أدب</option>
+                        <option value="bida">بيداغوجيا</option>
+                        <option value="chaan">شأن تربوي</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label>الاسم الكامل للكاتب <span style="color:red">*</span></label>
+                    <input type="text" id="authorName" required placeholder="مثال: محمد بن علي">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>مقدمة قصيرة (تظهر في البطاقة)</label>
+                <input type="text" id="excerpt" placeholder="جملة أو جملتين تلخصان المقال (اختياري)...">
+            </div>
+
+            <div class="field-group">
+                <label>نص المقال <span style="color:red">*</span></label>
+                <textarea id="content" required placeholder="اكتب نص مقالك هنا..."></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="field-group">
+                    <label>رابط صورة الغلاف (اختياري)</label>
+                    <input type="url" id="coverImage" placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="field-group">
+                    <label>رابط فيديو يوتيوب (اختياري)</label>
+                    <input type="url" id="videoUrl" placeholder="https://youtube.com/watch?v=...">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>نبذة عنك (اختياري)</label>
+                <input type="text" id="authorBio" placeholder="مثال: أستاذ اللغة العربية بمتوسطة النصر، مهتم بالشعر...">
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn"><i class="fas fa-paper-plane"></i> إرسال المقال للمراجعة</button>
+            <div class="msg" id="formMsg"></div>
+        </form>
+    </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://yzxyttieobyblznaehcl.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+document.getElementById('articleForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const msg = document.getElementById('formMsg');
+
+    const title = document.getElementById('title').value.trim();
+    const category = document.getElementById('category').value;
+    const authorName = document.getElementById('authorName').value.trim();
+    const excerpt = document.getElementById('excerpt').value.trim();
+    const content = document.getElementById('content').value.trim();
+    const coverImage = document.getElementById('coverImage').value.trim();
+    const videoUrl = document.getElementById('videoUrl').value.trim();
+    const authorBio = document.getElementById('authorBio').value.trim();
+
+    if (!title || !category || !authorName || !content) {
+        msg.className = 'msg error'; msg.textContent = 'يرجى ملء جميع الحقول الإلزامية.'; return;
+    }
+
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جارٍ الإرسال...';
+    msg.className = 'msg'; msg.style.display = 'none';
+
+    try {
+        const { error } = await sb.from('sahafa_articles').insert([{
+            title, category, author_name: authorName,
+            excerpt: excerpt || content.substring(0, 100),
+            content, cover_image_url: coverImage || null,
+            video_url: videoUrl || null, author_bio: authorBio || null,
+            status: 'pending'
+        }]);
+
+        if (error) throw error;
+
+        msg.className = 'msg success';
+        msg.textContent = '✅ تم إرسال مقالك بنجاح! سيتم مراجعته قريباً ونشره. شكراً لك.';
+        document.getElementById('articleForm').reset();
+    } catch (err) {
+        console.error('Submit error:', err);
+        msg.className = 'msg error';
+        msg.textContent = '❌ حدث خطأ أثناء الإرسال. يرجى المحاولة لاحقاً.';
+    } finally {
+        btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال المقال للمراجعة';
+    }
+});
+</script>
+</body>
+</html>
