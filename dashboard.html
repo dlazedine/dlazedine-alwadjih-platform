@@ -459,9 +459,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function refreshAllData() {
-    cachedUsers = await DataBridge.getUsers();
-    cachedCredentials = await DataBridge.getCredentials();
-    renderUsersList();
+    // 1. انتظر حتى يتم تحميل المستخدمين من السحابة أولاً
+    await DataBridge.getUsers().then(users => {
+        cachedUsers = users;
+        renderUsersList();
+    });
+    
+    // 2. الآن قم بتحديث باقي الأقسام
+    await DataBridge.getCredentials().then(creds => { cachedCredentials = creds; });
+    
     refreshLog();
     renderTeacherStats();
     loadPedagogicalRecords();
@@ -862,7 +868,14 @@ function updateMonitorStats() {
 async function renderTeacherStats() {
     const tbody = document.getElementById('teacherStatsBody');
     if (!tbody) return;
+    
+    // إضافة هذا السطر لضمان وجود المستخدمين قبل جلب الإحصائيات
+    if (cachedUsers.length === 0) {
+        cachedUsers = await DataBridge.getUsers();
+    }
+
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> جارٍ التحميل...</td></tr>';
+    // ... باقي الكود كما هو ...
     const teachers = cachedUsers.filter(u => u.role !== 'inspector');
     const activities = await DataBridge.getActivities();
     if (teachers.length === 0) {
