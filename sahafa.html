@@ -147,12 +147,16 @@ function renderArticles() {
         if (article.cover_image_url) {
             imgHtml = `<img src="${article.cover_image_url}" class="card-img" alt="${article.title}" loading="lazy" onerror="this.style.display='none'">`;
         }
-        let noteHtml = '';
-        let editBtnHtml = '';
-        if (article.admin_notes) {
-            noteHtml = `<div class="note-badge">📝 لديك ملاحظة من المفتش</div>`;
-            editBtnHtml = `<a href="edit-article.html?id=${article.id}" class="btn-read" style="background:var(--gold); color:#000; margin-right:5px;"><i class="fas fa-edit"></i> تعديل</a>`;
-        }
+ let noteHtml = '';
+let editBtnHtml = '';
+
+// إذا كانت هناك ملاحظة، نعرضها
+if (article.admin_notes) {
+    noteHtml = `<div class="note-badge">📝 لديك ملاحظة من المفتش: ${article.admin_notes}</div>`;
+}
+
+// ✅ إظهار زر التعديل دائماً (طالما أننا في صفحة الركن)
+editBtnHtml = `<a href="edit-article.html?id=${article.id}" class="btn-read" style="background:var(--gold); color:#000; margin-right:5px;"><i class="fas fa-edit"></i> تعديل</a>`;
         card.innerHTML = `
             ${imgHtml}
             <div class="card-content">
