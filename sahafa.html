@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>الجدارية الصحفية - ركن الكتابة الهادفة والفعاليات التربوية</title>
+<title> ركن الكتابة الهادفة والفعاليات التربوية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -424,7 +424,7 @@
 <div class="ticker-bar">
     <span class="ticker-label"><i class="fas fa-bullhorn"></i> إضاءات</span>
     <div class="ticker-content">
-        المقاطعة الثانية قسنطينة ترعى الإبداع التربوي والفكري • مرحباً بجميع أقلام الأساتذة والمتعلمين في ركن الكتابة الهادفة • يتم تدقيق واعتماد المقالات دورياً عبر مفتشية المادة.
+        المقاطعة الثانية قسنطينة ترعى الإبداع التربوي والفكري • مرحباً بجميع أقلام الأساتذة في ركن الكتابة الهادفة • يتم تدقيق واعتماد المقالات دورياً عبر إدارة الموقع.
     </div>
 </div>
 
@@ -435,7 +435,7 @@
         <span>المقاطعة الثانية قسنطينة</span>
     </div>
     <h1 class="newspaper-title">الجريدة والجدارية التربوية الرقمية</h1>
-    <p class="newspaper-sub">منبر حر وموثق لنشر المقالات الفكرية، التجارب البيداغوجية، الروبورتاجات الميدانية، وإبداعات المتعلمين.</p>
+    <p class="newspaper-sub">منبر حر وموثق لنشر المقالات الفكرية، التجارب البيداغوجية، الروبورتاجات الميدانية، وإبداعات الأساتذة.</p>
 </header>
 
 <!-- التبويبات الستة المبتكرة -->
@@ -544,7 +544,7 @@ function renderPressWall() {
             <div class="featured-hero">
                 ${heroMedia}
                 <div class="featured-content">
-                    <span class="featured-badge">⭐ مانشيت الجدارية</span>
+                    <span class="featured-badge">⭐ العنوان العريض</span>
                     <span style="font-size:12px; font-weight:800; color:var(--gold-deep); margin-bottom:6px;">${categoryLabels[heroArticle.category] || heroArticle.category}</span>
                     <h2 class="featured-title" onclick="openArticle('${heroArticle.id}')">${heroArticle.title}</h2>
                     <p class="featured-excerpt">${heroArticle.excerpt || heroArticle.content.substring(0, 160) + '...'}</p>
@@ -646,13 +646,29 @@ function openArticle(id) {
 
     const mediaContainer = document.getElementById('modalMedia');
     mediaContainer.innerHTML = '';
+
+    // 1. عرض الفيديو إن وجد
     if (article.video_url) {
-        mediaContainer.innerHTML = `
+        mediaContainer.innerHTML += `
             <div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
                 <h4 style="color:var(--primary); font-size:14px; margin-bottom:10px;"><i class="fas fa-play-circle" style="color:red;"></i> المرفق المرئي / الفيديو:</h4>
                 <iframe src="${formatVideoEmbed(article.video_url)}" style="width:100%; min-height:400px; border-radius:10px; border:none;" allowfullscreen></iframe>
             </div>
         `;
+    }
+
+    // 2. عرض معرض الصور المتعددة (الإبداع الجديد)
+    if (article.images_gallery && article.images_gallery.length > 0) {
+        let galleryHtml = `<div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
+            <h4 style="color:var(--primary); font-size:14px; margin-bottom:10px;"><i class="fas fa-images" style="color:var(--gold);"></i> ألبوم الصور التربوية:</h4>
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px;">`;
+        
+        article.images_gallery.forEach(imgUrl => {
+            galleryHtml += `<img src="${imgUrl}" style="width:100%; height:120px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid #ddd; transition:0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="window.open('${imgUrl}', '_blank')">`;
+        });
+        
+        galleryHtml += `</div></div>`;
+        mediaContainer.innerHTML += galleryHtml;
     }
 
     document.getElementById('articleModal').classList.add('active');

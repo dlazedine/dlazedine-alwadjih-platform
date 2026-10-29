@@ -23,12 +23,13 @@
     .field-group input, .field-group select, .field-group textarea { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 14px; background: #fdfcf8; }
     .field-group textarea { min-height: 250px; resize: vertical; line-height: 1.8; }
     .media-upload-area { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .upload-box { border: 2px dashed var(--border-color); border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; }
+    .upload-box { border: 2px dashed var(--border-color); border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
     .upload-box:hover { border-color: var(--gold); background: #fffdf8; }
     .upload-box input[type="file"] { display: none; }
     .upload-box i { font-size: 24px; color: var(--gold); margin-bottom: 10px; }
     .upload-box span { display: block; font-size: 12px; color: var(--text-muted); }
-    .preview-img { max-width: 100%; max-height: 100px; margin-top: 10px; border-radius: 5px; display: none; }
+    .preview-gallery { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; justify-content: center; }
+    .preview-gallery img { max-width: 60px; max-height: 60px; border-radius: 5px; object-fit: cover; border: 1px solid #ddd; }
     .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, #0e2744, #153861); color: #fff; border: none; border-radius: 9px; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.2s; margin-top: 10px; }
     .btn-submit:hover { transform: translateY(-2px); }
     .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
@@ -40,7 +41,7 @@
 <body>
 
 <div class="top-bar">
-    <div><i class="fas fa-feather-alt" style="color:var(--gold); margin-left:5px;"></i> إرسال مقال جديد</div>
+    <div><i class="fas fa-feather-alt" style="color:var(--gold); margin-left:5px;"></i> إرسال مقال / فعالية جديدة</div>
     <a href="sahafa.html"><i class="fas fa-arrow-right"></i> العودة للركن</a>
 </div>
 
@@ -57,12 +58,15 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div class="field-group">
                     <label>التصنيف <span style="color:red">*</span></label>
-                    <select id="category" required>
-                        <option value="">اختر التصنيف...</option>
-                        <option value="adab">أدب</option>
-                        <option value="bida">بيداغوجيا</option>
-                        <option value="chaan">شأن تربوي</option>
-                    </select>
+<select id="category" required>
+    <option value="">اختر التصنيف...</option>
+    <option value="adab">🖋️ الأدب والخواطر</option>
+    <option value="bida">🎓 تجارب بيداغوجية</option>
+    <option value="chaan">🏛️ الشأن التربوي</option>
+    <option value="mutaalim">🎭 أقلام المتعلمين</option>
+    <option value="reportage">📸 فعاليات وروبورتاجات</option>
+    <option value="kutub">💡 قراءات في كتب</option>
+</select>
                 </div>
                 <div class="field-group">
                     <label>الاسم الكامل للكاتب <span style="color:red">*</span></label>
@@ -77,14 +81,16 @@
                 <label>نص المقال <span style="color:red">*</span></label>
                 <textarea id="content" required placeholder="اكتب نص مقالك هنا..."></textarea>
             </div>
+            
+            <!-- ✅ الرفع المتعدد للصور -->
             <div class="media-upload-area">
                 <div class="field-group">
-                    <label>صورة الغلاف (اختياري)</label>
-                    <label class="upload-box" for="coverFile">
-                        <i class="fas fa-image"></i>
-                        <span>انقر لرفع صورة من حاسوبك</span>
-                        <input type="file" id="coverFile" accept="image/*">
-                        <img id="coverPreview" class="preview-img" src="" alt="معاينة">
+                    <label>صور الفعالية / الغلاف (يمكنك اختيار عدة صور)</label>
+                    <label class="upload-box" for="coverFiles">
+                        <i class="fas fa-images"></i>
+                        <span>انقر لرفع صور من حاسوبك (حتى 5 صور)</span>
+                        <input type="file" id="coverFiles" accept="image/*" multiple>
+                        <div id="galleryPreview" class="preview-gallery"></div>
                     </label>
                 </div>
                 <div class="field-group">
@@ -111,17 +117,25 @@ const SUPABASE_URL = "https://yzxyttieobyblznaehcl.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// معاينة الصورة
-document.getElementById('coverFile').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
+// ✅ معاينة الصور المتعددة
+document.getElementById('coverFiles').addEventListener('change', function(e) {
+    const files = e.target.files;
+    const previewContainer = document.getElementById('galleryPreview');
+    previewContainer.innerHTML = '';
+    
+    if (files.length > 5) {
+        alert('يمكنك رفع 5 صور كحد أقصى.');
+        return;
+    }
+    
+    for (let i = 0; i < files.length; i++) {
         const reader = new FileReader();
         reader.onload = function(evt) {
-            const preview = document.getElementById('coverPreview');
-            preview.src = evt.target.result;
-            preview.style.display = 'block';
+            const img = document.createElement('img');
+            img.src = evt.target.result;
+            previewContainer.appendChild(img);
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(files[i]);
     }
 });
 
@@ -135,29 +149,32 @@ document.getElementById('articleForm').addEventListener('submit', async (e) => {
     const excerpt = document.getElementById('excerpt').value.trim();
     const content = document.getElementById('content').value.trim();
     const authorBio = document.getElementById('authorBio').value.trim();
-    const coverFile = document.getElementById('coverFile').files[0];
+    const coverFiles = document.getElementById('coverFiles').files;
     const videoFile = document.getElementById('videoFile').files[0];
 
     if (!title || !category || !authorName || !content) {
         msg.className = 'msg error'; msg.textContent = 'يرجى ملء جميع الحقول الإلزامية.'; return;
     }
 
-    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جارٍ الإرسال...';
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جارٍ الرفع والإرسال...';
     msg.className = 'msg'; msg.style.display = 'none';
 
     try {
-        let coverUrl = null;
+        let uploadedImages = [];
         let videoUrl = null;
 
-        // رفع الصورة
-        if (coverFile) {
-            msg.textContent = '⏳ جارٍ رفع الصورة...';
-            const fileExt = coverFile.name.split('.').pop();
-            const fileName = `cover_${Date.now()}.${fileExt}`;
-            const { error: uploadError } = await sb.storage.from('sahafa_media').upload(fileName, coverFile);
-            if (uploadError) throw uploadError;
-            const { data: urlData } = sb.storage.from('sahafa_media').getPublicUrl(fileName);
-            coverUrl = urlData.publicUrl;
+        // رفع الصور المتعددة
+        if (coverFiles && coverFiles.length > 0) {
+            msg.textContent = '⏳ جارٍ رفع الصور...';
+            for (let i = 0; i < coverFiles.length; i++) {
+                const file = coverFiles[i];
+                const fileExt = file.name.split('.').pop();
+                const fileName = `img_${Date.now()}_${i}.${fileExt}`;
+                const { error: uploadError } = await sb.storage.from('sahafa_media').upload(fileName, file);
+                if (uploadError) throw uploadError;
+                const { data: urlData } = sb.storage.from('sahafa_media').getPublicUrl(fileName);
+                uploadedImages.push(urlData.publicUrl);
+            }
         }
 
         // رفع الفيديو
@@ -171,11 +188,14 @@ document.getElementById('articleForm').addEventListener('submit', async (e) => {
             videoUrl = urlData.publicUrl;
         }
 
-        // حفظ المقال
+        // حفظ المقال (نضع الصورة الأولى كغلاف، والبقية في المعرض)
         const { error } = await sb.from('sahafa_articles').insert([{
             title, category, author_name: authorName,
             excerpt: excerpt || content.substring(0, 100),
-            content, cover_image_url: coverUrl, video_url: videoUrl,
+            content,
+            cover_image_url: uploadedImages[0] || null, // الصورة الأولى كغلاف
+            images_gallery: uploadedImages, // كل الصور في المعرض
+            video_url: videoUrl,
             author_bio: authorBio || null, status: 'pending'
         }]);
 
@@ -184,7 +204,7 @@ document.getElementById('articleForm').addEventListener('submit', async (e) => {
         msg.className = 'msg success';
         msg.textContent = '✅ تم إرسال مقالك بنجاح! سيتم مراجعته قريباً.';
         document.getElementById('articleForm').reset();
-        document.getElementById('coverPreview').style.display = 'none';
+        document.getElementById('galleryPreview').innerHTML = '';
     } catch (err) {
         console.error(err);
         msg.className = 'msg error';

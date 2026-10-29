@@ -1,4 +1,4 @@
-// sahafa-edit.js - إدارة تعديل المقالات ورفع الوسائط (نسخة مصححة)
+// sahafa-edit.js - إدارة تعديل المقالات ورفع الوسائط (نسخة تدعم ألبوم الصور)
 
 const SUPABASE_URL = "https://yzxyttieobyblznaehcl.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u";
@@ -6,7 +6,6 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentArticle = null;
 
-// 1. جلب المقال عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const articleId = urlParams.get('id');
@@ -20,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('articleId').value = articleId;
     await fetchArticle(articleId);
     setupMediaPreview();
-    setupFormSubmit(); // ✅ ربط زر الحفظ هنا
+    setupFormSubmit();
 });
 
 async function fetchArticle(id) {
@@ -29,7 +28,7 @@ async function fetchArticle(id) {
         if (error) throw error;
         
         currentArticle = data;
-        
+        document.getElementById('category').value = data.category || 'adab';
         document.getElementById('title').value = data.title || '';
         document.getElementById('content').value = data.content || '';
         
@@ -51,7 +50,6 @@ async function fetchArticle(id) {
     }
 }
 
-// 2. معاينة الصورة
 function setupMediaPreview() {
     const coverInput = document.getElementById('coverFile');
     if(coverInput) {
@@ -70,17 +68,12 @@ function setupMediaPreview() {
     }
 }
 
-// 3. دالة الحفظ (تم فصلها لضمان عملها)
 function setupFormSubmit() {
     const form = document.getElementById('editForm');
-    if (!form) {
-        console.error('❌ لم يتم العثور على نموذج التعديل (editForm)');
-        return;
-    }
+    if (!form) return;
 
     form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // منع إعادة تحميل الصفحة
-        console.log('🚀 بدء عملية الحفظ...');
+        e.preventDefault();
         
         const btn = document.getElementById('submitBtn');
         const msg = document.getElementById('formMsg');
@@ -101,10 +94,10 @@ function setupFormSubmit() {
         try {
             let coverUrl = currentArticle ? currentArticle.cover_image_url : null;
             let videoUrl = currentArticle ? currentArticle.video_url : null;
+            // ✅ جلب ألبوم الصور الحالي
+            let galleryData = currentArticle && currentArticle.images_gallery ? currentArticle.images_gallery : [];
 
-            // رفع الصورة
             if (coverFile) {
-                console.log('⏳ جارٍ رفع الصورة...');
                 msg.className = 'msg success'; msg.textContent = '⏳ جارٍ رفع الصورة...';
                 const fileExt = coverFile.name.split('.').pop();
                 const fileName = `cover_${Date.now()}.${fileExt}`;
@@ -112,12 +105,12 @@ function setupFormSubmit() {
                 if (uploadError) throw uploadError;
                 const { data: urlData } = sb.storage.from('sahafa_media').getPublicUrl(fileName);
                 coverUrl = urlData.publicUrl;
-                console.log('✅ تم رفع الصورة:', coverUrl);
+                
+                // ✅ إضافة الصورة الجديدة إلى الألبوم
+                galleryData.push(coverUrl);
             }
 
-            // رفع الفيديو
             if (videoFile) {
-                console.log('⏳ جارٍ رفع الفيديو...');
                 msg.textContent = '⏳ جارٍ رفع الفيديو...';
                 const fileExt = videoFile.name.split('.').pop();
                 const fileName = `video_${Date.now()}.${fileExt}`;
@@ -125,31 +118,29 @@ function setupFormSubmit() {
                 if (uploadError) throw uploadError;
                 const { data: urlData } = sb.storage.from('sahafa_media').getPublicUrl(fileName);
                 videoUrl = urlData.publicUrl;
-                console.log('✅ تم رفع الفيديو:', videoUrl);
             }
 
-            // تحديث قاعدة البيانات
-            console.log('⏳ جارٍ تحديث قاعدة البيانات...');
+            // ✅ كائن التحديث (هنا نضع كل البيانات)
             const { error: updateError } = await sb.from('sahafa_articles').update({
                 title: title,
                 content: content,
                 cover_image_url: coverUrl,
                 video_url: videoUrl,
+                images_gallery: galleryData, // تحديث الألبوم
                 status: 'pending',
                 admin_notes: null,
                 updated_at: new Date().toISOString()
             }).eq('id', id);
 
             if (updateError) throw updateError;
-            console.log('✅ تم تحديث قاعدة البيانات بنجاح');
 
             msg.className = 'msg success';
-            msg.textContent = '✅ تم حفظ التعديلات وإعادة إرسال المقال للمفتش بنجاح! سيتم توجيهك الآن...';
+            msg.textContent = '✅ تم حفظ التعديلات وإعادة إرسال المقال للمفتش بنجاح!';
             
             setTimeout(() => { window.location.href = 'sahafa.html'; }, 2000);
 
         } catch (err) {
-            console.error('❌ Save Error:', err);
+            console.error('Save Error:', err);
             msg.className = 'msg error';
             msg.textContent = '❌ حدث خطأ أثناء الحفظ: ' + (err.message || 'خطأ غير معروف');
         } finally {
