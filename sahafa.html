@@ -39,10 +39,11 @@
     .card-tag { font-size: 11px; font-weight: 800; color: var(--gold-deep); background: #fce8bd; padding: 3px 10px; border-radius: 12px; align-self: flex-start; margin-bottom: 10px; }
     .card-title { font-family: 'Amiri', serif; font-size: 20px; color: var(--primary); margin-bottom: 10px; line-height: 1.4; }
     .card-excerpt { font-size: 13px; color: var(--text-muted); margin-bottom: 15px; flex: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-    .card-meta { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: auto; }
+    .card-meta { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: auto; flex-wrap: wrap; gap: 10px;}
     .card-author { font-weight: 700; color: var(--primary); }
-    .btn-read { background: var(--primary); color: #fff; border: none; padding: 7px 15px; border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: var(--transition); }
+    .btn-read { background: var(--primary); color: #fff; border: none; padding: 7px 15px; border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: var(--transition); text-decoration: none; display: inline-block;}
     .btn-read:hover { background: var(--gold); color: var(--navy-deep); }
+    .note-badge { background:#fff3cd; color:#856404; font-size:11px; padding:4px 8px; border-radius:5px; margin-bottom:8px; text-align:center; width:100%; font-weight:700;}
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(9,28,51,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
     .modal-overlay.active { display: flex; }
     .modal-box { background: #fff; border-radius: 16px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; position: relative; border-top: 5px solid var(--gold); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
@@ -119,9 +120,6 @@
 </div>
 
 <script>
-// ============================================================
-//  إعدادات Supabase
-// ============================================================
 const SUPABASE_URL = "https://yzxyttieobyblznaehcl.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -129,9 +127,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let articlesData = [];
 let currentFilter = 'all';
 
-// ============================================================
-//  جلب المقالات من Supabase
-// ============================================================
+// 1. جلب المقالات
 async function fetchArticles() {
     const grid = document.getElementById('articlesGrid');
     grid.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-spin"></i> جارٍ تحميل المقالات...</div>';
@@ -152,9 +148,7 @@ async function fetchArticles() {
     }
 }
 
-// ============================================================
-//  عرض المقالات
-// ============================================================
+// 2. عرض المقالات
 function renderArticles() {
     const grid = document.getElementById('articlesGrid');
     grid.innerHTML = '';
@@ -172,34 +166,48 @@ function renderArticles() {
         const initials = article.author_name.split(' ').map(w => w[0]).slice(0, 2).join('');
         const dateStr = new Date(article.created_at).toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' });
 
+        // بناء البطاقة بشكل سليم
         const card = document.createElement('div');
         card.className = 'card';
+        
+        // جزء الصورة
+        let imgHtml = `<div class="card-img" style="display:flex;align-items:center;justify-content:center;color:#ccc;font-size:40px;"><i class="fas fa-feather-alt"></i></div>`;
+        if (article.cover_image_url) {
+            imgHtml = `<img src="${article.cover_image_url}" class="card-img" alt="${article.title}" loading="lazy">`;
+        }
+
+        // جزء الملاحظة والتعديل
+        let noteHtml = '';
+        let editBtnHtml = '';
+        if (article.admin_notes) {
+            noteHtml = `<div class="note-badge">📝 لديك ملاحظة من المفتش</div>`;
+            editBtnHtml = `<a href="edit-article.html?id=${article.id}" class="btn-read" style="background:var(--gold); color:#000; margin-right:5px;"><i class="fas fa-edit"></i> تعديل</a>`;
+        }
+
         card.innerHTML = `
-            ${article.cover_image_url ? `<img src="${article.cover_image_url}" class="card-img" alt="${article.title}" loading="lazy">` : `<div class="card-img" style="display:flex;align-items:center;justify-content:center;color:#ccc;font-size:40px;"><i class="fas fa-feather-alt"></i></div>`}
+            ${imgHtml}
             <div class="card-content">
                 <span class="card-tag">${categoryLabels[article.category] || article.category}</span>
                 <h2 class="card-title">${article.title}</h2>
                 <p class="card-excerpt">${article.excerpt || article.content.substring(0, 100) + '...'}</p>
+                ${noteHtml}
                 <div class="card-meta">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <div style="width:28px; height:28px; border-radius:50%; background:var(--gold-light); color:var(--gold-deep); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px; border:1px solid var(--gold);">${initials}</div>
                         <span class="card-author">${article.author_name}</span>
                     </div>
-${article.admin_notes ? `
-    <div style="background:#fff3cd; color:#856404; font-size:11px; padding:5px; border-radius:5px; margin-bottom:5px; text-align:center;">
-        📝 لديك ملاحظة من المفتش
-    </div>
-` : ''}
-<button class="btn-read" onclick="openArticle('${article.id}')"><i class="fas fa-book-open"></i> قراءة</button>
-${article.admin_notes ? `
-    <a href="edit-article.html?id=${article.id}" class="btn-read" style="background:var(--gold); color:#000; text-decoration:none; display:inline-block; margin-right:5px;">
-        <i class="fas fa-edit"></i> تعديل
-    </a>
-` : ''}
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-read" onclick="openArticle('${article.id}')"><i class="fas fa-book-open"></i> قراءة</button>
+                        ${editBtnHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
 
-// ============================================================
-//  نافذة قراءة المقال
-// ============================================================
+// 3. نافذة قراءة المقال
 function openArticle(id) {
     const article = articlesData.find(a => a.id === id);
     if (!article) return;
@@ -223,7 +231,6 @@ function openArticle(id) {
     const mediaContainer = document.getElementById('modalMedia');
     mediaContainer.innerHTML = '';
     if (article.video_url) {
-        // تحويل رابط اليوتيوب العادي إلى رابط تضمين إذا لزم الأمر
         let videoUrl = article.video_url;
         if (videoUrl.includes('youtube.com/watch?v=')) {
             videoUrl = videoUrl.replace('watch?v=', 'embed/');
@@ -244,9 +251,7 @@ function closeArticle() {
 
 document.getElementById('articleModal').addEventListener('click', function(e) { if (e.target === this) closeArticle(); });
 
-// ============================================================
-//  الفلترة
-// ============================================================
+// 4. الفلترة
 document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
