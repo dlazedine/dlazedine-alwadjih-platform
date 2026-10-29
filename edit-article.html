@@ -16,7 +16,6 @@
         background-image: radial-gradient(circle at 50% 0%, rgba(196,155,63,0.12) 0%, transparent 60%), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><defs><pattern id='islamic-dash' width='80' height='80' patternUnits='userSpaceOnUse'><g fill='none' stroke='%23c49b3f' stroke-width='0.6' opacity='0.15'><path d='M40 16 L47 27 L60 20 L57 34 L71 39 L60 48 L68 60 L54 61 L51 75 L40 66 L29 75 L26 61 L12 60 L20 48 L9 39 L23 34 L20 20 L33 27 Z'/></g></pattern></defs><rect width='80' height='80' fill='url(%23islamic-dash)'/></svg>");
         background-attachment: fixed; padding-bottom: 60px;
     }
-    /* الترويسة العلوية */
     .top-bar { background: linear-gradient(135deg, #091c33, #0e2744); color: #f7e7c4; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--gold); flex-wrap: wrap; gap: 10px;}
     .top-bar a { color: #fff; text-decoration: none; font-size: 12px; font-weight: 700; background: rgba(196,155,63,0.2); padding: 6px 14px; border-radius: 7px; border: 1px solid var(--gold); transition: 0.2s;}
     .top-bar a:hover { background: var(--gold); color: #091c33; }
@@ -57,7 +56,6 @@
 </head>
 <body>
 
-<!-- الترويسة مع زر العودة للوحة التحكم -->
 <div class="top-bar">
     <div><i class="fas fa-edit" style="color:var(--gold); margin-left:5px;"></i> تعديل المقال</div>
     <div style="display:flex; gap:10px;">
@@ -68,7 +66,6 @@
 
 <div class="container">
     <div class="form-card">
-        <!-- زر الإغلاق (X) في الزاوية -->
         <a href="sahafa.html" class="close-btn" title="إلغاء والعودة">&times;</a>
 
         <h1>تعديل المقال</h1>
@@ -78,6 +75,7 @@
             <i class="fas fa-info-circle"></i> <strong>ملاحظة المفتش:</strong> <span id="adminNoteText"></span>
         </div>
 
+        <!-- ✅ النموذج يبدأ هنا -->
         <form id="editForm">
             <input type="hidden" id="articleId" value="">
             
@@ -110,13 +108,15 @@
                 </div>
             </div>
 
+            <!-- ✅ زر الحفظ داخل النموذج -->
             <button type="submit" class="btn-submit" id="submitBtn"><i class="fas fa-save"></i> حفظ التعديلات وإعادة الإرسال للمراجعة</button>
             <div class="msg" id="formMsg"></div>
         </form>
+        <!-- ✅ النموذج ينتهي هنا -->
+
     </div>
 </div>
 
-<!-- استدعاء ملف الجافاسكريبت -->
 <script src="sahafa-edit.js"></script>
 </body>
 </html>
