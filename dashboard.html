@@ -166,7 +166,7 @@
     <div class="main-tab active" data-maintab="users"><i class="fas fa-users-cog"></i> إدارة المستخدمين</div>
     <div class="main-tab" data-maintab="monitor"><i class="fas fa-satellite-dish"></i> مراقبة النشاطات</div>
     <div class="main-tab" data-maintab="pedagogical"><i class="fas fa-chalkboard-teacher"></i> المعالجة البيداغوجية</div>
-    <div class="main-tab" data-maintab="sahafa"><i class="fas fa-newspaper"></i> ركن الكتابة</div>
+    <div class="main-tab" data-maintab="guidedworks"><i class="fas fa-tasks"></i> الأعمال الموجهة</div>
 </div>
 
     <div class="tab-panel active" id="panel-users">
@@ -195,7 +195,7 @@
         <div class="card-box">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
                 <h3 style="margin-bottom:0;"><i class="fas fa-chart-bar"></i> إحصائيات مفصّلة لكل أستاذ(ة)</h3>
-                <button class="btn btn-sm btn-info" onclick="refreshAllData()"><i class="fas fa-sync"></i> تحديث</button>
+                <button class="btn btn-sm btn-info" onclick="renderTeacherStats()"><i class="fas fa-sync"></i> تحديث</button>
             </div>
             <div style="overflow-x:auto;">
                 <table class="teacher-table">
@@ -204,7 +204,18 @@
                 </table>
             </div>
         </div>
-        <!-- تم حذف السجل الحي المعطل من هنا -->
+        <div class="card-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                <h3 style="margin-bottom:0;"><i class="fas fa-stream"></i> سجلّ العمليات الحيّ</h3>
+                <div style="display:flex; gap:6px;">
+                    <select id="monitorFilterTeacher" onchange="renderLog()" style="padding:5px 10px; border-radius:7px; border:1.5px solid var(--border-color); font-family:inherit; font-size:12px;">
+                        <option value="">كل الأساتذة</option>
+                    </select>
+                    <button class="btn btn-sm btn-info" onclick="refreshLog()"><i class="fas fa-sync"></i> تحديث</button>
+                </div>
+            </div>
+            <div class="log-feed" id="logFeed"><div style="text-align:center; color:var(--text-muted); padding:20px;">جارٍ تحميل السجل...</div></div>
+        </div>
     </div>
 
     <div class="tab-panel" id="panel-pedagogical">
@@ -285,24 +296,6 @@
     </div>
 </div>
 
-<!-- ============ ركن الكتابة الهادفة ============ -->
-<div class="tab-panel" id="panel-sahafa">
-    <div class="card-box">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
-            <h3 style="margin-bottom:0;"><i class="fas fa-newspaper"></i> إدارة مقالات ركن الكتابة الهادفة</h3>
-            <button class="btn btn-sm btn-info" onclick="loadSahafaArticles()"><i class="fas fa-sync"></i> تحديث</button>
-        </div>
-        <div style="overflow-x:auto;">
-            <table class="teacher-table">
-                <thead>
-                    <tr><th>#</th><th>العنوان</th><th>الكاتب</th><th>التصنيف</th><th>التاريخ</th><th>الحالة</th><th>الإجراءات</th></tr>
-                </thead>
-                <tbody id="sahafaTableBody"><tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">اضغط "تحديث"</td></tr></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
     <div style="max-width:1100px; margin:20px auto 40px; padding:0 16px;">
         <div class="card-box" style="text-align:center; padding:18px; border-top:3.5px solid var(--gold);">
             <div style="display:flex; justify-content:center; align-items:center; gap:28px; flex-wrap:wrap; margin-bottom:12px;">
@@ -368,15 +361,6 @@
 // ============================================================
 //  كود لوحة التحكم (يعتمد على DataBridge + Firebase/Supabase)
 // ============================================================
-
-const SUPABASE_URL = "https://yzxyttieobyblznaehcl.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_JE7zHZ97cZ92gUALD0II-w_j04eEo2u";
-let sbMain = null;
-try {
-    if (typeof window.supabase !== 'undefined') {
-        sbMain = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
-} catch (e) { console.error('⚠️ فشل الاتصال بـ Supabase:', e); }
 
 function getPortalSession() {
     try {
@@ -447,27 +431,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function refreshAllData() {
-    try {
-        // 1. جلب المستخدمين (بانتظار الانتهاء)
-        cachedUsers = await DataBridge.getUsers();
-        cachedCredentials = await DataBridge.getCredentials();
-        renderUsersList();
-
-        // 2. جلب سجل النشاطات (بانتظار الانتهاء)
-        _logCache = await DataBridge.getActivityLog(300);
-        populateTeacherFilter();
-        renderLog();
-        updateMonitorStats();
-
-        // 3. جلب إحصائيات الأساتذة (بانتظار الانتهاء)
-        await renderTeacherStats();
-
-        // 4. جلب سجلات المعالجة (بانتظار الانتهاء)
-        await loadPedagogicalRecords();
-
-    } catch (e) {
-        console.error('خطأ في تحديث البيانات:', e);
-    }
+    cachedUsers = await DataBridge.getUsers();
+    cachedCredentials = await DataBridge.getCredentials();
+    renderUsersList();
+    refreshLog();
+    renderTeacherStats();
+    loadPedagogicalRecords();
 }
 
 function applyMuqataaLogo(dataUrl) {
@@ -548,11 +517,9 @@ function setupMainTabs() {
             tab.classList.add('active');
             const targetPanel = document.getElementById('panel-' + tab.dataset.maintab);
             if (targetPanel) targetPanel.classList.add('active');
-            
             if (tab.dataset.maintab === 'pedagogical') loadPedagogicalRecords();
             if (tab.dataset.maintab === 'monitor') { refreshLog(); renderTeacherStats(); }
             if (tab.dataset.maintab === 'guidedworks') loadGuidedWorksRecords();
-            if (tab.dataset.maintab === 'sahafa') loadSahafaArticles();
         });
     });
 }
@@ -814,11 +781,14 @@ function downloadCSVTemplate() {
     showToast('📄 تم تحميل النموذج', 'success');
 }
 
-// ---------- مراقبة النشاطات (الجزء المتبقي من النظام العلوي) ----------
+// ---------- مراقبة النشاطات ----------
+let _logCache = [];
+let _realtimeChannel = null;
+
 async function refreshLog() {
     const feed = document.getElementById('logFeed');
     if (!feed) return;
-    // Note: logFeed was removed from HTML, but this function remains to not break old code if called
+    feed.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">جارٍ تحميل السجل...</div>';
     _logCache = await DataBridge.getActivityLog();
     populateTeacherFilter();
     renderLog();
@@ -852,22 +822,16 @@ function renderLog() {
 }
 
 function updateMonitorStats() {
-    if(document.getElementById('monitorTotalActions')) document.getElementById('monitorTotalActions').textContent = _logCache.length;
-    if(document.getElementById('monitorActiveTeachers')) document.getElementById('monitorActiveTeachers').textContent = new Set(_logCache.map(r => r.teacher_id)).size;
+    document.getElementById('monitorTotalActions').textContent = _logCache.length;
+    document.getElementById('monitorActiveTeachers').textContent = new Set(_logCache.map(r => r.teacher_id)).size;
     const todayStr = new Date().toDateString();
-    if(document.getElementById('monitorToday')) document.getElementById('monitorToday').textContent = _logCache.filter(r => new Date(r.created_at).toDateString() === todayStr).length;
+    document.getElementById('monitorToday').textContent = _logCache.filter(r => new Date(r.created_at).toDateString() === todayStr).length;
 }
 
 async function renderTeacherStats() {
     const tbody = document.getElementById('teacherStatsBody');
     if (!tbody) return;
-    
-    if (cachedUsers.length === 0) {
-        cachedUsers = await DataBridge.getUsers();
-    }
-
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> جارٍ التحميل...</td></tr>';
-    
     const teachers = cachedUsers.filter(u => u.role !== 'inspector');
     const activities = await DataBridge.getActivities();
     if (teachers.length === 0) {
@@ -909,7 +873,7 @@ function subscribeRealtime() {
                 if (window.PORTAL_CFG && PORTAL_CFG.HIDE.test(n.key || '')) return;
                 const title = (LBL[n.key] || n.key || '') + (n.detail ? ' — ' + n.detail : '');
                 _logCache.unshift({ action: n.action, teacher_id: n.user_id, teacher_name: n.user_name, activity_title: title, created_at: n.created_at });
-                if(document.getElementById('logFeed')) renderLog();
+                renderLog();
                 updateMonitorStats();
                 if (typeof window.renderTeacherStats === 'function') window.renderTeacherStats();
                 const actionLabelMap = { create: 'أضاف نشاطاً جديداً', update: 'عدّل نشاطاً', delete: 'حذف نشاطاً' };
@@ -1246,7 +1210,7 @@ function exportPedagogicalCSV() {
 }
 
 // ============================================================
-//  الأعمال الموجهة (Guided Works)
+//  الأعمال الموجهة (Guided Works) - مع الأهداف بدلاً من المعايير
 // ============================================================
 let _gwRecords = [];
 
@@ -1316,6 +1280,7 @@ async function loadGuidedWorksRecords() {
     records.sort((a, b) => new Date(b.created_at || b.updatedAt || 0) - new Date(a.created_at || a.updatedAt || 0));
     _gwRecords = records;
 
+    // تحديث الإحصائيات
     document.getElementById('gwTotalRecords').textContent = _gwRecords.length;
     document.getElementById('gwTotalTeachers').textContent = new Set(_gwRecords.map(r => r.created_by_name || r.enseignant).filter(Boolean)).size;
     document.getElementById('gwTotalStudents').textContent = _gwRecords.reduce((s, r) => {
@@ -1323,6 +1288,7 @@ async function loadGuidedWorksRecords() {
     }, 0);
     document.getElementById('gwTotalPlans').textContent = _gwRecords.filter(r => r.plan && Object.keys(r.plan).length > 0).length;
 
+    // تحديث فلتر الأساتذة
     const teacherSelect = document.getElementById('gwFilterTeacher');
     if (teacherSelect) {
         const prev = teacherSelect.value;
@@ -1696,21 +1662,11 @@ function exportGuidedWorksCSV() {
     showToast('✅ تم تصدير ملف CSV', 'success');
 }
 
-// ---------- بدء الاشتراك الحيّ بعد الدخول ----------
 window.addEventListener('load', () => {
     setTimeout(() => {
         subscribeRealtime();
     }, 1500);
 });
 </script>
-
-<!-- ✅ استدعاء ملفات الإدارة الخارجية -->
-<script src="dashboard-supabase.js"></script>
-<script src="admin-panel.js"></script>
-<script src="bulk-users.js"></script>
-<script src="admin-extras.js"></script>
-<script src="amal-dashboard.js"></script>
-<script src="sahafa-dashboard.js"></script>
-
 </body>
 </html>
