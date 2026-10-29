@@ -102,7 +102,23 @@ async function deleteSahafa(id) {
         showToast('❌ تعذر الحذف', 'error'); 
     }
 }
-
+async function addNoteSahafa(id) {
+    const note = prompt('أدخل الملاحظة التي تريد إرسالها للكاتب:');
+    if (!note || !note.trim()) return;
+    
+    try {
+        const { error } = await sbMain.from('sahafa_articles').update({ 
+            admin_notes: note.trim(),
+            status: 'pending' 
+        }).eq('id', id);
+        if (error) throw error;
+        showToast('✅ تم إرسال الملاحظة للكاتب', 'success');
+        loadSahafaArticles();
+    } catch (e) { 
+        console.error(e);
+        showToast('❌ تعذر إرسال الملاحظة', 'error'); 
+    }
+}
 // ربط التبويب بالدالة
 document.addEventListener('DOMContentLoaded', () => {
     const sahafaTab = document.querySelector('.main-tab[data-maintab="sahafa"]');

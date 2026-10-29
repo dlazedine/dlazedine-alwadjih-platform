@@ -185,13 +185,17 @@ function renderArticles() {
                         <div style="width:28px; height:28px; border-radius:50%; background:var(--gold-light); color:var(--gold-deep); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px; border:1px solid var(--gold);">${initials}</div>
                         <span class="card-author">${article.author_name}</span>
                     </div>
-                    <button class="btn-read" onclick="openArticle('${article.id}')"><i class="fas fa-book-open"></i> قراءة</button>
-                </div>
-            </div>
-        `;
-        grid.appendChild(card);
-    });
-}
+${article.admin_notes ? `
+    <div style="background:#fff3cd; color:#856404; font-size:11px; padding:5px; border-radius:5px; margin-bottom:5px; text-align:center;">
+        📝 لديك ملاحظة من المفتش
+    </div>
+` : ''}
+<button class="btn-read" onclick="openArticle('${article.id}')"><i class="fas fa-book-open"></i> قراءة</button>
+${article.admin_notes ? `
+    <a href="edit-article.html?id=${article.id}" class="btn-read" style="background:var(--gold); color:#000; text-decoration:none; display:inline-block; margin-right:5px;">
+        <i class="fas fa-edit"></i> تعديل
+    </a>
+` : ''}
 
 // ============================================================
 //  نافذة قراءة المقال
