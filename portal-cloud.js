@@ -48,7 +48,7 @@ if(d&&d.length){d.forEach(x=>ev.push({...base,action:x[0],key:r.key,detail:x[1]}
 else if(!d&&!(le[r.key]>now-6e4))ev.push({...base,action:le[r.key]?'update':'create',key:r.key})});
 T.forEach(r=>le[r.key]=now);rawSet.call(localStorage,'pc_ev',JSON.stringify(le));if(ev.length)insAct(c,ev).then(()=>{},()=>{})}
 catch(e){console.warn('sync',e.message||e);Object.keys(snap).forEach(k=>{if(pending[k]===undefined){pending[k]=snap[k];if(sa[k])pendAct[k]=true}})}}
-async function pull(){const c=await ready;const{data,error}=await c.from('portal_data').select('key,value,owner,updated_at');if(error||!data)return 0;
+async function pull(){const c=await ready;const{data,error}=await c.from('portal_data').select('key,value,owner,updated_at').in('owner',[prof.id,SH]);if(error||!data)return 0;
 const t=ts();let n=0;data.forEach(r=>{if(r.owner!==SH&&r.owner!==prof.id)return;const u=Date.parse(r.updated_at);
 if(localStorage.getItem(r.key)!==r.value&&(!t[r.key]||u>=t[r.key])){rawSet.call(localStorage,r.key,r.value);t[r.key]=u;n++}});rawSet.call(localStorage,'pc_ts',JSON.stringify(t));let sn={};try{sn=JSON.parse(localStorage.getItem('pc_seen')||'{}')}catch(e){}data.forEach(r=>{if(r.owner===SH)sn[r.key]=Date.parse(r.updated_at)});rawSet.call(localStorage,'pc_seen',JSON.stringify(sn));return n}
 function saveSession(p){const u={id:p.id,username:p.username,fullName:p.full_name||p.username,role:p.role,email:'',school:p.school||''};
@@ -67,12 +67,42 @@ if(p.length<10)return E('كلمة المرور قصيرة');
 let r=await c.auth.updateUser({password:p});if(r.error)return E(r.error.message);
 r=await c.rpc('wj_complete_first_login',{new_username:u});if(r.error)return E('الاسم مستعمل أو غير صالح');
 prof.username=u;prof.must_change=false;d.remove();res()}})}
+/* ---- إغلاق الموقع مؤقتاً (قيد الاعتماد): يظهر الإعلان للجميع ولا يدخل غير المفتش ----
+   الحالة تُقرأ من جدول wajih_site_status (يتحكم بها المفتش من لوحة التحكم دون تعديل GitHub)،
+   وقيمة PORTAL_CFG.SITE_LOCK احتياطية إن تعذّر الجدول (force:true تجعلها ملزمة مهما كان الجدول). */
+const SLC=C.SITE_LOCK||{};let lock={locked:!!SLC.locked,message:SLC.message||''};
+try{const k=JSON.parse(localStorage.getItem('pc_lock')||'null');if(k&&typeof k.locked==='boolean')lock=k}catch(e){}
+const LOCKMSG='الموقع قيد المراجعة والاعتماد الرسمي. الدخول مغلق مؤقتاً حتى لأصحاب الحسابات، وسيُفتح فور الاعتماد. نعتذر عن الإزعاج.';
+let lv={show:false,inspector:false},lw=0;
+function lockUI(show,inspector){lv={show:!!show,inspector:!!inspector};
+if(!document.body){if(!lw){lw=1;addEventListener('DOMContentLoaded',()=>{lw=0;drawLock()})}return}drawLock()}
+function drawLock(){let d=document.getElementById('pc-lock');
+if(!lv.show){if(d)d.remove();document.documentElement.style.overflow='';return}
+if(!d){d=document.createElement('div');d.id='pc-lock';document.body.appendChild(d)}
+const m=lock.message||SLC.message||LOCKMSG;
+if(lv.inspector){d.removeAttribute('data-ov');d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:2147483000;background:#a01c2c;color:#fff;text-align:center;padding:5px 10px;font:12.5px/1.6 Tahoma,Arial,sans-serif;direction:rtl';d.textContent='وضع الإغلاق مفعّل: الموقع مغلق على الجميع ما عداك. الرسالة المعروضة: '+m;document.documentElement.style.overflow=''}
+else{d.setAttribute('data-ov','1');d.style.cssText='position:fixed;inset:0;z-index:2147483647;background:#0e2744;color:#fff;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;direction:rtl;font-family:Tajawal,Tahoma,Arial,sans-serif';
+d.innerHTML='<div style="max-width:560px;background:#fff;color:#1f2a44;border-radius:18px;border-top:6px solid #c49b3f;padding:28px 24px;box-shadow:0 10px 40px #0008"><div style="font-size:42px">🔒</div><h2 style="margin:8px 0;color:#1f3864;font-size:20px">الوجيه في الإشراف التربوي</h2><p style="line-height:2;font-size:15px;margin:0 0 14px"></p><a href="#" id="pc-lock-adm" style="font-size:12px;color:#6b7280">دخول مدير المنصة</a></div>';
+d.querySelector('p').textContent=m;document.documentElement.style.overflow='hidden';
+d.querySelector('#pc-lock-adm').onclick=e=>{e.preventDefault();window.__lockBypass=true;lockUI(false)}}}
+async function loadLock(){try{const c=await ready;const{data,error}=await c.from('wajih_site_status').select('locked,message').eq('id',1).maybeSingle();
+if(!error&&data)lock={locked:!!data.locked||!!SLC.force,message:data.message||SLC.message||''};else if(SLC.force)lock.locked=true}catch(e){}
+rawSet.call(localStorage,'pc_lock',JSON.stringify(lock));return lock}
+async function enforceLock(){await loadLock();if(!lock.locked){lockUI(false);return false}
+let p=null;try{p=await me()}catch(e){}
+if(p&&p.role==='inspector'){lockUI(true,true);return false}
+if(p){try{await signOut()}catch(e){}}
+if(!window.__lockBypass)lockUI(true,false);return true}
+if(lock.locked)lockUI(true,false);
+const lockReady=enforceLock();
 async function login(u,p){u=(u||'').trim().toLowerCase();if(!u||!p)return{success:false,error:'أدخل اسم المستخدم وكلمة المرور'};
-const bad={success:false,error:'اسم المستخدم أو كلمة المرور غير صحيحة'},c=await ready;
-const{data:em}=await c.rpc('wj_email_for_username',{u});if(!em)return bad;
+const bad={success:false,error:'اسم المستخدم أو كلمة المرور غير صحيحة'},c=await ready;const L=await loadLock();
+const{data:em}=await c.rpc('wj_email_for_username',{u});if(!em)return L.locked?{success:false,error:(L.message||LOCKMSG)+' (الدخول متاح لمدير المنصة فقط)'}:bad;
 const{data,error}=await c.auth.signInWithPassword({email:em,password:p});if(error)return bad;
 const{data:pr}=await c.from('wajih_profiles').select('*').eq('id',data.user.id).single();
 if(!pr||!pr.active){await c.auth.signOut();return{success:false,error:'الحساب غير مفعّل'}}
+if(L.locked&&pr.role!=='inspector'){await c.auth.signOut();window.__lockBypass=false;lockUI(true,false);return{success:false,error:L.message||LOCKMSG}}
+if(L.locked)lockUI(true,true);
 prof=pr;if(pr.must_change)await forceChange(c);const user=saveSession(prof);await pull();startPresence();return{success:true,user}}
 const lastLog={};
 async function insAct(c,rows){const r=await c.from('wajih_activity').insert(rows);
@@ -104,10 +134,11 @@ pres=c.channel('wajih-presence',{config:{presence:{key:prof.id+':'+Math.random()
 pres.on('presence',{event:'sync'},()=>window.dispatchEvent(new CustomEvent('pc:presence',{detail:presList()})));
 pres.subscribe(st=>{if(st==='SUBSCRIBED')pres.track(pagePayload())})}
 addEventListener('pagehide',()=>{try{if(pres)pres.untrack()}catch(e){}});
-window.PortalCloud={ready,login,signOut,flush,log,me,presence:{list:()=>presList(),start:startPresence},get profile(){return prof}};
+window.PortalCloud={ready,login,signOut,flush,log,me,lock:()=>lock,refreshLock:enforceLock,presence:{list:()=>presList(),start:startPresence},get profile(){return prof}};
 (async()=>{const c=await ready,{data}=await c.auth.getSession();const has=!!(sessionStorage.getItem('pgb_session')||localStorage.getItem('pgb_session_persistent'));
 if(!data.session){if(has)clearSession();return}if(!has){await c.auth.signOut();return}
 const{data:p}=await c.from('wajih_profiles').select('*').eq('id',data.session.user.id).single();if(!p||!p.active){await signOut();return}
+if(await lockReady)return;
 prof=p;startPresence();if(p.must_change)await forceChange(c);const n=await pull();const g='pc_r:'+location.pathname;
 if(n&&Date.now()-(+sessionStorage.getItem(g)||0)>6e4){sessionStorage.setItem(g,Date.now());location.reload()}})();
 addEventListener('pagehide',()=>{if(prof&&Object.keys(pending).length)flush()});
