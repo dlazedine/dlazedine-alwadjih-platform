@@ -1,164 +1,144 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الموقع قيد الاعتماد</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>الموقع قيد الصيانة - الوجيه في الإشراف التربوي</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
         :root {
-            --primary-color: #1e3a8a; /* أزرق داكن */
-            --accent-color: #3b82f6;  /* أزرق فاتح */
-            --bg-color: #f8fafc;      /* رمادي فاتح جداً */
-            --text-color: #1e293b;    /* رمادي داكن */
+            --primary: #0e2744; --navy-deep: #091c33; --gold: #c49b3f; --gold-light: #fce8bd;
+            --bg-body: #faf7ef; --text-dark: #152238; --text-muted: #5d6b7b;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-dark);
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
             padding: 20px;
-            background-image: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 20%),
-                              radial-gradient(circle at 90% 80%, rgba(30, 58, 138, 0.05) 0%, transparent 20%);
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(196,155,63,0.12) 0%, transparent 60%),
+                url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><defs><pattern id='islamic-dash' width='80' height='80' patternUnits='userSpaceOnUse'><g fill='none' stroke='%23c49b3f' stroke-width='0.6' opacity='0.15'><path d='M40 16 L47 27 L60 20 L57 34 L71 39 L60 48 L68 60 L54 61 L51 75 L40 66 L29 75 L26 61 L12 60 L20 48 L9 39 L23 34 L20 20 L33 27 Z'/></g></pattern></defs><rect width='80' height='80' fill='url(%23islamic-dash)'/></svg>");
+            background-attachment: fixed;
         }
 
-        .container {
-            background: #ffffff;
+        .maintenance-card {
+            background: #fff;
+            border-radius: 20px;
             padding: 50px 40px;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0,0,0,0.02);
             max-width: 600px;
             width: 100%;
-            transition: transform 0.3s ease;
+            box-shadow: 0 15px 50px rgba(14,39,68,0.1);
+            border-top: 5px solid var(--gold);
+            position: relative;
+            overflow: hidden;
         }
 
-        .container:hover {
-            transform: translateY(-5px);
-        }
-
-        .icon-wrapper {
-            display: inline-flex;
+        .icon-container {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 25px;
+            background: linear-gradient(135deg, #faf7ef, #f4eedd);
+            border: 2px solid var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
             justify-content: center;
-            align-items: center;
-            width: 90px;
-            height: 90px;
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            border-radius: 50%;
-            margin-bottom: 30px;
-            color: white;
-            box-shadow: 0 10px 20px -5px rgba(30, 58, 138, 0.3);
-        }
-
-        .icon-wrapper svg {
-            width: 45px;
-            height: 45px;
-            stroke: white;
-            stroke-width: 2;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        p {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #475569;
-            margin-bottom: 30px;
-            max-width: 450px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background-color: #eff6ff;
-            color: var(--primary-color);
-            padding: 8px 16px;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            border: 1px solid #dbeafe;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #22c55e; /* أخضر */
-            border-radius: 50%;
+            font-size: 40px;
+            color: var(--gold-deep);
+            box-shadow: 0 5px 15px rgba(196,155,63,0.2);
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
-            100% { opacity: 1; transform: scale(1); }
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(196,155,63,0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(196,155,63,0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(196,155,63,0); }
         }
 
-        .footer-note {
-            margin-top: 40px;
-            font-size: 0.85rem;
-            color: #94a3b8;
-            border-top: 1px solid #e2e8f0;
+        h1 {
+            font-family: 'Amiri', serif;
+            font-size: 32px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 16px;
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .info-box {
+            background: #faf7ef;
+            border: 1px dashed var(--gold);
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 14px;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            border-top: 1px solid #eee;
             padding-top: 20px;
+            margin-top: 20px;
         }
 
-        @media (max-width: 480px) {
-            .container { padding: 30px 20px; }
-            h1 { font-size: 1.8rem; }
-            p { font-size: 1rem; }
+        /* شعار المقاطعة */
+        .logo-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .logo-box img {
+            max-width: 50px;
+            max-height: 50px;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="icon-wrapper">
-            <!-- أيقونة درع/قفل -->
-            <svg viewBox="0 0 24 24">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                <path d="M12 8v4"></path>
-                <path d="M12 16h.01"></path>
-            </svg>
+    <div class="maintenance-card">
+        <!-- شعار المقاطعة (يمكنك تغييره) -->
+        <div class="logo-box">
+            <img src="icons/icon-180.png" alt="شعار" onerror="this.style.display='none'">
+            <span style="font-family:'Amiri', serif; font-size:20px; color:var(--primary); font-weight:700;">الوجيه في الإشراف التربوي</span>
         </div>
-        
-        <h1>الموقع قيد الاعتماد</h1>
+
+        <div class="icon-container">
+            <i class="fas fa-tools"></i>
+        </div>
+
+        <h1>الموقع يبحث عن حلول يتجاوز فيها أي إجراء إداري</h1>
         
         <p>
-            نعتذر عن عدم تمكنكم من الولوج إلى الموقع حالياً. 
-            المنصة تخضع حالياً لعملية اعتماد وتدقيق نهائية لضمان جودة وأمان الخدمات المقدمة.
-            <br><br>
-            <strong>الولوج متوقف مؤقتاً لجميع المستخدمين، حتى الذين يملكون حسابات نشطة.</strong>
-            <br>
-            سنعود قريباً جداً. شكراً لتفهمكم وصبركم.
+           سنكمل مشروعنا معا في طريق النجاح وسنفرض حضورنا بوعيً.
         </p>
 
-        <div class="status-badge">
-            <span class="status-dot"></span>
-            حالة النظام: في انتظار الردّ على طلب الاعتماد في نطاق تعليمي رسمي (.edu.dz):
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i> المهم في المشكلة ليس حلها، ولكن القوة التي نكتسبها في إيجاد الحل — سينيكا .
         </div>
 
-        <div class="footer-note">
-            &copy; 2026 - إدارة المنصة. جميع الحقوق محفوظة.
+        <div class="footer-text">
+            مفتش التعليم المتوسط لمادة اللغة العربية درويش الهلالي — المقاطعة الثانية قسنطينة
         </div>
     </div>
 
